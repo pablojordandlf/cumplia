@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Next.js
+.next/
+out/
+*.log
+
+# Python
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+postgres_data/
+
+# Alembic
+alembic.ini.bak
