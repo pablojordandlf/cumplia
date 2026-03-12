@@ -5,7 +5,7 @@ FROM python:3.12-slim-bullseye
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY ./apps/api/requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 
 # Install any needed packages specified in requirements.txt
 # Use --no-cache-dir to reduce image size
@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
-COPY ./apps/api/ /app/
+COPY . /app/
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
