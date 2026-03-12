@@ -8,3 +8,4 @@ psycopg2-binary
 pyjwt
 python-jose[cryptography]
 python-multipart
+email-validator
