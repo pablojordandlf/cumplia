@@ -19,19 +19,33 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useCasesApi, UseCase } from '@/lib/api/use-cases';
-import { ApiError } from '@/lib/api/client';
+import { supabase } from '@/lib/supabase';
 
 const sectors = [
-  { value: 'Salud', label: 'Salud' },
-  { value: 'Educación', label: 'Educación' },
-  { value: 'Seguridad Pública', label: 'Seguridad Pública' },
-  { value: 'Empleo', label: 'Empleo' },
-  { value: 'Transporte', label: 'Transporte' },
-  { value: 'Finanzas', label: 'Finanzas' },
-  { value: 'Justicia', label: 'Justicia' },
-  { value: 'Otro', label: 'Otro' },
+  { value: 'healthcare', label: 'Salud' },
+  { value: 'education', label: 'Educación' },
+  { value: 'security', label: 'Seguridad Pública' },
+  { value: 'employment', label: 'Empleo' },
+  { value: 'transport', label: 'Transporte' },
+  { value: 'finance', label: 'Finanzas' },
+  { value: 'justice', label: 'Justicia' },
+  { value: 'other', label: 'Otro' },
 ];
+
+interface UseCase {
+  id: string;
+  name: string;
+  description: string | null;
+  sector: string;
+  status: string;
+  ai_act_level: string;
+  confidence_score: number | null;
+  classification_reason: string | null;
+  classification_data: any;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface ClassificationResult {
   level: 'prohibited' | 'high' | 'limited' | 'minimal' | 'unclassified';
@@ -52,6 +66,15 @@ const levelMap: Record<string, ClassificationResult['level']> = {
   'unclassified': 'unclassified',
 };
 
+// Reverse map for API
+const levelToApiMap: Record<string, string> = {
+  'prohibited': 'prohibited',
+  'high': 'high_risk',
+  'limited': 'limited_risk',
+  'minimal': 'minimal_risk',
+  'unclassified': 'unclassified',
+};
+
 export default function ClassificationWizardPage() {
   const router = useRouter();
   const params = useParams();
@@ -60,7 +83,6 @@ export default function ClassificationWizardPage() {
   
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [result, setResult] = useState<ClassificationResult | null>(null);
   
   const [useCase, setUseCase] = useState<UseCase | null>(null);
@@ -75,7 +97,20 @@ export default function ClassificationWizardPage() {
 
   const loadUseCase = async () => {
     try {
-      const data = await useCasesApi.get(useCaseId);
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        router.push('/login');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('use_cases')
+        .select('*')
+        .eq('id', useCaseId)
+        .single();
+
+      if (error) throw error;
+      
       setUseCase(data);
       setName(data.name);
       setDescription(data.description || '');
@@ -92,11 +127,11 @@ export default function ClassificationWizardPage() {
         });
         setCurrentStep(4);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading use case:', error);
       toast({
         title: 'Error',
-        description: error instanceof ApiError ? error.message : 'No se pudo cargar el caso de uso',
+        description: error.message || 'No se pudo cargar el caso de uso',
         variant: 'destructive',
       });
     }
@@ -132,36 +167,47 @@ export default function ClassificationWizardPage() {
   const handleClassify = async () => {
     setIsLoading(true);
     try {
-      // Update use case with latest info
-      await useCasesApi.update(useCaseId, {
-        name,
-        description,
-        sector,
+      // Update use case with latest info via API route
+      const updateResponse = await fetch('/api/classify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          useCaseId,
+          name,
+          description,
+          sector,
+        }),
       });
-      
-      // Call classification endpoint
-      const classified = await useCasesApi.classify(useCaseId);
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || 'Error al clasificar');
+      }
+
+      const { classification } = await updateResponse.json();
       
       // Format result
       setResult({
-        level: levelMap[classified.ai_act_level] || 'unclassified',
-        confidence: classified.confidence_score || 0,
-        reasoning: classified.classification_reason || '',
-        articles: classified.classification_data?.articles || [],
-        obligations: classified.classification_data?.obligations || [],
+        level: levelMap[classification.level] || 'unclassified',
+        confidence: classification.confidence || 0,
+        reasoning: classification.reasoning || '',
+        articles: classification.articles || [],
+        obligations: classification.obligations || [],
       });
       
       setCurrentStep(4);
       
       toast({
         title: 'Clasificación completada',
-        description: `Nivel de riesgo: ${classified.ai_act_level}`,
+        description: `Nivel de riesgo: ${classification.level}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error classifying use case:', error);
       toast({
         title: 'Error',
-        description: error instanceof ApiError ? error.message : 'No se pudo clasificar el caso de uso',
+        description: error.message || 'No se pudo clasificar el caso de uso',
         variant: 'destructive',
       });
     } finally {
