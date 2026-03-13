@@ -43,3 +43,4 @@ postgres_data/
 
 # Alembic
 alembic.ini.bak
+.vercel

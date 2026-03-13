@@ -24,6 +24,12 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+    
+    /* AI Act Risk Colors */
+    --risk-prohibited: 0 72% 51%;
+    --risk-high: 25 95% 53%;
+    --risk-limited: 142 71% 45%;
+    --risk-minimal: 217 91% 60%;
   }
 
   .dark {

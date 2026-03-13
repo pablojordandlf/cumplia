@@ -3,7 +3,7 @@ import { Pencil, Trash2, Eye } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import RiskBadge from './risk-badge'; // Assuming RiskBadge is in the same directory
+import { RiskBadge } from './risk-badge'; // Assuming RiskBadge is in the same directory
 import { cn } from '@/lib/utils'; // Assuming cn utility is available
 
 // Define the available risk levels

@@ -10,8 +10,6 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export const dynamic = 'force-dynamic';
-
 // URL base para redirecciones
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 

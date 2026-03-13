@@ -1,8 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
+import { Toaster } from '@/components/providers/toaster';
 
 export const metadata: Metadata = {
   title: 'CumplIA',
@@ -16,8 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={inter.className}>
+      <body className="font-sans antialiased">
         {children}
+        <Toaster />
       </body>
     </html>
   );

@@ -15,10 +15,12 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 
-// Sectors matching backend catalog
+const SECTOR_UNSET = '__unset__';
+
 const sectors = [
-  { value: '', label: 'Selecciona un sector' },
+  { value: SECTOR_UNSET, label: 'Selecciona un sector' },
   { value: 'healthcare', label: 'Salud' },
   { value: 'education', label: 'Educación' },
   { value: 'security', label: 'Seguridad Pública' },
@@ -29,6 +31,15 @@ const sectors = [
   { value: 'other', label: 'Otro' },
 ];
 
+interface CatalogItem {
+  id: string;
+  name: string;
+  description: string;
+  sector: string;
+  typical_ai_act_level: string;
+  template_data?: Record<string, unknown>;
+}
+
 export default function NewUseCasePage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -37,7 +48,7 @@ export default function NewUseCasePage() {
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [sector, setSector] = useState<string>('');
+  const [sector, setSector] = useState<string>(SECTOR_UNSET);
 
   // Get current user
   useEffect(() => {
@@ -46,20 +57,29 @@ export default function NewUseCasePage() {
       if (session?.user) {
         setUser(session.user);
       } else {
-        // Redirect to login if not authenticated
         router.push('/login');
       }
     };
     getUser();
   }, [router]);
 
+  const handleSelectSuggestion = (suggestion: CatalogItem) => {
+    setName(suggestion.name);
+    setDescription(suggestion.description);
+    setSector(suggestion.sector);
+    toast({
+      title: 'Plantilla cargada',
+      description: `Se ha cargado "${suggestion.name}". Puedes modificar los datos antes de guardar.`,
+    });
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (!name || !description || !sector) {
+    if (!name || !description || sector === SECTOR_UNSET) {
       toast({
         title: 'Campos incompletos',
-        description: 'Por favor, completa todos los campos.',
+        description: 'Por favor, completa todos los campos incluyendo el sector.',
         variant: 'destructive',
       });
       return;
@@ -77,7 +97,6 @@ export default function NewUseCasePage() {
     try {
       setIsSubmitting(true);
       
-      // Create use case directly in Supabase
       const { data: useCase, error } = await supabase
         .from('use_cases')
         .insert([
@@ -100,7 +119,6 @@ export default function NewUseCasePage() {
         description: 'Redirigiendo al asistente de clasificación...',
       });
       
-      // Redirect to classification wizard
       router.push(`/dashboard/inventory/${useCase.id}/classify`);
     } catch (error: any) {
       console.error('Error creating use case:', error);
@@ -118,7 +136,6 @@ export default function NewUseCasePage() {
     router.push('/dashboard/inventory');
   };
 
-  // Show loading while checking auth
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -134,10 +151,20 @@ export default function NewUseCasePage() {
       <div className="max-w-3xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Crear Nuevo Caso de Uso</h1>
-          <p className="text-gray-600">Introduce los detalles para comenzar el proceso de clasificación.</p>
+          <p className="text-gray-600">
+            Selecciona una sugerencia o completa el formulario para crear uno nuevo.
+          </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-sm">
+        {/* Suggestions Section */}
+        <div className="mb-8">
+          <UseCaseSuggestions 
+            onSelectSuggestion={handleSelectSuggestion}
+            selectedSector={sector}
+          />
+        </div>
+
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-sm border">
           <div className="space-y-6">
             <div>
               <Label htmlFor="name">Nombre</Label>
