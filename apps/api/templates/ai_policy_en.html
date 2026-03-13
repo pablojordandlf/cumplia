@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm;
+        }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #2d3748;
+            font-size: 11pt;
+        }
+        h1 { 
+            color: #1a365d; 
+            border-bottom: 3px solid #3182ce; 
+            padding-bottom: 12px;
+            font-size: 24pt;
+            margin-top: 0;
+        }
+        h2 { 
+            color: #2c5282; 
+            margin-top: 30px;
+            font-size: 14pt;
+            border-left: 4px solid #3182ce;
+            padding-left: 12px;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .company-name { 
+            font-size: 22pt; 
+            font-weight: bold; 
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        .document-title {
+            font-size: 28pt;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 20px 0;
+        }
+        .date { 
+            color: #718096;
+            font-size: 11pt;
+            margin-top: 15px;
+        }
+        .section { 
+            margin: 25px 0; 
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .signature-section {
+            margin-top: 80px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .signature-line {
+            margin-top: 20px;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 9pt;
+            color: #a0aec0;
+            padding: 10px 0;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-name">{{ company_name }}</div>
+        <div class="document-title">Artificial Intelligence Policy</div>
+        <div class="date">Effective Date: {{ effective_date }}</div>
+    </div>
+    
+    <div class="section">
+        <h2>1. Purpose and Scope</h2>
+        <p>{{ purpose_scope }}</p>
+    </div>
+    
+    <div class="section">
+        <h2>2. AI System Inventory</h2>
+        <p>This policy covers the following AI systems:</p>
+        <ul>
+        {% for system in ai_systems %}
+            <li><strong>{{ system.name }}</strong> - {{ system.description }} (Risk Level: {{ system.risk_level }})</li>
+        {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>3. Compliance Framework</h2>
+        <p>This policy ensures compliance with:</p>
+        <ul>
+            <li>EU AI Act Regulation (EU) 2024/1689</li>
+            <li>GDPR where applicable</li>
+            <li>Industry-specific regulations</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>4. Governance Structure</h2>
+        <p>{{ governance_structure }}</p>
+    </div>
+    
+    <div class="section">
+        <h2>5. Risk Management</h2>
+        <p>{{ risk_management_approach }}</p>
+    </div>
+    
+    <div class="section">
+        <h2>6. Human Oversight</h2>
+        <p>{{ human_oversight_measures }}</p>
+    </div>
+    
+    <div class="section">
+        <h2>7. Data Governance</h2>
+        <p>{{ data_governance }}</p>
+    </div>
+    
+    <div class="section">
+        <h2>8. Transparency and Documentation</h2>
+        <p>{{ transparency_measures }}</p>
+    </div>
+    
+    <div class="section">
+        <h2>9. Review and Updates</h2>
+        <p>This policy will be reviewed {{ review_frequency }}.</p>
+    </div>
+    
+    <div class="signature-section">
+        <div class="signature-line">
+            <p><strong>Approved by:</strong> {{ approver_name }}</p>
+        </div>
+        <div class="signature-line">
+            <p><strong>Date:</strong> {{ approval_date }}</p>
+        </div>
+    </div>
+</body>
+</html>
