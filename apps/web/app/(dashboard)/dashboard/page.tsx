@@ -23,6 +23,20 @@ import { useCasesApi, UseCase } from '@/lib/api/use-cases';
 import { useToast } from '@/hooks/use-toast';
 import RiskBadge from '@/components/risk-badge';
 
+// Mapear valores del API al formato del componente RiskBadge
+type RiskLevel = 'prohibited' | 'high' | 'limited' | 'minimal' | 'unclassified';
+
+function mapApiRiskLevel(apiLevel: string): RiskLevel {
+  const mapping: Record<string, RiskLevel> = {
+    'prohibited': 'prohibited',
+    'high_risk': 'high',
+    'limited_risk': 'limited',
+    'minimal_risk': 'minimal',
+    'unclassified': 'unclassified',
+  };
+  return mapping[apiLevel] || 'unclassified';
+}
+
 interface DashboardStats {
   total: number;
   classified: number;
@@ -395,7 +409,7 @@ export default function DashboardPage() {
                             {useCase.sector}
                           </p>
                         </div>
-                        <RiskBadge level={useCase.ai_act_level} />
+                        <RiskBadge level={mapApiRiskLevel(useCase.ai_act_level)} />
                       </div>
                     </Link>
                   ))}
