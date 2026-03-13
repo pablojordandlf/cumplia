@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -14,30 +14,44 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useCasesApi } from '@/lib/api/use-cases';
-import { ApiError } from '@/lib/api/client';
+import { supabase } from '@/lib/supabase';
 
 // Sectors matching backend catalog
 const sectors = [
   { value: '', label: 'Selecciona un sector' },
-  { value: 'Salud', label: 'Salud' },
-  { value: 'Educación', label: 'Educación' },
-  { value: 'Seguridad Pública', label: 'Seguridad Pública' },
-  { value: 'Empleo', label: 'Empleo' },
-  { value: 'Transporte', label: 'Transporte' },
-  { value: 'Finanzas', label: 'Finanzas' },
-  { value: 'Justicia', label: 'Justicia' },
-  { value: 'Otro', label: 'Otro' },
+  { value: 'healthcare', label: 'Salud' },
+  { value: 'education', label: 'Educación' },
+  { value: 'security', label: 'Seguridad Pública' },
+  { value: 'employment', label: 'Empleo' },
+  { value: 'transport', label: 'Transporte' },
+  { value: 'finance', label: 'Finanzas' },
+  { value: 'justice', label: 'Justicia' },
+  { value: 'other', label: 'Otro' },
 ];
 
 export default function NewUseCasePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState<any>(null);
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [sector, setSector] = useState<string>('');
+
+  // Get current user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        // Redirect to login if not authenticated
+        router.push('/login');
+      }
+    };
+    getUser();
+  }, [router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -51,15 +65,35 @@ export default function NewUseCasePage() {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: 'Error',
+        description: 'Debes iniciar sesión para crear un caso de uso.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
-      // Create use case via API
-      const useCase = await useCasesApi.create({
-        name,
-        description,
-        sector,
-      });
+      // Create use case directly in Supabase
+      const { data: useCase, error } = await supabase
+        .from('use_cases')
+        .insert([
+          {
+            name,
+            description,
+            sector,
+            user_id: user.id,
+            status: 'draft',
+            ai_act_level: 'unclassified',
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
       
       toast({
         title: 'Caso de uso creado',
@@ -68,11 +102,11 @@ export default function NewUseCasePage() {
       
       // Redirect to classification wizard
       router.push(`/dashboard/inventory/${useCase.id}/classify`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating use case:', error);
       toast({
         title: 'Error',
-        description: error instanceof ApiError ? error.message : 'No se pudo crear el caso de uso',
+        description: error.message || 'No se pudo crear el caso de uso',
         variant: 'destructive',
       });
     } finally {
@@ -83,6 +117,17 @@ export default function NewUseCasePage() {
   const handleCancel = () => {
     router.push('/dashboard/inventory');
   };
+
+  // Show loading while checking auth
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

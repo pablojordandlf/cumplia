@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import UseCaseCard from '@/components/use-case-card';
 import EmptyState from '@/components/empty-state';
 import FilterBar from '@/components/filter-bar';
-import { useCasesApi, UseCase } from '@/lib/api/use-cases';
-import { ApiError } from '@/lib/api/client';
+import { supabase } from '@/lib/supabase';
 
 // Map backend status to frontend status
 type FrontendStatus = 'draft' | 'active' | 'archived';
@@ -32,10 +32,22 @@ const riskLevelMap: Record<string, FrontendRiskLevel> = {
   'unclassified': 'unclassified',
 };
 
+interface UseCase {
+  id: string;
+  name: string;
+  description: string | null;
+  sector: string;
+  status: string;
+  ai_act_level: string;
+  created_at: string;
+}
+
 export default function InventoryPage() {
+  const router = useRouter();
   const [useCases, setUseCases] = useState<UseCase[]>([]);
   const [filteredUseCases, setFilteredUseCases] = useState<UseCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
 
   // Filter state
@@ -44,26 +56,78 @@ export default function InventoryPage() {
   const [sectorFilter, setSectorFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-  // Load use cases from API
+  // Get current user and load use cases
   useEffect(() => {
-    loadUseCases();
-  }, []);
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        loadUseCases(session.user.id);
+      } else {
+        router.push('/login');
+      }
+    };
+    init();
+  }, [router]);
 
-  const loadUseCases = async () => {
+  // Subscribe to realtime changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('use-cases-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'use_cases',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Realtime change:', payload);
+          if (payload.eventType === 'INSERT') {
+            setUseCases((prev) => [payload.new as UseCase, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setUseCases((prev) =>
+              prev.map((uc) => (uc.id === payload.new.id ? (payload.new as UseCase) : uc))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setUseCases((prev) => prev.filter((uc) => uc.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const loadUseCases = async (userId: string) => {
     try {
       setIsLoading(true);
-      const filters: { sector?: string; status?: string; ai_act_level?: string } = {};
-      if (sectorFilter) filters.sector = sectorFilter;
-      if (statusFilter) filters.status = statusFilter;
-      if (riskLevelFilter) filters.ai_act_level = riskLevelFilter;
       
-      const data = await useCasesApi.list(filters);
-      setUseCases(data);
-    } catch (error) {
+      let query = supabase
+        .from('use_cases')
+        .select('*')
+        .eq('user_id', userId)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
+
+      if (sectorFilter) query = query.eq('sector', sectorFilter);
+      if (statusFilter) query = query.eq('status', statusFilter);
+      if (riskLevelFilter) query = query.eq('ai_act_level', riskLevelFilter);
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setUseCases(data || []);
+    } catch (error: any) {
       console.error('Error loading use cases:', error);
       toast({
         title: 'Error',
-        description: error instanceof ApiError ? error.message : 'No se pudieron cargar los casos de uso',
+        description: error.message || 'No se pudieron cargar los casos de uso',
         variant: 'destructive',
       });
     } finally {
@@ -73,8 +137,8 @@ export default function InventoryPage() {
 
   // Re-fetch when filters change
   useEffect(() => {
-    if (!isLoading) {
-      loadUseCases();
+    if (user && !isLoading) {
+      loadUseCases(user.id);
     }
   }, [sectorFilter, statusFilter, riskLevelFilter]);
 
@@ -102,17 +166,25 @@ export default function InventoryPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      await useCasesApi.delete(id);
+      // Soft delete - set deleted_at timestamp
+      const { error } = await supabase
+        .from('use_cases')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
       setUseCases(useCases.filter(uc => uc.id !== id));
       toast({
         title: 'Eliminado',
         description: 'Caso de uso eliminado correctamente',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting use case:', error);
       toast({
         title: 'Error',
-        description: error instanceof ApiError ? error.message : 'No se pudo eliminar el caso de uso',
+        description: error.message || 'No se pudo eliminar el caso de uso',
         variant: 'destructive',
       });
     }
@@ -168,9 +240,9 @@ export default function InventoryPage() {
                 sector={useCase.sector}
                 riskLevel={riskLevelMap[useCase.ai_act_level] || 'unclassified'}
                 status={statusMap[useCase.status] || 'draft'}
-                onEdit={(id) => window.location.href = `/dashboard/inventory/${id}`}
+                onEdit={(id) => router.push(`/dashboard/inventory/${id}`)}
                 onDelete={handleDelete}
-                onView={(id) => window.location.href = `/dashboard/inventory/${id}`}
+                onView={(id) => router.push(`/dashboard/inventory/${id}`)}
               />
             ))}
           </div>
@@ -179,7 +251,7 @@ export default function InventoryPage() {
             title="No hay casos de uso que coincidan con tus criterios."
             description="Intenta ajustar tus filtros o crear un nuevo caso de uso de IA."
             actionLabel="Crear caso de uso"
-            onAction={() => window.location.href = '/dashboard/inventory/new'}
+            onAction={() => router.push('/dashboard/inventory/new')}
           />
         )}
       </main>
