@@ -1,13 +1,13 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase'; // Adjust path as needed
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');

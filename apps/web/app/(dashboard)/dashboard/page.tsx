@@ -1,9 +1,9 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import UserMenu from '@/components/auth/UserMenu';
+
+export const dynamic = 'force-dynamic';
 
 export default function DashboardPage() {
   return (

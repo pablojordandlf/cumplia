@@ -1,9 +1,9 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+
+export const dynamic = 'force-dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase'; // Adjust path as needed
