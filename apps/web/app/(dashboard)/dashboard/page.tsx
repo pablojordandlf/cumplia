@@ -21,7 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useCasesApi, UseCase } from '@/lib/api/use-cases';
 import { useToast } from '@/hooks/use-toast';
-import { RiskBadge } from '@/components/risk-badge';
+import RiskBadge from '@/components/risk-badge';
 
 interface DashboardStats {
   total: number;
