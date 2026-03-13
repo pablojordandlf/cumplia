@@ -214,35 +214,37 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push('/dashboard')}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-gray-600 hover:text-gray-900 -ml-2 sm:ml-0"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver al Dashboard
+            <span className="hidden sm:inline">Volver al Dashboard</span>
+            <span className="sm:hidden">Volver</span>
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
         </div>
-        <Link href="/dashboard/inventory/new">
-          <Button className="bg-blue-600 hover:bg-blue-700">
+        <Link href="/dashboard/inventory/new" className="w-full sm:w-auto">
+          <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5v14"/>
             </svg>
-            Nuevo caso de uso
+            <span className="hidden sm:inline">Nuevo caso de uso</span>
+            <span className="sm:hidden">Nuevo</span>
           </Button>
         </Link>
       </header>
 
       <FilterBar {...filterBarProps} />
 
-      <main className="mt-8">
+      <main className="mt-4 sm:mt-8">
         {filteredUseCases.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredUseCases.map((useCase) => (
               <UseCaseCard
                 key={useCase.id}

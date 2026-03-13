@@ -407,27 +407,27 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
     
     return (
       <Card className="w-full max-w-3xl mx-auto">
-        <CardHeader className={cn("text-center", riskInfo.bgColor)}>
-          <div className="mx-auto mb-4">
-            <Icon className={cn("h-16 w-16", riskInfo.color)} />
+        <CardHeader className={cn("text-center px-4 sm:px-6", riskInfo.bgColor)}>
+          <div className="mx-auto mb-3 sm:mb-4">
+            <Icon className={cn("h-12 w-12 sm:h-16 sm:w-16", riskInfo.color)} />
           </div>
-          <CardTitle className={cn("text-2xl", riskInfo.color)}>
+          <CardTitle className={cn("text-xl sm:text-2xl", riskInfo.color)}>
             {riskInfo.title}
           </CardTitle>
-          <CardDescription className="text-base mt-2">
+          <CardDescription className="text-sm sm:text-base mt-2">
             {riskInfo.description}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 pt-6">
-          <div className="flex items-center justify-center gap-4">
+        <CardContent className="space-y-4 sm:space-y-6 pt-4 sm:pt-6 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
             <div className="text-center">
-              <p className="text-sm text-gray-500">Confianza</p>
-              <p className="text-2xl font-bold">{Math.round(result.confidence * 100)}%</p>
+              <p className="text-xs sm:text-sm text-gray-500">Confianza</p>
+              <p className="text-xl sm:text-2xl font-bold">{Math.round(result.confidence * 100)}%</p>
             </div>
-            <div className="h-12 w-px bg-gray-200" />
+            <div className="hidden sm:block h-12 w-px bg-gray-200" />
             <div className="text-center">
-              <p className="text-sm text-gray-500">Artículos aplicables</p>
-              <p className="text-lg font-medium">
+              <p className="text-xs sm:text-sm text-gray-500">Artículos aplicables</p>
+              <p className="text-sm sm:text-lg font-medium">
                 {result.applicableArticles.length > 0 
                   ? result.applicableArticles.join(', ') 
                   : 'Ninguno específico'}
@@ -435,23 +435,24 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
             </div>
           </div>
           
-          <div className={cn("rounded-lg border p-4", riskInfo.bgColor, riskInfo.borderColor)}>
+          <div className={cn("rounded-lg border p-3 sm:p-4", riskInfo.bgColor, riskInfo.borderColor)}>
             <div className="flex items-center gap-2 mb-2">
-              <Info className="h-4 w-4" />
-              <h4 className="font-semibold">Razonamiento</h4>
+              <Info className="h-4 w-4 flex-shrink-0" />
+              <h4 className="font-semibold text-sm sm:text-base">Razonamiento</h4>
             </div>
-            <ul className="list-disc list-inside space-y-1 text-sm">
+            <ul className="list-disc list-inside space-y-1 text-xs sm:text-sm">
               {result.reasoning.map((reason, idx) => (
                 <li key={idx}>{reason}</li>
               ))}
             </ul>
           </div>
           
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-center">
             <Button 
               variant="outline" 
               onClick={() => setShowResult(false)}
               disabled={isSubmitting}
+              className="w-full sm:w-auto"
             >
               Revisar respuestas
             </Button>
@@ -459,6 +460,7 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
               onClick={handleSubmit}
               disabled={isSubmitting}
               className={cn(
+                "w-full sm:w-auto",
                 result.level === 'prohibited' ? 'bg-red-600 hover:bg-red-700' :
                 result.level === 'high' ? 'bg-amber-600 hover:bg-amber-700' :
                 result.level === 'limited' ? 'bg-green-600 hover:bg-green-700' :
@@ -475,18 +477,18 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
   
   return (
     <Card className="w-full max-w-3xl mx-auto">
-      <CardHeader>
+      <CardHeader className="px-4 sm:px-6">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-gray-500">
+          <span className="text-xs sm:text-sm text-gray-500">
             Pregunta {currentStep + 1} de {questions.length}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-xs sm:text-sm text-gray-500">
             {Math.round(progress)}% completado
           </span>
         </div>
         <Progress value={progress} className="h-2 mb-4" />
         {/* Step indicators - clickable when in review mode (has initialAnswers) */}
-        <div className="flex justify-center gap-1 flex-wrap">
+        <div className="flex justify-center gap-1 sm:gap-1.5 flex-wrap px-1">
           {questions.map((q, idx) => {
             const isAnswered = answers[q.id] !== undefined;
             const isCurrent = idx === currentStep;
@@ -497,7 +499,7 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
                 onClick={() => canNavigate && setCurrentStep(idx)}
                 disabled={!canNavigate}
                 className={`
-                  w-8 h-8 rounded-full text-xs font-medium transition-all
+                  w-7 h-7 sm:w-8 sm:h-8 rounded-full text-xs font-medium transition-all flex-shrink-0
                   ${isCurrent 
                     ? 'bg-blue-600 text-white ring-2 ring-blue-200' 
                     : isAnswered 
@@ -513,24 +515,25 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
           })}
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
         <div>
           <div className={cn(
-            "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium mb-4 border",
+            "inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4 border",
             riskFocusConfig[currentQuestion.riskFocus].bg,
             riskFocusConfig[currentQuestion.riskFocus].text,
             riskFocusConfig[currentQuestion.riskFocus].border
           )}>
             <span>{riskFocusConfig[currentQuestion.riskFocus].icon}</span>
-            <span>{currentQuestion.riskLabel}</span>
+            <span className="hidden sm:inline">{currentQuestion.riskLabel}</span>
+            <span className="sm:hidden">{currentQuestion.riskLabel.split(' ')[0]}</span>
             {currentQuestion.article && (
-              <span className="opacity-75">• {currentQuestion.article}</span>
+              <span className="opacity-75 hidden sm:inline">• {currentQuestion.article}</span>
             )}
           </div>
-          <h3 className="text-lg font-semibold mb-2">
+          <h3 className="text-base sm:text-lg font-semibold mb-2">
             {currentQuestion.question}
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-sm sm:text-base text-gray-600 mb-4">
             {currentQuestion.description}
           </p>
         </div>
@@ -538,13 +541,13 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
         <RadioGroup 
           value={currentAnswer} 
           onValueChange={handleAnswer}
-          className="space-y-3"
+          className="space-y-2 sm:space-y-3"
         >
           {currentQuestion.options.map((option) => (
             <div
               key={option.value}
               className={cn(
-                "flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-colors",
+                "flex items-start space-x-2 sm:space-x-3 rounded-lg border p-3 sm:p-4 cursor-pointer transition-colors min-h-[44px]",
                 currentAnswer === option.value 
                   ? "border-blue-500 bg-blue-50" 
                   : "border-gray-200 hover:border-gray-300"
@@ -554,17 +557,17 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
               <RadioGroupItem 
                 value={option.value} 
                 id={option.value}
-                className="mt-1"
+                className="mt-0.5 sm:mt-1 flex-shrink-0"
               />
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <Label 
                   htmlFor={option.value}
-                  className="font-medium cursor-pointer"
+                  className="font-medium cursor-pointer text-sm sm:text-base"
                 >
                   {option.label}
                 </Label>
                 {option.description && (
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
                     {option.description}
                   </p>
                 )}
@@ -573,11 +576,12 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
           ))}
         </RadioGroup>
         
-        <div className="flex justify-between pt-4">
+        <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 pt-4">
           <Button
             variant="outline"
             onClick={currentStep === 0 ? onCancel : handleBack}
             disabled={isSubmitting}
+            className="w-full sm:w-auto"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
             {currentStep === 0 ? 'Cancelar' : 'Anterior'}
@@ -585,6 +589,7 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
           <Button
             onClick={handleNext}
             disabled={!currentAnswer || isSubmitting}
+            className="w-full sm:w-auto"
           >
             {currentStep === questions.length - 1 ? 'Ver resultado' : 'Siguiente'}
             <ChevronRight className="h-4 w-4 ml-2" />

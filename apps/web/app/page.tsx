@@ -12,10 +12,9 @@ import {
   AlertCircle,
   TrendingDown,
   Users,
-  ArrowRight,
-  Menu,
-  X
+  ArrowRight
 } from 'lucide-react';
+import { Header } from '@/components/landing-header';
 
 export const metadata = {
   title: 'CumplIA - Cumplimiento del AI Act para Empresas',
@@ -23,79 +22,37 @@ export const metadata = {
   keywords: 'AI Act, cumplimiento IA, regulación inteligencia artificial, IA responsable, GDPR, sistemas de IA',
 };
 
-// Header Component
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">CumplIA</span>
-          </Link>
-          <nav className="hidden md:flex items-center space-x-6">
-            <a href="#riesgos" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              El Riesgo
-            </a>
-            <a href="#solucion" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Solución
-            </a>
-            <a href="#precios" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Precios
-            </a>
-            <a href="#faq" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              FAQ
-            </a>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="ghost" className="hidden sm:inline-flex">
-                Iniciar Sesión
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                Registrarse
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 // Hero Section
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white py-20 lg:py-32">
+    <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white py-12 sm:py-20 lg:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight mb-4 sm:mb-6">
             Cumple el AI Act con Confianza
-            <span className="block text-blue-600 mt-2">
+            <span className="block text-blue-600 mt-2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
               Transforma la Regulación en tu Ventaja Competitiva
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2 sm:px-0">
             La inteligencia artificial avanza a pasos agigantados. Asegúrate de que tu negocio 
             no solo cumpla con el reglamento más importante de IA de Europa, sino que prospere en él. 
             CumplIA te guía paso a paso.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+            <Link href="/register" className="w-full sm:w-auto">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto">
                 Empieza tu Cumplimiento Gratis
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
-            <a href="#solucion">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+            <a href="#solucion" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto">
                 Más información
               </Button>
             </a>
           </div>
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-xs sm:text-sm text-gray-500">
             Sin tarjeta de crédito • Sin compromiso • Empieza en minutos
           </p>
         </div>
@@ -138,32 +95,32 @@ function PainPointsSection() {
   ];
 
   return (
-    <section id="riesgos" className="py-20 bg-white">
+    <section id="riesgos" className="py-12 sm:py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             El AI Act no es una Opción, es una Obligación
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-base sm:text-lg text-gray-600">
             La entrada en vigor del AI Act europeo marca un antes y un después en el desarrollo 
             y uso de la Inteligencia Artificial. Ignorar esta regulación expone a tu empresa a:
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {risks.map((risk, index) => (
             <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className={`${risk.bgColor} w-14 h-14 rounded-xl flex items-center justify-center mb-4`}>
-                  <risk.icon className={`h-7 w-7 ${risk.color}`} />
+              <CardContent className="p-4 sm:p-6">
+                <div className={`${risk.bgColor} w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-3 sm:mb-4`}>
+                  <risk.icon className={`h-6 w-6 sm:h-7 sm:w-7 ${risk.color}`} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{risk.title}</h3>
-                <p className="text-gray-600">{risk.description}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{risk.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600">{risk.description}</p>
               </CardContent>
             </Card>
           ))}
         </div>
-        <div className="text-center mt-12">
-          <p className="text-xl font-medium text-gray-800">
+        <div className="text-center mt-8 sm:mt-12">
+          <p className="text-base sm:text-xl font-medium text-gray-800 px-4">
             ¿Está tu negocio preparado para operar legalmente en el ecosistema de IA de la UE?
           </p>
         </div>
@@ -208,28 +165,28 @@ function FeaturesSection() {
   ];
 
   return (
-    <section id="solucion" className="py-20 bg-gray-50">
+    <section id="solucion" className="py-12 sm:py-20 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Navega la Complejidad del AI Act con Inteligencia y Facilidad
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-base sm:text-lg text-gray-600">
             CumplIA es la plataforma SaaS diseñada para simplificar el cumplimiento normativo de la IA. 
             Te proporcionamos las herramientas y la guía necesarias para entender, implementar y demostrar 
             que tus sistemas de IA cumplen con el AI Act.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {features.map((feature, index) => (
             <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-              <CardContent className="p-6">
-                <div className="bg-blue-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                  <feature.icon className="h-7 w-7 text-blue-600" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="bg-blue-100 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                  <feature.icon className="h-6 w-6 sm:h-7 sm:w-7 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 mb-3">{feature.description}</p>
-                <p className="text-sm text-blue-600 italic">{feature.microcopy}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600 mb-3">{feature.description}</p>
+                <p className="text-xs sm:text-sm text-blue-600 italic">{feature.microcopy}</p>
               </CardContent>
             </Card>
           ))}
@@ -251,19 +208,19 @@ function BenefitsSection() {
   ];
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-12 sm:py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Más Allá del Cumplimiento: Impulsa tu Innovación con Ética
             </h2>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
-                <span className="text-lg font-medium text-gray-900">{benefit}</span>
+              <div key={index} className="flex items-center space-x-3 p-3 sm:p-4 bg-green-50 rounded-lg">
+                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 flex-shrink-0" />
+                <span className="text-sm sm:text-lg font-medium text-gray-900">{benefit}</span>
               </div>
             ))}
           </div>
@@ -323,41 +280,41 @@ function PricingSection() {
   ];
 
   return (
-    <section id="precios" className="py-20 bg-gray-50">
+    <section id="precios" className="py-12 sm:py-20 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Comienza tu Viaje de Cumplimiento Hoy Mismo
           </h2>
         </div>
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
-            <Card key={index} className={`border-0 shadow-xl ${plan.popular ? 'ring-2 ring-blue-600 scale-105' : ''}`}>
+            <Card key={index} className={`border-0 shadow-xl ${plan.popular ? 'md:scale-105 ring-2 ring-blue-600' : ''}`}>
               {plan.popular && (
                 <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">
                   Más Popular
                 </div>
               )}
-              <CardHeader className="p-6">
-                <CardTitle className="text-2xl font-bold text-gray-900">{plan.name}</CardTitle>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">{plan.name}</CardTitle>
+                <div className="mt-3 sm:mt-4">
+                  <span className="text-3xl sm:text-4xl font-bold text-gray-900">{plan.price}</span>
                   <span className="text-gray-600">{plan.period}</span>
                 </div>
-                <CardDescription className="mt-2">{plan.description}</CardDescription>
+                <CardDescription className="mt-2 text-sm sm:text-base">{plan.description}</CardDescription>
               </CardHeader>
-              <CardContent className="p-6 pt-0">
-                <ul className="space-y-3">
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <ul className="space-y-2 sm:space-y-3">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start space-x-2">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-600">{feature}</span>
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm sm:text-base text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Link href="/register">
                   <Button 
-                    className={`w-full mt-6 ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-900 hover:bg-gray-800'}`}
+                    className={`w-full mt-4 sm:mt-6 ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-900 hover:bg-gray-800'}`}
                     size="lg"
                   >
                     {plan.cta}
@@ -367,7 +324,7 @@ function PricingSection() {
             </Card>
           ))}
         </div>
-        <p className="text-center mt-8 text-sm text-gray-500">
+        <p className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
           Precios basados en facturación anual. Consulta para planes mensuales.
         </p>
       </div>
@@ -409,23 +366,23 @@ function FAQSection() {
   ];
 
   return (
-    <section id="faq" className="py-20 bg-white">
+    <section id="faq" className="py-12 sm:py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Tus Dudas sobre el AI Act y CumplIA, Respondidas
           </h2>
         </div>
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
           {faqs.map((faq, index) => (
             <Card key={index} className="border border-gray-200">
-              <CardHeader className="p-6">
-                <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg font-semibold text-gray-900">
                   {faq.question}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-6 pb-6 pt-0">
-                <p className="text-gray-600">{faq.answer}</p>
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">
+                <p className="text-sm sm:text-base text-gray-600">{faq.answer}</p>
               </CardContent>
             </Card>
           ))}
@@ -438,39 +395,39 @@ function FAQSection() {
 // Footer Section
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-16">
+    <footer className="bg-gray-900 text-white py-12 sm:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
             No Dejes el Futuro de tu IA al Azar
           </h2>
-          <p className="text-xl text-gray-400 mb-8">
+          <p className="text-base sm:text-xl text-gray-400 mb-6 sm:mb-8 px-2 sm:px-0">
             Asegura tu Cumplimiento con CumplIA. El AI Act es una realidad que definirá 
             el panorama de la inteligencia artificial.
           </p>
           <Link href="/register">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-6">
-              Solicita una Demostración Personalizada
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6">
+              Solicita una Demostración
+              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
         </div>
         
-        <div className="border-t border-gray-800 pt-8 mt-12">
+        <div className="border-t border-gray-800 pt-6 sm:pt-8 mt-8 sm:mt-12">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Shield className="h-6 w-6 text-blue-500" />
-              <span className="text-xl font-bold">CumplIA</span>
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+              <span className="text-lg sm:text-xl font-bold">CumplIA</span>
             </div>
-            <nav className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
+            <nav className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400">
               <a href="#" className="hover:text-white transition-colors">Sobre Nosotros</a>
               <a href="#" className="hover:text-white transition-colors">Contacto</a>
-              <a href="#" className="hover:text-white transition-colors">Política de Privacidad</a>
-              <a href="#" className="hover:text-white transition-colors">Términos de Servicio</a>
-              <a href="#" className="hover:text-white transition-colors">Blog de IA y Cumplimiento</a>
+              <a href="#" className="hover:text-white transition-colors">Privacidad</a>
+              <a href="#" className="hover:text-white transition-colors">Términos</a>
+              <a href="#" className="hover:text-white transition-colors">Blog</a>
             </nav>
           </div>
-          <p className="text-center text-gray-500 text-sm mt-8">
+          <p className="text-center text-gray-500 text-xs sm:text-sm mt-6 sm:mt-8">
             © 2024 CumplIA. Todos los derechos reservados.
           </p>
         </div>
