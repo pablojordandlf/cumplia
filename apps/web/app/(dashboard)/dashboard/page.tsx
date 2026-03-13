@@ -19,9 +19,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useCasesApi, UseCase } from '@/lib/api/use-cases';
 import { useToast } from '@/hooks/use-toast';
 import RiskBadge from '@/components/risk-badge';
+import { supabase } from '@/lib/supabase';
+
+// Define UseCase interface locally
+interface UseCase {
+  id: string;
+  name: string;
+  description: string | null;
+  sector: string;
+  status: string;
+  ai_act_level: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
 
 // Mapear valores del API al formato del componente RiskBadge
 type RiskLevel = 'prohibited' | 'high' | 'limited' | 'minimal' | 'unclassified';
@@ -76,31 +89,50 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      const useCases = await useCasesApi.list();
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
       
-      const classified = useCases.filter(uc => 
+      if (!session?.user) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch use cases directly from Supabase
+      const { data: useCases, error } = await supabase
+        .from('use_cases')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const useCasesList = useCases || [];
+      
+      const classified = useCasesList.filter(uc => 
         uc.status === 'classified' || uc.status === 'compliant'
       ).length;
       
       const byRiskLevel = {
-        prohibited: useCases.filter(uc => uc.ai_act_level === 'prohibited').length,
-        high: useCases.filter(uc => uc.ai_act_level === 'high_risk').length,
-        limited: useCases.filter(uc => uc.ai_act_level === 'limited_risk').length,
-        minimal: useCases.filter(uc => uc.ai_act_level === 'minimal_risk').length,
-        unclassified: useCases.filter(uc => uc.ai_act_level === 'unclassified').length,
+        prohibited: useCasesList.filter(uc => uc.ai_act_level === 'prohibited').length,
+        high: useCasesList.filter(uc => uc.ai_act_level === 'high_risk').length,
+        limited: useCasesList.filter(uc => uc.ai_act_level === 'limited_risk').length,
+        minimal: useCasesList.filter(uc => uc.ai_act_level === 'minimal_risk').length,
+        unclassified: useCasesList.filter(uc => uc.ai_act_level === 'unclassified').length,
       };
 
       setStats({
-        total: useCases.length,
+        total: useCasesList.length,
         classified,
-        pending: useCases.length - classified,
+        pending: useCasesList.length - classified,
         byRiskLevel,
-        recentUseCases: useCases.slice(0, 5),
+        recentUseCases: useCasesList.slice(0, 5),
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error loading dashboard:', error);
       toast({
         title: 'Error',
-        description: 'No se pudieron cargar los datos del dashboard',
+        description: error.message || 'No se pudieron cargar los datos del dashboard',
         variant: 'destructive',
       });
     } finally {
