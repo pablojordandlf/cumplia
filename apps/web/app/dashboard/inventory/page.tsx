@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UseCaseCard from '@/components/use-case-card';
 import EmptyState from '@/components/empty-state';
@@ -215,7 +216,18 @@ export default function InventoryPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver al Dashboard
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
+        </div>
         <Link href="/dashboard/inventory/new">
           <Button className="bg-blue-600 hover:bg-blue-700">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

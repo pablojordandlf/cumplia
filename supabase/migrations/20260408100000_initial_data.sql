@@ -1,5 +1,20 @@
 -- Data: 20260408100000_initial_data.sql
 
+-- Insert into use_case_catalog (use case templates/suggestions)
+INSERT INTO use_case_catalog (name, description, sector, typical_ai_act_level, template_data) VALUES
+('Sistema de Detección de Fraude', 'Sistema de IA que analiza transacciones financieras en tiempo real para detectar patrones sospechosos y prevenir fraudes.', 'finance', 'high_risk', '{"keywords": ["fraude", "transacciones", "finanzas", "detección"]}'),
+('Chatbot de Atención al Cliente', 'Asistente virtual para responder consultas frecuentes y guiar a clientes a través de procesos básicos.', 'finance', 'limited_risk', '{"keywords": ["chatbot", "atención", "cliente", "conversación"]}'),
+('Sistema de Recomendación de Productos', 'Algoritmo que sugiere productos financieros basados en el historial del cliente y preferencias.', 'finance', 'limited_risk', '{"keywords": ["recomendación", "productos", "personalización"]}'),
+('Evaluación Automatizada de Crédito', 'Sistema que evalúa solicitudes de préstamo basándose en datos financieros y comportamiento crediticio.', 'finance', 'high_risk', '{"keywords": ["crédito", "evaluación", "riesgo", "préstamo"]}'),
+('Detección de Cáncer con IA', 'Sistema de diagnóstico médico asistido por IA para análisis de imágenes médicas.', 'healthcare', 'high_risk', '{"keywords": ["salud", "diagnóstico", "imágenes", "cáncer"]}'),
+('Asistente Virtual Médico', 'Chatbot para triaje inicial y orientación sobre síntomas antes de consultar con un médico.', 'healthcare', 'limited_risk', '{"keywords": ["salud", "triaje", "síntomas", "orientación"]}'),
+('Sistema de Evaluación de Candidatos', 'IA para screening de CVs y evaluación inicial de candidatos en procesos de selección.', 'employment', 'high_risk', '{"keywords": ["empleo", "reclutamiento", "cv", "evaluación"]}'),
+('Plataforma de Aprendizaje Personalizado', 'Sistema adaptativo que personaliza contenido educativo según el progreso del estudiante.', 'education', 'high_risk', '{"keywords": ["educación", "aprendizaje", "personalización", "estudiantes"]}'),
+('Sistema de Reconocimiento Facial', 'Identificación biométrica para control de acceso y seguridad.', 'security', 'prohibited', '{"keywords": ["biometría", "facial", "identificación", "seguridad"]}'),
+('Detección de Deepfakes', 'Herramienta para identificar contenido sintético generado por IA.', 'security', 'minimal_risk', '{"keywords": ["deepfake", "contenido", "sintético", "detección"]}'),
+('Análisis de Sentimiento en Redes Sociales', 'Monitoreo de opiniones y sentimientos sobre marca o productos en redes sociales.', 'other', 'minimal_risk', '{"keywords": ["sentimiento", "redes", "monitoreo", "opinión"]}'),
+('Sistema de Predicción de Mantenimiento', 'IA para predecir fallos en equipos industriales y programar mantenimiento preventivo.', 'transport', 'high_risk', '{"keywords": ["mantenimiento", "predicción", "industrial", "equipos"]}');
+
 -- Insert into risk_catalog
 INSERT INTO risk_catalog (name, description, ai_act_article, ai_act_level, category, sector_tags) VALUES
 ('Manipulación subliminal de comportamiento', 'Sistemas que utilizan técnicas subliminales para influir en el comportamiento de las personas de forma perjudicial.', 'Art. 5.1.a', 'prohibited', 'manipulacion', '["general"]'),

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Lightbulb, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronRight, Sparkles } from 'lucide-react';
 import { RiskBadge } from '@/components/risk-badge';
 
 interface CatalogItem {
@@ -43,9 +43,11 @@ const levelMap: Record<string, 'prohibited' | 'high' | 'limited' | 'minimal' | '
 export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCaseSuggestionsProps) {
   const [suggestions, setSuggestions] = useState<CatalogItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     loadSuggestions();
+    setShowAll(false); // Reset when sector changes
   }, [selectedSector]);
 
   const loadSuggestions = async () => {
@@ -57,7 +59,7 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
       const response = await fetch(`/api/catalog${params}`);
       if (!response.ok) throw new Error('Error loading suggestions');
       const data = await response.json();
-      setSuggestions(data.slice(0, 6)); // Show max 6 suggestions
+      setSuggestions(data);
     } catch (error) {
       console.error('Error loading suggestions:', error);
       setSuggestions([]);
@@ -65,6 +67,9 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
       setIsLoading(false);
     }
   };
+
+  const visibleSuggestions = showAll ? suggestions : suggestions.slice(0, 4);
+  const hasMore = suggestions.length > 4;
 
   if (isLoading) {
     return (
@@ -97,7 +102,7 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {suggestions.map((item) => (
+          {visibleSuggestions.map((item) => (
             <Card
               key={item.id}
               className="cursor-pointer hover:shadow-md transition-shadow border-blue-200 hover:border-blue-300 bg-white"
@@ -129,6 +134,15 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
             </Card>
           ))}
         </div>
+        {hasMore && (
+          <Button
+            variant="ghost"
+            className="w-full mt-4 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? 'Ver menos' : `Ver más (${suggestions.length - 4} restantes)`}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
