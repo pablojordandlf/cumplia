@@ -59,7 +59,8 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
       const response = await fetch(`/api/catalog${params}`);
       if (!response.ok) throw new Error('Error loading suggestions');
       const data = await response.json();
-      setSuggestions(data);
+      // API returns { catalog: [...] } or directly [...]
+      setSuggestions(data.catalog || data || []);
     } catch (error) {
       console.error('Error loading suggestions:', error);
       setSuggestions([]);
