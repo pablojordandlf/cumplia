@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-
-export const dynamic = 'force-dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase'; // Adjust path as needed
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
+
+// URL base para redirecciones (usa env var o fallback a window.location)
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,10 +23,15 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
+    // Usar la URL configurada o fallback a window.location.origin
+    const redirectTo = APP_URL 
+      ? `${APP_URL}/auth/callback`
+      : `${window.location.origin}/auth/callback`;
+
     const { error: supabaseError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`, // Adjust callback URL
+        emailRedirectTo: redirectTo,
       },
     });
 
@@ -31,7 +39,6 @@ export default function LoginPage() {
       setError(supabaseError.message);
       setIsLoading(false);
     } else {
-      // Redirect to verification page or show success message
       router.push('/verify');
     }
   };

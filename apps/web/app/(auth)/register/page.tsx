@@ -9,6 +9,9 @@ import { useRouter } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
+// URL base para redirecciones (usa env var o fallback a window.location)
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +23,15 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError(null);
 
+    // Usar la URL configurada o fallback a window.location.origin
+    const redirectTo = APP_URL 
+      ? `${APP_URL}/auth/callback`
+      : `${window.location.origin}/auth/callback`;
+
     const { error: supabaseError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`, // Adjust callback URL
+        emailRedirectTo: redirectTo,
       },
     });
 
@@ -31,7 +39,6 @@ export default function RegisterPage() {
       setError(supabaseError.message);
       setIsLoading(false);
     } else {
-      // Redirect to verification page or show success message
       router.push('/verify');
     }
   };
