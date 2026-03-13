@@ -19,12 +19,12 @@ type UseCaseStatus = 'draft' | 'active' | 'archived';
 interface FilterBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  riskLevelFilter: RiskLevel | null;
-  onRiskLevelChange: (level: RiskLevel | null) => void;
+  riskLevelFilter: string | null;
+  onRiskLevelChange: (level: string | null) => void;
   sectorFilter: string | null;
   onSectorChange: (sector: string | null) => void;
-  statusFilter: UseCaseStatus | null;
-  onStatusChange: (status: UseCaseStatus | null) => void;
+  statusFilter: string | null;
+  onStatusChange: (status: string | null) => void;
   onClearFilters: () => void;
   className?: string;
 }

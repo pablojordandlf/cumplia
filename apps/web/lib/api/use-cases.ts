@@ -11,6 +11,11 @@ export interface UseCase {
   ai_act_level: string;
   confidence_score: number | null;
   classification_reason: string | null;
+  classification_data: {
+    articles?: string[];
+    obligations?: string[];
+    [key: string]: unknown;
+  } | null;
   created_at: string;
   updated_at: string;
 }
