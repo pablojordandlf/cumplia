@@ -1,8 +1,8 @@
 // Placeholder for GET /api/v1/documents/{id}/download
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { searchParams } = new URL(request.url);
   const format = searchParams.get('format');
 

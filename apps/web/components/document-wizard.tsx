@@ -47,8 +47,6 @@ const MockUpgradeModal = ({ isOpen, onClose, feature }: any) => (
     </div>
   ) : null
 );
-const cn = (...inputs: any[]) => inputs.filter(Boolean).join(' ');
-
 // --- ACTUAL COMPONENT ---
 
 const documentTypes = [

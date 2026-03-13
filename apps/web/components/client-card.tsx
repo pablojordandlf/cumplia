@@ -57,9 +57,3 @@ export function ClientCard({ org, onManage }: ClientCardProps) {
     </Card>
   );
 }
-
-// Placeholder for cn utility if not globally available
-// In a real app, this would be imported from '@/lib/utils' or similar
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}
