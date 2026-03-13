@@ -1,5 +1,5 @@
 import { createClient } from '../supabase/client';
-import { UseCase } from '../api/use-cases'; // Assuming UseCase is defined here
+import { UseCase } from '../lib/api/use-cases';
 
 interface UseCaseHook {
   createUseCase: (data: Omit<UseCase, 'id' | 'created_at' | 'updated_at' | 'status' | 'ai_act_level' | 'confidence_score' | 'classification_reason' | 'classification_data'>) => Promise<UseCase | null>;

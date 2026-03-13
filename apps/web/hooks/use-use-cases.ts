@@ -1,5 +1,6 @@
+import React from 'react';
 import { createClient } from '../supabase/client';
-import { UseCase, UseCaseFilters } from '../api/use-cases'; // Assuming UseCase and UseCaseFilters are defined here
+import { UseCase, UseCaseFilters } from '../lib/api/use-cases';
 import { RealtimeSubscription } from '@supabase/supabase-js';
 
 interface UseCasesHook {
