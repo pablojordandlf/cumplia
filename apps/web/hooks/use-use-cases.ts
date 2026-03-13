@@ -1,7 +1,6 @@
 import React from 'react';
-import { createClient } from '../supabase/client';
-import { UseCase, UseCaseFilters } from '../lib/api/use-cases';
-import { RealtimeSubscription } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
+import { UseCase, UseCaseFilters } from '@/lib/api/use-cases';
 
 interface UseCasesHook {
   useCases: UseCase[];
@@ -23,7 +22,7 @@ export const useUseCases = (userId: string): UseCasesHook => {
       const { data, error } = await supabase
         .from('use_cases')
         .select('*')
-        .eq('user_id', userId); // Assuming user_id is available in the session
+        .eq('user_id', userId);
 
       if (error) throw error;
       setUseCases(data || []);
@@ -38,7 +37,7 @@ export const useUseCases = (userId: string): UseCasesHook => {
     fetchUseCases();
   }, [userId]);
 
-  // Realtime subscription
+  // Realtime subscription - simplified to refetch on changes
   React.useEffect(() => {
     const supabase = createClient();
     const channel = supabase.channel(`use-cases-channel-${userId}`);
@@ -48,37 +47,19 @@ export const useUseCases = (userId: string): UseCasesHook => {
       {
         event: '*',
         schema: 'public',
+        table: 'use_cases',
         filter: `user_id=eq.${userId}`,
       },
-      (payload) => {
-        console.log('Change received!', payload);
-        // Update state based on payload operation (INSERT, UPDATE, DELETE)
-        setUseCases((currentUseCases) => {
-          let updatedUseCases = [...currentUseCases];
-          switch (payload.event) {
-            case 'INSERT':
-              updatedUseCases.push(payload.new as UseCase);
-              break;
-            case 'UPDATE':
-              updatedUseCases = updatedUseCases.map((uc) =>
-                uc.id === payload.new.id ? (payload.new as UseCase) : uc
-              );
-              break;
-            case 'DELETE':
-              updatedUseCases = updatedUseCases.filter((uc) => uc.id !== payload.old.id);
-              break;
-          }
-          return updatedUseCases;
-        });
+      () => {
+        // Refetch all data when changes occur
+        fetchUseCases();
       }
     ).subscribe();
 
-    // Clean up subscription on unmount
     return () => {
       supabase.removeChannel(channel);
     };
   }, [userId]);
-
 
   return { useCases, loading, error, refetch: fetchUseCases };
 };
