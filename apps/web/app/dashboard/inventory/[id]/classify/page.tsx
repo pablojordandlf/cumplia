@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import RiskBadge from '@/components/risk-badge';
 import { Progress } from '@/components/ui/progress';
@@ -18,16 +18,19 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useCasesApi, UseCase } from '@/lib/api/use-cases';
+import { ApiError } from '@/lib/api/client';
 
 const sectors = [
-  { value: 'health', label: 'Salud' },
-  { value: 'education', label: 'Educación' },
-  { value: 'public_safety', label: 'Seguridad Pública' },
-  { value: 'employment', label: 'Empleo' },
-  { value: 'transport', label: 'Transporte' },
-  { value: 'finance', label: 'Finanzas' },
-  { value: 'justice', label: 'Justicia' },
-  { value: 'other', label: 'Otros' },
+  { value: 'Salud', label: 'Salud' },
+  { value: 'Educación', label: 'Educación' },
+  { value: 'Seguridad Pública', label: 'Seguridad Pública' },
+  { value: 'Empleo', label: 'Empleo' },
+  { value: 'Transporte', label: 'Transporte' },
+  { value: 'Finanzas', label: 'Finanzas' },
+  { value: 'Justicia', label: 'Justicia' },
+  { value: 'Otro', label: 'Otro' },
 ];
 
 interface ClassificationResult {
@@ -38,31 +41,66 @@ interface ClassificationResult {
   obligations: string[];
 }
 
-const mockClassificationResult: ClassificationResult = {
-  level: 'high',
-  confidence: 0.92,
-  reasoning: 'Este sistema procesa datos personales sensibles para evaluación de candidatos, clasificándose como sistema de alto riesgo según el Artículo 6(2) del AI Act.',
-  articles: ['Art. 6(2)', 'Art. 10', 'Art. 14'],
-  obligations: [
-    'Sistema de gestión de riesgos',
-    'Gobernanza de datos de alta calidad',
-    'Documentación técnica detallada',
-    'Supervisión humana efectiva',
-    'Transparencia y provisiones de información'
-  ],
-};
-
 type Step = 1 | 2 | 3 | 4;
+
+// Map backend level to frontend level
+const levelMap: Record<string, ClassificationResult['level']> = {
+  'prohibited': 'prohibited',
+  'high_risk': 'high',
+  'limited_risk': 'limited',
+  'minimal_risk': 'minimal',
+  'unclassified': 'unclassified',
+};
 
 export default function ClassificationWizardPage() {
   const router = useRouter();
+  const params = useParams();
+  const { toast } = useToast();
+  const useCaseId = params.id as string;
+  
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [result, setResult] = useState<ClassificationResult | null>(null);
+  
+  const [useCase, setUseCase] = useState<UseCase | null>(null);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [sector, setSector] = useState('');
 
-  const [name, setName] = useState('Sistema de Selección de Candidatos');
-  const [description, setDescription] = useState('IA para análisis de CVs y evaluación de candidatos');
-  const [sector, setSector] = useState('employment');
+  // Load use case data
+  useEffect(() => {
+    loadUseCase();
+  }, [useCaseId]);
+
+  const loadUseCase = async () => {
+    try {
+      const data = await useCasesApi.get(useCaseId);
+      setUseCase(data);
+      setName(data.name);
+      setDescription(data.description || '');
+      setSector(data.sector);
+      
+      // If already classified, show result
+      if (data.ai_act_level !== 'unclassified' && data.classification_data) {
+        setResult({
+          level: levelMap[data.ai_act_level] || 'unclassified',
+          confidence: data.confidence_score || 0,
+          reasoning: data.classification_reason || '',
+          articles: data.classification_data.articles || [],
+          obligations: data.classification_data.obligations || [],
+        });
+        setCurrentStep(4);
+      }
+    } catch (error) {
+      console.error('Error loading use case:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof ApiError ? error.message : 'No se pudo cargar el caso de uso',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const stepTitles: Record<Step, string> = {
     1: 'Información',
@@ -80,6 +118,8 @@ export default function ClassificationWizardPage() {
       } else {
         setCurrentStep((prev) => (prev + 1) as Step);
       }
+    } else {
+      handleFinish();
     }
   };
 
@@ -89,13 +129,48 @@ export default function ClassificationWizardPage() {
     }
   };
 
-  const handleClassify = () => {
+  const handleClassify = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setResult(mockClassificationResult);
-      setIsLoading(false);
+    try {
+      // Update use case with latest info
+      await useCasesApi.update(useCaseId, {
+        name,
+        description,
+        sector,
+      });
+      
+      // Call classification endpoint
+      const classified = await useCasesApi.classify(useCaseId);
+      
+      // Format result
+      setResult({
+        level: levelMap[classified.ai_act_level] || 'unclassified',
+        confidence: classified.confidence_score || 0,
+        reasoning: classified.classification_reason || '',
+        articles: classified.classification_data?.articles || [],
+        obligations: classified.classification_data?.obligations || [],
+      });
+      
       setCurrentStep(4);
-    }, 2000);
+      
+      toast({
+        title: 'Clasificación completada',
+        description: `Nivel de riesgo: ${classified.ai_act_level}`,
+      });
+    } catch (error) {
+      console.error('Error classifying use case:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof ApiError ? error.message : 'No se pudo clasificar el caso de uso',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFinish = () => {
+    router.push('/dashboard/inventory');
   };
 
   const renderStepContent = () => {
@@ -149,13 +224,13 @@ export default function ClassificationWizardPage() {
             <div>
               <Label>Propósito Principal</Label>
               <p className="text-sm text-gray-600 mt-1">
-                Evaluación y selección de candidatos para puestos de trabajo mediante procesamiento automatizado.
+                Describe el propósito específico del sistema de IA y cómo se utiliza.
               </p>
             </div>
             <div>
               <Label>Impacto Potencial</Label>
               <p className="text-sm text-gray-600 mt-1">
-                Afecta a derechos fundamentales: acceso al empleo y no discriminación.
+                Considera cómo el sistema puede afectar derechos fundamentales, seguridad, o acceso a servicios esenciales.
               </p>
             </div>
           </div>

@@ -13,51 +13,75 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { useCasesApi } from '@/lib/api/use-cases';
+import { ApiError } from '@/lib/api/client';
 
-// Define the structure for sector options
-interface SectorOption {
-  value: string | null;
-  label: string;
-}
-
-// Mock data for sectors (re-defined for this page's context, should ideally be imported)
-const mockSectors: SectorOption[] = [
-  { value: null, label: 'Selecciona un sector' },
-  { value: 'health', label: 'Salud' },
-  { value: 'education', label: 'Educación' },
-  { value: 'public_safety', label: 'Seguridad Pública' },
-  { value: 'employment', label: 'Empleo' },
-  { value: 'transport', label: 'Transporte' },
-  { value: 'finance', label: 'Finanzas' },
-  { value: 'justice', label: 'Justicia' },
-  { value: 'other', label: 'Otros' },
+// Sectors matching backend catalog
+const sectors = [
+  { value: '', label: 'Selecciona un sector' },
+  { value: 'Salud', label: 'Salud' },
+  { value: 'Educación', label: 'Educación' },
+  { value: 'Seguridad Pública', label: 'Seguridad Pública' },
+  { value: 'Empleo', label: 'Empleo' },
+  { value: 'Transporte', label: 'Transporte' },
+  { value: 'Finanzas', label: 'Finanzas' },
+  { value: 'Justicia', label: 'Justicia' },
+  { value: 'Otro', label: 'Otro' },
 ];
 
 export default function NewUseCasePage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [sector, setSector] = useState<string | null>(null);
+  const [sector, setSector] = useState<string>('');
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    
     if (!name || !description || !sector) {
-      alert('Por favor, completa todos los campos.'); // Basic validation
+      toast({
+        title: 'Campos incompletos',
+        description: 'Por favor, completa todos los campos.',
+        variant: 'destructive',
+      });
       return;
     }
 
-    // In a real application, you would POST this data.
-    // For now, we'll simulate creation and redirect to the classification wizard.
-    console.log('Creating new use case:', { name, description, sector });
-
-    // Redirect to the classification wizard page.
-    // In a real app, you might pass the created ID or data.
-    router.push('/dashboard/inventory/new/classify');
+    try {
+      setIsSubmitting(true);
+      
+      // Create use case via API
+      const useCase = await useCasesApi.create({
+        name,
+        description,
+        sector,
+      });
+      
+      toast({
+        title: 'Caso de uso creado',
+        description: 'Redirigiendo al asistente de clasificación...',
+      });
+      
+      // Redirect to classification wizard
+      router.push(`/dashboard/inventory/${useCase.id}/classify`);
+    } catch (error) {
+      console.error('Error creating use case:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof ApiError ? error.message : 'No se pudo crear el caso de uso',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
-    router.push('/dashboard/inventory'); // Navigate back to the inventory list
+    router.push('/dashboard/inventory');
   };
 
   return (
@@ -97,13 +121,13 @@ export default function NewUseCasePage() {
 
             <div>
               <Label htmlFor="sector">Sector</Label>
-              <Select value={sector ?? ''} onValueChange={(value: string) => setSector(value === '' ? null : value)}>
+              <Select value={sector} onValueChange={(value: string) => setSector(value)}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecciona un sector" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockSectors.map((s) => (
-                    <SelectItem key={s.value || 'null'} value={s.value || ''}>
+                  {sectors.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
                       {s.label}
                     </SelectItem>
                   ))}
@@ -113,11 +137,11 @@ export default function NewUseCasePage() {
           </div>
 
           <div className="mt-8 flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={handleCancel}>
+            <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Guardar y Continuar
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+              {isSubmitting ? 'Guardando...' : 'Guardar y Continuar'}
             </Button>
           </div>
         </form>
