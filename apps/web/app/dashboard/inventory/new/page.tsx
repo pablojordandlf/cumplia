@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 
 const SECTOR_UNSET = '__unset__';
+const ROLES_UNSET = '__unset__';
 
 const sectors = [
   { value: SECTOR_UNSET, label: 'Selecciona un sector' },
@@ -29,6 +30,15 @@ const sectors = [
   { value: 'finance', label: 'Finanzas' },
   { value: 'justice', label: 'Justicia' },
   { value: 'other', label: 'Otro' },
+];
+
+// AI Act roles according to Article 3
+const aiActRoles = [
+  { value: ROLES_UNSET, label: 'Selecciona tu rol según el AI Act' },
+  { value: 'provider', label: 'Proveedor - Desarrollo/comercializo sistemas de IA' },
+  { value: 'deployer', label: 'Usuario (Deployer) - Utilizo sistemas de IA en mi empresa' },
+  { value: 'distributor', label: 'Distribuidor - Distribuyo sistemas de IA en la UE' },
+  { value: 'importer', label: 'Importador - Importo sistemas de IA desde fuera de la UE' },
 ];
 
 interface CatalogItem {
@@ -49,6 +59,7 @@ export default function NewUseCasePage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [sector, setSector] = useState<string>(SECTOR_UNSET);
+  const [role, setRole] = useState<string>(ROLES_UNSET);
 
   // Get current user
   useEffect(() => {
@@ -67,6 +78,10 @@ export default function NewUseCasePage() {
     setName(suggestion.name);
     setDescription(suggestion.description);
     setSector(suggestion.sector);
+    // Set AI Act role if available in template data
+    if (suggestion.template_data?.ai_act_role) {
+      setRole(suggestion.template_data.ai_act_role as string);
+    }
     toast({
       title: 'Plantilla cargada',
       description: `Se ha cargado "${suggestion.name}". Puedes modificar los datos antes de guardar.`,
@@ -76,10 +91,10 @@ export default function NewUseCasePage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (!name || !description || sector === SECTOR_UNSET) {
+    if (!name || !description || sector === SECTOR_UNSET || role === ROLES_UNSET) {
       toast({
         title: 'Campos incompletos',
-        description: 'Por favor, completa todos los campos incluyendo el sector.',
+        description: 'Por favor, completa todos los campos incluyendo el sector y tu rol según el AI Act.',
         variant: 'destructive',
       });
       return;
@@ -104,6 +119,7 @@ export default function NewUseCasePage() {
             name,
             description,
             sector,
+            ai_act_role: role,
             user_id: user.id,
             status: 'draft',
             ai_act_level: 'unclassified',
@@ -205,6 +221,25 @@ export default function NewUseCasePage() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="role">Rol según el AI Act</Label>
+              <Select value={role} onValueChange={(value: string) => setRole(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecciona tu rol según el AI Act" />
+                </SelectTrigger>
+                <SelectContent>
+                  {aiActRoles.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 mt-1">
+                Este rol determina tus obligaciones específicas según el Reglamento IA UE
+              </p>
             </div>
           </div>
 

@@ -472,7 +472,7 @@ function CTASection() {
             ¿Listo para asegurar el cumplimiento del AI Act?
           </h2>
           <p className="text-lg text-blue-100 mb-8">
-            CumplIA te guía paso a paso en todo el proceso de cumplimiento del Reglamento de 
+            CumplIA guía a tu empresa paso a paso en todo el proceso de cumplimiento del Reglamento de 
             Inteligencia Artificial de la UE. Desde la clasificación de riesgos hasta la 
             documentación regulatoria.
           </p>

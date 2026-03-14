@@ -35,14 +35,14 @@ function HeroSection() {
             </span>
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2 sm:px-0">
-            La inteligencia artificial avanza a pasos agigantados. Asegúrate de que tu negocio 
+            La inteligencia artificial avanza a pasos agigantados. Asegúrate de que tu empresa 
             no solo cumpla con el reglamento más importante de IA de Europa, sino que prospere en él. 
-            CumplIA te guía paso a paso.
+            CumplIA guía a tu organización paso a paso.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <Link href="/register" className="w-full sm:w-auto">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto">
-                Empieza tu Cumplimiento Gratis
+                Evalúa tu empresa gratis
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
@@ -121,7 +121,7 @@ function PainPointsSection() {
         </div>
         <div className="text-center mt-8 sm:mt-12">
           <p className="text-base sm:text-xl font-medium text-gray-800 px-4">
-            ¿Está tu negocio preparado para operar legalmente en el ecosistema de IA de la UE?
+            ¿Está tu empresa preparada para operar legalmente en el ecosistema de IA de la UE?
           </p>
         </div>
       </div>
@@ -136,13 +136,13 @@ function FeaturesSection() {
       icon: Shield,
       title: "Evaluación de Riesgos Automatizada",
       description: "Identifica la clasificación de riesgo de tus sistemas de IA según el AI Act (bajo, limitado, alto, inaceptable).",
-      microcopy: "Nuestra IA analítica clasifica tus sistemas de acuerdo a los criterios del AI Act 2024."
+      microcopy: "Nuestra IA analítica clasifica los sistemas de tu empresa según los criterios del AI Act 2024."
     },
     {
       icon: FileText,
       title: "Gestión de Documentación y Trazabilidad",
       description: "Crea y mantén expedientes técnicos unificados, registros de datos y auditorías de conformidad.",
-      microcopy: "Documenta cada paso de tu ciclo de vida de IA para auditorías simplificadas."
+      microcopy: "Documenta cada paso del ciclo de vida de IA de tu organización para auditorías simplificadas."
     },
     {
       icon: Activity,
@@ -160,7 +160,7 @@ function FeaturesSection() {
       icon: Zap,
       title: "Integración con Flujos de Trabajo",
       description: "Se adapta a tus metodologías de desarrollo y gestión de proyectos.",
-      microcopy: "Conecta CumplIA con tus herramientas de desarrollo y gestión de riesgos."
+      microcopy: "Conecta CumplIA con las herramientas de desarrollo y gestión de riesgos de tu empresa."
     }
   ];
 
@@ -173,8 +173,8 @@ function FeaturesSection() {
           </h2>
           <p className="text-base sm:text-lg text-gray-600">
             CumplIA es la plataforma SaaS diseñada para simplificar el cumplimiento normativo de la IA. 
-            Te proporcionamos las herramientas y la guía necesarias para entender, implementar y demostrar 
-            que tus sistemas de IA cumplen con el AI Act.
+            Proporcionamos a tu organización las herramientas y la guía necesarias para entender, implementar y demostrar 
+            que los sistemas de IA de tu empresa cumplen con el AI Act.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
@@ -337,7 +337,7 @@ function FAQSection() {
   const faqs = [
     {
       question: "¿Cuándo entra en vigor el AI Act y a quién afecta?",
-      answer: "El AI Act entrará en plena aplicación progresivamente, con la mayoría de las disposiciones aplicándose a partir de mediados de 2024. Afecta a proveedores y usuarios de sistemas de IA en el mercado de la UE, independientemente de dónde se encuentren si sus sistemas se usan en la UE."
+      answer: "El AI Act entrará en vigor el 2 de agosto de 2024, ampliándose su aplicación progresivamente hasta 2027. Afecta a proveedores y usuarios de sistemas de IA en el mercado de la UE, independientemente de su ubicación, si sus sistemas se usan en la UE."
     },
     {
       question: "¿Mi sistema de IA actual ya necesita cumplir todo?",
@@ -370,7 +370,7 @@ function FAQSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Tus Dudas sobre el AI Act y CumplIA, Respondidas
+            Las dudas de tu empresa sobre el AI Act, respondidas
           </h2>
         </div>
         <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
@@ -399,11 +399,11 @@ function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-            No Dejes el Futuro de tu IA al Azar
+            No dejes el futuro de la IA de tu empresa al azar
           </h2>
           <p className="text-base sm:text-xl text-gray-400 mb-6 sm:mb-8 px-2 sm:px-0">
-            Asegura tu Cumplimiento con CumplIA. El AI Act es una realidad que definirá 
-            el panorama de la inteligencia artificial.
+            Asegura el cumplimiento de tu empresa con CumplIA. El AI Act es una realidad que definirá 
+            el panorama de la inteligencia artificial en Europa.
           </p>
           <Link href="/register">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6">
