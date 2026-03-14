@@ -18,15 +18,17 @@ export const metadata: Metadata = {
 
 const pricingTiers = [
   {
-    name: "Starter",
+    name: "Free",
     monthlyPrice: 0,
     yearlyPrice: 0,
+    description: "Para probar la plataforma",
     features: [
-      "1 sistema de IA gestionado",
+      "1 sistema de IA",
       "1 usuario",
-      "Evaluación de riesgos básica",
-      "Plantillas de documentación",
-      "Soporte por email",
+      "Evaluación básica de riesgos",
+      "Visualización de clasificación",
+      "Sin generación de documentos",
+      "Soporte community",
     ],
     ctaText: "Empezar Gratis",
     popular: false,
@@ -34,36 +36,39 @@ const pricingTiers = [
     stripePriceIdYearly: "",
   },
   {
-    name: "Professional",
+    name: "PRO",
     monthlyPrice: 99,
     yearlyPrice: 990,
+    description: "Para pequeñas empresas",
     features: [
       "Hasta 5 sistemas de IA",
-      "3 usuarios de empresa",
-      "Evaluación de riesgos completa",
-      "Generación de FRIA automatizada",
-      "Registro de sistemas",
-      "Soporte prioritario",
+      "3 usuarios",
+      "Evaluación completa de riesgos",
+      "Generación FRIA básica",
+      "10 documentos/mes",
       "Exportación PDF/DOCX",
+      "Soporte por email",
     ],
     ctaText: "Suscribirse",
     popular: true,
-    stripePriceIdMonthly: "price_professional_monthly",
-    stripePriceIdYearly: "price_professional_yearly",
+    stripePriceIdMonthly: "price_pro_monthly",
+    stripePriceIdYearly: "price_pro_yearly",
   },
   {
     name: "Business",
-    monthlyPrice: 299,
-    yearlyPrice: 2990,
+    monthlyPrice: 239,
+    yearlyPrice: 2390,
+    description: "Para empresas en crecimiento",
     features: [
       "Hasta 15 sistemas de IA",
-      "10 usuarios de empresa",
-      "Todo lo de Professional",
+      "10 usuarios",
+      "FRIA completa Art. 27",
+      "Documentos ilimitados",
       "Gestión multi-departamento",
       "API access",
       "Integraciones (Slack, Teams)",
-      "Onboarding personalizado",
-      "Soporte dedicado",
+      "Plantillas personalizadas",
+      "Soporte prioritario",
     ],
     ctaText: "Suscribirse",
     popular: false,
@@ -74,15 +79,17 @@ const pricingTiers = [
     name: "Enterprise",
     monthlyPrice: 0,
     yearlyPrice: 0,
+    description: "Para grandes organizaciones",
     features: [
       "Sistemas de IA ilimitados",
       "Usuarios ilimitados",
       "Todo lo de Business",
-      "Despliegue On-premise / Cloud privado",
-      "SSO y control de accesos avanzado",
+      "On-premise / Cloud privado",
+      "SSO y control de accesos",
       "Auditorías y certificaciones",
       "SLA garantizado 99.9%",
       "Account Manager dedicado",
+      "Integraciones custom",
     ],
     ctaText: "Contactar Ventas",
     popular: false,
@@ -97,11 +104,11 @@ export default function PricingPage() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-4">
-            Planes para Empresas
+            Planes para cada etapa
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Soluciones de cumplimiento AI Act diseñadas para empresas de cualquier tamaño. 
-            Gestiona tus sistemas de IA y cumple con el Reglamento Europeo.
+            Desde pruebas gratuitas hasta soluciones enterprise. 
+            Cumple con el AI Act sin comprometer tu presupuesto.
           </p>
         </div>
 
@@ -110,6 +117,7 @@ export default function PricingPage() {
             <PricingCard
               key={tier.name}
               name={tier.name}
+              description={tier.description}
               monthlyPrice={tier.monthlyPrice}
               yearlyPrice={tier.yearlyPrice}
               features={tier.features}
@@ -119,6 +127,82 @@ export default function PricingPage() {
               stripePriceIdYearly={tier.stripePriceIdYearly}
             />
           ))}
+        </div>
+
+        {/* Feature Comparison */}
+        <div className="mt-20 max-w-6xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-8">Comparativa de funciones</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-4 px-4 font-medium">Función</th>
+                  <th className="text-center py-4 px-4 font-medium">Free</th>
+                  <th className="text-center py-4 px-4 font-medium text-blue-600">PRO</th>
+                  <th className="text-center py-4 px-4 font-medium">Business</th>
+                  <th className="text-center py-4 px-4 font-medium">Enterprise</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Sistemas de IA</td>
+                  <td className="text-center py-3 px-4">1</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">5</td>
+                  <td className="text-center py-3 px-4">15</td>
+                  <td className="text-center py-3 px-4">Ilimitados</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Usuarios</td>
+                  <td className="text-center py-3 px-4">1</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">3</td>
+                  <td className="text-center py-3 px-4">10</td>
+                  <td className="text-center py-3 px-4">Ilimitados</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Documentos/mes</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">10</td>
+                  <td className="text-center py-3 px-4">Ilimitados</td>
+                  <td className="text-center py-3 px-4">Ilimitados</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">FRIA (Art. 27)</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">Básica</td>
+                  <td className="text-center py-3 px-4">Completa</td>
+                  <td className="text-center py-3 px-4">Completa</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">API Access</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Integraciones</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">Custom</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Multi-departamento</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Soporte</td>
+                  <td className="text-center py-3 px-4">Community</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">Email</td>
+                  <td className="text-center py-3 px-4">Prioritario</td>
+                  <td className="text-center py-3 px-4">Dedicado</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="mt-16 max-w-3xl mx-auto bg-muted/30 rounded-lg p-6">

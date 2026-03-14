@@ -87,7 +87,7 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm sm:max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center text-green-600">¡Registro Exitoso!</CardTitle>
           <CardDescription className="text-center">
@@ -104,7 +104,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm sm:max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
         <CardDescription className="text-center">

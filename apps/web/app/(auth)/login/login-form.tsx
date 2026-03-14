@@ -66,7 +66,7 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm sm:max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
         <CardDescription className="text-center">

@@ -102,7 +102,7 @@ export default function BlogQueEsAIActPage() {
         </section>
 
         {/* Content */}
-        <article className="py-12 bg-white">
+        <article className="py-12 sm:py-16 lg:py-20 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto prose prose-lg max-w-none">
               
