@@ -62,10 +62,16 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
         ? `?sector=${encodeURIComponent(selectedSector)}` 
         : '';
       const response = await fetch(`/api/catalog${params}`);
-      if (!response.ok) throw new Error('Error loading suggestions');
+      if (!response.ok) {
+        console.error('API error:', response.status, response.statusText);
+        throw new Error('Error loading suggestions');
+      }
       const data = await response.json();
+      console.log('Catalog API response:', data);
       // API returns { catalog: [...] } or directly [...]
-      setSuggestions(data.catalog || data || []);
+      const items = data.catalog || data || [];
+      console.log('Loaded suggestions:', items.length, items);
+      setSuggestions(items);
     } catch (error) {
       console.error('Error loading suggestions:', error);
       setSuggestions([]);
@@ -90,6 +96,7 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
   }
 
   if (suggestions.length === 0) {
+    console.log('No suggestions to display');
     return null;
   }
 
