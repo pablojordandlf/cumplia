@@ -1,12 +1,238 @@
-{# Jinja2 template for AI Policy
-# This is a placeholder. Actual content will be more detailed.
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>AI Policy</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Uso de IA - {{ organization.name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1e40af;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo-placeholder {
+            width: 120px;
+            height: 60px;
+            background: #f3f4f6;
+            border: 2px dashed #d1d5db;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 10pt;
+        }
+        .header h1 {
+            font-size: 20pt;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        .header .company {
+            font-size: 14pt;
+            font-weight: 600;
+            color: #374151;
+        }
+        .header .meta {
+            font-size: 10pt;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+        h2 {
+            font-size: 14pt;
+            color: #1e40af;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        h3 {
+            font-size: 12pt;
+            color: #374151;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        .use-case {
+            background: #f9fafb;
+            border-left: 4px solid #1e40af;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .use-case h4 {
+            font-size: 11pt;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+        .use-case-meta {
+            font-size: 10pt;
+            color: #6b7280;
+        }
+        .risk-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 9pt;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .risk-high { background: #fecaca; color: #991b1b; }
+        .risk-limited { background: #fed7aa; color: #9a3412; }
+        .risk-minimal { background: #bbf7d0; color: #166534; }
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .signature-section {
+            margin-top: 50px;
+            page-break-inside: avoid;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 60%;
+            margin-top: 60px;
+            padding-top: 10px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 9pt;
+            color: #6b7280;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>AI Policy for {{ organization_name }}</h1>
-    <p>Content related to AI usage policies.</p>
+    <div class="header">
+        <div class="logo-placeholder">LOGO EMPRESA</div>
+        <h1>Política de Uso de Inteligencia Artificial</h1>
+        <div class="company">{{ organization.name }}</div>
+        <div class="meta">
+            Versión 1.0 | Fecha: {{ generated_date }} | Sector: {{ organization.sector or "No especificado" }}
+        </div>
+    </div>
+
+    <h2>1. Objeto y Ámbito</h2>
+    <p>
+        Esta política regula el uso de sistemas de inteligencia artificial en <strong>{{ organization.name }}</strong>, 
+        en cumplimiento del Reglamento (UE) 2024/1689 (AI Act) y sus disposiciones aplicables.
+    </p>
+    <p>
+        El presente documento establece los principios, responsabilidades y procedimientos para el uso ético, 
+        seguro y conforme a la normativa de los sistemas de IA en nuestra organización.
+    </p>
+
+    <h2>2. Sistemas de IA en Uso</h2>
+    <p>La organización utiliza los siguientes sistemas de inteligencia artificial:</p>
+    
+    {% for uc in use_cases %}
+    <div class="use-case">
+        <h4>2.{{ loop.index }}. {{ uc.name }}</h4>
+        <div class="use-case-meta">
+            <strong>Proveedor:</strong> {{ uc.tool_provider or "No especificado" }} | 
+            <strong>Herramienta:</strong> {{ uc.tool_name or "No especificado" }} | 
+            <strong>Departamento:</strong> {{ uc.department or "No especificado" }}
+        </div>
+        <div style="margin-top: 10px;">
+            <strong>Clasificación de riesgo:</strong> 
+            <span class="risk-badge risk-{{ uc.risk_classification }}">
+                {{ uc.risk_classification | upper }}
+            </span>
+            {% if uc.risk_classification == 'high' %}
+            <p style="margin-top: 10px; color: #991b1b;">
+                <strong>Responsable de supervisión:</strong> _______________________
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <h2>3. Obligaciones y Compromisos</h2>
+    <p>De conformidad con el AI Act, {{ organization.name }} se compromete a:</p>
+    <ul>
+        {% for uc in use_cases %}
+            {% if uc.obligations_summary %}
+                {% for obligation in uc.obligations_summary %}
+                <li>{{ obligation }}</li>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+        <li>Garantizar la transparencia en el uso de sistemas de IA</li>
+        <li>Respetar los derechos fundamentales de los usuarios y afectados</li>
+        <li>Mantener un registro actualizado de todos los sistemas de IA utilizados</li>
+        <li>Realizar evaluaciones de impacto cuando sea requerido</li>
+        <li>Cooperar con las autoridades de supervisión competentes</li>
+    </ul>
+
+    <h2>4. Formación y Alfabetización en IA</h2>
+    <p>
+        De conformidad con el <strong>Artículo 4 del AI Act</strong>, {{ organization.name }} garantiza que 
+        todos los empleados que usen sistemas de IA reciban formación adecuada sobre su funcionamiento, 
+        limitaciones y riesgos potenciales.
+    </p>
+    <p>
+        La organización implementará programas de formación periódicos para asegurar una comprensión 
+        adecuada de las capacidades y limitaciones de los sistemas de IA empleados.
+    </p>
+
+    <h2>5. Revisión y Actualización</h2>
+    <p>
+        Esta política será revisada <strong>anualmente</strong> o cuando se incorporen nuevos sistemas de IA 
+        a la organización, o cuando se produzcan cambios significativos en la normativa aplicable.
+    </p>
+    <p>
+        Cualquier modificación de esta política será comunicada a todo el personal y se registrará 
+        en el sistema de gestión documental de la organización.
+    </p>
+
+    <div class="signature-section">
+        <h2>6. Aprobación y Firma</h2>
+        <p>Esta política ha sido aprobada por la dirección de {{ organization.name }}.</p>
+        
+        <div style="margin-top: 40px;">
+            <div style="float: left; width: 45%;">
+                <div class="signature-line">
+                    <strong>Firma del Responsable</strong><br>
+                    Nombre: _______________________<br>
+                    Cargo: ________________________
+                </div>
+            </div>
+            <div style="float: right; width: 45%;">
+                <div class="signature-line">
+                    <strong>Fecha de Aprobación</strong><br>
+                    ____ / ____ / ________
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="clear: both;"></div>
+
+    <div class="footer">
+        <p>Documento generado automáticamente por Cumplia AI | Cumplimiento AI Act UE 2024/1689</p>
+        <p>{{ organization.name }} | {{ generated_date }}</p>
+    </div>
 </body>
 </html>

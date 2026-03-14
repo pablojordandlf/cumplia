@@ -1,12 +1,337 @@
-{# Jinja2 template for FRIYA (Future Requires Impact Assessment)
-# This is a placeholder. Actual content will be more detailed.
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Friya Documentation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRIA - {{ use_case.name }} - {{ organization.name }}</title>
+    <style>
+        @page { size: A4; margin: 2cm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #dc2626;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        .header .badge {
+            display: inline-block;
+            background: #dc2626;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 10pt;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 16pt;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .header .subtitle {
+            font-size: 12pt;
+            color: #dc2626;
+            font-weight: 600;
+        }
+        .header .company {
+            font-size: 11pt;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+        .warning-box {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning-box h2 {
+            color: #991b1b;
+            font-size: 12pt;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 13pt;
+            color: #1e40af;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        h3 {
+            font-size: 11pt;
+            color: #374151;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .section-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .question-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-left: 4px solid #3b82f6;
+        }
+        .question-item .q {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+        .question-item .a {
+            color: #374151;
+            padding-left: 15px;
+        }
+        .risk-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .risk-matrix th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #d1d5db;
+        }
+        .risk-matrix td {
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        .risk-matrix tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        .high-risk { background: #fecaca; color: #991b1b; font-weight: 600; }
+        .measures-list {
+            margin: 15px 0;
+        }
+        .measures-list li {
+            margin: 10px 0;
+            padding: 10px;
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            list-style: none;
+        }
+        .approval-box {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .approval-box h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .signature-block {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            font-size: 9pt;
+            color: #6b7280;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>High-Risk AI Systems Documentation (Friya)</h1>
-    <p>Documentation for systems requiring a prior conformity assessment.</p>
+    <div class="header">
+        <div class="badge">ARTÍCULO 27 AI ACT</div>
+        <h1>Evaluación de Impacto en Derechos Fundamentales</h1>
+        <div class="subtitle">Fundamental Rights Impact Assessment (FRIA)</div>
+        <div class="company">{{ organization.name }} | {{ use_case.name }}</div>
+    </div>
+
+    <div class="warning-box">
+        <h2>⚠️ Sistema de Alto Riesgo</h2>
+        <p>
+            Este sistema de IA ha sido clasificado como <strong>ALTO RIESGO</strong> conforme al 
+            Reglamento (UE) 2024/1689. La presente evaluación es obligatoria antes de su despliegue 
+            conforme al Artículo 27 del AI Act.
+        </p>
+    </div>
+
+    <div class="section-box">
+        <h3>Información del Sistema Evaluado</h3>
+        <table style="width: 100%; margin-top: 10px;">
+            <tr>
+                <td style="width: 30%; font-weight: 600;">Nombre del sistema:</td>
+                <td>{{ use_case.name }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Herramienta:</td>
+                <td>{{ use_case.tool_name or "No especificado" }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Proveedor:</td>
+                <td>{{ use_case.tool_provider or "No especificado" }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Departamento:</td>
+                <td>{{ use_case.department or "No especificado" }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Clasificación:</td>
+                <td class="high-risk" style="display: inline-block; padding: 3px 10px; border-radius: 4px;">
+                    ALTO RIESGO
+                </td>
+            </tr>
+            <tr>
+                <td style="font-weight: 600;">Fecha evaluación:</td>
+                <td>{{ generated_date }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>1. Propósito y Contexto de Uso</h2>
+    <div class="section-box">
+        <p><strong>Descripción del sistema:</strong></p>
+        <p>{{ use_case.description or "No se ha proporcionado descripción." }}</p>
+        
+        <p style="margin-top: 15px;"><strong>Propósito previsto:</strong></p>
+        <p>{{ use_case.purpose or "No especificado." }}</p>
+    </div>
+
+    <h2>2. Evaluación de Riesgos para Derechos Fundamentales</h2>
+    
+    {% if questionnaire_answers %}
+    <div class="section-box">
+        {% for qa in questionnaire_answers %}
+        <div class="question-item">
+            <div class="q">{{ loop.index }}. {{ qa.question }}</div>
+            <div class="a">{{ qa.answer or "No respondida" }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="section-box">
+        <p style="color: #6b7280;">No hay respuestas al cuestionario registradas.</p>
+    </div>
+    {% endif %}
+
+    <h2>3. Análisis de Impacto</h2>
+    
+    <table class="risk-matrix">
+        <thead>
+            <tr>
+                <th>Derecho Afectado</th>
+                <th>Nivel de Impacto</th>
+                <th>Probabilidad</th>
+                <th>Medidas Mitigadoras</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Privacidad y protección de datos</td>
+                <td class="high-risk">Alto</td>
+                <td>Media</td>
+                <td>Anonimización, minimización de datos</td>
+            </tr>
+            <tr>
+                <td>No discriminación</td>
+                <td class="high-risk">Alto</td>
+                <td>Media-Alta</td>
+                <td>Auditorías de sesgo, datasets diversos</td>
+            </tr>
+            <tr>
+                <td>Libertad de expresión</td>
+                <td>Medio</td>
+                <td>Baja</td>
+                <td>Supervisión humana significativa</td>
+            </tr>
+            <tr>
+                <td>Acceso a la justicia</td>
+                <td>Medio</td>
+                <td>Media</td>
+                <td>Derecho a explicación, revisión humana</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. Medidas de Mitigación Implementadas</h2>
+    <ul class="measures-list">
+        {% if use_case.obligations_summary %}
+            {% for obligation in use_case.obligations_summary %}
+            <li>{{ obligation }}</li>
+            {% endfor %}
+        {% endif %}
+        <li>✅ Supervisión humana significativa en todas las decisiones automatizadas</li>
+        <li>✅ Sistema de logging y trazabilidad de decisiones</li>
+        <li>✅ Mecanismo de revisión y apelación de decisiones</li>
+        <li>✅ Formación obligatoria para operadores del sistema</li>
+        <li>✅ Evaluación periódica de sesgo y discriminación</li>
+    </ul>
+
+    <h2>5. Conclusión y Dictamen</h2>
+    <div class="section-box">
+        <p>
+            Tras la evaluación realizada, se determina que el sistema <strong>{{ use_case.name }}</strong> 
+            puede desplegarse con las medidas de mitigación establecidas, siempre y cuando:
+        </p>
+        <ul style="margin: 15px 0 15px 20px;">
+            <li>Se mantenga la supervisión humana significativa en todo momento</li>
+            <li>Se cumplan las obligaciones de transparencia establecidas en el Art. 13</li>
+            <li>Se realicen auditorías trimestrales de sesgo</li>
+            <li>Se garantice el derecho a explicación de decisiones automatizadas</li>
+        </ul>
+        <p>
+            <strong>Dictamen:</strong> 
+            {% if use_case.risk_classification == 'high' %}
+            ✅ <span style="color: #166534;">APTO PARA DESPLIEGUE CON MEDIDAS</span>
+            {% else %}
+            ⚠️ Se requiere revisión adicional
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="approval-box">
+        <h3>✍️ Aprobación de la Evaluación</h3>
+        <p>
+            Los abajo firmantes certifican que han revisado esta evaluación de impacto y 
+            aprueban el despliegue del sistema con las medidas de mitigación establecidas.
+        </p>
+        
+        <div style="margin-top: 30px;">
+            <div style="border-top: 1px solid #333; width: 45%; display: inline-block; padding-top: 10px; margin-right: 5%;">
+                <strong>Responsable de Cumplimiento</strong><br>
+                Nombre: _______________________<br>
+                Firma: _______________________<br>
+                Fecha: ____ / ____ / ________
+            </div>
+            <div style="border-top: 1px solid #333; width: 45%; display: inline-block; padding-top: 10px;">
+                <strong>Representante Legal</strong><br>
+                Nombre: _______________________<br>
+                Firma: _______________________<br>
+                Fecha: ____ / ____ / ________
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>FRIA generada por Cumplia AI | Cumplimiento AI Act UE 2024/1689 - Artículo 27</p>
+        <p>{{ organization.name }} | {{ use_case.name }} | {{ generated_date }}</p>
+        <p style="margin-top: 10px; font-size: 8pt;">
+            Esta evaluación debe revisarse anualmente o cuando se produzcan cambios significativos en el sistema.
+        </p>
+    </div>
 </body>
 </html>

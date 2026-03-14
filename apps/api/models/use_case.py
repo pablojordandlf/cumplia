@@ -31,4 +31,7 @@ class UseCase(Base):
 
     # Optional: Define relationship if UseCaseCatalog is in the same module and Base is defined
     # catalog = relationship("UseCaseCatalog", backref="use_cases")
+    
+    # Relationships
+    documents = relationship("Document", back_populates="use_case")
 

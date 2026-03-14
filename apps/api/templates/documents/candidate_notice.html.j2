@@ -1,12 +1,306 @@
-{# Jinja2 template for Candidate Notice
-# This is a placeholder. Actual content will be more detailed.
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Candidate Notice</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso de IA en Procesos de Selección - {{ organization.name }}</title>
+    <style>
+        @page { size: A4; margin: 2cm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #7c3aed;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 16pt;
+            color: #7c3aed;
+            margin-bottom: 10px;
+        }
+        .header .company {
+            font-size: 14pt;
+            font-weight: 600;
+            color: #374151;
+        }
+        .candidate-notice {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border: 2px solid #7c3aed;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        .candidate-notice h2 {
+            color: #5b21b6;
+            font-size: 14pt;
+            margin-bottom: 15px;
+        }
+        .candidate-notice p {
+            color: #6b21a8;
+            font-size: 12pt;
+        }
+        h2 {
+            font-size: 13pt;
+            color: #7c3aed;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        .system-warning {
+            background: #fef3c7;
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .system-warning h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        .risk-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 10pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #fecaca;
+            color: #991b1b;
+        }
+        .rights-box {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .rights-box h3 {
+            color: #065f46;
+            margin-bottom: 15px;
+        }
+        .rights-list {
+            list-style: none;
+            padding: 0;
+        }
+        .rights-list li {
+            padding: 10px 0 10px 35px;
+            position: relative;
+            border-bottom: 1px dashed #d1fae5;
+        }
+        .rights-list li:last-child {
+            border-bottom: none;
+        }
+        .rights-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 14pt;
+        }
+        .process-flow {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .process-step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .step-number {
+            background: #7c3aed;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .contact-section {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .contact-section h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 9pt;
+            color: #6b7280;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Candidate Notice</h1>
-    <p>Notice for candidates regarding AI in recruitment.</p>
+    <div class="header">
+        <h1>📢 Aviso de Uso de IA en Procesos de Selección</h1>
+        <div class="company">{{ organization.name }}</div>
+        <div style="font-size: 10pt; color: #6b7280; margin-top: 10px;">
+            Información para candidatos conforme al AI Act
+        </div>
+    </div>
+
+    <div class="candidate-notice">
+        <h2>🎯 Información Importante para Candidatos</h2>
+        <p>
+            En {{ organization.name }} utilizamos sistemas de inteligencia artificial 
+            en nuestros procesos de selección. Este documento le informa sobre cómo 
+            se utilizan estos sistemas y cuáles son sus derechos.
+        </p>
+    </div>
+
+    <h2>Sistemas de IA Utilizados en Selección</h2>
+    
+    {% for uc in use_cases %}
+    <div class="system-warning">
+        <h3>⚠️ {{ uc.name }}</h3>
+        <p><strong>Herramienta:</strong> {{ uc.tool_name or "No especificado" }}</p>
+        <p><strong>Proveedor:</strong> {{ uc.tool_provider or "No especificado" }}</p>
+        <p style="margin-top: 10px;">
+            <strong>Clasificación de riesgo:</strong> 
+            <span class="risk-badge">Alto Riesgo</span>
+        </p>
+        <p style="margin-top: 10px;">
+            <strong>Propósito:</strong> {{ uc.description or "Evaluación de candidatos" }}
+        </p>
+    </div>
+    {% endfor %}
+
+    <h2>Sus Derechos como Candidato</h2>
+    
+    <div class="rights-box">
+        <h3>✅ Derechos Garantizados por el AI Act</h3>
+        <ul class="rights-list">
+            <li>
+                <strong>Transparencia:</strong> Ser informado de que se utiliza IA en la evaluación
+            </li>
+            <li>
+                <strong>Explicación:</strong> Solicitar explicaciones sobre decisiones automatizadas
+            </li>
+            <li>
+                <strong>Revisión humana:</strong> Solicitar que una persona revise su caso
+            </li>
+            <li>
+                <strong>No discriminación:</strong> Ser evaluado de forma equitativa sin sesgos
+            </li>
+            <li>
+                <strong>Privacidad:</strong> Protección de sus datos personales conforme al RGPD
+            </li>
+            <li>
+                <strong>Rectificación:</strong> Corregir datos incorrectos utilizados en la evaluación
+            </li>
+            <li>
+                <strong>Oposición:</strong> Oponerse al tratamiento automatizado de sus datos
+            </li>
+            <li>
+                <strong>Reclamación:</strong> Presentar reclamaciones ante la AEPD
+            </li>
+        </ul>
+    </div>
+
+    <h2>Cómo Funciona el Proceso</h2>
+    
+    <div class="process-flow">
+        <div class="process-step">
+            <div class="step-number">1</div>
+            <div>
+                <strong>Recepción de candidatura</strong><br>
+                Su CV y datos son recibidos por nuestro sistema.
+            </div>
+        </div>
+        <div class="process-step">
+            <div class="step-number">2</div>
+            <div>
+                <strong>Evaluación asistida por IA</strong><br>
+                El sistema analiza su perfil comparándolo con los requisitos del puesto.
+            </div>
+        </div>
+        <div class="process-step">
+            <div class="step-number">3</div>
+            <div>
+                <strong>Revisión humana</strong><br>
+                Un reclutador humano revisa todas las evaluaciones antes de tomar decisiones.
+            </div>
+        </div>
+        <div class="process-step">
+            <div class="step-number">4</div>
+            <div>
+                <strong>Decisión final</strong><br>
+                La decisión se comunica al candidato con explicación si se solicita.
+            </div>
+        </div>
+    </div>
+
+    <h2>Compromisos de {{ organization.name }}</h2>
+    <p>
+        Nos comprometemos a:
+    </p>
+    <ul style="margin: 15px 0 15px 20px;">
+        <li>Mantener supervisión humana significativa en todas las decisiones</li>
+        <li>Realizar auditorías periódicas para detectar sesgos</li>
+        <li>Garantizar la transparencia en el uso de IA</li>
+        <li>Proteger sus datos conforme al RGPD</li>
+        <li>Proporcionar explicaciones cuando se soliciten</li>
+        <li>No utilizar sistemas de puntuación que no puedan explicarse</li>
+    </ul>
+
+    <div class="contact-section">
+        <h3>📞 ¿Tiene Preguntas?</h3>
+        <p>
+            Si tiene alguna duda sobre el uso de IA en nuestros procesos de selección, 
+            puede contactar con nosotros:
+        </p>
+        <div style="margin-top: 15px;">
+            <p><strong>Departamento de Selección:</strong> _______________________</p>
+            <p><strong>Email:</strong> _______________________</p>
+            <p><strong>Teléfono:</strong> _______________________</p>
+            <p><strong>Delegado de Protección de Datos:</strong> dpo@{{ organization.name.lower().replace(' ', '') }}.com</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; padding: 20px; background: #f3f4f6; border-radius: 8px;">
+        <h3>📋 Reconocimiento de Lectura</h3>
+        <p style="font-size: 10pt;">
+            He leído y comprendido la información sobre el uso de sistemas de inteligencia 
+            artificial en el proceso de selección de {{ organization.name }}.
+        </p>
+        <div style="margin-top: 20px; border-top: 1px solid #333; width: 50%; padding-top: 10px;">
+            <strong>Firma del Candidato</strong><br>
+            Nombre: _______________________<br>
+            Fecha: ____ / ____ / ________
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Documento generado por Cumplia AI | Cumplimiento AI Act UE 2024/1689</p>
+        <p>{{ organization.name }} | {{ generated_date }}</p>
+        <p style="margin-top: 10px; font-size: 8pt;">
+            Este aviso debe proporcionarse a todos los candidatos antes de su evaluación.
+        </p>
+    </div>
 </body>
 </html>

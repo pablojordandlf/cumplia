@@ -9,3 +9,10 @@ pyjwt
 python-jose[cryptography]
 python-multipart
 email-validator
+
+# Document generation
+weasyprint
+python-docx
+jinja2
+supabase
+

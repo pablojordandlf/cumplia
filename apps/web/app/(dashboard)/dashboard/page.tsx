@@ -168,6 +168,12 @@ export default function DashboardPage() {
             <h1 className="text-xl font-bold text-gray-900">CumplIA</h1>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/dashboard/documents">
+              <Button variant="ghost" size="sm">
+                <FileText className="w-4 h-4 mr-2" />
+                Documentos
+              </Button>
+            </Link>
             <Link href="/dashboard/inventory">
               <Button variant="ghost" size="sm">
                 <ClipboardList className="w-4 h-4 mr-2" />
