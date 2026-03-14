@@ -50,6 +50,11 @@ export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCa
     setShowAll(false); // Reset when sector changes
   }, [selectedSector]);
 
+  // Cargar sugerencias al montar el componente (para mostrar globales inicialmente)
+  useEffect(() => {
+    loadSuggestions();
+  }, []);
+
   const loadSuggestions = async () => {
     setIsLoading(true);
     try {

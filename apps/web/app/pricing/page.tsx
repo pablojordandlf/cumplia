@@ -1,4 +1,20 @@
 import { PricingCard } from "@/components/pricing-card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Planes y Precios - CumplIA",
+  description: "Elige el plan perfecto para cumplir con el AI Act. Desde gratis hasta Enterprise. Incluye evaluación de riesgos, documentación legal y monitoreo de sistemas de IA.",
+  keywords: ["precios AI Act", "planes cumplimiento IA", "software cumplimiento AI Act", "coste auditoría IA", "precio FRIA"],
+  alternates: {
+    canonical: "https://cumplia.com/pricing",
+  },
+  openGraph: {
+    title: "Planes y Precios - CumplIA",
+    description: "Desde gratis hasta Enterprise. Cumple con el AI Act sin complicaciones.",
+    url: "https://cumplia.com/pricing",
+    type: "website",
+  },
+};
 
 const pricingTiers = [
   {
