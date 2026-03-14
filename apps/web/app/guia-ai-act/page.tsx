@@ -311,33 +311,33 @@ function RiskClassificationSection() {
 function TimelineSection() {
   const milestones = [
     {
-      date: 'Agosto 2024',
-      title: 'Entrada en vigor del AI Act',
-      description: 'El reglamento se publica en el Diario Oficial de la UE y entra en vigor 20 días después.',
+      date: '2 agosto 2024',
+      title: 'Publicación y entrada en vigor',
+      description: 'El reglamento (Reglamento 2024/1689) se publica y entra en vigor.',
       completed: true,
     },
     {
-      date: 'Febrero 2025',
-      title: 'Prohibiciones aplicables',
-      description: 'Entran en vigor las prohibiciones sobre sistemas de IA inaceptables.',
+      date: '2 febrero 2025',
+      title: 'Prohibiciones (Art. 5) y Códigos de práctica GPAI',
+      description: 'Entran en vigor las prohibiciones del Artículo 5 y los códigos de práctica para IA Generativa.',
       completed: false,
     },
     {
-      date: 'Agosto 2025',
-      title: 'Obligaciones para modelos de IA general',
-      description: 'Requisitos para modelos de IA general (GPAI) y códigos de práctica.',
+      date: '2 agosto 2025',
+      title: 'Obligaciones GPAI y Sistemas de IA General con Riesgo Sistémico',
+      description: 'Aplican obligaciones del Capítulo III para GPAI, sistemas de IA general con riesgo sistémico y notificación de incidentes.',
       completed: false,
     },
     {
-      date: 'Agosto 2026',
-      title: 'Aplicación completa del AI Act',
-      description: 'Entran en vigor todas las obligaciones para sistemas de alto riesgo.',
+      date: '2 agosto 2026',
+      title: 'Obligaciones Sistemas ALTO RIESGO',
+      description: 'Aplican obligaciones para sistemas de alto riesgo (Anexos II y III), FRIA, sistema de calidad y documentación técnica.',
       completed: false,
     },
     {
-      date: 'Agosto 2027',
-      title: 'Obligaciones para sistemas existentes',
-      description: 'Los sistemas de alto riesgo ya en el mercado deben cumplir el AI Act.',
+      date: '2 agosto 2027',
+      title: 'Cumplimiento de sistemas alto riesgo ya en el mercado',
+      description: 'Los sistemas de alto riesgo ya existentes en el mercado deben cumplir con el Reglamento AI Act.',
       completed: false,
     },
   ];
