@@ -332,6 +332,116 @@ function PricingSection() {
   );
 }
 
+// Timeline Section
+function TimelineSection() {
+  const milestones = [
+    {
+      date: '2 ago 2024',
+      title: 'Publicación y entrada en vigor',
+      description: 'El Reglamento 2024/1689 se publica y entra en vigor oficialmente.',
+      completed: true,
+      color: 'bg-green-500'
+    },
+    {
+      date: '2 feb 2025',
+      title: 'Prohibiciones activas',
+      description: 'Entran en vigor las prohibiciones del Art. 5 y códigos de práctica GPAI.',
+      completed: true,
+      color: 'bg-red-500'
+    },
+    {
+      date: '2 ago 2025',
+      title: 'Obligaciones GPAI',
+      description: 'Aplican obligaciones del Capítulo III para IA General y riesgo sistémico.',
+      completed: false,
+      color: 'bg-orange-500'
+    },
+    {
+      date: '2 ago 2026',
+      title: 'Sistemas de Alto Riesgo',
+      description: 'Obligaciones completas para sistemas alto riesgo (Anexos II y III).',
+      completed: false,
+      color: 'bg-blue-500'
+    },
+    {
+      date: '2 ago 2027',
+      title: 'Sistemas existentes',
+      description: 'Los sistemas alto riesgo ya en el mercado deben cumplir.',
+      completed: false,
+      color: 'bg-purple-500'
+    }
+  ];
+
+  return (
+    <section id="timeline" className="py-12 sm:py-20 bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+            Calendario de Aplicación del AI Act
+          </h2>
+          <p className="text-base sm:text-lg text-gray-600">
+            El Reglamento de IA de la UE se aplica progresivamente. 
+            Conoce las fechas clave para planificar el cumplimiento de tu empresa.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          <div className="relative">
+            {/* Línea vertical */}
+            <div className="absolute left-4 sm:left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+            
+            {milestones.map((milestone, index) => (
+              <div key={index} className="relative flex items-start mb-8 last:mb-0">
+                {/* Punto del timeline */}
+                <div className={`relative z-10 flex-shrink-0 w-8 h-8 sm:w-16 sm:h-16 rounded-full ${milestone.color} flex items-center justify-center shadow-lg`}>
+                  {milestone.completed ? (
+                    <CheckCircle className="w-4 h-4 sm:w-8 sm:h-8 text-white" />
+                  ) : (
+                    <span className="text-white text-xs sm:text-sm font-bold">{index + 1}</span>
+                  )}
+                </div>
+                
+                {/* Contenido */}
+                <div className="ml-4 sm:ml-8 flex-1 bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-transparent hover:border-blue-500 transition-all">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                    <span className="inline-block px-3 py-1 text-xs sm:text-sm font-semibold text-blue-700 bg-blue-100 rounded-full mb-2 sm:mb-0">
+                      {milestone.date}
+                    </span>
+                    {milestone.completed && (
+                      <span className="text-xs text-green-600 font-medium flex items-center">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Completado
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                    {milestone.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-600">
+                    {milestone.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-sm text-gray-500 mb-4">
+              ¿Necesitas ayuda para cumplir con estas fechas?
+            </p>
+            <Link href="/register">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                Empieza tu evaluación gratuita
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // FAQ Section
 function FAQSection() {
   const faqs = [
@@ -446,6 +556,7 @@ export default function LandingPage() {
       <FeaturesSection />
       <BenefitsSection />
       <PricingSection />
+      <TimelineSection />
       <FAQSection />
       <Footer />
     </main>
