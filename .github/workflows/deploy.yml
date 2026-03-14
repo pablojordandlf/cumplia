@@ -3,7 +3,8 @@ name: Deploy to Vercel
 on:
   push:
     branches:
-      - main # Or your default branch
+      - main
+      - master
 
 jobs:
   deploy:
@@ -36,7 +37,7 @@ jobs:
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          project-name: cumprlia # Replace with your Vercel project name
+          project-name: cumplia
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           # Add any environment variables needed for deployment
