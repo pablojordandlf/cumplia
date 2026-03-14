@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface JsonLdProps {
-  type: 'Organization' | 'SoftwareApplication' | 'FAQPage' | 'Article' | 'Product' | 'Service';
+  type: 'Organization' | 'SoftwareApplication' | 'FAQPage' | 'Article' | 'Product' | 'Service' | 'BreadcrumbList';
   data: Record<string, unknown>;
 }
 
