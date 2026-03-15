@@ -190,13 +190,13 @@ export class PlanGate {
 
   getUpgradeMessage(feature: string): string {
     const messages: Record<string, string> = {
-      use_cases: `Has alcanzado el límite de ${this.plan.features.use_cases} sistemas de IA. Actualiza a PRO para gestionar hasta 5 sistemas.`,
-      documents: `Has alcanzado el límite de ${this.plan.features.documents} documentos. Actualiza a Business para documentación ilimitada.`,
-      fria: 'La generación de FRIA completa requiere un plan PRO o superior.',
-      api: 'El acceso a API requiere un plan Business o superior.',
-      integrations: 'Las integraciones requieren un plan Business o superior.',
-      custom_templates: 'Las plantillas personalizadas requieren un plan Business o superior.',
-      multi_department: 'La gestión multi-departamento requiere un plan Business o superior.',
+      use_cases: `Has alcanzado el límite de ${this.plan.features.use_cases} casos de uso. Actualiza a Essential para gestionar hasta 5 casos de uso.`,
+      documents: `Has alcanzado el límite de ${this.plan.features.documents} documentos. Actualiza a Professional para documentación ilimitada.`,
+      fria: 'La generación de FRIA completa requiere un plan Essential o superior.',
+      api: 'El acceso a API requiere un plan Professional o superior.',
+      integrations: 'Las integraciones requieren un plan Professional o superior.',
+      custom_templates: 'Las plantillas personalizadas requieren un plan Professional o superior.',
+      multi_department: 'La gestión multi-departamento requiere un plan Professional o superior.',
     };
     return messages[feature] || 'Esta función requiere un plan superior.';
   }

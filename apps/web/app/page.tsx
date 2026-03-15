@@ -12,99 +12,82 @@ import {
   AlertCircle,
   TrendingDown,
   Users,
-  ArrowRight
+  ArrowRight,
+  Lightbulb,
+  Calculator
 } from 'lucide-react';
 import { Header } from '@/components/landing-header';
 
 export const metadata = {
   title: 'CumplIA - Cumplimiento del AI Act para Empresas',
-  description: 'Plataforma SaaS que ayuda a empresas a cumplir con el Reglamento de IA de la UE (AI Act). Evaluación de riesgos, documentación y monitoreo continuo.',
-  keywords: 'AI Act, cumplimiento IA, regulación inteligencia artificial, IA responsable, GDPR, sistemas de IA',
+  description: 'Plataforma SaaS que ayuda a empresas a cumplir con el Reglamento de IA de la UE (AI Act). Evaluación de riesgos, documentación y monitoreo continuo para tus casos de uso de IA.',
+  keywords: 'AI Act, cumplimiento IA, regulación inteligencia artificial, IA responsable, GDPR, casos de uso IA',
 };
 
-// Hero Section
 function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white py-12 sm:py-20 lg:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
+            <Lightbulb className="h-4 w-4" />
+            Ahora con Pricing por Casos de Uso
+          </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight mb-4 sm:mb-6">
             Cumple el AI Act con Confianza
             <span className="block text-blue-600 mt-2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-              Transforma la Regulación en tu Ventaja Competitiva
+              Gestiona tus Casos de Uso de IA sin Complicaciones
             </span>
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2 sm:px-0">
             La inteligencia artificial avanza a pasos agigantados. Asegúrate de que tu empresa 
             no solo cumpla con el reglamento más importante de IA de Europa, sino que prospere en él. 
-            CumplIA guía a tu organización paso a paso.
+            CumplIA guía a tu organización caso de uso por caso de uso.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <Link href="/register" className="w-full sm:w-auto">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto">
-                Evalúa tu empresa gratis
+                Evalúa tu primer caso gratis
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
-            <a href="#solucion" className="w-full sm:w-auto">
+            <Link href="/pricing" className="w-full sm:w-auto">
               <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto">
-                Más información
+                Ver planes y precios
               </Button>
-            </a>
+            </Link>
           </div>
           <p className="mt-4 text-xs sm:text-sm text-gray-500">
             Sin tarjeta de crédito • Sin compromiso • Empieza en minutos
           </p>
+          
+          <div className="mt-8 p-4 bg-white rounded-lg shadow-sm border border-gray-100 inline-flex items-center gap-4">
+            <Calculator className="h-5 w-5 text-blue-600" />
+            <span className="text-sm text-gray-600">¿Cuánto te costaría el cumplimiento?</span>
+            <Link href="/pricing" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+              Calcula tu ROI →
+            </Link>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-// Pain Points Section
 function PainPointsSection() {
   const risks = [
-    {
-      icon: AlertTriangle,
-      title: "Sanciones Millonarias",
-      description: "Multas que pueden alcanzar el 7% de tu facturación global anual.",
-      color: "text-red-600",
-      bgColor: "bg-red-50"
-    },
-    {
-      icon: Users,
-      title: "Daño Reputacional",
-      description: "Pérdida de confianza de clientes, socios e inversores.",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50"
-    },
-    {
-      icon: TrendingDown,
-      title: "Retrasos en Innovación",
-      description: "Bloqueo de proyectos de IA por incumplimiento, frenando tu crecimiento.",
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50"
-    },
-    {
-      icon: AlertCircle,
-      title: "Desventaja Competitiva",
-      description: "Mientras tus competidores se adaptan, tú te quedas atrás.",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50"
-    }
+    { icon: AlertTriangle, title: "Sanciones Millonarias", description: "Multas que pueden alcanzar el 7% de tu facturación global anual por cada caso de uso no conforme.", color: "text-red-600", bgColor: "bg-red-50" },
+    { icon: Users, title: "Daño Reputacional", description: "Pérdida de confianza de clientes, socios e inversores por incumplimiento normativo.", color: "text-orange-600", bgColor: "bg-orange-50" },
+    { icon: TrendingDown, title: "Retrasos en Innovación", description: "Bloqueo de proyectos de IA por incumplimiento, frenando tu crecimiento competitivo.", color: "text-yellow-600", bgColor: "bg-yellow-50" },
+    { icon: AlertCircle, title: "Desventaja Competitiva", description: "Mientras tus competidores se adaptan, tú te quedas atrás en el mercado europeo.", color: "text-purple-600", bgColor: "bg-purple-50" }
   ];
 
   return (
     <section id="riesgos" className="py-12 sm:py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            El AI Act no es una Opción, es una Obligación
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600">
-            La entrada en vigor del AI Act europeo marca un antes y un después en el desarrollo 
-            y uso de la Inteligencia Artificial. Ignorar esta regulación expone a tu empresa a:
-          </p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">El AI Act no es una Opción, es una Obligación</h2>
+          <p className="text-base sm:text-lg text-gray-600">La entrada en vigor del AI Act europeo marca un antes y un después en el desarrollo y uso de la Inteligencia Artificial.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {risks.map((risk, index) => (
@@ -120,62 +103,67 @@ function PainPointsSection() {
           ))}
         </div>
         <div className="text-center mt-8 sm:mt-12">
-          <p className="text-base sm:text-xl font-medium text-gray-800 px-4">
-            ¿Está tu empresa preparada para operar legalmente en el ecosistema de IA de la UE?
-          </p>
+          <Link href="/register">
+            <Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">Descubre tu nivel de riesgo gratis<ArrowRight className="ml-2 h-4 w-4" /></Button>
+          </Link>
         </div>
       </div>
     </section>
   );
 }
 
-// Features Section
+function UseCaseExplanationSection() {
+  const examples = [
+    { name: "Chatbot de atención al cliente", count: "1 caso de uso" },
+    { name: "Sistema de recomendación de productos", count: "1 caso de uso" },
+    { name: "Análisis de currículums con IA", count: "1 caso de uso" },
+    { name: "Detección de fraude financiero", count: "1 caso de uso" },
+    { name: "Generación de contenido marketing", count: "1 caso de uso" },
+    { name: "Scoring crediticio automatizado", count: "1 caso de uso" },
+  ];
+
+  return (
+    <section className="py-12 sm:py-20 bg-blue-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">¿Qué es un Caso de Uso de IA?</h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">Según el AI Act, cada <strong>aplicación concreta</strong> de inteligencia artificial en tu negocio es un caso de uso.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {examples.map((example, index) => (
+              <div key={index} className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm">
+                <span className="text-gray-700 font-medium">{example.name}</span>
+                <span className="text-sm text-blue-600 font-semibold bg-blue-50 px-3 py-1 rounded-full">{example.count}</span>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/register">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">Cuenta tus casos de uso gratis<ArrowRight className="ml-2 h-4 w-4" /></Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FeaturesSection() {
   const features = [
-    {
-      icon: Shield,
-      title: "Evaluación de Riesgos Automatizada",
-      description: "Identifica la clasificación de riesgo de tus sistemas de IA según el AI Act (bajo, limitado, alto, inaceptable).",
-      microcopy: "Nuestra IA analítica clasifica los sistemas de tu empresa según los criterios del AI Act 2024."
-    },
-    {
-      icon: FileText,
-      title: "Gestión de Documentación y Trazabilidad",
-      description: "Crea y mantén expedientes técnicos unificados, registros de datos y auditorías de conformidad.",
-      microcopy: "Documenta cada paso del ciclo de vida de IA de tu organización para auditorías simplificadas."
-    },
-    {
-      icon: Activity,
-      title: "Monitoreo Continuo",
-      description: "Supervisa tus sistemas de IA en producción para asegurar el cumplimiento post-implementación.",
-      microcopy: "Recibe alertas proactivas ante cualquier deriva o incumplimiento."
-    },
-    {
-      icon: BookOpen,
-      title: "Guía Experta Integrada",
-      description: "Accede a checklists, plantillas y consejos de expertos en regulación de IA.",
-      microcopy: "Recursos actualizados para ayudarte a comprender y aplicar las directrices del AI Act."
-    },
-    {
-      icon: Zap,
-      title: "Integración con Flujos de Trabajo",
-      description: "Se adapta a tus metodologías de desarrollo y gestión de proyectos.",
-      microcopy: "Conecta CumplIA con las herramientas de desarrollo y gestión de riesgos de tu empresa."
-    }
+    { icon: Shield, title: "Evaluación de Riesgos por Caso de Uso", description: "Identifica la clasificación de riesgo de cada caso de uso según el AI Act.", microcopy: "Clasificación automática según criterios del AI Act 2024." },
+    { icon: FileText, title: "Gestión de Documentación", description: "Crea y mantén expedientes técnicos unificados por caso de uso.", microcopy: "Documentación simplificada para auditorías." },
+    { icon: Activity, title: "Monitoreo Continuo", description: "Supervisa tus casos de uso de IA en producción.", microcopy: "Alertas proactivas ante incumplimientos." },
+    { icon: BookOpen, title: "Guía Experta Integrada", description: "Accede a checklists y plantillas para cada caso de uso.", microcopy: "Recursos actualizados del AI Act." },
+    { icon: Zap, title: "Integración con Flujos de Trabajo", description: "Se adapta a tus metodologías de desarrollo.", microcopy: "Conecta con herramientas de gestión de riesgos." }
   ];
 
   return (
     <section id="solucion" className="py-12 sm:py-20 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Navega la Complejidad del AI Act con Inteligencia y Facilidad
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600">
-            CumplIA es la plataforma SaaS diseñada para simplificar el cumplimiento normativo de la IA. 
-            Proporcionamos a tu organización las herramientas y la guía necesarias para entender, implementar y demostrar 
-            que los sistemas de IA de tu empresa cumplen con el AI Act.
-          </p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Navega la Complejidad del AI Act</h2>
+          <p className="text-base sm:text-lg text-gray-600">CumplIA simplifica el cumplimiento normativo de la IA para tu organización.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
           {features.map((feature, index) => (
@@ -191,375 +179,70 @@ function FeaturesSection() {
             </Card>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-// Benefits Section
-function BenefitsSection() {
-  const benefits = [
-    "Reduce Riesgos y Evita Sanciones",
-    "Acelera la Adopción de IA",
-    "Fortalece la Confianza de Clientes",
-    "Optimiza Recursos de tu Equipo",
-    "Gana Ventaja Competitiva",
-    "Cumplimiento Continuo y Actualizado"
-  ];
-
-  return (
-    <section className="py-12 sm:py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Más Allá del Cumplimiento: Impulsa tu Innovación con Ética
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 sm:p-4 bg-green-50 rounded-lg">
-                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 flex-shrink-0" />
-                <span className="text-sm sm:text-lg font-medium text-gray-900">{benefit}</span>
-              </div>
-            ))}
-          </div>
+        <div className="text-center mt-10">
+          <Link href="/pricing"><Button size="lg" variant="outline">Explora todas las funciones<ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
         </div>
       </div>
     </section>
   );
 }
 
-// Pricing Section
 function PricingSection() {
   const plans = [
-    {
-      name: "Gratis",
-      price: "0€",
-      period: "/mes",
-      description: "Perfecto para validar tu sistema de IA inicial o para equipos pequeños.",
-      features: [
-        "Evaluación de riesgo para 1 sistema de IA",
-        "Documentación básica ilimitada",
-        "1 hora de soporte por chat",
-        "Checklist de cumplimiento básico"
-      ],
-      cta: "¡Prueba CumplIA Gratis!",
-      popular: false
-    },
-    {
-      name: "Profesional",
-      price: "99€",
-      period: "/mes",
-      description: "Ideal para startups y PYMEs en crecimiento.",
-      features: [
-        "Todas las características del plan Gratis",
-        "Evaluación de riesgo para hasta 5 sistemas",
-        "Monitoreo continuo básico",
-        "Soporte prioritario por email",
-        "Plantillas de documentación avanzadas"
-      ],
-      cta: "Elige Plan Profesional",
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Personalizado",
-      period: "",
-      description: "Solución completa para grandes corporaciones y proyectos complejos.",
-      features: [
-        "Sistemas de IA ilimitados",
-        "Monitoreo avanzado y personalizable",
-        "Acceso a API para integraciones",
-        "Soporte dedicado 24/7",
-        "Consultoría de cumplimiento a medida"
-      ],
-      cta: "Solicitar Demo",
-      popular: false
-    }
+    { name: "Starter", price: "0€", period: "/mes", description: "Perfecto para validar tu primer caso de uso.", features: ["1 caso de uso", "1 sistema de IA", "Documentación básica", "Checklist cumplimiento", "Soporte email"], cta: "Empieza Gratis", popular: false },
+    { name: "Essential", price: "29€", period: "/mes", description: "Ideal para startups y PYMEs.", features: ["Hasta 5 casos de uso", "Hasta 3 sistemas IA", "5 documentos/mes", "FRIA básica", "Soporte prioritario"], cta: "Elige Essential", popular: true },
+    { name: "Professional", price: "99€", period: "/mes", description: "Para empresas en crecimiento.", features: ["Hasta 20 casos de uso", "Hasta 10 sistemas IA", "Documentos ilimitados", "FRIA completa", "API access"], cta: "Elige Professional", popular: false },
+    { name: "Enterprise", price: "499€+", period: "/mes", description: "Solución completa para grandes corporaciones.", features: ["Casos de uso ilimitados", "Sistemas IA ilimitados", "SSO y on-premise", "SLA 99.9%", "Account Manager"], cta: "Contactar Ventas", popular: false }
   ];
 
   return (
-    <section id="precios" className="py-12 sm:py-20 bg-gray-50">
+    <section id="precios" className="py-12 sm:py-20 bg-gradient-to-b from-gray-50 to-blue-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Comienza tu Viaje de Cumplimiento Hoy Mismo
-          </h2>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Precios claros, basados en tu uso real</h2>
+          <p className="text-base sm:text-lg text-gray-600">Paga por los <strong>casos de uso</strong> que gestionas, no por usuarios.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
           {plans.map((plan, index) => (
             <Card key={index} className={`border-0 shadow-xl ${plan.popular ? 'md:scale-105 ring-2 ring-blue-600' : ''}`}>
-              {plan.popular && (
-                <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">
-                  Más Popular
-                </div>
-              )}
+              {plan.popular && <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">Más Popular</div>}
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">{plan.name}</CardTitle>
-                <div className="mt-3 sm:mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-gray-600">{plan.period}</span>
-                </div>
+                <div className="mt-3 sm:mt-4"><span className="text-3xl sm:text-4xl font-bold text-gray-900">{plan.price}</span><span className="text-gray-600">{plan.period}</span></div>
                 <CardDescription className="mt-2 text-sm sm:text-base">{plan.description}</CardDescription>
               </CardHeader>
               <CardContent className="p-4 sm:p-6 pt-0">
                 <ul className="space-y-2 sm:space-y-3">
                   {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start space-x-2">
-                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm sm:text-base text-gray-600">{feature}</span>
-                    </li>
+                    <li key={idx} className="flex items-start space-x-2"><CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0 mt-0.5" /><span className="text-sm sm:text-base text-gray-600">{feature}</span></li>
                   ))}
                 </ul>
-                <Link href="/register">
-                  <Button 
-                    className={`w-full mt-4 sm:mt-6 ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-900 hover:bg-gray-800'}`}
-                    size="lg"
-                  >
-                    {plan.cta}
-                  </Button>
+                <Link href={plan.name === "Enterprise" ? "mailto:sales@cumplia.com" : "/register"}>
+                  <Button className={`w-full mt-4 sm:mt-6 ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-900 hover:bg-gray-800'}`} size="lg">{plan.cta}</Button>
                 </Link>
               </CardContent>
             </Card>
           ))}
         </div>
-        <p className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
-          Precios basados en facturación anual. Consulta para planes mensuales.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-// Timeline Section
-function TimelineSection() {
-  const milestones = [
-    {
-      date: '2 ago 2024',
-      title: 'Publicación y entrada en vigor',
-      description: 'El Reglamento 2024/1689 se publica y entra en vigor oficialmente.',
-      completed: true,
-      color: 'bg-green-500'
-    },
-    {
-      date: '2 feb 2025',
-      title: 'Prohibiciones activas',
-      description: 'Entran en vigor las prohibiciones del Art. 5 y códigos de práctica GPAI.',
-      completed: true,
-      color: 'bg-red-500'
-    },
-    {
-      date: '2 ago 2025',
-      title: 'Obligaciones GPAI',
-      description: 'Aplican obligaciones del Capítulo III para IA General y riesgo sistémico.',
-      completed: false,
-      color: 'bg-orange-500'
-    },
-    {
-      date: '2 ago 2026',
-      title: 'Sistemas de Alto Riesgo',
-      description: 'Obligaciones completas para sistemas alto riesgo (Anexos II y III).',
-      completed: false,
-      color: 'bg-blue-500'
-    },
-    {
-      date: '2 ago 2027',
-      title: 'Sistemas existentes',
-      description: 'Los sistemas alto riesgo ya en el mercado deben cumplir.',
-      completed: false,
-      color: 'bg-purple-500'
-    }
-  ];
-
-  return (
-    <section id="timeline" className="py-12 sm:py-20 bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Calendario de Aplicación del AI Act
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600">
-            El Reglamento de IA de la UE se aplica progresivamente. 
-            Conoce las fechas clave para planificar el cumplimiento de tu empresa.
-          </p>
-        </div>
-
-        <div className="max-w-4xl mx-auto">
-          <div className="relative">
-            {/* Línea vertical */}
-            <div className="absolute left-4 sm:left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-            
-            {milestones.map((milestone, index) => (
-              <div key={index} className="relative flex items-start mb-8 last:mb-0">
-                {/* Punto del timeline */}
-                <div className={`relative z-10 flex-shrink-0 w-8 h-8 sm:w-16 sm:h-16 rounded-full ${milestone.color} flex items-center justify-center shadow-lg`}>
-                  {milestone.completed ? (
-                    <CheckCircle className="w-4 h-4 sm:w-8 sm:h-8 text-white" />
-                  ) : (
-                    <span className="text-white text-xs sm:text-sm font-bold">{index + 1}</span>
-                  )}
-                </div>
-                
-                {/* Contenido */}
-                <div className="ml-4 sm:ml-8 flex-1 bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-transparent hover:border-blue-500 transition-all">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                    <span className="inline-block px-3 py-1 text-xs sm:text-sm font-semibold text-blue-700 bg-blue-100 rounded-full mb-2 sm:mb-0">
-                      {milestone.date}
-                    </span>
-                    {milestone.completed && (
-                      <span className="text-xs text-green-600 font-medium flex items-center">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Completado
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                    {milestone.title}
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-600">
-                    {milestone.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 text-center">
-            <p className="text-sm text-gray-500 mb-4">
-              ¿Necesitas ayuda para cumplir con estas fechas?
-            </p>
-            <Link href="/register">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                Empieza tu evaluación gratuita
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+        <div className="text-center mt-10">
+          <Link href="/pricing"><Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">Ver comparativa completa<ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
         </div>
       </div>
     </section>
   );
 }
 
-// FAQ Section
-function FAQSection() {
-  const faqs = [
-    {
-      question: "¿Cuándo entra en vigor el AI Act y a quién afecta?",
-      answer: "El AI Act entrará en vigor el 2 de agosto de 2024, ampliándose su aplicación progresivamente hasta 2027. Afecta a proveedores y usuarios de sistemas de IA en el mercado de la UE, independientemente de su ubicación, si sus sistemas se usan en la UE."
-    },
-    {
-      question: "¿Mi sistema de IA actual ya necesita cumplir todo?",
-      answer: "Depende de la clasificación de riesgo de tu sistema (limitado, alto, inaceptable). CumplIA te ayuda a determinar esta clasificación y a aplicar los requisitos correspondientes."
-    },
-    {
-      question: "¿Qué tipo de IA cubre el AI Act?",
-      answer: "Cualquier sistema de IA desarrollado para operar con diferentes niveles de autonomía y que pueda generar resultados como predicciones, recomendaciones o decisiones que influyan en entornos reales."
-    },
-    {
-      question: "¿CumplIA es solo para empresas europeas?",
-      answer: "No. CumplIA es para cualquier empresa que desarrolle, implemente o ponga a disposición sistemas de IA en el Espacio Económico Europeo, sin importar su ubicación geográfica."
-    },
-    {
-      question: "¿Necesito ser un experto en IA o en derecho para usar CumplIA?",
-      answer: "No. CumplIA está diseñado para ser intuitivo. Te guiamos a través del proceso con lenguaje accesible y herramientas automatizadas, complementado con recursos de ayuda."
-    },
-    {
-      question: "¿Cómo garantiza CumplIA la seguridad de mis datos?",
-      answer: "Utilizamos encriptación de extremo a extremo y cumplimos con las normativas de protección de datos más estrictas, incluyendo el GDPR. Tus datos de cumplimiento de IA son privados y seguros."
-    },
-    {
-      question: "¿Puedo integrar CumplIA con mis sistemas de gestión de riesgos existentes?",
-      answer: "Sí, nuestro Plan Enterprise ofrece acceso a API para una integración fluida con tus plataformas de gestión de riesgos y cumplimiento corporativo."
-    }
-  ];
-
+export default function HomePage() {
   return (
-    <section id="faq" className="py-12 sm:py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Las dudas de tu empresa sobre el AI Act, respondidas
-          </h2>
-        </div>
-        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-          {faqs.map((faq, index) => (
-            <Card key={index} className="border border-gray-200">
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg font-semibold text-gray-900">
-                  {faq.question}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">
-                <p className="text-sm sm:text-base text-gray-600">{faq.answer}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Footer Section
-function Footer() {
-  return (
-    <footer className="bg-gray-900 text-white py-12 sm:py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-            No dejes el futuro de la IA de tu empresa al azar
-          </h2>
-          <p className="text-base sm:text-xl text-gray-400 mb-6 sm:mb-8 px-2 sm:px-0">
-            Asegura el cumplimiento de tu empresa con CumplIA. El AI Act es una realidad que definirá 
-            el panorama de la inteligencia artificial en Europa.
-          </p>
-          <Link href="/register">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6">
-              Solicita una Demostración
-              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-          </Link>
-        </div>
-        
-        <div className="border-t border-gray-800 pt-6 sm:pt-8 mt-8 sm:mt-12">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
-              <span className="text-lg sm:text-xl font-bold">CumplIA</span>
-            </div>
-            <nav className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Sobre Nosotros</a>
-              <a href="#" className="hover:text-white transition-colors">Contacto</a>
-              <Link href="/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
-              <Link href="/terminos-servicio" className="hover:text-white transition-colors">Términos</Link>
-              <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
-              <a href="#" className="hover:text-white transition-colors">Blog</a>
-            </nav>
-          </div>
-          <p className="text-center text-gray-500 text-xs sm:text-sm mt-6 sm:mt-8">
-            © 2024 CumplIA. Todos los derechos reservados.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// Main Page Component
-export default function LandingPage() {
-  return (
-    <main className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Header />
-      <HeroSection />
-      <PainPointsSection />
-      <FeaturesSection />
-      <BenefitsSection />
-      <PricingSection />
-      <TimelineSection />
-      <FAQSection />
-      <Footer />
-    </main>
+      <main>
+        <HeroSection />
+        <PainPointsSection />
+        <UseCaseExplanationSection />
+        <FeaturesSection />
+        <PricingSection />
+      </main>
+    </div>
   );
 }
