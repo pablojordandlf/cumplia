@@ -73,15 +73,9 @@ const useCaseFormSchema = z.object({
     message: 'El nombre debe tener al menos 2 caracteres.',
   }),
   description: z.string().optional(),
-  sector: z.enum(sectors, {
-    required_error: 'Por favor, selecciona un sector.',
-  }),
-  ai_act_level: z.enum(aiActRiskLevels, {
-    required_error: 'Por favor, selecciona un nivel de riesgo AI Act.',
-  }),
-  ai_act_role: z.enum(['provider', 'deployer', 'distributor', 'importer'], {
-    required_error: 'Por favor, selecciona tu rol según el AI Act.',
-  }),
+  sector: z.enum(sectors),
+  ai_act_level: z.enum(aiActRiskLevels),
+  ai_act_role: z.enum(['provider', 'deployer', 'distributor', 'importer']),
 });
 
 export const dynamic = 'force-dynamic';
