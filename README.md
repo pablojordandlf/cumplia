@@ -6,6 +6,8 @@
 // NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 // NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
+// Last deployment check: 2026-03-15 11:56 CET - Vercel auto-deploy test
+
 // New files:
 // - /tmp/cumplia/apps/web/lib/supabase/client.ts
 // - /tmp/cumplia/apps/web/lib/supabase/server.ts
