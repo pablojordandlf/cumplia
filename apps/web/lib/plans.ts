@@ -18,17 +18,19 @@ export interface PlanFeatures {
 
 export interface Plan {
   id: string;
-  name: 'free' | 'pro' | 'business' | 'enterprise';
+  name: 'starter' | 'essential' | 'professional' | 'enterprise';
   display_name: string;
   price_monthly: number;
   features: PlanFeatures;
 }
 
+// New plan structure aligned with landing page
 export const PLANS: Record<string, Plan> = {
+  // Legacy mapping for backward compatibility
   free: {
-    id: 'free',
-    name: 'free',
-    display_name: 'Free',
+    id: 'starter',
+    name: 'starter',
+    display_name: 'Starter',
     price_monthly: 0,
     features: {
       use_cases: 1,
@@ -43,14 +45,32 @@ export const PLANS: Record<string, Plan> = {
       priority_support: false,
     },
   },
-  pro: {
-    id: 'pro',
-    name: 'pro',
-    display_name: 'PRO',
-    price_monthly: 99,
+  starter: {
+    id: 'starter',
+    name: 'starter',
+    display_name: 'Starter',
+    price_monthly: 0,
+    features: {
+      use_cases: 1,
+      documents: 0,
+      users: 1,
+      ai_check_exports: 0,
+      fria_generation: false,
+      api_access: false,
+      integrations: false,
+      custom_templates: false,
+      multi_department: false,
+      priority_support: false,
+    },
+  },
+  essential: {
+    id: 'essential',
+    name: 'essential',
+    display_name: 'Essential',
+    price_monthly: 29,
     features: {
       use_cases: 5,
-      documents: 10,
+      documents: 5,
       users: 3,
       ai_check_exports: -1,
       fria_generation: true,
@@ -61,15 +81,53 @@ export const PLANS: Record<string, Plan> = {
       priority_support: false,
     },
   },
-  business: {
-    id: 'business',
-    name: 'business',
-    display_name: 'Business',
-    price_monthly: 239,
+  // Legacy pro maps to essential for backward compatibility
+  pro: {
+    id: 'essential',
+    name: 'essential',
+    display_name: 'Essential',
+    price_monthly: 29,
     features: {
-      use_cases: 15,
+      use_cases: 5,
+      documents: 5,
+      users: 3,
+      ai_check_exports: -1,
+      fria_generation: true,
+      api_access: false,
+      integrations: false,
+      custom_templates: false,
+      multi_department: false,
+      priority_support: false,
+    },
+  },
+  professional: {
+    id: 'professional',
+    name: 'professional',
+    display_name: 'Professional',
+    price_monthly: 99,
+    features: {
+      use_cases: -1,
       documents: -1,
-      users: 10,
+      users: -1,
+      ai_check_exports: -1,
+      fria_generation: true,
+      api_access: true,
+      integrations: true,
+      custom_templates: true,
+      multi_department: true,
+      priority_support: true,
+    },
+  },
+  // Legacy business maps to professional
+  business: {
+    id: 'professional',
+    name: 'professional',
+    display_name: 'Professional',
+    price_monthly: 99,
+    features: {
+      use_cases: -1,
+      documents: -1,
+      users: -1,
       ai_check_exports: -1,
       fria_generation: true,
       api_access: true,
@@ -105,8 +163,8 @@ export const PLANS: Record<string, Plan> = {
 export class PlanGate {
   private plan: Plan;
 
-  constructor(planName: string = 'free') {
-    this.plan = PLANS[planName] || PLANS.free;
+  constructor(planName: string = 'starter') {
+    this.plan = PLANS[planName] || PLANS.starter;
   }
 
   static async fromUser(userId: string, supabase: any): Promise<PlanGate> {
@@ -114,14 +172,14 @@ export class PlanGate {
       .rpc('get_user_plan_features', { p_user_id: userId });
     
     if (error || !data) {
-      return new PlanGate('free');
+      return new PlanGate('starter');
     }
 
     // Determine plan from features
     const planName = Object.keys(PLANS).find(key => {
       const plan = PLANS[key];
       return plan.features.use_cases === (data.use_cases || 0);
-    }) || 'free';
+    }) || 'starter';
 
     return new PlanGate(planName);
   }
@@ -177,11 +235,15 @@ export class PlanGate {
   }
 
   isProOrHigher(): boolean {
-    return ['pro', 'business', 'enterprise'].includes(this.plan.name);
+    return ['essential', 'professional', 'enterprise'].includes(this.plan.name);
   }
 
-  isBusinessOrHigher(): boolean {
-    return ['business', 'enterprise'].includes(this.plan.name);
+  isEssentialOrHigher(): boolean {
+    return ['essential', 'professional', 'enterprise'].includes(this.plan.name);
+  }
+
+  isProfessionalOrHigher(): boolean {
+    return ['professional', 'enterprise'].includes(this.plan.name);
   }
 
   isEnterprise(): boolean {

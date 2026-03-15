@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 
+// New plan structure: starter | essential | professional | enterprise
 interface Subscription {
-  plan: "free" | "pro" | "agency";
+  plan: "starter" | "essential" | "professional" | "enterprise";
   status: "active" | "canceled" | "incomplete" | "past_due";
   currentPeriodEnd?: string;
   stripeSubscriptionId?: string;
@@ -16,10 +17,28 @@ interface UsageStats {
   documentsLimit: number;
 }
 
+// Plan limits aligned with new pricing
 const PLAN_LIMITS: Record<string, { aiUses: number; documents: number }> = {
-  free: { aiUses: 10, documents: 3 },
-  pro: { aiUses: Infinity, documents: 50 },
+  starter: { aiUses: 10, documents: 0 },
+  essential: { aiUses: Infinity, documents: 5 },
+  professional: { aiUses: Infinity, documents: Infinity },
+  enterprise: { aiUses: Infinity, documents: Infinity },
+  // Legacy mappings for backward compatibility
+  free: { aiUses: 10, documents: 0 },
+  pro: { aiUses: Infinity, documents: 5 },
   agency: { aiUses: Infinity, documents: Infinity },
+  business: { aiUses: Infinity, documents: Infinity },
+};
+
+// Helper to map legacy plan names to new ones
+const mapLegacyPlan = (plan: string): string => {
+  const mapping: Record<string, string> = {
+    'free': 'starter',
+    'pro': 'essential',
+    'business': 'professional',
+    'agency': 'professional',
+  };
+  return mapping[plan] || plan || 'starter';
 };
 
 export function useSubscription() {
@@ -35,11 +54,15 @@ export function useSubscription() {
           throw new Error("Failed to fetch subscription");
         }
         const data = await response.json();
+        // Map legacy plan names
+        if (data.subscription) {
+          data.subscription.plan = mapLegacyPlan(data.subscription.plan);
+        }
         setSubscription(data.subscription);
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Unknown error"));
-        // Default to free plan on error
-        setSubscription({ plan: "free", status: "active" });
+        // Default to starter plan on error
+        setSubscription({ plan: "starter", status: "active" });
       } finally {
         setIsLoading(false);
       }
@@ -69,10 +92,11 @@ export function useUsageStats() {
         }
 
         const usageData = await usageRes.json();
-        const subData = subRes.ok ? await subRes.json() : { subscription: { plan: "free" } };
+        const subData = subRes.ok ? await subRes.json() : { subscription: { plan: "starter" } };
         
-        const plan = subData.subscription?.plan || "free";
-        const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+        const rawPlan = subData.subscription?.plan || "starter";
+        const plan = mapLegacyPlan(rawPlan);
+        const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.starter;
 
         setUsage({
           aiUsesUsed: usageData.aiUsesUsed || 0,
@@ -85,9 +109,9 @@ export function useUsageStats() {
         // Default usage on error
         setUsage({
           aiUsesUsed: 0,
-          aiUsesLimit: PLAN_LIMITS.free.aiUses,
+          aiUsesLimit: PLAN_LIMITS.starter.aiUses,
           documentsUsed: 0,
-          documentsLimit: PLAN_LIMITS.free.documents,
+          documentsLimit: PLAN_LIMITS.starter.documents,
         });
       } finally {
         setIsLoading(false);
@@ -107,12 +131,12 @@ export function useCanAccessFeature(feature: "documents" | "ai_classification" |
     return { canAccess: false, isLoading: true };
   }
 
-  const plan = subscription?.plan || "free";
+  const plan = subscription?.plan || "starter";
 
   const featureAccess: Record<string, Record<string, boolean>> = {
-    documents: { free: true, pro: true, agency: true },
-    ai_classification: { free: true, pro: true, agency: true },
-    multiple_orgs: { free: false, pro: false, agency: true },
+    documents: { starter: false, essential: true, professional: true, enterprise: true },
+    ai_classification: { starter: true, essential: true, professional: true, enterprise: true },
+    multiple_orgs: { starter: false, essential: false, professional: true, enterprise: true },
   };
 
   const canAccess = featureAccess[feature]?.[plan] ?? false;

@@ -2,9 +2,9 @@
 
 import React from "react";
 import { usePermissions, type PermissionChecks } from "@/hooks/use-permissions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, Crown, Building2 } from "lucide-react";
+import { Lock, Sparkles, Building2, Crown } from "lucide-react";
 import Link from "next/link";
 
 interface PermissionGateProps {
@@ -53,20 +53,20 @@ export function FeatureGate({ children, feature, fallback }: FeatureGateProps) {
 
 interface PlanGateProps {
   children: React.ReactNode;
-  minPlan: "free" | "pro" | "business" | "enterprise";
+  minPlan: "starter" | "essential" | "professional" | "enterprise";
   fallback?: React.ReactNode;
 }
 
 export function PlanGate({ children, minPlan, fallback }: PlanGateProps) {
-  const planHierarchy = ["free", "pro", "business", "enterprise"];
+  const planHierarchy = ["starter", "essential", "professional", "enterprise"];
   
   return (
     <PermissionGate
       check={(checks) => {
         const currentIndex = planHierarchy.indexOf(
           checks.isPlan("enterprise") ? "enterprise" :
-          checks.isPlan("business") ? "business" :
-          checks.isPlan("pro") ? "pro" : "free"
+          checks.isPlan("professional") ? "professional" :
+          checks.isPlan("essential") ? "essential" : "starter"
         );
         const minIndex = planHierarchy.indexOf(minPlan);
         return currentIndex >= minIndex;
@@ -94,32 +94,32 @@ function FeatureFallback({ feature }: { feature: string }) {
     fria_generation: {
       title: "FRIA - Evaluación de Impacto",
       description: "Genera evaluaciones de impacto en derechos fundamentales conforme al Art. 27 del AI Act.",
-      plan: "PRO",
+      plan: "Essential",
     },
     api_access: {
       title: "Acceso API",
       description: "Integra CumplIA con tus sistemas mediante nuestra API REST.",
-      plan: "Business",
+      plan: "Professional",
     },
     integrations: {
       title: "Integraciones",
       description: "Conecta con Slack, Microsoft Teams y otras herramientas.",
-      plan: "Business",
+      plan: "Professional",
     },
     custom_templates: {
       title: "Plantillas Personalizadas",
       description: "Crea y personaliza plantillas de documentos para tu organización.",
-      plan: "Business",
+      plan: "Professional",
     },
     multi_department: {
       title: "Multi-departamento",
       description: "Gestiona múltiples departamentos y equipos desde una cuenta.",
-      plan: "Business",
+      plan: "Professional",
     },
     priority_support: {
       title: "Soporte Prioritario",
       description: "Obtén respuesta prioritaria de nuestro equipo de soporte.",
-      plan: "Business",
+      plan: "Professional",
     },
     sso: {
       title: "Single Sign-On (SSO)",
@@ -141,7 +141,7 @@ function FeatureFallback({ feature }: { feature: string }) {
   const info = featureLabels[feature] || {
     title: "Función Premium",
     description: "Esta función requiere un plan superior.",
-    plan: "PRO",
+    plan: "Essential",
   };
 
   return (
@@ -164,13 +164,15 @@ function FeatureFallback({ feature }: { feature: string }) {
 }
 
 function PlanFallback({ minPlan }: { minPlan: string }) {
-  const planInfo: Record<string, { icon: React.ReactNode; color: string }> = {
-    pro: { icon: <Sparkles className="w-6 h-6" />, color: "text-blue-600" },
-    business: { icon: <Building2 className="w-6 h-6" />, color: "text-purple-600" },
-    enterprise: { icon: <Crown className="w-6 h-6" />, color: "text-amber-600" },
+  const planInfo: Record<string, { icon: React.ReactNode; color: string; price: string }> = {
+    starter: { icon: <Sparkles className="w-6 h-6" />, color: "text-gray-600", price: "0€" },
+    essential: { icon: <Sparkles className="w-6 h-6" />, color: "text-blue-600", price: "29€/mes" },
+    professional: { icon: <Building2 className="w-6 h-6" />, color: "text-purple-600", price: "99€/mes" },
+    enterprise: { icon: <Crown className="w-6 h-6" />, color: "text-amber-600", price: "Custom" },
   };
 
-  const info = planInfo[minPlan] || planInfo.pro;
+  const info = planInfo[minPlan] || planInfo.essential;
+  const planName = minPlan.charAt(0).toUpperCase() + minPlan.slice(1);
 
   return (
     <Card className="border-dashed">
@@ -179,13 +181,13 @@ function PlanFallback({ minPlan }: { minPlan: string }) {
           {info.icon}
         </div>
         <h3 className="font-semibold text-gray-900 mb-2">
-          Requiere plan {minPlan.charAt(0).toUpperCase() + minPlan.slice(1)}
+          Requiere plan {planName}
         </h3>
         <p className="text-sm text-gray-500 mb-4">
-          Esta sección requiere una suscripción {minPlan} o superior.
+          Esta sección requiere una suscripción {planName} ({info.price}) o superior.
         </p>
         <Link href={`/pricing?plan=${minPlan}`}>
-          <Button>Ver planes {minPlan}</Button>
+          <Button>Ver planes {planName}</Button>
         </Link>
       </CardContent>
     </Card>

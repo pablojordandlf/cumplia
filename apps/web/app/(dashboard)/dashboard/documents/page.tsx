@@ -69,7 +69,7 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [userPlan, setUserPlan] = useState<string>('free');
+  const [userPlan, setUserPlan] = useState<string>('starter');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,7 +91,15 @@ export default function DocumentsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setUserPlan(data.plan || 'free');
+        // Map legacy plan names to new ones
+        const planMapping: Record<string, string> = {
+          'free': 'starter',
+          'pro': 'essential',
+          'business': 'professional',
+          'agency': 'professional',
+        };
+        const mappedPlan = planMapping[data.plan] || data.plan || 'starter';
+        setUserPlan(mappedPlan);
       }
     } catch (error) {
       console.error('Error checking plan:', error);
@@ -159,7 +167,7 @@ export default function DocumentsPage() {
   };
 
   const handleGenerate = async (type: string) => {
-    const isProRequired = userPlan === 'free';
+    const isProRequired = userPlan === 'starter';
     
     if (isProRequired) {
       setShowUpgradeModal(true);
@@ -221,7 +229,7 @@ export default function DocumentsPage() {
   };
 
   const requiresPro = (type: string) => {
-    return userPlan === 'free';
+    return userPlan === 'starter';
   };
 
   return (
@@ -258,13 +266,13 @@ export default function DocumentsPage() {
           <p className="text-gray-600 mt-1">
             Genera automáticamente los documentos de cumplimiento requeridos por el AI Act
           </p>
-          {userPlan === 'free' && (
+          {userPlan === 'starter' && (
             <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
               <Lock className="w-5 h-5 text-amber-600 mt-0.5" />
               <div>
-                <p className="text-amber-800 font-medium">Funcionalidad Pro</p>
+                <p className="text-amber-800 font-medium">Funcionalidad Essential</p>
                 <p className="text-amber-700 text-sm">
-                  La generación de documentos requiere un plan Pro o Agency. 
+                  La generación de documentos requiere un plan Essential o superior. 
                   <Button 
                     variant="link" 
                     className="text-amber-800 p-0 h-auto font-medium"

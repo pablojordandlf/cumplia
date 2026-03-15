@@ -36,9 +36,9 @@ export interface PermissionChecks {
   hasFeature: (feature: keyof PlanFeatures) => boolean;
   getRemaining: (type: "useCases" | "documents" | "users") => number;
   getPercentage: (type: "useCases" | "documents" | "users") => number;
-  isPlan: (planName: "free" | "pro" | "business" | "enterprise") => boolean;
-  isProOrHigher: boolean;
-  isBusinessOrHigher: boolean;
+  isPlan: (planName: "starter" | "essential" | "professional" | "enterprise") => boolean;
+  isEssentialOrHigher: boolean;
+  isProfessionalOrHigher: boolean;
   isEnterprise: boolean;
 }
 
@@ -60,25 +60,25 @@ export function usePermissions(): {
       // Get session
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        // Return free plan defaults if no session
-        const freePlan = PLANS.free;
+        // Return starter plan defaults if no session
+        const starterPlan = PLANS.starter;
         setPermissions({
-          plan: freePlan,
+          plan: starterPlan,
           limits: {
-            useCases: freePlan.features.use_cases,
-            documents: freePlan.features.documents,
-            users: freePlan.features.users,
+            useCases: starterPlan.features.use_cases,
+            documents: starterPlan.features.documents,
+            users: starterPlan.features.users,
           },
           features: {
-            friaGeneration: freePlan.features.fria_generation,
-            apiAccess: freePlan.features.api_access,
-            integrations: freePlan.features.integrations,
-            customTemplates: freePlan.features.custom_templates,
-            multiDepartment: freePlan.features.multi_department,
-            prioritySupport: freePlan.features.priority_support,
-            sso: freePlan.features.sso || false,
-            sla: freePlan.features.sla || false,
-            dedicatedManager: freePlan.features.dedicated_manager || false,
+            friaGeneration: starterPlan.features.fria_generation,
+            apiAccess: starterPlan.features.api_access,
+            integrations: starterPlan.features.integrations,
+            customTemplates: starterPlan.features.custom_templates,
+            multiDepartment: starterPlan.features.multi_department,
+            prioritySupport: starterPlan.features.priority_support,
+            sso: starterPlan.features.sso || false,
+            sla: starterPlan.features.sla || false,
+            dedicatedManager: starterPlan.features.dedicated_manager || false,
           },
           usage: { useCasesUsed: 0, documentsUsed: 0, usersUsed: 0 },
         });
@@ -95,13 +95,23 @@ export function usePermissions(): {
         }),
       ]);
 
-      let planName = "free";
+      let planName = "starter";
       let usage = { useCasesUsed: 0, documentsUsed: 0, usersUsed: 0 };
 
       if (planRes.ok) {
         const planData = await planRes.json();
-        // Map agency to business for compatibility
-        planName = planData.plan === "agency" ? "business" : planData.plan || "free";
+        // Map legacy plan names to new ones
+        const planMapping: Record<string, string> = {
+          'free': 'starter',
+          'starter': 'starter',
+          'pro': 'essential',
+          'essential': 'essential',
+          'business': 'professional',
+          'professional': 'professional',
+          'enterprise': 'enterprise',
+          'agency': 'professional',
+        };
+        planName = planMapping[planData.plan] || planData.plan || "starter";
       }
 
       if (usageRes.ok) {
@@ -113,7 +123,7 @@ export function usePermissions(): {
         };
       }
 
-      const plan = PLANS[planName] || PLANS.free;
+      const plan = PLANS[planName] || PLANS.starter;
 
       setPermissions({
         plan,
@@ -137,25 +147,25 @@ export function usePermissions(): {
       });
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Unknown error"));
-      // Fallback to free plan
-      const freePlan = PLANS.free;
+      // Fallback to starter plan
+      const starterPlan = PLANS.starter;
       setPermissions({
-        plan: freePlan,
+        plan: starterPlan,
         limits: {
-          useCases: freePlan.features.use_cases,
-          documents: freePlan.features.documents,
-          users: freePlan.features.users,
+          useCases: starterPlan.features.use_cases,
+          documents: starterPlan.features.documents,
+          users: starterPlan.features.users,
         },
         features: {
-          friaGeneration: freePlan.features.fria_generation,
-          apiAccess: freePlan.features.api_access,
-          integrations: freePlan.features.integrations,
-          customTemplates: freePlan.features.custom_templates,
-          multiDepartment: freePlan.features.multi_department,
-          prioritySupport: freePlan.features.priority_support,
-          sso: freePlan.features.sso || false,
-          sla: freePlan.features.sla || false,
-          dedicatedManager: freePlan.features.dedicated_manager || false,
+          friaGeneration: starterPlan.features.fria_generation,
+          apiAccess: starterPlan.features.api_access,
+          integrations: starterPlan.features.integrations,
+          customTemplates: starterPlan.features.custom_templates,
+          multiDepartment: starterPlan.features.multi_department,
+          prioritySupport: starterPlan.features.priority_support,
+          sso: starterPlan.features.sso || false,
+          sla: starterPlan.features.sla || false,
+          dedicatedManager: starterPlan.features.dedicated_manager || false,
         },
         usage: { useCasesUsed: 0, documentsUsed: 0, usersUsed: 0 },
       });
@@ -195,8 +205,8 @@ export function usePermissions(): {
           return Math.min((used / limit) * 100, 100);
         },
         isPlan: (planName) => permissions.plan.name === planName,
-        isProOrHigher: ["pro", "business", "enterprise"].includes(permissions.plan.name),
-        isBusinessOrHigher: ["business", "enterprise"].includes(permissions.plan.name),
+        isEssentialOrHigher: ["essential", "professional", "enterprise"].includes(permissions.plan.name),
+        isProfessionalOrHigher: ["professional", "enterprise"].includes(permissions.plan.name),
         isEnterprise: permissions.plan.name === "enterprise",
       }
     : null;
@@ -219,12 +229,12 @@ export function useFeature(feature: keyof PlanFeatures): {
   const { permissions, checks, isLoading } = usePermissions();
 
   const upgradeMessages: Record<string, string> = {
-    fria_generation: "La generación de FRIA requiere un plan PRO o superior",
-    api_access: "El acceso a API requiere un plan Business o superior",
-    integrations: "Las integraciones requieren un plan Business o superior",
-    custom_templates: "Las plantillas personalizadas requieren un plan Business o superior",
-    multi_department: "La gestión multi-departamento requiere un plan Business o superior",
-    priority_support: "El soporte prioritario requiere un plan Business o superior",
+    fria_generation: "La generación de FRIA requiere un plan Essential o superior",
+    api_access: "El acceso a API requiere un plan Professional o superior",
+    integrations: "Las integraciones requieren un plan Professional o superior",
+    custom_templates: "Las plantillas personalizadas requieren un plan Professional o superior",
+    multi_department: "La gestión multi-departamento requiere un plan Professional o superior",
+    priority_support: "El soporte prioritario requiere un plan Professional o superior",
     sso: "El SSO requiere un plan Enterprise",
     sla: "El SLA garantizado requiere un plan Enterprise",
     dedicated_manager: "El Account Manager dedicado requiere un plan Enterprise",

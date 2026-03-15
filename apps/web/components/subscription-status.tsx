@@ -40,24 +40,30 @@ export function SubscriptionStatus() {
             Enterprise
           </Badge>
         );
-      case "business":
+      case "professional":
         return (
           <Badge className="bg-purple-500 hover:bg-purple-600">
             <Building2 className="h-3 w-3 mr-1" />
-            Business
+            Professional
           </Badge>
         );
-      case "pro":
+      case "essential":
         return (
           <Badge className="bg-blue-500 hover:bg-blue-600">
             <Sparkles className="h-3 w-3 mr-1" />
-            Pro
+            Essential
+          </Badge>
+        );
+      case "starter":
+        return (
+          <Badge variant="secondary">
+            Starter
           </Badge>
         );
       default:
         return (
           <Badge variant="secondary">
-            Free
+            Starter
           </Badge>
         );
     }
@@ -123,9 +129,9 @@ export function SubscriptionStatus() {
             value={useCasesPercentage} 
             className={`h-2 ${showDanger(useCasesPercentage) ? 'bg-red-200' : ''}`}
           />
-          {plan.name === "free" && showWarning(useCasesPercentage) && (
+          {plan.name === "starter" && showWarning(useCasesPercentage) && (
             <p className="text-xs text-amber-600">
-              Estás cerca del límite. Actualiza a PRO para gestionar hasta 5 sistemas.
+              Estás cerca del límite. Actualiza a Essential para gestionar hasta 5 sistemas.
             </p>
           )}
         </div>
@@ -145,9 +151,9 @@ export function SubscriptionStatus() {
             value={documentsPercentage} 
             className={`h-2 ${showDanger(documentsPercentage) ? 'bg-red-200' : ''}`}
           />
-          {plan.name === "pro" && showWarning(documentsPercentage) && (
+          {plan.name === "essential" && showWarning(documentsPercentage) && (
             <p className="text-xs text-amber-600">
-              Estás cerca del límite. Actualiza a Business para documentos ilimitados.
+              Estás cerca del límite. Actualiza a Professional para documentos ilimitados.
             </p>
           )}
         </div>
@@ -193,21 +199,21 @@ export function SubscriptionStatus() {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 pt-2">
-          {plan.name === "free" ? (
+          {plan.name === "starter" ? (
             <Link href="/pricing" className="w-full">
               <Button className="w-full">
                 <Sparkles className="h-4 w-4 mr-2" />
-                Actualizar a PRO
+                Actualizar a Essential
               </Button>
             </Link>
-          ) : plan.name === "pro" ? (
-            <Link href="/pricing?plan=business" className="w-full">
+          ) : plan.name === "essential" ? (
+            <Link href="/pricing?plan=professional" className="w-full">
               <Button variant="outline" className="w-full">
                 <Building2 className="h-4 w-4 mr-2" />
-                Ver Business
+                Ver Professional
               </Button>
             </Link>
-          ) : plan.name === "business" ? (
+          ) : plan.name === "professional" ? (
             <Link href="/pricing?plan=enterprise" className="w-full">
               <Button variant="outline" className="w-full">
                 <Crown className="h-4 w-4 mr-2" />
@@ -216,7 +222,7 @@ export function SubscriptionStatus() {
             </Link>
           ) : null}
           
-          {plan.name !== "free" && (
+          {plan.name !== "starter" && (
             <Button
               variant="ghost"
               onClick={handleManageSubscription}

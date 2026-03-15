@@ -194,9 +194,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Link href="/dashboard/inventory/new">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200 bg-gradient-to-br from-blue-50 to-white h-full">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
@@ -212,7 +212,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link href="/dashboard/inventory">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
@@ -227,7 +227,23 @@ export default function DashboardPage() {
             </Card>
           </Link>
 
-          <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-200">
+          <Link href="/dashboard/documents">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-green-200 bg-gradient-to-br from-green-50 to-white h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Documentos</h3>
+                    <p className="text-sm text-gray-500">Generar documentos IA</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Card className="bg-gradient-to-br from-amber-50 to-white border-amber-200 h-full">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
