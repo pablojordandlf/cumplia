@@ -65,34 +65,38 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t bg-white">
             <nav className="flex flex-col py-4 space-y-2">
-              <a 
-                href="#riesgos" 
+              <Link 
+                href="/#riesgos" 
                 className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
+                scroll={false}
               >
                 El Riesgo
-              </a>
-              <a 
-                href="#solucion" 
+              </Link>
+              <Link 
+                href="/#solucion" 
                 className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
+                scroll={false}
               >
                 Solución
-              </a>
-              <a 
-                href="#precios" 
+              </Link>
+              <Link 
+                href="/#precios" 
                 className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
+                scroll={false}
               >
                 Precios
-              </a>
-              <a 
-                href="#faq" 
+              </Link>
+              <Link 
+                href="/#faq" 
                 className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
+                scroll={false}
               >
                 FAQ
-              </a>
+              </Link>
               <div className="border-t pt-4 mt-2 px-4 space-y-3">
                 <Link href="/login" className="block w-full" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full">

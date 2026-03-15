@@ -41,7 +41,7 @@ export function PricingCard({
   const handleSubscribe = async () => {
     if (isFree) {
       // Redirect to signup for free plan
-      window.location.href = "/auth/signup?plan=free";
+      window.location.href = "/register?plan=free";
       return;
     }
 
