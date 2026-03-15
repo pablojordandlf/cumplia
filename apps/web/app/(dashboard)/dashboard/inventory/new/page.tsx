@@ -192,7 +192,7 @@ export default function NewUseCasePage() {
       toast({
         title: 'Caso de Uso Creado',
         description: 'Tu nuevo caso de uso ha sido registrado exitosamente.',
-        variant: 'success',
+        variant: 'default',
       });
       router.push('/dashboard/inventory'); // Redirect to inventory page on success
     } catch (error: any) {
