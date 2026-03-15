@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, FileText, Sparkles, ExternalLink, Crown } from "lucide-react";
+import { CreditCard, FileText, Server, Users, ExternalLink, Crown, Building2, Sparkles, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useSubscription, useUsageStats } from "@/lib/subscription";
+import { usePermissions } from "@/hooks/use-permissions";
+import Link from "next/link";
 
 export function SubscriptionStatus() {
-  const { subscription, isLoading: subLoading } = useSubscription();
-  const { usage, isLoading: usageLoading } = useUsageStats();
+  const { permissions, checks, isLoading, refresh } = usePermissions();
   const [isPortalLoading, setIsPortalLoading] = useState(false);
 
   const handleManageSubscription = async () => {
@@ -31,13 +31,20 @@ export function SubscriptionStatus() {
     }
   };
 
-  const getPlanBadge = (plan: string) => {
-    switch (plan) {
-      case "agency":
+  const getPlanBadge = (planName: string) => {
+    switch (planName) {
+      case "enterprise":
+        return (
+          <Badge className="bg-amber-500 hover:bg-amber-600">
+            <Crown className="h-3 w-3 mr-1" />
+            Enterprise
+          </Badge>
+        );
+      case "business":
         return (
           <Badge className="bg-purple-500 hover:bg-purple-600">
-            <Crown className="h-3 w-3 mr-1" />
-            Agency
+            <Building2 className="h-3 w-3 mr-1" />
+            Business
           </Badge>
         );
       case "pro":
@@ -56,7 +63,7 @@ export function SubscriptionStatus() {
     }
   };
 
-  if (subLoading || usageLoading) {
+  if (isLoading) {
     return (
       <Card className="dark:bg-gray-900">
         <CardContent className="p-6">
@@ -70,39 +77,55 @@ export function SubscriptionStatus() {
     );
   }
 
-  const plan = subscription?.plan || "free";
-  const aiUsesUsed = usage?.aiUsesUsed || 0;
-  const aiUsesLimit = usage?.aiUsesLimit || 10;
-  const documentsUsed = usage?.documentsUsed || 0;
-  const documentsLimit = usage?.documentsLimit || 3;
+  const plan = permissions?.plan;
+  if (!plan || !checks) {
+    return (
+      <Card className="dark:bg-gray-900">
+        <CardContent className="p-6 text-center">
+          <AlertCircle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+          <p className="text-sm text-gray-500">No se pudo cargar la información de suscripción</p>
+          <Button variant="outline" size="sm" onClick={refresh} className="mt-2">
+            Reintentar
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const aiUsesPercentage = Math.min((aiUsesUsed / aiUsesLimit) * 100, 100);
-  const documentsPercentage = Math.min((documentsUsed / documentsLimit) * 100, 100);
+  const useCasesPercentage = checks.getPercentage("useCases");
+  const documentsPercentage = checks.getPercentage("documents");
+  const usersPercentage = checks.getPercentage("users");
+
+  const showWarning = (percentage: number) => percentage >= 80 && percentage < 100;
+  const showDanger = (percentage: number) => percentage >= 100;
 
   return (
     <Card className="dark:bg-gray-900">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Estado de Suscripción</span>
-          {getPlanBadge(plan)}
+          <span>Tu Plan</span>
+          {getPlanBadge(plan.name)}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* AI Usage */}
+        {/* Use Cases Usage */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-yellow-500" />
-              <span>Usos de IA</span>
+              <Server className="h-4 w-4 text-blue-500" />
+              <span>Sistemas de IA</span>
             </div>
             <span className="text-muted-foreground">
-              {aiUsesUsed} / {aiUsesLimit}
+              {permissions.usage.useCasesUsed} / {permissions.limits.useCases === -1 ? "∞" : permissions.limits.useCases}
             </span>
           </div>
-          <Progress value={aiUsesPercentage} className="h-2" />
-          {plan === "free" && aiUsesUsed >= aiUsesLimit * 0.8 && (
+          <Progress 
+            value={useCasesPercentage} 
+            className={`h-2 ${showDanger(useCasesPercentage) ? 'bg-red-200' : ''}`}
+          />
+          {plan.name === "free" && showWarning(useCasesPercentage) && (
             <p className="text-xs text-amber-600">
-              Estás cerca del límite. Considera actualizar a Pro.
+              Estás cerca del límite. Actualiza a PRO para gestionar hasta 5 sistemas.
             </p>
           )}
         </div>
@@ -111,45 +134,101 @@ export function SubscriptionStatus() {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-blue-500" />
+              <FileText className="h-4 w-4 text-green-500" />
               <span>Documentos</span>
             </div>
             <span className="text-muted-foreground">
-              {documentsUsed} / {documentsLimit}
+              {permissions.usage.documentsUsed} / {permissions.limits.documents === -1 ? "∞" : permissions.limits.documents}
             </span>
           </div>
-          <Progress value={documentsPercentage} className="h-2" />
+          <Progress 
+            value={documentsPercentage} 
+            className={`h-2 ${showDanger(documentsPercentage) ? 'bg-red-200' : ''}`}
+          />
+          {plan.name === "pro" && showWarning(documentsPercentage) && (
+            <p className="text-xs text-amber-600">
+              Estás cerca del límite. Actualiza a Business para documentos ilimitados.
+            </p>
+          )}
+        </div>
+
+        {/* Users Usage */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-purple-500" />
+              <span>Usuarios</span>
+            </div>
+            <span className="text-muted-foreground">
+              {permissions.usage.usersUsed} / {permissions.limits.users === -1 ? "∞" : permissions.limits.users}
+            </span>
+          </div>
+          <Progress 
+            value={usersPercentage} 
+            className={`h-2 ${showDanger(usersPercentage) ? 'bg-red-200' : ''}`}
+          />
+        </div>
+
+        {/* Features Summary */}
+        <div className="pt-2 border-t">
+          <p className="text-xs font-medium text-gray-500 mb-2">Características incluidas:</p>
+          <div className="flex flex-wrap gap-1">
+            {permissions.features.friaGeneration && (
+              <Badge variant="outline" className="text-xs">FRIA</Badge>
+            )}
+            {permissions.features.apiAccess && (
+              <Badge variant="outline" className="text-xs">API</Badge>
+            )}
+            {permissions.features.integrations && (
+              <Badge variant="outline" className="text-xs">Integraciones</Badge>
+            )}
+            {permissions.features.prioritySupport && (
+              <Badge variant="outline" className="text-xs">Soporte prioritario</Badge>
+            )}
+            {permissions.features.sso && (
+              <Badge variant="outline" className="text-xs">SSO</Badge>
+            )}
+          </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          {plan === "free" ? (
-            <Button asChild className="flex-1">
-              <a href="/pricing">
+        <div className="flex flex-col gap-3 pt-2">
+          {plan.name === "free" ? (
+            <Link href="/pricing" className="w-full">
+              <Button className="w-full">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Actualizar a PRO
+              </Button>
+            </Link>
+          ) : plan.name === "pro" ? (
+            <Link href="/pricing?plan=business" className="w-full">
+              <Button variant="outline" className="w-full">
+                <Building2 className="h-4 w-4 mr-2" />
+                Ver Business
+              </Button>
+            </Link>
+          ) : plan.name === "business" ? (
+            <Link href="/pricing?plan=enterprise" className="w-full">
+              <Button variant="outline" className="w-full">
                 <Crown className="h-4 w-4 mr-2" />
-                Actualizar Plan
-              </a>
-            </Button>
-          ) : (
+                Ver Enterprise
+              </Button>
+            </Link>
+          ) : null}
+          
+          {plan.name !== "free" && (
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={handleManageSubscription}
               disabled={isPortalLoading}
-              className="flex-1"
+              className="w-full"
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              {isPortalLoading ? "Cargando..." : "Gestionar Suscripción"}
+              {isPortalLoading ? "Cargando..." : "Gestionar suscripción"}
               <ExternalLink className="h-3 w-3 ml-2" />
             </Button>
           )}
         </div>
-
-        {plan !== "free" && subscription?.currentPeriodEnd && (
-          <p className="text-xs text-muted-foreground text-center">
-            Tu suscripción se renueva el{" "}
-            {new Date(subscription.currentPeriodEnd).toLocaleDateString("es-ES")}
-          </p>
-        )}
       </CardContent>
     </Card>
   );
