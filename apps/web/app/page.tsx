@@ -532,8 +532,9 @@ function Footer() {
             <nav className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400">
               <a href="#" className="hover:text-white transition-colors">Sobre Nosotros</a>
               <a href="#" className="hover:text-white transition-colors">Contacto</a>
-              <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-              <a href="#" className="hover:text-white transition-colors">Términos</a>
+              <Link href="/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
+              <Link href="/terminos-servicio" className="hover:text-white transition-colors">Términos</Link>
+              <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
               <a href="#" className="hover:text-white transition-colors">Blog</a>
             </nav>
           </div>
