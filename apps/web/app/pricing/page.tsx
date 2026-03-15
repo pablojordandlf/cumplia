@@ -6,14 +6,14 @@ import { ArrowRight, CheckCircle, HelpCircle, Info } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Planes y Precios - CumplIA",
-  description: "Soluciones de cumplimiento AI Act para empresas. Pricing por casos de uso desde 0€ hasta planes Enterprise. Evaluación de riesgos, documentación legal y gestión de IA.",
+  description: "Soluciones de cumplimiento AI Act para empresas. Pricing por casos de uso desde 0€. Evaluación de riesgos, documentación legal y gestión de IA.",
   keywords: ["precios AI Act", "planes cumplimiento IA", "software cumplimiento AI Act", "coste auditoría IA", "precio FRIA", "compliance empresas", "casos de uso IA"],
   alternates: {
     canonical: "https://cumplia.com/pricing",
   },
   openGraph: {
     title: "Planes y Precios - CumplIA",
-    description: "Soluciones de cumplimiento AI Act para empresas. Desde startups hasta grandes corporaciones.",
+    description: "Soluciones de cumplimiento AI Act para empresas. Desde startups hasta empresas en crecimiento.",
     url: "https://cumplia.com/pricing",
     type: "website",
   },
@@ -62,10 +62,10 @@ const pricingTiers = [
     name: "Professional",
     monthlyPrice: 99,
     yearlyPrice: 990,
-    description: "Para empresas en crecimiento con múltiples aplicaciones",
+    description: "Casos de uso y sistemas ilimitados para empresas en crecimiento",
     features: [
-      "Hasta 20 casos de uso",
-      "Hasta 10 sistemas de IA",
+      "Casos de uso ilimitados",
+      "Sistemas de IA ilimitados",
       "FRIA completa Art. 27",
       "Documentos ilimitados",
       "Gestión multi-departamento",
@@ -79,39 +79,18 @@ const pricingTiers = [
     stripePriceIdMonthly: "price_professional_monthly",
     stripePriceIdYearly: "price_professional_yearly",
   },
-  {
-    name: "Enterprise",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    description: "Solución completa para grandes organizaciones",
-    features: [
-      "Casos de uso ilimitados",
-      "Sistemas de IA ilimitados",
-      "Todo lo de Professional",
-      "On-premise / Cloud privado",
-      "SSO y control de accesos",
-      "Auditorías y certificaciones",
-      "SLA garantizado 99.9%",
-      "Account Manager dedicado",
-      "Integraciones custom",
-    ],
-    ctaText: "Contactar Ventas",
-    popular: false,
-    stripePriceIdMonthly: "",
-    stripePriceIdYearly: "",
-  },
 ];
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-16 px-4 sm:px-6 lg:px-8 dark:bg-gray-950">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-4">
             Planes para cada etapa
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Desde pruebas gratuitas hasta soluciones enterprise. 
+            Desde pruebas gratuitas hasta soluciones ilimitadas. 
             Cumple con el AI Act sin comprometer tu presupuesto.
           </p>
           
@@ -135,7 +114,7 @@ export default function PricingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {pricingTiers.map((tier) => (
             <PricingCard
               key={tier.name}
@@ -153,7 +132,7 @@ export default function PricingPage() {
         </div>
 
         {/* Feature Comparison */}
-        <div className="mt-20 max-w-6xl mx-auto">
+        <div className="mt-20 max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-8">Comparativa de funciones</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -163,7 +142,6 @@ export default function PricingPage() {
                   <th className="text-center py-4 px-4 font-medium">Starter</th>
                   <th className="text-center py-4 px-4 font-medium text-blue-600">Essential</th>
                   <th className="text-center py-4 px-4 font-medium">Professional</th>
-                  <th className="text-center py-4 px-4 font-medium">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
@@ -171,21 +149,18 @@ export default function PricingPage() {
                   <td className="py-3 px-4">Casos de uso</td>
                   <td className="text-center py-3 px-4">1</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">5</td>
-                  <td className="text-center py-3 px-4">20</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Sistemas de IA</td>
                   <td className="text-center py-3 px-4">1</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">3</td>
-                  <td className="text-center py-3 px-4">10</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Usuarios</td>
                   <td className="text-center py-3 px-4">1</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">3</td>
-                  <td className="text-center py-3 px-4">10</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
                 </tr>
                 <tr className="border-b">
@@ -193,13 +168,11 @@ export default function PricingPage() {
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">5</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
-                  <td className="text-center py-3 px-4">Ilimitados</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">FRIA (Art. 27)</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">Básica</td>
-                  <td className="text-center py-3 px-4">Completa</td>
                   <td className="text-center py-3 px-4">Completa</td>
                 </tr>
                 <tr className="border-b">
@@ -207,20 +180,17 @@ export default function PricingPage() {
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Integraciones</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4">Custom</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Multi-departamento</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">✓</td>
                   <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
@@ -228,7 +198,6 @@ export default function PricingPage() {
                   <td className="text-center py-3 px-4">Community</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">Email</td>
                   <td className="text-center py-3 px-4">Prioritario</td>
-                  <td className="text-center py-3 px-4">Dedicado</td>
                 </tr>
               </tbody>
             </table>
@@ -307,7 +276,7 @@ export default function PricingPage() {
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground">
             ¿Necesitas un plan personalizado para tu organización?{" "}
-            <a href="mailto:enterprise@cumplia.com" className="text-primary hover:underline font-medium">
+            <a href="mailto:sales@cumplia.com" className="text-primary hover:underline font-medium">
               Contacta con nuestro equipo de ventas
             </a>
           </p>

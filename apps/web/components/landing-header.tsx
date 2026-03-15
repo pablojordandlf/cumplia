@@ -25,12 +25,12 @@ export function Header() {
             <a href="#solucion" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
               Solución
             </a>
-            <a href="#precios" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+            <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
               Precios
-            </a>
-            <a href="#faq" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              FAQ
-            </a>
+            </Link>
+            <Link href="/guia-ai-act" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+              Guía AI Act
+            </Link>
           </nav>
 
           {/* Desktop Auth Buttons */}
@@ -82,20 +82,18 @@ export function Header() {
                 Solución
               </Link>
               <Link 
-                href="/#precios" 
+                href="/pricing" 
                 className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
-                scroll={false}
               >
                 Precios
               </Link>
               <Link 
-                href="/#faq" 
+                href="/guia-ai-act" 
                 className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
-                scroll={false}
               >
-                FAQ
+                Guía AI Act
               </Link>
               <div className="border-t pt-4 mt-2 px-4 space-y-3">
                 <Link href="/login" className="block w-full" onClick={() => setMobileMenuOpen(false)}>
