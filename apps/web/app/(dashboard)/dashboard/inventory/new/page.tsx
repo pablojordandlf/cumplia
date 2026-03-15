@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Plus, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { LimitGate } from '@/components/permission-gate';
