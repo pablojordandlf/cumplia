@@ -205,9 +205,9 @@ export function usePermissions(): {
           return Math.min((used / limit) * 100, 100);
         },
         isPlan: (planName) => permissions.plan.name === planName,
-        isEssentialOrHigher: ["essential", "professional", "enterprise"].includes(permissions.plan.name),
-        isProfessionalOrHigher: ["professional", "enterprise"].includes(permissions.plan.name),
-        isEnterprise: permissions.plan.name === "enterprise",
+        isEssentialOrHigher: ["essential", "professional"].includes(permissions.plan.name),
+        isProfessionalOrHigher: permissions.plan.name === "professional",
+        isEnterprise: false, // Enterprise deprecated, mapped to professional
       }
     : null;
 
@@ -235,9 +235,9 @@ export function useFeature(feature: keyof PlanFeatures): {
     custom_templates: "Las plantillas personalizadas requieren un plan Professional o superior",
     multi_department: "La gestión multi-departamento requiere un plan Professional o superior",
     priority_support: "El soporte prioritario requiere un plan Professional o superior",
-    sso: "El SSO requiere un plan Enterprise",
-    sla: "El SLA garantizado requiere un plan Enterprise",
-    dedicated_manager: "El Account Manager dedicado requiere un plan Enterprise",
+    sso: "El SSO requiere un plan Professional",
+    sla: "El SLA garantizado requiere un plan Professional",
+    dedicated_manager: "El Account Manager dedicado requiere un plan Professional",
   };
 
   return {

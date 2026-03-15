@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 
-// New plan structure: starter | essential | professional | enterprise
+// New plan structure: starter | essential | professional
 interface Subscription {
-  plan: "starter" | "essential" | "professional" | "enterprise";
+  plan: "starter" | "essential" | "professional";
   status: "active" | "canceled" | "incomplete" | "past_due";
   currentPeriodEnd?: string;
   stripeSubscriptionId?: string;
@@ -17,17 +17,17 @@ interface UsageStats {
   documentsLimit: number;
 }
 
-// Plan limits aligned with new pricing
+// Plan limits aligned with new pricing (3-tier: Starter, Essential, Professional)
 const PLAN_LIMITS: Record<string, { aiUses: number; documents: number }> = {
   starter: { aiUses: 10, documents: 0 },
   essential: { aiUses: Infinity, documents: 5 },
   professional: { aiUses: Infinity, documents: Infinity },
-  enterprise: { aiUses: Infinity, documents: Infinity },
   // Legacy mappings for backward compatibility
   free: { aiUses: 10, documents: 0 },
   pro: { aiUses: Infinity, documents: 5 },
   agency: { aiUses: Infinity, documents: Infinity },
   business: { aiUses: Infinity, documents: Infinity },
+  enterprise: { aiUses: Infinity, documents: Infinity }, // Mapped to professional
 };
 
 // Helper to map legacy plan names to new ones
@@ -134,9 +134,9 @@ export function useCanAccessFeature(feature: "documents" | "ai_classification" |
   const plan = subscription?.plan || "starter";
 
   const featureAccess: Record<string, Record<string, boolean>> = {
-    documents: { starter: false, essential: true, professional: true, enterprise: true },
-    ai_classification: { starter: true, essential: true, professional: true, enterprise: true },
-    multiple_orgs: { starter: false, essential: false, professional: true, enterprise: true },
+    documents: { starter: false, essential: true, professional: true },
+    ai_classification: { starter: true, essential: true, professional: true },
+    multiple_orgs: { starter: false, essential: false, professional: true },
   };
 
   const canAccess = featureAccess[feature]?.[plan] ?? false;

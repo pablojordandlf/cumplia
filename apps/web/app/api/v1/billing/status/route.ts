@@ -65,17 +65,30 @@ export async function GET(request: Request) {
       .eq('name', plan)
       .single();
 
+    // Map to new plan names
+    const planMapping: Record<string, string> = {
+      'free': 'starter',
+      'starter': 'starter',
+      'pro': 'essential',
+      'essential': 'essential',
+      'business': 'professional',
+      'professional': 'professional',
+      'agency': 'professional',
+      'enterprise': 'professional', // Map enterprise to professional (3-tier system)
+    };
+
+    const mappedPlan = planMapping[plan] || plan;
+
     return NextResponse.json({
-      plan,
-      display_name: planData?.display_name || plan,
+      plan: mappedPlan,
+      display_name: planData?.display_name || mappedPlan,
       status: subscriptionStatus,
-      is_pro: isPro,
-      is_agency: isAgency,
+      is_pro: mappedPlan === 'essential' || mappedPlan === 'professional',
+      is_professional: mappedPlan === 'professional',
       limits: planData?.limits || {
-        use_cases: 3,
-        documents: 0,
-        managed_orgs: 1,
-        ai_check_exports: 0
+        use_cases: mappedPlan === 'starter' ? 1 : mappedPlan === 'essential' ? 5 : -1,
+        documents: mappedPlan === 'starter' ? 0 : mappedPlan === 'essential' ? 5 : -1,
+        users: mappedPlan === 'starter' ? 1 : mappedPlan === 'essential' ? 3 : -1,
       },
       user: {
         id: user.id,
