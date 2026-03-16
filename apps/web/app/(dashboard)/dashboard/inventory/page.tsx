@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Pencil, Eye, Search } from 'lucide-react';
+import { Plus, Pencil, Eye, Search, LayoutDashboard, ArrowLeft } from 'lucide-react';
 import {
   Table,
   TableBody,

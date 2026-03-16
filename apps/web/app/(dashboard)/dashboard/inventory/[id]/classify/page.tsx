@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,29 +23,21 @@ import {
   Shield, 
   AlertTriangle, 
   CheckCircle2,
-  Brain,
-  Users,
-  Building2,
   HelpCircle,
+  Brain,
   Cpu,
   Sparkles,
-  Bot,
-  Network
+  Bot
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 // Schema para el cuestionario de clasificación
 const classificationSchema = z.object({
-  // Tipo de sistema IA
-  systemType: z.enum(['standard', 'gpai', 'embedded', 'biometric', 'safety']),
-  
-  // Artículo 5 - Sistemas prohibidos
+  systemType: z.enum(['gpai_model', 'gpai_sr', 'gpai_system', 'specific_purpose']),
   isSubliminal: z.enum(['yes', 'no']),
   isSocialScoring: z.enum(['yes', 'no']),
   isRealTimeBiometric: z.enum(['yes', 'no']),
   exploitsVulnerabilities: z.enum(['yes', 'no']),
-  
-  // Artículo 6 - Sistemas de alto riesgo (Anexo III)
   isBiometricIdentification: z.enum(['yes', 'no']),
   isCriticalInfrastructure: z.enum(['yes', 'no']),
   isEducationVocational: z.enum(['yes', 'no']),
@@ -55,15 +46,7 @@ const classificationSchema = z.object({
   isLawEnforcement: z.enum(['yes', 'no']),
   isMigrationAsylum: z.enum(['yes', 'no']),
   isJusticeDemocratic: z.enum(['yes', 'no']),
-  
-  // Anexo II - Productos de seguridad
   isSafetyComponent: z.enum(['yes', 'no']),
-  
-  // GPAI
-  isGeneralPurposeAI: z.enum(['yes', 'no']),
-  hasSystemicRisk: z.enum(['yes', 'no']),
-  
-  // Interacción
   interactsWithHumans: z.enum(['yes', 'no']),
   isEmotionRecognition: z.enum(['yes', 'no']),
   isBiometricCategorization: z.enum(['yes', 'no']),
@@ -71,127 +54,58 @@ const classificationSchema = z.object({
 });
 
 const riskLevels = {
-  prohibited: {
-    label: 'Prohibido',
-    color: 'bg-red-100 text-red-800 border-red-200',
-    icon: AlertCircle,
-    description: 'Este sistema de IA está prohibido por el Artículo 5 del AI Act y no puede desplegarse en la UE.',
-  },
-  high_risk: {
-    label: 'Alto Riesgo',
-    color: 'bg-orange-100 text-orange-800 border-orange-200',
-    icon: AlertTriangle,
-    description: 'Sistema de alto riesgo sujeto a obligaciones estrictas de cumplimiento (Arts. 6-51).',
-  },
-  limited_risk: {
-    label: 'Riesgo Limitado',
-    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    icon: Shield,
-    description: 'Sujeto a obligaciones de transparencia (Art. 50).',
-  },
-  minimal_risk: {
-    label: 'Riesgo Mínimo',
-    color: 'bg-green-100 text-green-800 border-green-200',
-    icon: CheckCircle2,
-    description: 'Libre uso con recomendación de códigos de conducta voluntarios.',
-  },
+  prohibited: { label: 'Prohibido', color: 'bg-red-100 text-red-800 border-red-200', icon: AlertCircle, description: 'Este sistema de IA está prohibido por el Artículo 5 del AI Act y no puede desplegarse en la UE.' },
+  high_risk: { label: 'Alto Riesgo', color: 'bg-orange-100 text-orange-800 border-orange-200', icon: AlertTriangle, description: 'Sistema de alto riesgo sujeto a obligaciones estrictas de cumplimiento (Arts. 6-51).' },
+  limited_risk: { label: 'Riesgo Limitado', color: 'bg-yellow-100 text-yellow-800 border-orange-200', icon: Shield, description: 'Sujeto a obligaciones de transparencia (Art. 50).' },
+  minimal_risk: { label: 'Riesgo Mínimo', color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, description: 'Libre uso con recomendación de códigos de conducta voluntarios.' },
 };
 
 const systemTypes = [
-  { 
-    value: 'standard', 
-    label: 'Sistema de IA Estándar', 
-    description: 'Sistema de IA tradicional con propósito específico',
-    icon: Cpu
-  },
-  { 
-    value: 'gpai', 
-    label: 'Modelo de Propósito General (GPAI)', 
-    description: 'IA con capacidades generales aplicables a múltiples contextos (ej: GPT, Claude)',
-    icon: Sparkles
-  },
-  { 
-    value: 'embedded', 
-    label: 'Sistema de IA Embebido', 
-    description: 'IA integrada en productos de seguridad o dispositivos físicos',
-    icon: Bot
-  },
-  { 
-    value: 'biometric', 
-    label: 'Sistema Biométrico', 
-    description: 'IA para identificación, categorización o análisis de personas',
-    icon: Users
-  },
-  { 
-    value: 'safety', 
-    label: 'Componente de Seguridad', 
-    description: 'Sistema de seguridad regulado por legislación sectorial UE (Anexo II)',
-    icon: Shield
-  },
+  { value: 'gpai_model' as const, label: 'Modelo de IA de Propósito General (GPAI Model)', description: 'El activo es únicamente un modelo base (no incluye interfaz ni pipeline completo). Es capaz de realizar una amplia variedad de tareas y puede integrarse en otros sistemas o aplicaciones.', examples: 'Ejemplos: GPT-4, Llama, Gemini en su forma base.', icon: Brain },
+  { value: 'gpai_sr' as const, label: 'Modelo GPAI con Riesgo Sistémico (GPAI-SR)', description: 'Igual que el tipo A, pero supera los 10²⁵ FLOP de entrenamiento o la Comisión Europea lo ha designado expresamente como tal por sus capacidades de gran impacto.', examples: 'Requiere evaluación de riesgos sistémicos y medidas de mitigación.', icon: Sparkles },
+  { value: 'gpai_system' as const, label: 'Sistema de IA de Propósito General (GPAI System)', description: 'El activo es un sistema completo (con interfaz, pipeline u otros componentes) construido sobre un modelo GPAI y sin una finalidad de uso única y específica.', examples: 'Ejemplos: ChatGPT como producto, Copilot Studio sin configuración de dominio.', icon: Bot },
+  { value: 'specific_purpose' as const, label: 'Sistema de IA de Finalidad Específica', description: 'El activo es un sistema con un caso de uso concreto y definido. Esta es la categoría donde aplican los niveles de riesgo (prohibido, alto, limitado, mínimo).', examples: 'Ejemplos: modelo de scoring de crédito, chatbot de atención, sistema de detección de fraude.', icon: Cpu },
 ];
 
-// Tooltip component
 function InfoTooltip({ text }: { text: string }) {
   const [show, setShow] = useState(false);
+  const [position, setPosition] = useState<'top' | 'bottom'>('top');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (show && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceAbove < 150 && spaceBelow > 150) setPosition('bottom');
+      else setPosition('top');
+    }
+  }, [show]);
+
   return (
-    <div className="relative inline-block ml-2">
-      <HelpCircle 
-        className="w-4 h-4 text-gray-400 cursor-help hover:text-gray-600"
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
-      />
+    <div ref={containerRef} className="relative inline-flex items-center ml-2" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <HelpCircle className="w-4 h-4 text-gray-400 cursor-help hover:text-blue-500 transition-colors" />
       {show && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 max-w-xs">
+        <div className={`absolute ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-1/2 transform -translate-x-1/2 px-4 py-3 bg-gray-900 text-white text-sm rounded-lg shadow-xl z-50 w-72 leading-relaxed`}>
           {text}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+          <div className={`absolute left-1/2 transform -translate-x-1/2 border-8 border-transparent ${position === 'top' ? 'top-full border-t-gray-900' : 'bottom-full border-b-gray-900'}`}></div>
         </div>
       )}
     </div>
   );
 }
 
-// Selector Sí/No visual
-function YesNoSelector({ 
-  value, 
-  onChange, 
-  label, 
-  tooltip 
-}: { 
-  value: string; 
-  onChange: (val: 'yes' | 'no') => void;
-  label: string;
-  tooltip?: string;
-}) {
+function YesNoSelector({ value, onChange, label, tooltip }: { value: string; onChange: (val: 'yes' | 'no') => void; label: string; tooltip?: string; }) {
   return (
-    <div className="rounded-lg border p-4 hover:border-gray-300 transition-colors cursor-pointer" onClick={() => onChange(value === 'yes' ? 'no' : 'yes')}>
+    <div className="rounded-xl border-2 border-gray-100 p-4 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer" onClick={() => onChange(value === 'yes' ? 'no' : 'yes')}>
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-gray-900">{label}</span>
+        <div className="flex items-center gap-2 flex-1">
+          <span className="font-medium text-gray-900 text-sm">{label}</span>
           {tooltip && <InfoTooltip text={tooltip} />}
         </div>
-        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            onClick={() => onChange('yes')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              value === 'yes'
-                ? 'bg-green-500 text-white shadow-md'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            Sí
-          </button>
-          <button
-            type="button"
-            onClick={() => onChange('no')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              value === 'no'
-                ? 'bg-gray-500 text-white shadow-md'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            No
-          </button>
+        <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <button type="button" onClick={() => onChange('yes')} className={`px-5 py-2 rounded-lg font-semibold text-sm transition-all ${value === 'yes' ? 'bg-green-500 text-white shadow-md ring-2 ring-green-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Sí</button>
+          <button type="button" onClick={() => onChange('no')} className={`px-5 py-2 rounded-lg font-semibold text-sm transition-all ${value === 'no' ? 'bg-gray-500 text-white shadow-md ring-2 ring-gray-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>No</button>
         </div>
       </div>
     </div>
@@ -202,184 +116,83 @@ export default function ClassifyUseCasePage() {
   const router = useRouter();
   const params = useParams();
   const useCaseId = params.id as string;
-  
   const [useCase, setUseCase] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const form = useForm<z.infer<typeof classificationSchema>>({
     resolver: zodResolver(classificationSchema),
     defaultValues: {
-      systemType: 'standard',
-      isSubliminal: 'no',
-      isSocialScoring: 'no',
-      isRealTimeBiometric: 'no',
-      exploitsVulnerabilities: 'no',
-      isBiometricIdentification: 'no',
-      isCriticalInfrastructure: 'no',
-      isEducationVocational: 'no',
-      isEmployment: 'no',
-      isAccessToServices: 'no',
-      isLawEnforcement: 'no',
-      isMigrationAsylum: 'no',
-      isJusticeDemocratic: 'no',
-      isSafetyComponent: 'no',
-      isGeneralPurposeAI: 'no',
-      hasSystemicRisk: 'no',
-      interactsWithHumans: 'no',
-      isEmotionRecognition: 'no',
-      isBiometricCategorization: 'no',
-      generatesDeepfakes: 'no',
+      systemType: 'specific_purpose', isSubliminal: 'no', isSocialScoring: 'no', isRealTimeBiometric: 'no', exploitsVulnerabilities: 'no',
+      isBiometricIdentification: 'no', isCriticalInfrastructure: 'no', isEducationVocational: 'no', isEmployment: 'no', isAccessToServices: 'no',
+      isLawEnforcement: 'no', isMigrationAsylum: 'no', isJusticeDemocratic: 'no', isSafetyComponent: 'no',
+      interactsWithHumans: 'no', isEmotionRecognition: 'no', isBiometricCategorization: 'no', generatesDeepfakes: 'no',
     },
   });
 
-  const isGPAI = form.watch('isGeneralPurposeAI') === 'yes';
+  const selectedSystemType = form.watch('systemType');
 
-  useEffect(() => {
-    loadUseCase();
-  }, [useCaseId]);
+  useEffect(() => { loadUseCase(); }, [useCaseId]);
 
   async function loadUseCase() {
     try {
-      const { data, error } = await supabase
-        .from('use_cases')
-        .select('*')
-        .eq('id', useCaseId)
-        .single();
-
+      const { data, error } = await supabase.from('use_cases').select('*').eq('id', useCaseId).single();
       if (error) throw error;
       setUseCase(data);
-      
-      // Si hay classification_data previo, cargarlo
       if (data?.classification_data) {
         const prevData = data.classification_data;
-        // Convertir booleanos a 'yes'/'no'
-        const convertedData: any = { systemType: prevData.systemType || 'standard' };
+        const convertedData: any = { systemType: prevData.systemType || 'specific_purpose' };
         Object.keys(prevData).forEach(key => {
-          if (typeof prevData[key] === 'boolean') {
-            convertedData[key] = prevData[key] ? 'yes' : 'no';
-          } else if (prevData[key] === 'yes' || prevData[key] === 'no') {
-            convertedData[key] = prevData[key];
-          }
+          if (typeof prevData[key] === 'boolean') convertedData[key] = prevData[key] ? 'yes' : 'no';
+          else if (prevData[key] === 'yes' || prevData[key] === 'no') convertedData[key] = prevData[key];
         });
         form.reset(convertedData);
       }
     } catch (error) {
       console.error('Error loading use case:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo cargar el caso de uso',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'No se pudo cargar el caso de uso', variant: 'destructive' });
       router.push('/dashboard/inventory');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   function calculateRiskLevel(values: z.infer<typeof classificationSchema>): string {
-    // Artículo 5 - Prohibidos
-    if (values.isSubliminal === 'yes' || values.isSocialScoring === 'yes' || 
-        values.isRealTimeBiometric === 'yes' || values.exploitsVulnerabilities === 'yes') {
-      return 'prohibited';
+    if (values.isSubliminal === 'yes' || values.isSocialScoring === 'yes' || values.isRealTimeBiometric === 'yes' || values.exploitsVulnerabilities === 'yes') return 'prohibited';
+    if (values.systemType === 'specific_purpose') {
+      if (values.isBiometricIdentification === 'yes' || values.isCriticalInfrastructure === 'yes' || values.isEducationVocational === 'yes' || values.isEmployment === 'yes' || values.isAccessToServices === 'yes' || values.isLawEnforcement === 'yes' || values.isMigrationAsylum === 'yes' || values.isJusticeDemocratic === 'yes' || values.isSafetyComponent === 'yes') return 'high_risk';
     }
-
-    // Artículo 6 y Anexo III - Alto riesgo
-    if (
-      values.isBiometricIdentification === 'yes' ||
-      values.isCriticalInfrastructure === 'yes' ||
-      values.isEducationVocational === 'yes' ||
-      values.isEmployment === 'yes' ||
-      values.isAccessToServices === 'yes' ||
-      values.isLawEnforcement === 'yes' ||
-      values.isMigrationAsylum === 'yes' ||
-      values.isJusticeDemocratic === 'yes' ||
-      values.isSafetyComponent === 'yes'
-    ) {
-      return 'high_risk';
+    if (values.systemType === 'gpai_sr') return 'high_risk';
+    if (values.systemType === 'specific_purpose') {
+      if (values.interactsWithHumans === 'yes' || values.isEmotionRecognition === 'yes' || values.isBiometricCategorization === 'yes' || values.generatesDeepfakes === 'yes') return 'limited_risk';
     }
-
-    // GPAI con riesgo sistémico
-    if (values.isGeneralPurposeAI === 'yes' && values.hasSystemicRisk === 'yes') {
-      return 'high_risk';
-    }
-
-    // Artículo 50 - Riesgo limitado
-    if (
-      values.interactsWithHumans === 'yes' ||
-      values.isEmotionRecognition === 'yes' ||
-      values.isBiometricCategorization === 'yes' ||
-      values.generatesDeepfakes === 'yes'
-    ) {
-      return 'limited_risk';
-    }
-
-    // GPAI sin riesgo sistémico
-    if (values.isGeneralPurposeAI === 'yes' && values.hasSystemicRisk === 'no') {
-      return 'limited_risk';
-    }
-
-    // Por defecto - Riesgo mínimo
+    if (values.systemType === 'gpai_model' || values.systemType === 'gpai_system') return 'limited_risk';
     return 'minimal_risk';
   }
 
   async function onSubmit(values: z.infer<typeof classificationSchema>) {
     setCalculating(true);
-    
     try {
       const riskLevel = calculateRiskLevel(values);
-      
-      // Obtener sesión actual para el user_id
       const { data: { session } } = await supabase.auth.getSession();
-      
-      // Actualizar el caso de uso con la clasificación
-      const { error } = await supabase
-        .from('use_cases')
-        .update({
-          ai_act_level: riskLevel,
-          classification_data: values,
-          status: 'classified',
-          updated_at: new Date().toISOString(),
-          updated_by: session?.user?.id,
-        })
-        .eq('id', useCaseId);
-
+      const { error } = await supabase.from('use_cases').update({
+        ai_act_level: riskLevel, classification_data: values, status: 'classified',
+        updated_at: new Date().toISOString(), updated_by: session?.user?.id,
+      }).eq('id', useCaseId);
       if (error) throw error;
-
       setResult(riskLevel);
-      
-      toast({
-        title: 'Clasificación Completada',
-        description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}`,
-      });
+      toast({ title: 'Clasificación Completada', description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}` });
     } catch (error: any) {
       console.error('Error saving classification:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo guardar la clasificación',
-        variant: 'destructive',
-      });
-    } finally {
-      setCalculating(false);
-    }
+      toast({ title: 'Error', description: error.message || 'No se pudo guardar la clasificación', variant: 'destructive' });
+    } finally { setCalculating(false); }
   }
 
-  if (loading) {
-    return (
-      <div className="p-4 sm:p-8 bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-48"></div>
-          <div className="h-64 bg-muted rounded w-96"></div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-4 sm:p-8 bg-gray-50 min-h-screen flex items-center justify-center"><div className="animate-pulse space-y-4"><div className="h-8 bg-muted rounded w-48"></div><div className="h-64 bg-muted rounded w-96"></div></div></div>;
 
   if (result) {
     const riskInfo = riskLevels[result as keyof typeof riskLevels];
     const RiskIcon = riskInfo.icon;
-
     return (
       <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
         <div className="max-w-2xl mx-auto">
@@ -388,35 +201,16 @@ export default function ClassifyUseCasePage() {
               <div className={`w-20 h-20 ${riskInfo.color.split(' ')[0]} rounded-full flex items-center justify-center mx-auto mb-6`}>
                 <RiskIcon className={`w-10 h-10 ${riskInfo.color.split(' ')[1]}`} />
               </div>
-              
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Clasificación Completada
-              </h1>
-              
-              <Badge className={`text-lg px-4 py-1 ${riskInfo.color}`}>
-                {riskInfo.label}
-              </Badge>
-              
-              <p className="text-gray-600 mt-4 mb-6">
-                {riskInfo.description}
-              </p>
-
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Clasificación Completada</h1>
+              <Badge className={`text-lg px-4 py-1 ${riskInfo.color}`}>{riskInfo.label}</Badge>
+              <p className="text-gray-600 mt-4 mb-6">{riskInfo.description}</p>
               <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
                 <h3 className="font-semibold text-gray-900 mb-2">{useCase?.name}</h3>
                 <p className="text-sm text-gray-600">{useCase?.description}</p>
               </div>
-
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/dashboard/inventory">
-                  <Button size="lg">
-                    Ver en el Inventario
-                  </Button>
-                </Link>
-                <Link href={`/dashboard/inventory/${useCaseId}`}>
-                  <Button variant="outline" size="lg">
-                    Ver Detalles
-                  </Button>
-                </Link>
+                <Link href="/dashboard/inventory"><Button size="lg">Ver en el Inventario</Button></Link>
+                <Link href={`/dashboard/inventory/${useCaseId}`}><Button variant="outline" size="lg">Ver Detalles</Button></Link>
               </div>
             </CardContent>
           </Card>
@@ -425,206 +219,132 @@ export default function ClassifyUseCasePage() {
     );
   }
 
+  const totalSteps = selectedSystemType === 'specific_purpose' ? 4 : 2;
+  const progressValue = (currentStep / totalSteps) * 100;
+
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-3xl mx-auto">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard/inventory">
-            <Button variant="ghost" size="icon">
-              <ChevronLeft className="w-6 h-6" />
-            </Button>
-          </Link>
+          <Link href="/dashboard/inventory"><Button variant="ghost" size="icon"><ChevronLeft className="w-6 h-6" /></Button></Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Clasificar Caso de Uso</h1>
-            <p className="text-gray-600">Paso 2 de 2: Cuestionario AI Act</p>
+            <p className="text-gray-600">Cuestionario de clasificación AI Act</p>
           </div>
         </div>
 
-        {/* Progress */}
         <div className="mb-6">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-600">Progreso</span>
-            <span className="font-medium">Paso 2 de 2</span>
-          </div>
-          <Progress value={100} className="h-2" />
+          <div className="flex justify-between text-sm mb-2"><span className="text-gray-600">Progreso</span><span className="font-medium">Paso {currentStep} de {totalSteps}</span></div>
+          <Progress value={progressValue} className="h-2" />
         </div>
 
-        {/* Classification Form */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              Cuestionario de Clasificación AI Act
-            </CardTitle>
-            <CardDescription>
-              Responde Sí o No a cada pregunta. Pasa el cursor sobre <HelpCircle className="w-3 h-3 inline" /> para más información.
-            </CardDescription>
+            <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Cuestionario de Clasificación AI Act</CardTitle>
+            <CardDescription>Responde Sí o No a cada pregunta. Pasa el cursor sobre <HelpCircle className="w-3 h-3 inline" /> para más información.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                
-                {/* Tipo de Sistema IA */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                      <Cpu className="w-4 h-4" />
-                      Tipo de Sistema de IA
-                    </h3>
-                    <InfoTooltip text="El AI Act clasifica los sistemas de IA en diferentes categorías según su naturaleza y alcance." />
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="systemType"
-                    render={({ field }) => (
+                {currentStep === 1 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-bold">1</span>Tipo de Sistema de IA</h3>
+                      <InfoTooltip text="El AI Act clasifica los activos de IA en 4 categorías según su naturaleza. Selecciona la que mejor describa tu activo." />
+                    </div>
+                    <FormField control={form.control} name="systemType" render={({ field }) => (
                       <FormItem>
                         <FormControl>
                           <div className="grid grid-cols-1 gap-3">
                             {systemTypes.map((type) => {
                               const Icon = type.icon;
                               return (
-                                <button
-                                  key={type.value}
-                                  type="button"
-                                  onClick={() => field.onChange(type.value)}
-                                  className={`flex items-start gap-4 p-4 rounded-lg border-2 text-left transition-all hover:shadow-md ${
-                                    field.value === type.value
-                                      ? 'border-blue-500 bg-blue-50'
-                                      : 'border-gray-200 bg-white hover:border-gray-300'
-                                  }`}
-                                >
-                                  <div className={`p-2 rounded-lg ${
-                                    field.value === type.value ? 'bg-blue-100' : 'bg-gray-100'
-                                  }`}>
-                                    <Icon className={`w-5 h-5 ${
-                                      field.value === type.value ? 'text-blue-600' : 'text-gray-500'
-                                    }`} />
+                                <button key={type.value} type="button" onClick={() => field.onChange(type.value)} className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all hover:shadow-md ${field.value === type.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
+                                  <div className={`p-3 rounded-xl ${field.value === type.value ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                                    <Icon className={`w-6 h-6 ${field.value === type.value ? 'text-blue-600' : 'text-gray-500'}`} />
                                   </div>
                                   <div className="flex-1">
-                                    <div className="font-medium text-gray-900">{type.label}</div>
-                                    <div className="text-sm text-gray-500">{type.description}</div>
+                                    <div className="font-semibold text-gray-900 text-base">{type.label}</div>
+                                    <div className="text-sm text-gray-600 mt-1 leading-relaxed">{type.description}</div>
+                                    <div className="text-xs text-blue-600 mt-2 font-medium">{type.examples}</div>
                                   </div>
-                                  {field.value === type.value && (
-                                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                                  )}
+                                  {field.value === type.value && <CheckCircle2 className="w-6 h-6 text-blue-500 shrink-0" />}
                                 </button>
                               );
                             })}
                           </div>
                         </FormControl>
                       </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Artículo 5 - Prohibidos */}
-                <div className="space-y-4 pt-6 border-t">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-red-900 flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4" />
-                      Artículo 5: Prácticas Prohibidas
-                    </h3>
-                    <InfoTooltip text="El Artículo 5 del AI Act prohíbe ciertas prácticas consideradas inaceptables para la UE. Si respondes Sí a alguna, el sistema será clasificado como PROHIBIDO." />
+                    )} />
                   </div>
-                  
-                  <div className="space-y-3">
-                    <FormField
-                      control={form.control}
-                      name="isSubliminal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <YesNoSelector
-                              value={field.value}
-                              onChange={field.onChange}
-                              label="¿Usa técnicas subliminales o manipuladoras que distorsionen el comportamiento causando daño?"
-                              tooltip="Técnicas que distorsionan el comportamiento de personas de manera que puedan causar daño psicológico o físico."
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                )}
 
-                    <FormField
-                      control={form.control}
-                      name="exploitsVulnerabilities"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <YesNoSelector
-                              value={field.value}
-                              onChange={field.onChange}
-                              label="¿Explota vulnerabilidades de grupos específicos (edad, discapacidad, situación social)?"
-                              tooltip="Aprovecha debilidades de personas debido a su edad, discapacidad, situación social o económica específica."
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isSocialScoring"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <YesNoSelector
-                              value={field.value}
-                              onChange={field.onChange}
-                              label="¿Realiza puntuación social (social scoring) por autoridades públicas?"
-                              tooltip="Evaluación o clasificación de personas basada en comportamiento social o personalidad que conduce a tratamiento desfavorable."
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isRealTimeBiometric"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <YesNoSelector
-                              value={field.value}
-                              onChange={field.onChange}
-                              label="¿Realiza identificación biométrica remota en tiempo real en espacios públicos para fines policiales?"
-                              tooltip="Identificación mediante biometría en tiempo real en espacios públicos por autoridades policiales (prohibido salvo excepciones muy limitadas)."
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                {currentStep === 2 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-red-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-red-100 text-red-600 text-sm flex items-center justify-center font-bold">2</span>Artículo 5: Prácticas Prohibidas</h3>
+                      <InfoTooltip text="El Artículo 5 del AI Act prohíbe ciertas prácticas consideradas inaceptables para la UE. Si respondes Sí a alguna, el sistema será clasificado como PROHIBIDO." />
+                    </div>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                      <p className="text-sm text-red-800"><AlertCircle className="w-4 h-4 inline mr-1" /><strong>Atención:</strong> Si alguna de estas prácticas aplica a tu sistema, está prohibido en la UE.</p>
+                    </div>
+                    <div className="space-y-3">
+                      <FormField control={form.control} name="isSubliminal" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Usa técnicas subliminales o manipuladoras que distorsionen el comportamiento causando daño?" tooltip="Técnicas que distorsionan el comportamiento de personas de manera que puedan causar daño psicológico o físico sin que la persona sea consciente." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="exploitsVulnerabilities" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Explota vulnerabilidades de grupos específicos (edad, discapacidad, situación social)?" tooltip="Aprovecha debilidades de personas debido a su edad, discapacidad, situación social o económica específica para causar daño." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isSocialScoring" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Realiza puntuación social (social scoring) por autoridades públicas?" tooltip="Evaluación o clasificación de personas basada en comportamiento social o personalidad que conduce a tratamiento desfavorable en contextos no relacionados." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isRealTimeBiometric" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Realiza identificación biométrica remota en tiempo real en espacios públicos para fines policiales?" tooltip="Identificación mediante biometría en tiempo real en espacios públicos por autoridades policiales (prohibido salvo excepciones muy limitadas como búsqueda de víctimas de delitos graves)." /></FormControl></FormItem>)} />
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Submit */}
-                <div className="pt-6 border-t flex justify-end gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push('/dashboard/inventory')}
-                  >
-                    Guardar como borrador
-                  </Button>
-                  <Button type="submit" disabled={calculating} size="lg">
-                    {calculating ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                        Calculando...
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="w-4 h-4 mr-2" />
-                        Calcular Clasificación
-                      </>
-                    )}
-                  </Button>
+                {currentStep === 3 && selectedSystemType === 'specific_purpose' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-orange-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-sm flex items-center justify-center font-bold">3</span>Artículo 6: Sistemas de Alto Riesgo (Anexo III)</h3>
+                      <InfoTooltip text="El Anexo III lista los sistemas de IA considerados de alto riesgo por su impacto potencial en seguridad, derechos fundamentales o sociedad. Requieren cumplimiento estricto." />
+                    </div>
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                      <p className="text-sm text-orange-800"><AlertTriangle className="w-4 h-4 inline mr-1" />Estos sistemas requieren un sistema de gestión de riesgos, datos de entrenamiento de alta calidad, supervisión humana, transparencia y registro en la base de datos de la UE.</p>
+                    </div>
+                    <div className="space-y-3">
+                      <FormField control={form.control} name="isBiometricIdentification" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Realiza identificación o verificación biométrica de personas?" tooltip="Sistemas de identificación biométrica a distancia, categorización biométrica por características protegidas, o reconocimiento de emociones en lugares de trabajo o educación." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isCriticalInfrastructure" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Gestiona infraestructura crítica (tráfico, agua, gas, electricidad)?" tooltip="Sistemas de gestión de infraestructura crítica donde un fallo podría poner en riesgo la vida de personas." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isEducationVocational" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se usa en educación o formación profesional para evaluación o acceso?" tooltip="Sistemas que determinan acceso a instituciones educativas, evalúan el aprendizaje, o asignan personas en contextos educativos." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isEmployment" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se usa en empleo, gestión de trabajadores o acceso a la autopromoción?" tooltip="Reclutamiento, selección de candidatos, promoción, terminación de contratos, o asignación de tareas basadas en comportamiento o características personales." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isAccessToServices" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Evalúa acceso a servicios esenciales privados o públicos (crédito, seguros, servicios públicos)?" tooltip="Evaluación de elegibilidad para servicios esenciales como créditos, seguros, servicios públicos, beneficios sociales, emergencias." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isLawEnforcement" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se utiliza para aplicación de la ley?" tooltip="Evaluación de riesgos de reincidencia, análisis de evidencia, perfilado de personas, poligráfos en contexto policial." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isMigrationAsylum" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se usa para migración, asilo o control de fronteras?" tooltip="Sistemas para evaluar solicitudes de asilo, visados, detección de irregularidades en documentos de viaje, o evaluación de riesgos de seguridad en fronteras." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isJusticeDemocratic" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Asiste en la administración de justicia o procesos democráticos?" tooltip="Sistemas que asisten jueces en investigación o interpretación de hechos/ley, o que se usan para influir en el resultado de elecciones o referéndums." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isSafetyComponent" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Es un componente de seguridad de productos regulados por legislación sectorial UE (Anexo II)?" tooltip="Sistemas de seguridad en maquinaria, juguetes, dispositivos médicos, vehículos, equipos de protección individual regulados por la UE." /></FormControl></FormItem>)} />
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 4 && selectedSystemType === 'specific_purpose' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-yellow-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 text-sm flex items-center justify-center font-bold">4</span>Artículo 50: Obligaciones de Transparencia (Riesgo Limitado)</h3>
+                      <InfoTooltip text="El Artículo 50 establece obligaciones de transparencia para ciertos sistemas de IA que interactúan con personas o generan contenido sintético." />
+                    </div>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                      <p className="text-sm text-yellow-800"><Shield className="w-4 h-4 inline mr-1" />Estos sistemas deben informar a los usuarios que están interactuando con una IA o que el contenido ha sido generado/modificado por IA.</p>
+                    </div>
+                    <div className="space-y-3">
+                      <FormField control={form.control} name="interactsWithHumans" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Interactúa directamente con personas (chatbots, sistemas de generación de respuestas)?" tooltip="Chatbots, asistentes virtuales, o cualquier sistema de IA que interactúe con humanos de manera que puedan pensar que están interactuando con una persona real." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isEmotionRecognition" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Reconoce o interpreta emociones a partir de datos biométricos?" tooltip="Sistemas que detectan emociones a través de expresiones faciales, tono de voz, gestos u otras características biométricas." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="isBiometricCategorization" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Categoriza personas basándose en datos biométricos?" tooltip="Clasificación de personas en categorías basadas en características biométricas como edad, género, origen étnico, etc. (excepto en lugares de trabajo/educación que ya son alto riesgo)." /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="generatesDeepfakes" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Genera o manipula contenido sintético (deepfakes) que emula personas reales?" tooltip="Generación de contenido de audio, imagen o video que parece ser real pero ha sido creado o modificado artificialmente (deepfakes)." /></FormControl></FormItem>)} />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between pt-4">
+                  <Button type="button" variant="outline" onClick={() => setCurrentStep(Math.max(1, currentStep - 1))} disabled={currentStep === 1}>Anterior</Button>
+                  {currentStep < totalSteps ? (
+                    <Button type="button" onClick={() => setCurrentStep(currentStep + 1)}>Siguiente</Button>
+                  ) : (
+                    <Button type="submit" disabled={calculating}>{calculating ? 'Calculando...' : 'Finalizar Clasificación'}</Button>
+                  )}
                 </div>
               </form>
             </Form>
