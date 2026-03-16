@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Pencil, Eye, Search, LayoutDashboard, ArrowLeft, Trash2, LayoutTemplate } from 'lucide-react';
+import { Plus, Eye, Search, ArrowLeft, Trash2, LayoutTemplate, FileCheck } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -16,28 +16,41 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { RiskBadge } from '@/components/risk-badge'; // Assuming RiskBadge is available
-import { supabase } from '@/lib/supabase'; // Assuming supabase client is configured
-import { useToast } from '@/hooks/use-toast'; // Assuming useToast hook is available
+import { RiskBadge } from '@/components/risk-badge';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
-// Define UseCase interface locally for clarity
+const OBLIGATIONS_BY_LEVEL: Record<string, number> = {
+  prohibited: 2,
+  high_risk: 8,
+  limited_risk: 4,
+  minimal_risk: 2,
+  gpai_sr: 7,
+  gpai_model: 3,
+  gpai_system: 3,
+  unclassified: 1,
+};
+
 interface UseCase {
   id: string;
   name: string;
   sector: string;
-  status: string; // e.g., 'in_progress', 'completed', 'classified'
-  ai_act_level: string; // e.g., 'prohibited', 'high_risk', 'limited_risk', 'minimal_risk', 'unclassified'
+  status: string;
+  ai_act_level: string;
   created_at: string;
 }
 
+interface ObligationsCount {
+  completed: number;
+  total: number;
+}
 
-
-// Define table columns
 const columns = [
   { label: 'Nombre', accessor: 'name' },
   { label: 'Sector', accessor: 'sector' },
   { label: 'Estado', accessor: 'status' },
   { label: 'Nivel AI Act', accessor: 'ai_act_level' },
+  { label: 'Obligaciones', accessor: 'obligations' },
   { label: 'Acciones', accessor: 'actions' },
 ];
 
@@ -46,6 +59,7 @@ export const dynamic = 'force-dynamic';
 export default function InventoryPage() {
   const [useCases, setUseCases] = useState<UseCase[]>([]);
   const [filteredUseCases, setFilteredUseCases] = useState<UseCase[]>([]);
+  const [obligationsCounts, setObligationsCounts] = useState<Record<string, ObligationsCount>>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -56,7 +70,6 @@ export default function InventoryPage() {
   }, []);
 
   useEffect(() => {
-    // Filter use cases based on search term
     const results = useCases.filter(useCase =>
       useCase.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       useCase.sector.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,29 +84,30 @@ export default function InventoryPage() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session?.user) {
-        // Redirect to login or show an error if not authenticated
         toast({
           title: 'Autenticación requerida',
           description: 'Por favor, inicia sesión para ver tu inventario.',
           variant: 'destructive',
         });
-        router.push('/auth/login'); // Assuming a login route exists
+        router.push('/auth/login');
         setLoading(false);
         return;
       }
 
-      // Fetch use cases from Supabase
       const { data, error } = await supabase
         .from('use_cases')
         .select('id, name, sector, status, ai_act_level, created_at')
         .eq('user_id', session.user.id)
-        .is('deleted_at', null) // Exclude soft-deleted items
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setUseCases(data || []);
-      setFilteredUseCases(data || []); // Initialize filtered list as well
+      const cases = data || [];
+      setUseCases(cases);
+      setFilteredUseCases(cases);
+
+      await loadObligationsCounts(cases, session.user.id);
 
     } catch (error: any) {
       console.error('Error fetching use cases:', error);
@@ -107,8 +121,39 @@ export default function InventoryPage() {
     }
   };
 
+  const loadObligationsCounts = async (cases: UseCase[], userId: string) => {
+    try {
+      const counts: Record<string, ObligationsCount> = {};
+      const useCaseIds = cases.map(c => c.id);
+      if (useCaseIds.length === 0) return;
+
+      const { data: completedObligations } = await supabase
+        .from('use_case_obligations')
+        .select('use_case_id')
+        .in('use_case_id', useCaseIds)
+        .eq('user_id', userId)
+        .eq('is_completed', true);
+
+      const completedCounts: Record<string, number> = {};
+      completedObligations?.forEach((item: any) => {
+        completedCounts[item.use_case_id] = (completedCounts[item.use_case_id] || 0) + 1;
+      });
+
+      cases.forEach(useCase => {
+        const level = useCase.ai_act_level || 'unclassified';
+        const total = OBLIGATIONS_BY_LEVEL[level] || 0;
+        const completed = completedCounts[useCase.id] || 0;
+        counts[useCase.id] = { completed, total };
+      });
+
+      setObligationsCounts(counts);
+    } catch (error) {
+      console.error('Error loading obligations counts:', error);
+    }
+  };
+
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este caso de uso? Esta acción no se puede deshacer.')) return;
+    if (!confirm('¿Estás seguro de que deseas eliminar este caso de uso?')) return;
     
     try {
       const { error } = await supabase
@@ -123,7 +168,6 @@ export default function InventoryPage() {
         description: 'El caso de uso ha sido eliminado correctamente.',
       });
       
-      // Refresh the list
       fetchUseCases();
     } catch (error: any) {
       toast({
@@ -134,15 +178,44 @@ export default function InventoryPage() {
     }
   };
 
+  const renderObligationsCell = (useCase: UseCase) => {
+    const count = obligationsCounts[useCase.id];
+    if (!count || count.total === 0) {
+      return (
+        <Link href={`/dashboard/inventory/${useCase.id}`} className="text-gray-400 text-sm hover:text-blue-600">
+          Ver detalles
+        </Link>
+      );
+    }
+
+    const { completed, total } = count;
+    const percentage = Math.round((completed / total) * 100);
+    const isComplete = completed === total;
+
+    return (
+      <Link href={`/dashboard/inventory/${useCase.id}`} className="flex items-center gap-2 group">
+        <div className="flex items-center gap-1.5">
+          <span className={`text-sm font-semibold ${isComplete ? 'text-green-600' : 'text-blue-600'}`}>
+            {completed}
+          </span>
+          <span className="text-gray-400 text-sm">/</span>
+          <span className="text-gray-500 text-sm">{total}</span>
+        </div>
+        <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+          <div className={`h-full transition-all duration-300 ${isComplete ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${percentage}%` }} />
+        </div>
+        {isComplete && <FileCheck className="w-4 h-4 text-green-500" />}
+      </Link>
+    );
+  };
+
   const renderCell = (useCase: UseCase, accessor: string) => {
     switch (accessor) {
       case 'name':
         return (
-          <div className="flex items-center gap-2">
-            <Link href={`/dashboard/inventory/${useCase.id}`} className="font-medium text-blue-600 hover:underline">
-              {useCase.name}
-            </Link>
-          </div>
+          <Link href={`/dashboard/inventory/${useCase.id}`} className="font-medium text-blue-600 hover:underline">
+            {useCase.name}
+          </Link>
         );
       case 'sector':
         return <span className="capitalize">{useCase.sector}</span>;
@@ -150,6 +223,8 @@ export default function InventoryPage() {
         return <Badge variant="outline" className="capitalize">{useCase.status}</Badge>;
       case 'ai_act_level':
         return <RiskBadge level={useCase.ai_act_level || 'unclassified'} />;
+      case 'obligations':
+        return renderObligationsCell(useCase);
       case 'actions':
         return (
           <div className="flex gap-2">
@@ -158,12 +233,7 @@ export default function InventoryPage() {
                 <Eye className="h-4 w-4" />
               </Link>
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={() => handleDelete(useCase.id)}
-            >
+            <Button variant="outline" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(useCase.id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -198,62 +268,57 @@ export default function InventoryPage() {
           <Link href="/dashboard/inventory/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Nuevo Caso de Uso
+              Añadir Caso de Uso
             </Button>
           </Link>
         </div>
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center gap-4">
-            <Search className="h-5 w-5 text-gray-500" />
-            <Input
-              type="text"
-              placeholder="Buscar por nombre, sector, nivel de riesgo..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 flex-1"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
-          <CardTitle>Casos de Uso</CardTitle>
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <span className="text-lg font-semibold">Lista de Casos de Uso</span>
+            <div className="flex items-center gap-2">
+              <Search className="h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Buscar por nombre, sector o nivel..."
+                className="w-full sm:w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">Cargando...</div>
-          ) : useCases.length === 0 ? (
+          {filteredUseCases.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>Aún no tienes casos de uso registrados.</p>
-              <Link href="/dashboard/inventory/new">
-                <Button variant="link" className="mt-2">
-                  Crea tu primer caso de uso
-                </Button>
-              </Link>
+              {searchTerm ? 'No se encontraron casos de uso que coincidan con la búsqueda.' : 'No hay casos de uso registrados.'}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                {columns.map((column, index) => (
-                  <TableHead key={index}>{column.label}</TableHead>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {filteredUseCases.map((useCase) => (
-                  <TableRow key={useCase.id}>
-                    {columns.map((column, index) => (
-                      <TableCell key={index}>
-                        {renderCell(useCase, column.accessor)}
-                      </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columns.map((col) => (
+                      <TableHead key={col.accessor} className="whitespace-nowrap">
+                        {col.label}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredUseCases.map((useCase) => (
+                    <TableRow key={useCase.id}>
+                      {columns.map((col) => (
+                        <TableCell key={`${useCase.id}-${col.accessor}`} className="whitespace-nowrap">
+                          {renderCell(useCase, col.accessor)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
