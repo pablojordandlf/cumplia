@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -26,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, AlertCircle, ChevronLeft, FileText, Shield } from 'lucide-react';
+import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Square, FlaskConical, Package } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 import { LimitGate } from '@/components/permission-gate';
@@ -59,6 +60,22 @@ const aiActRoles = [
   { value: 'importer', label: 'Importador', description: 'Introduce sistemas de IA en la UE desde terceros países' },
 ] as const;
 
+// Tooltip component for PoC
+function PoCTooltip() {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="relative inline-flex items-center ml-1" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <HelpCircle className="w-4 h-4 text-gray-400 cursor-help hover:text-blue-500 transition-colors" />
+      {show && (
+        <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl z-50 w-64 leading-relaxed">
+          <strong>¿Qué es una PoC?</strong><br/>
+          Prueba de Concepto (Proof of Concept): Un proyecto piloto o demostración para validar la viabilidad técnica o de negocio antes de un despliegue completo.
+        </span>
+      )}
+    </span>
+  );
+}
+
 // Form schema using Zod - ai_act_level se calculará en el paso 2 (wizard de clasificación)
 const useCaseFormSchema = z.object({
   name: z.string().min(2, {
@@ -67,6 +84,8 @@ const useCaseFormSchema = z.object({
   description: z.string().optional(),
   sector: z.enum(sectors),
   ai_act_role: z.enum(['provider', 'deployer', 'distributor', 'importer']),
+  is_active: z.boolean(),
+  is_poc: z.boolean(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -82,6 +101,8 @@ export default function NewUseCasePage() {
       description: '',
       sector: undefined,
       ai_act_role: undefined,
+      is_active: true,
+      is_poc: false,
     },
   });
 
@@ -175,6 +196,8 @@ export default function NewUseCasePage() {
           ai_act_role: values.ai_act_role,
           status: 'draft',
           ai_act_level: 'unclassified',
+          is_active: values.is_active,
+          is_poc: values.is_poc,
         },
       ]).select('id').single();
 
@@ -324,6 +347,91 @@ export default function NewUseCasePage() {
                   </FormItem>
                 )}
               />
+
+              {/* Estado del sistema */}
+              <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+                <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  Estado del Sistema
+                </h3>
+                
+                <FormField
+                  control={form.control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado del Producto</FormLabel>
+                      <FormControl>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => field.onChange(true)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                              field.value ? 'bg-green-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            <Play className="w-4 h-4" />
+                            Activo
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => field.onChange(false)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                              !field.value ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            <Square className="w-4 h-4" />
+                            Obsoleto
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Indica si el sistema está actualmente en uso o marcado como obsoleto.
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_poc"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        ¿Es una Prueba de Concepto (PoC)?
+                        <PoCTooltip />
+                      </FormLabel>
+                      <FormControl>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => field.onChange(true)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                              field.value ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            <FlaskConical className="w-4 h-4" />
+                            Sí, es PoC
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => field.onChange(false)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                              !field.value ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            <Package className="w-4 h-4" />
+                            No, es producción
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Una PoC es un proyecto piloto antes del despliegue completo.
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               {/* Sección de inspiración - Casos de uso sugeridos */}
               <UseCaseSuggestions 

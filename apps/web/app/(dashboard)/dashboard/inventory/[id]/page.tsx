@@ -386,7 +386,7 @@ export default function UseCaseDetailPage() {
                 </CardContent>
               </Card>
 
-              {/* Estado del Sistema - incluido en Resumen */}
+              {/* Estado del Sistema - incluido en Resumen con capacidad de edición */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -403,12 +403,26 @@ export default function UseCaseDetailPage() {
                         : 'Este caso de uso ha sido marcado como obsoleto.'}
                     </p>
                     <div className="flex gap-3">
-                      <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                        useCase.is_active ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
-                      }`}>
+                      <button
+                        onClick={() => updateStatus({ is_active: true })}
+                        disabled={updating || useCase.is_active}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                          useCase.is_active ? 'bg-green-500 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
                         <Play className="w-4 h-4" />
-                        {useCase.is_active ? 'Activo' : 'Inactivo'}
-                      </div>
+                        Activo
+                      </button>
+                      <button
+                        onClick={() => updateStatus({ is_active: false })}
+                        disabled={updating || !useCase.is_active}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                          !useCase.is_active ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
+                        <Square className="w-4 h-4" />
+                        Obsoleto
+                      </button>
                     </div>
                   </div>
 
@@ -423,12 +437,26 @@ export default function UseCaseDetailPage() {
                         : 'Este caso de uso es un sistema en producción.'}
                     </p>
                     <div className="flex gap-3">
-                      <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                        useCase.is_poc ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
-                      }`}>
+                      <button
+                        onClick={() => updateStatus({ is_poc: true })}
+                        disabled={updating || useCase.is_poc}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                          useCase.is_poc ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
                         <FlaskConical className="w-4 h-4" />
-                        {useCase.is_poc ? 'Sí, es PoC' : 'No, es producción'}
-                      </div>
+                        Sí, es PoC
+                      </button>
+                      <button
+                        onClick={() => updateStatus({ is_poc: false })}
+                        disabled={updating || !useCase.is_poc}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                          !useCase.is_poc ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
+                        <Package className="w-4 h-4" />
+                        No, es producción
+                      </button>
                     </div>
                   </div>
                 </CardContent>
