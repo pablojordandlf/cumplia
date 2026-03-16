@@ -24,12 +24,21 @@ import {
   Play,
   Square,
   FlaskConical,
-  HelpCircle
+  HelpCircle,
+  Plus,
+  X,
+  GripVertical
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+interface CustomField {
+  id: string;
+  key: string;
+  value: string;
+}
 
 interface UseCase {
   id: string;
@@ -45,6 +54,7 @@ interface UseCase {
   updated_at: string;
   classification_data: any;
   created_by: string;
+  custom_fields: CustomField[];
 }
 
 interface Version {
@@ -99,6 +109,12 @@ export default function UseCaseDetailPage() {
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [newFieldKey, setNewFieldKey] = useState('');
+  const [newFieldValue, setNewFieldValue] = useState('');
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editKey, setEditKey] = useState('');
+  const [editValue, setEditValue] = useState('');
 
   useEffect(() => {
     loadData();
@@ -114,6 +130,9 @@ export default function UseCaseDetailPage() {
 
       if (useCaseError) throw useCaseError;
       setUseCase(useCaseData);
+      
+      // Load custom fields
+      setCustomFields(useCaseData.custom_fields || []);
 
       const { data: versionsData, error: versionsError } = await supabase
         .from('use_case_versions')
@@ -199,6 +218,118 @@ export default function UseCaseDetailPage() {
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
+  }
+
+  // Custom Fields Management Functions
+  async function addCustomField() {
+    if (!newFieldKey.trim() || !newFieldValue.trim()) {
+      toast({ title: 'Error', description: 'El nombre y valor del campo son obligatorios', variant: 'destructive' });
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const newField: CustomField = {
+        id: crypto.randomUUID(),
+        key: newFieldKey.trim(),
+        value: newFieldValue.trim()
+      };
+      
+      const updatedFields = [...customFields, newField];
+      
+      const { error } = await supabase
+        .from('use_cases')
+        .update({ 
+          custom_fields: updatedFields,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', useCaseId);
+
+      if (error) throw error;
+      
+      setCustomFields(updatedFields);
+      setNewFieldKey('');
+      setNewFieldValue('');
+      toast({ title: 'Campo añadido', description: 'El campo personalizado se ha guardado correctamente.' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function updateCustomField(fieldId: string) {
+    if (!editKey.trim() || !editValue.trim()) {
+      toast({ title: 'Error', description: 'El nombre y valor del campo son obligatorios', variant: 'destructive' });
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const updatedFields = customFields.map(field => 
+        field.id === fieldId 
+          ? { ...field, key: editKey.trim(), value: editValue.trim() }
+          : field
+      );
+      
+      const { error } = await supabase
+        .from('use_cases')
+        .update({ 
+          custom_fields: updatedFields,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', useCaseId);
+
+      if (error) throw error;
+      
+      setCustomFields(updatedFields);
+      setEditingField(null);
+      setEditKey('');
+      setEditValue('');
+      toast({ title: 'Campo actualizado', description: 'Los cambios se han guardado correctamente.' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function deleteCustomField(fieldId: string) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este campo?')) return;
+
+    setUpdating(true);
+    try {
+      const updatedFields = customFields.filter(field => field.id !== fieldId);
+      
+      const { error } = await supabase
+        .from('use_cases')
+        .update({ 
+          custom_fields: updatedFields,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', useCaseId);
+
+      if (error) throw error;
+      
+      setCustomFields(updatedFields);
+      toast({ title: 'Campo eliminado', description: 'El campo personalizado se ha eliminado correctamente.' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  function startEditing(field: CustomField) {
+    setEditingField(field.id);
+    setEditKey(field.key);
+    setEditValue(field.value);
+  }
+
+  function cancelEditing() {
+    setEditingField(null);
+    setEditKey('');
+    setEditValue('');
   }
 
   async function createVersion() {
@@ -354,7 +485,8 @@ export default function UseCaseDetailPage() {
           <TabsList>
             <TabsTrigger value="summary">Resumen</TabsTrigger>
             <TabsTrigger value="classification">Clasificación</TabsTrigger>
-            <TabsTrigger value="settings">Configuración</TabsTrigger>
+            <TabsTrigger value="settings">Estado</TabsTrigger>
+            <TabsTrigger value="additional">Información Adicional</TabsTrigger>
             <TabsTrigger value="history">Historial</TabsTrigger>
           </TabsList>
 
@@ -386,7 +518,7 @@ export default function UseCaseDetailPage() {
                 </CardContent>
               </Card>
 
-              {/* Estado del Sistema - incluido en Resumen con capacidad de edición */}
+              {/* Estado del Sistema - Solo visualización en Resumen */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -403,26 +535,12 @@ export default function UseCaseDetailPage() {
                         : 'Este caso de uso ha sido marcado como obsoleto.'}
                     </p>
                     <div className="flex gap-3">
-                      <button
-                        onClick={() => updateStatus({ is_active: true })}
-                        disabled={updating || useCase.is_active}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                          useCase.is_active ? 'bg-green-500 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
+                      <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+                        useCase.is_active ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+                      }`}>
                         <Play className="w-4 h-4" />
-                        Activo
-                      </button>
-                      <button
-                        onClick={() => updateStatus({ is_active: false })}
-                        disabled={updating || !useCase.is_active}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                          !useCase.is_active ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
-                        <Square className="w-4 h-4" />
-                        Obsoleto
-                      </button>
+                        {useCase.is_active ? 'Activo' : 'Inactivo'}
+                      </div>
                     </div>
                   </div>
 
@@ -437,26 +555,12 @@ export default function UseCaseDetailPage() {
                         : 'Este caso de uso es un sistema en producción.'}
                     </p>
                     <div className="flex gap-3">
-                      <button
-                        onClick={() => updateStatus({ is_poc: true })}
-                        disabled={updating || useCase.is_poc}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                          useCase.is_poc ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
+                      <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+                        useCase.is_poc ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+                      }`}>
                         <FlaskConical className="w-4 h-4" />
-                        Sí, es PoC
-                      </button>
-                      <button
-                        onClick={() => updateStatus({ is_poc: false })}
-                        disabled={updating || !useCase.is_poc}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                          !useCase.is_poc ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
-                        <Package className="w-4 h-4" />
-                        No, es producción
-                      </button>
+                        {useCase.is_poc ? 'Sí, es PoC' : 'No, es producción'}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -503,7 +607,7 @@ export default function UseCaseDetailPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />
-                  Configuración
+                  Estado del Sistema
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -562,6 +666,146 @@ export default function UseCaseDetailPage() {
                       No, es producción
                     </button>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="additional">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Información Adicional
+                </CardTitle>
+                <CardDescription>
+                  Añade campos personalizados con información adicional sobre este caso de uso.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Add new field form */}
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-3">Añadir nuevo campo</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-1">Nombre del campo</label>
+                      <input
+                        type="text"
+                        value={newFieldKey}
+                        onChange={(e) => setNewFieldKey(e.target.value)}
+                        placeholder="Ej: Responsable, URL, Proveedor..."
+                        className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={updating}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-1">Valor</label>
+                      <input
+                        type="text"
+                        value={newFieldValue}
+                        onChange={(e) => setNewFieldValue(e.target.value)}
+                        placeholder="Introduce el valor..."
+                        className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled={updating}
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={addCustomField}
+                    disabled={updating || !newFieldKey.trim() || !newFieldValue.trim()}
+                    className="mt-3"
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Añadir campo
+                  </Button>
+                </div>
+
+                {/* Custom fields list */}
+                <div className="space-y-3">
+                  {customFields.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                      <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p>No hay campos adicionales.</p>
+                      <p className="text-sm mt-1">Añade información personalizada usando el formulario de arriba.</p>
+                    </div>
+                  ) : (
+                    customFields.map((field) => (
+                      <div key={field.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        {editingField === field.id ? (
+                          // Edit mode
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                                <input
+                                  type="text"
+                                  value={editKey}
+                                  onChange={(e) => setEditKey(e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  disabled={updating}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                                <input
+                                  type="text"
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  disabled={updating}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                onClick={() => updateCustomField(field.id)}
+                                disabled={updating}
+                                size="sm"
+                              >
+                                Guardar
+                              </Button>
+                              <Button 
+                                onClick={cancelEditing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          // View mode
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <GripVertical className="w-5 h-5 text-gray-400" />
+                              <div>
+                                <h5 className="font-medium text-gray-900">{field.key}</h5>
+                                <p className="text-gray-600">{field.value}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => startEditing(field)}
+                                variant="ghost"
+                                size="sm"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={() => deleteCustomField(field.id)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

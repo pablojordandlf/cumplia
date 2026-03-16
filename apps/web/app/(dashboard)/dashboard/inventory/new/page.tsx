@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Square, FlaskConical, Package } from 'lucide-react';
+import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Square, FlaskConical, Package, X, GripVertical, Pencil } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 import { LimitGate } from '@/components/permission-gate';
@@ -37,6 +37,13 @@ import { Badge } from '@/components/ui/badge';
 
 const MAX_FILE_SIZE = 500_000;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+// Custom field interface
+interface CustomField {
+  id: string;
+  key: string;
+  value: string;
+}
 
 // Define the sectors
 const sectors = [
@@ -94,6 +101,14 @@ export default function NewUseCasePage() {
   const router = useRouter();
   const { limit, used, remaining, percentage, canUse, isLoading } = useLimit('useCases');
   
+  // Custom fields state
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [newFieldKey, setNewFieldKey] = useState('');
+  const [newFieldValue, setNewFieldValue] = useState('');
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editKey, setEditKey] = useState('');
+  const [editValue, setEditValue] = useState('');
+  
   const form = useForm<z.infer<typeof useCaseFormSchema>>({
     resolver: zodResolver(useCaseFormSchema),
     defaultValues: {
@@ -105,6 +120,70 @@ export default function NewUseCasePage() {
       is_poc: false,
     },
   });
+
+  // Custom fields management functions
+  function addCustomField() {
+    if (!newFieldKey.trim() || !newFieldValue.trim()) {
+      toast({ 
+        title: 'Error', 
+        description: 'El nombre y valor del campo son obligatorios', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    const newField: CustomField = {
+      id: crypto.randomUUID(),
+      key: newFieldKey.trim(),
+      value: newFieldValue.trim()
+    };
+    
+    setCustomFields([...customFields, newField]);
+    setNewFieldKey('');
+    setNewFieldValue('');
+    toast({ title: 'Campo añadido', description: 'El campo personalizado se ha añadido.' });
+  }
+
+  function updateCustomField(fieldId: string) {
+    if (!editKey.trim() || !editValue.trim()) {
+      toast({ 
+        title: 'Error', 
+        description: 'El nombre y valor del campo son obligatorios', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    const updatedFields = customFields.map(field => 
+      field.id === fieldId 
+        ? { ...field, key: editKey.trim(), value: editValue.trim() }
+        : field
+    );
+    
+    setCustomFields(updatedFields);
+    setEditingField(null);
+    setEditKey('');
+    setEditValue('');
+    toast({ title: 'Campo actualizado', description: 'Los cambios se han guardado.' });
+  }
+
+  function deleteCustomField(fieldId: string) {
+    const updatedFields = customFields.filter(field => field.id !== fieldId);
+    setCustomFields(updatedFields);
+    toast({ title: 'Campo eliminado', description: 'El campo personalizado se ha eliminado.' });
+  }
+
+  function startEditing(field: CustomField) {
+    setEditingField(field.id);
+    setEditKey(field.key);
+    setEditValue(field.value);
+  }
+
+  function cancelEditing() {
+    setEditingField(null);
+    setEditKey('');
+    setEditValue('');
+  }
 
   // Show loading state while checking permissions
   if (isLoading) {
@@ -198,6 +277,7 @@ export default function NewUseCasePage() {
           ai_act_level: 'unclassified',
           is_active: values.is_active,
           is_poc: values.is_poc,
+          custom_fields: customFields.length > 0 ? customFields : [],
         },
       ]).select('id').single();
 
@@ -431,6 +511,137 @@ export default function NewUseCasePage() {
                     </FormItem>
                   )}
                 />
+              </div>
+
+              {/* Información Adicional - Campos personalizados */}
+              <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+                <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Información Adicional
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Añade campos personalizados con información adicional sobre este caso de uso.
+                </p>
+
+                {/* Add new field form */}
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-3 text-sm">Añadir nuevo campo</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-1">Nombre del campo</label>
+                      <input
+                        type="text"
+                        value={newFieldKey}
+                        onChange={(e) => setNewFieldKey(e.target.value)}
+                        placeholder="Ej: Responsable, URL, Proveedor..."
+                        className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-blue-800 mb-1">Valor</label>
+                      <input
+                        type="text"
+                        value={newFieldValue}
+                        onChange={(e) => setNewFieldValue(e.target.value)}
+                        placeholder="Introduce el valor..."
+                        className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    type="button"
+                    onClick={addCustomField}
+                    disabled={!newFieldKey.trim() || !newFieldValue.trim()}
+                    className="mt-3"
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Añadir campo
+                  </Button>
+                </div>
+
+                {/* Custom fields list */}
+                <div className="space-y-2">
+                  {customFields.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg text-sm">
+                      No hay campos adicionales. Añade información personalizada usando el formulario de arriba.
+                    </div>
+                  ) : (
+                    customFields.map((field) => (
+                      <div key={field.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        {editingField === field.id ? (
+                          // Edit mode
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                value={editKey}
+                                onChange={(e) => setEditKey(e.target.value)}
+                                placeholder="Nombre"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                              />
+                              <input
+                                type="text"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                placeholder="Valor"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                type="button"
+                                onClick={() => updateCustomField(field.id)}
+                                size="sm"
+                              >
+                                Guardar
+                              </Button>
+                              <Button 
+                                type="button"
+                                onClick={cancelEditing}
+                                variant="outline"
+                                size="sm"
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          // View mode
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <GripVertical className="w-4 h-4 text-gray-400" />
+                              <div>
+                                <span className="font-medium text-gray-900 text-sm">{field.key}</span>
+                                <span className="text-gray-600 text-sm ml-2">{field.value}</span>
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                type="button"
+                                onClick={() => startEditing(field)}
+                                variant="ghost"
+                                size="sm"
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => deleteCustomField(field.id)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
 
               {/* Sección de inspiración - Casos de uso sugeridos */}
