@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AlertCircle, Clock, ShieldAlert, Shield, CheckCircle2, Brain, FileCheck } from 'lucide-react';
+import { AlertCircle, Clock, ShieldAlert, Shield, CheckCircle2, FileCheck, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -25,6 +25,8 @@ interface ObligationItem {
   key: string;
   title: string;
   description: string;
+  isWarning?: boolean;
+  warningText?: string;
 }
 
 interface UseCaseObligation {
@@ -43,7 +45,7 @@ const OBLIGATIONS_BY_LEVEL: Record<string, ObligationItem[]> = {
     { key: 'notify_authorities', title: 'Notificación a autoridades', description: 'Si se detecta un uso prohibido, debe notificarse inmediatamente a la autoridad nacional competente.' },
   ],
   high_risk: [
-    { key: 'eu_database_registration', title: 'Registro en base de datos UE', description: 'El sistema debe registrarse en la base de datos de sistemas de IA de alto riesgo de la UE (Art. 71).' },
+    { key: 'eu_database_registration', title: 'Registro en base de datos UE', description: 'El sistema debe registrarse en la base de datos de sistemas de IA de alto riesgo de la UE (Art. 71).', isWarning: true, warningText: '⚠️ La base de datos de la Comisión Europea aún no está disponible. Se espera su apertura en los próximos meses.' },
     { key: 'technical_documentation', title: 'Documentación técnica completa', description: 'Mantener documentación técnica actualizada conforme al Anexo IV (Art. 11).' },
     { key: 'automatic_logs', title: 'Logs automáticos', description: 'Registro automático de eventos durante el funcionamiento del sistema (Art. 12).' },
     { key: 'human_oversight', title: 'Supervisión humana efectiva', description: 'Garantizar supervisión humana adecuada para prevenir o minimizar riesgos (Art. 14).' },
@@ -54,32 +56,13 @@ const OBLIGATIONS_BY_LEVEL: Record<string, ObligationItem[]> = {
   ],
   limited_risk: [
     { key: 'inform_ai_interaction', title: 'Informar que se interactúa con IA', description: 'Los usuarios deben saber que están interactuando con un sistema de inteligencia artificial (chatbots, sistemas conversacionales).' },
-    { key: 'disclose_synthetic_content', title: 'Divulgación de contenido sintético', description: 'Marcar claramente contenido generado por IA (deepfakes, imágenes sintéticas, audio sintético) como artificialmente generado o manipulado.' },
+    { key: 'disclose_synthetic_content', title: 'Divulgación de contenido sintético', description: 'Marcar claramente contenido generado por IA como artificialmente generado o manipulado. Se aplica a deepfakes, imágenes sintéticas, audio y video generado por IA (multimedia).' },
     { key: 'inform_emotion_recognition', title: 'Informar sobre reconocimiento emocional/biométrico', description: 'Notificar a las personas cuando se utilice un sistema de reconocimiento de emociones o categorización biométrica.' },
-    { key: 'label_ai_text', title: 'Etiquetado de texto generado por IA', description: 'Divulgar que el texto ha sido generado por IA (excepto cuando sea revisado por humanos, asistentes editoriales o contenido artístico/libre).' },
+    { key: 'label_ai_text', title: 'Etiquetado de texto generado por IA', description: 'Divulgar que el texto ha sido generado por IA (exclusivamente texto escrito). Excepciones: cuando sea revisado por humanos, asistentes editoriales o contenido artístico/libre.' },
   ],
   minimal_risk: [
     { key: 'voluntary_code_conduct', title: 'Adhesión voluntaria a códigos de conducta', description: 'Posibilidad de adherirse a códigos de conducta voluntarios para demostrar compromiso ético.' },
     { key: 'best_practices', title: 'Buenas prácticas recomendadas', description: 'Seguir las mejores prácticas y estándares de la industria para sistemas de IA.' },
-  ],
-  gpai_sr: [
-    { key: 'technical_doc_gpai', title: 'Documentación técnica', description: 'Mantener documentación técnica actualizada del modelo (incluyendo proceso de entrenamiento y evaluación).' },
-    { key: 'copyright_compliance', title: 'Respetar derechos de autor', description: 'Respetar la ley de derechos de autor y derechos conexos, y proporcionar un resumen del contenido utilizado para entrenar.' },
-    { key: 'use_policy', title: 'Política de uso', description: 'Elaborar y mantener una política de uso respetuosa de los derechos de la UE.' },
-    { key: 'systemic_risk_assessment', title: 'Evaluación de riesgos sistémicos', description: 'Realizar evaluaciones de riesgos sistémicos, incluyendo pruebas adversarias y red teaming.' },
-    { key: 'risk_mitigation', title: 'Mitigación de riesgos', description: 'Implementar medidas de mitigación de riesgos sistémicos identificados.' },
-    { key: 'cybersecurity', title: 'Seguridad física y cibernética', description: 'Garantizar la seguridad del modelo y la infraestructura asociada.' },
-    { key: 'incident_reporting', title: 'Informe de incidentes graves', description: 'Notificar a la Comisión y autoridades nacionales competentes sobre incidentes graves.' },
-  ],
-  gpai_model: [
-    { key: 'technical_doc_gpai', title: 'Documentación técnica', description: 'Mantener documentación técnica actualizada del modelo (incluyendo proceso de entrenamiento y evaluación).' },
-    { key: 'copyright_compliance', title: 'Respetar derechos de autor', description: 'Respetar la ley de derechos de autor y derechos conexos, y proporcionar un resumen del contenido utilizado para entrenar.' },
-    { key: 'use_policy', title: 'Política de uso', description: 'Elaborar y mantener una política de uso respetuosa de los derechos de la UE.' },
-  ],
-  gpai_system: [
-    { key: 'technical_doc_gpai', title: 'Documentación técnica', description: 'Mantener documentación técnica actualizada del modelo (incluyendo proceso de entrenamiento y evaluación).' },
-    { key: 'copyright_compliance', title: 'Respetar derechos de autor', description: 'Respetar la ley de derechos de autor y derechos conexos, y proporcionar un resumen del contenido utilizado para entrenar.' },
-    { key: 'use_policy', title: 'Política de uso', description: 'Elaborar y mantener una política de uso respetuosa de los derechos de la UE.' },
   ],
   unclassified: [
     { key: 'classify_system', title: 'Clasificar el sistema', description: 'Realizar la clasificación del sistema de IA según el AI Act para determinar las obligaciones aplicables.' },
@@ -91,9 +74,6 @@ const LEVEL_INFO: Record<string, { title: string; icon: any; reference: string }
   high_risk: { title: 'Obligaciones de Alto Riesgo', icon: ShieldAlert, reference: 'Artículos 6, 9-15, 43, 71 del AI Act' },
   limited_risk: { title: 'Obligaciones de Transparencia', icon: Shield, reference: 'Artículo 50 del AI Act' },
   minimal_risk: { title: 'Riesgo Mínimo - Códigos de Conducta', icon: CheckCircle2, reference: 'Artículo 95 del AI Act' },
-  gpai_sr: { title: 'Obligaciones GPAI con Riesgo Sistémico', icon: Brain, reference: 'Artículos 52, 55 del AI Act' },
-  gpai_model: { title: 'Obligaciones GPAI (Modelo)', icon: Brain, reference: 'Artículo 52 del AI Act' },
-  gpai_system: { title: 'Obligaciones GPAI (Sistema)', icon: Brain, reference: 'Artículo 52 del AI Act' },
   unclassified: { title: 'Sin clasificar', icon: Clock, reference: 'AI Act' },
 };
 
@@ -245,10 +225,11 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
               return (
                 <div
                   key={obligation.key}
-                  className={`p-3 rounded-lg border transition-all duration-200 ${
+                  onClick={() => !isLoading && toggleObligation(obligation, !isCompleted)}
+                  className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
                     isCompleted
                       ? 'bg-green-50 border-green-200'
-                      : 'bg-white border-gray-200 hover:border-blue-300'
+                      : 'bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -257,7 +238,8 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                       checked={isCompleted}
                       onCheckedChange={(checked) => toggleObligation(obligation, checked as boolean)}
                       disabled={isLoading}
-                      className="mt-1"
+                      className="mt-1 pointer-events-none"
+                      onClick={(e) => e.stopPropagation()}
                     />
                     <div className="flex-1">
                       <label
@@ -271,6 +253,12 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                       <p className={`text-sm mt-1 ${isCompleted ? 'text-green-600' : 'text-gray-600'}`}>
                         {obligation.description}
                       </p>
+                      {obligation.isWarning && obligation.warningText && (
+                        <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded flex items-start gap-2">
+                          <Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-amber-700">{obligation.warningText}</p>
+                        </div>
+                      )}
                       {isCompleted && obligationsStatus[obligation.key]?.completed_at && (
                         <p className="text-xs text-green-500 mt-2">
                           Completado el {new Date(obligationsStatus[obligation.key].completed_at!).toLocaleDateString('es-ES')}
