@@ -26,8 +26,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, AlertCircle } from 'lucide-react';
+import { Plus, AlertCircle, ChevronLeft, FileText, Shield } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 import { LimitGate } from '@/components/permission-gate';
 import { useLimit } from '@/hooks/use-permissions';
 import { Progress } from '@/components/ui/progress';
@@ -35,15 +36,6 @@ import { Badge } from '@/components/ui/badge';
 
 const MAX_FILE_SIZE = 500_000;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-
-// Define the AI Act risk levels
-const aiActRiskLevels = [
-  'prohibited',
-  'high_risk',
-  'limited_risk',
-  'minimal_risk',
-  'unclassified',
-] as const; // Using 'as const' for type safety
 
 // Define the sectors
 const sectors = [
@@ -67,14 +59,13 @@ const aiActRoles = [
   { value: 'importer', label: 'Importador', description: 'Introduce sistemas de IA en la UE desde terceros países' },
 ] as const;
 
-// Form schema using Zod
+// Form schema using Zod - ai_act_level se calculará en el paso 2 (wizard de clasificación)
 const useCaseFormSchema = z.object({
   name: z.string().min(2, {
     message: 'El nombre debe tener al menos 2 caracteres.',
   }),
   description: z.string().optional(),
   sector: z.enum(sectors),
-  ai_act_level: z.enum(aiActRiskLevels),
   ai_act_role: z.enum(['provider', 'deployer', 'distributor', 'importer']),
 });
 
@@ -90,7 +81,6 @@ export default function NewUseCasePage() {
       name: '',
       description: '',
       sector: undefined,
-      ai_act_level: undefined,
       ai_act_role: undefined,
     },
   });
@@ -175,26 +165,28 @@ export default function NewUseCasePage() {
         return;
       }
 
-      const { error } = await supabase.from('use_cases').insert([
+      // Crear el caso de uso como borrador - ai_act_level será calculado en el paso 2
+      const { data: newUseCase, error } = await supabase.from('use_cases').insert([
         {
           user_id: session.user.id,
           name: values.name,
           description: values.description,
           sector: values.sector,
-          ai_act_level: values.ai_act_level,
           ai_act_role: values.ai_act_role,
-          status: 'created',
+          status: 'draft',
+          ai_act_level: 'unclassified',
         },
-      ]);
+      ]).select('id').single();
 
       if (error) throw error;
 
       toast({
         title: 'Caso de Uso Creado',
-        description: 'Tu nuevo caso de uso ha sido registrado exitosamente.',
+        description: 'Continúa con el cuestionario de clasificación para determinar el nivel de riesgo AI Act.',
         variant: 'default',
       });
-      router.push('/dashboard/inventory'); // Redirect to inventory page on success
+      // Redirigir al wizard de clasificación con el ID del nuevo caso
+      router.push(`/dashboard/inventory/${newUseCase?.id}/classify`);
     } catch (error: any) {
       console.error('Error creating use case:', error);
       toast({
@@ -207,34 +199,61 @@ export default function NewUseCasePage() {
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/dashboard/inventory">
-          <Button variant="ghost" size="icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5L8.25 12l7.5-7.5"
-              />
-            </svg>
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Nuevo Caso de Uso</h1>
-        <p className="text-gray-600 mt-1">Registra un nuevo sistema de IA</p>
+      {/* Header con StepIndicator */}
+      <div className="max-w-3xl mx-auto mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <Link href="/dashboard/inventory">
+            <Button variant="ghost" size="icon">
+              <ChevronLeft className="w-6 h-6" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Nuevo Caso de Uso</h1>
+            <p className="text-gray-600">Registra un nuevo sistema de IA en dos pasos</p>
+          </div>
+        </div>
+
+        {/* Step Indicator */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="flex items-center">
+            {/* Step 1 - Active */}
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                1
+              </div>
+              <div className="hidden sm:block">
+                <p className="font-medium text-gray-900">Información Básica</p>
+                <p className="text-sm text-gray-500">Nombre, sector, rol</p>
+              </div>
+            </div>
+            
+            {/* Connector */}
+            <div className="flex-1 h-0.5 bg-gray-200 mx-4">
+              <div className="h-full bg-gray-300 w-1/2"></div>
+            </div>
+            
+            {/* Step 2 - Pending */}
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center font-semibold">
+                2
+              </div>
+              <div className="hidden sm:block">
+                <p className="font-medium text-gray-500">Clasificación AI Act</p>
+                <p className="text-sm text-gray-400">Cuestionario de riesgo</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Card className="max-w-2xl mx-auto">
+      <Card className="max-w-3xl mx-auto">
         <CardHeader>
-          <CardTitle>Detalles del Caso de Uso</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Paso 1: Información Básica
+          </CardTitle>
           <CardDescription>
-            Completa la información requerida para registrar tu sistema de IA.
+            Completa los datos iniciales de tu sistema de IA. El nivel de riesgo se calculará automáticamente en el paso siguiente.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -306,32 +325,17 @@ export default function NewUseCasePage() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="ai_act_level"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nivel de Riesgo AI Act</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el nivel de riesgo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {aiActRiskLevels.map((level) => (
-                          <SelectItem key={level} value={level}>
-                            <span className="capitalize">{level.replace('_', ' ')}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Clasificación del sistema de IA según el Reglamento Europeo AI Act.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              {/* Sección de inspiración - Casos de uso sugeridos */}
+              <UseCaseSuggestions 
+                onSelectCase={(useCase) => {
+                  form.setValue('name', useCase.name);
+                  form.setValue('description', useCase.description);
+                  form.setValue('sector', useCase.sector as any);
+                  toast({
+                    title: 'Caso precargado',
+                    description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.`,
+                  });
+                }}
               />
 
               <FormField
@@ -379,34 +383,43 @@ export default function NewUseCasePage() {
                 </p>
               </div>
 
+              {/* Info box about next step */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-blue-900 text-sm">Siguiente paso: Clasificación AI Act</p>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Después de guardar, completarás un cuestionario para determinar automáticamente el nivel de riesgo según el Reglamento Europeo.
+                  </p>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-4">
                 <Button variant="outline" type="button" onClick={() => router.push('/dashboard/inventory')}>
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting && (
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 8.001l-1.593 1.594c-.472-.472-.845-.992-1.135-1.594l1.207-1.207z"
-                      ></path>
-                    </svg>
+                <Button type="submit" disabled={form.formState.isSubmitting} size="lg">
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      Continuar al Paso 2
+                      <svg className="ml-2 w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </>
                   )}
-                  Guardar Caso de Uso
                 </Button>
               </div>
             </form>

@@ -1,157 +1,201 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Sparkles } from 'lucide-react';
-import { RiskBadge } from '@/components/risk-badge';
+import { Lightbulb, ChevronDown, ChevronUp, Sparkles, Building2, ArrowRight } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { toast } from '@/hooks/use-toast';
 
-interface CatalogItem {
+interface UseCaseCatalog {
   id: string;
   name: string;
   description: string;
   sector: string;
-  typical_ai_act_level: string;
-  template_data?: Record<string, unknown>;
+  ai_act_level: string;
+  typical_purpose?: string;
 }
 
 interface UseCaseSuggestionsProps {
-  onSelectSuggestion: (suggestion: CatalogItem) => void;
-  selectedSector?: string;
+  onSelectCase: (useCase: UseCaseCatalog) => void;
 }
 
+const riskLevelColors: Record<string, string> = {
+  prohibited: 'bg-red-100 text-red-800 border-red-200',
+  high_risk: 'bg-orange-100 text-orange-800 border-orange-200',
+  limited_risk: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  minimal_risk: 'bg-green-100 text-green-800 border-green-200',
+  unclassified: 'bg-gray-100 text-gray-800 border-gray-200',
+};
+
+const riskLevelLabels: Record<string, string> = {
+  prohibited: 'Prohibido',
+  high_risk: 'Alto Riesgo',
+  limited_risk: 'Riesgo Limitado',
+  minimal_risk: 'Riesgo Mínimo',
+  unclassified: 'Sin clasificar',
+};
+
 const sectorLabels: Record<string, string> = {
+  finance: 'Finanzas',
   healthcare: 'Salud',
   education: 'Educación',
-  security: 'Seguridad Pública',
+  government: 'Gobierno',
+  retail: 'Retail',
+  technology: 'Tecnología',
+  entertainment: 'Entretenimiento',
+  manufacturing: 'Manufactura',
+  transportation: 'Transporte',
   employment: 'Empleo',
-  transport: 'Transporte',
-  finance: 'Finanzas',
+  security: 'Seguridad',
+  other: 'Otros',
+  general: 'General',
+  customer_service: 'Atención al Cliente',
+  media: 'Medios',
+  ecommerce: 'E-commerce',
+  border: 'Fronteras',
   justice: 'Justicia',
-  other: 'Otro',
+  infrastructure: 'Infraestructura',
 };
 
-const levelMap: Record<string, 'prohibited' | 'high' | 'limited' | 'minimal' | 'unclassified'> = {
-  prohibited: 'prohibited',
-  high_risk: 'high',
-  limited_risk: 'limited',
-  minimal_risk: 'minimal',
-  unclassified: 'unclassified',
-};
-
-export function UseCaseSuggestions({ onSelectSuggestion, selectedSector }: UseCaseSuggestionsProps) {
-  const [suggestions, setSuggestions] = useState<CatalogItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+export function UseCaseSuggestions({ onSelectCase }: UseCaseSuggestionsProps) {
+  const [catalog, setCatalog] = useState<UseCaseCatalog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSuggestions();
-    setShowAll(false); // Reset when sector changes
-  }, [selectedSector]);
+    loadCatalog();
+  }, []);
 
-  const loadSuggestions = async () => {
-    setIsLoading(true);
+  async function loadCatalog() {
     try {
-      const params = selectedSector && selectedSector !== '__unset__' 
-        ? `?sector=${encodeURIComponent(selectedSector)}` 
-        : '';
-      const response = await fetch(`/api/catalog${params}`);
-      if (!response.ok) {
-        console.error('API error:', response.status, response.statusText);
-        throw new Error('Error loading suggestions');
-      }
-      const data = await response.json();
-      console.log('Catalog API response:', data);
-      // API returns { catalog: [...] } or directly [...]
-      const items = data.catalog || data || [];
-      console.log('Loaded suggestions:', items.length, items);
-      setSuggestions(items);
+      const { data, error } = await supabase
+        .from('use_case_catalog')
+        .select('id, name, description, sector, ai_act_level, typical_purpose')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setCatalog(data || []);
     } catch (error) {
-      console.error('Error loading suggestions:', error);
-      setSuggestions([]);
+      console.error('Error loading catalog:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar los casos de ejemplo',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }
 
-  const visibleSuggestions = showAll ? suggestions : suggestions.slice(0, 4);
-  const hasMore = suggestions.length > 4;
+  const displayedCases = showAll ? catalog : catalog.slice(0, 4);
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100">
-        <CardContent className="py-8">
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-amber-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-24 bg-amber-100 rounded-lg"></div>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
-  if (suggestions.length === 0) {
-    console.log('No suggestions to display');
+  if (catalog.length === 0) {
     return null;
   }
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-blue-600" />
-          <CardTitle className="text-lg text-blue-900">
-            Casos de uso sugeridos
-          </CardTitle>
+    <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 border border-amber-200 rounded-xl p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 bg-amber-100 rounded-lg">
+          <Lightbulb className="w-5 h-5 text-amber-600" />
         </div>
-        <p className="text-sm text-blue-700">
-          Selecciona uno para empezar con una plantilla, o crea uno desde cero
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {visibleSuggestions.map((item) => (
-            <Card
-              key={item.id}
-              className="cursor-pointer hover:shadow-md transition-shadow border-blue-200 hover:border-blue-300 bg-white"
-              onClick={() => onSelectSuggestion(item)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 truncate">
-                      {item.name}
-                    </h4>
-                    <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                      {item.description}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline" className="text-xs">
-                        {sectorLabels[item.sector] || item.sector}
-                      </Badge>
-                      <RiskBadge
-                        level={levelMap[item.typical_ai_act_level] || 'unclassified'}
-                        size="sm"
-                        showIcon={false}
-                      />
-                    </div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div>
+          <h3 className="font-semibold text-amber-900">¿Necesitas inspiración?</h3>
+          <p className="text-sm text-amber-700">
+            Selecciona un caso de uso típico para empezar rápidamente
+          </p>
         </div>
-        {hasMore && (
-          <Button
-            variant="ghost"
-            className="w-full mt-4 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            onClick={() => setShowAll(!showAll)}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {displayedCases.map((useCase) => (
+          <button
+            key={useCase.id}
+            onClick={() => {
+              setSelectedId(useCase.id);
+              onSelectCase(useCase);
+            }}
+            className={`text-left p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md group ${
+              selectedId === useCase.id
+                ? 'border-amber-500 bg-amber-100'
+                : 'border-amber-200 bg-white hover:border-amber-300'
+            }`}
           >
-            {showAll ? 'Ver menos' : `Ver más (${suggestions.length - 4} restantes)`}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-medium text-gray-900 truncate group-hover:text-amber-700 transition-colors">
+                  {useCase.name}
+                </h4>
+                <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                  {useCase.description}
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <Badge 
+                variant="outline" 
+                className={`text-xs ${riskLevelColors[useCase.ai_act_level] || riskLevelColors.unclassified}`}
+              >
+                {riskLevelLabels[useCase.ai_act_level] || 'Sin clasificar'}
+              </Badge>
+              <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                <Building2 className="w-3 h-3" />
+                {sectorLabels[useCase.sector] || useCase.sector}
+              </Badge>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {catalog.length > 4 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowAll(!showAll)}
+          className="mt-4 w-full text-amber-700 hover:text-amber-800 hover:bg-amber-100"
+        >
+          {showAll ? (
+            <>
+              <ChevronUp className="w-4 h-4 mr-2" />
+              Ver menos
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-4 h-4 mr-2" />
+              Ver más ({catalog.length - 4} casos adicionales)
+            </>
+          )}
+        </Button>
+      )}
+
+      <div className="mt-4 pt-4 border-t border-amber-200">
+        <div className="flex items-center gap-2 text-sm text-amber-700">
+          <Sparkles className="w-4 h-4" />
+          <span>
+            <strong>Consejo:</strong> CumplIA calculará automáticamente el nivel de riesgo después de completar el cuestionario de clasificación.
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
