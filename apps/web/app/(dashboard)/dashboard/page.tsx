@@ -26,7 +26,8 @@ import {
   Bot,
   Sparkles as SparklesIcon,
   Ban,
-  MinusCircle
+  MinusCircle,
+  FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -538,6 +539,26 @@ export default function DashboardPage() {
                 </Link>
               </div>
             </CardContent>
+          </Card>
+
+          {/* Documentos Card */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <Link href="/dashboard/documents">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900">Documentos</h3>
+                    <p className="text-sm text-gray-500">
+                      Genera documentos de cumplimiento automáticamente
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Link>
           </Card>
 
         </div>

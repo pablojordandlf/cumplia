@@ -77,10 +77,12 @@ export default function DocumentsPage() {
   const [showWizard, setShowWizard] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState<string>('');
   const [userPlan, setUserPlan] = useState<string>('starter');
+  const [planChecked, setPlanChecked] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadDocuments();
+    // Load with silent=true to prevent flash of error toast on initial load
+    loadDocuments(true);
     loadDocumentTypes();
     checkUserPlan();
   }, []);
@@ -88,7 +90,10 @@ export default function DocumentsPage() {
   const checkUserPlan = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) return;
+      if (!session?.access_token) {
+        setPlanChecked(true);
+        return;
+      }
 
       const response = await fetch('/api/v1/billing/status', {
         headers: {
@@ -113,10 +118,12 @@ export default function DocumentsPage() {
       }
     } catch (error) {
       console.error('Error checking plan:', error);
+    } finally {
+      setPlanChecked(true);
     }
   };
 
-  const loadDocuments = async () => {
+  const loadDocuments = async (silent = false) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -151,11 +158,14 @@ export default function DocumentsPage() {
       setDocuments(data.documents || []);
     } catch (error: any) {
       console.error('Error loading documents:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudieron cargar los documentos',
-        variant: 'destructive',
-      });
+      // Only show toast if not in silent mode (initial load)
+      if (!silent) {
+        toast({
+          title: 'Error',
+          description: error.message || 'No se pudieron cargar los documentos',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -270,15 +280,15 @@ export default function DocumentsPage() {
           <p className="text-gray-600 mt-1">
             Genera automáticamente los documentos de cumplimiento requeridos por el AI Act
           </p>
-          {userPlan === 'starter' && (
+          {planChecked && userPlan === 'starter' && (
             <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
               <Lock className="w-5 h-5 text-amber-600 mt-0.5" />
               <div>
                 <p className="text-amber-800 font-medium">Funcionalidad de Documentos</p>
                 <p className="text-amber-700 text-sm">
-                  Algunos documentos requieren un plan Essential o Professional. 
-                  <Button 
-                    variant="link" 
+                  Algunos documentos requieren un plan Essential o Professional.{" "}
+                  <Button
+                    variant="link"
                     className="text-amber-800 p-0 h-auto font-medium"
                     onClick={() => setShowUpgradeModal(true)}
                   >
