@@ -64,11 +64,12 @@ export async function POST(request: NextRequest) {
     // Get user's organization membership and plan
     const { data: membership, error: membershipError } = await supabase
       .from('organization_members')
-      .select('role, org_id, organizations!inner(id, name, subscription_plan)')
+      .select('role, organization_id, organizations!inner(id, name, subscription_plan)')
       .eq('user_id', user.id)
       .single();
 
     if (membershipError || !membership) {
+      console.error('Membership error:', membershipError);
       return NextResponse.json(
         { error: 'Forbidden: User is not a member of any organization' },
         { status: 403 }
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
       : membership.organizations;
     
     const plan = organization?.subscription_plan || 'free';
-    const organizationId = membership.org_id;
+    const organizationId = membership.organization_id;
 
     // Check Pro requirement
     if (PRO_DOCUMENTS.includes(type) && plan === 'free') {
