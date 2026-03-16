@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Pencil, Eye, Search, LayoutDashboard, ArrowLeft, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Eye, Search, LayoutDashboard, ArrowLeft, Trash2, LayoutTemplate } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -188,12 +188,20 @@ export default function InventoryPage() {
           <h1 className="text-2xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
           <p className="text-gray-600 mt-1">Lista y gestiona tus sistemas de IA</p>
         </div>
-        <Link href="/dashboard/inventory/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Caso de Uso
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/dashboard/inventory/templates">
+            <Button variant="outline">
+              <LayoutTemplate className="mr-2 h-4 w-4" />
+              Plantillas
+            </Button>
+          </Link>
+          <Link href="/dashboard/inventory/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Caso de Uso
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="mb-6">

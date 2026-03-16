@@ -8,7 +8,8 @@ import {
   FolderKanban, 
   FileText, 
   Settings,
-  Shield
+  Shield,
+  LayoutTemplate
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,11 @@ const navItems = [
     title: "Casos de Uso",
     href: "/dashboard/inventory",
     icon: FolderKanban,
+  },
+  {
+    title: "Plantillas",
+    href: "/dashboard/inventory/templates",
+    icon: LayoutTemplate,
   },
   {
     title: "Documentos",

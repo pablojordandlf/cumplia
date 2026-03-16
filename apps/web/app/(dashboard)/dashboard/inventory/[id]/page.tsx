@@ -27,7 +27,12 @@ import {
   HelpCircle,
   Plus,
   X,
-  GripVertical
+  GripVertical,
+  LayoutTemplate,
+  Globe,
+  ShieldAlert,
+  ShieldCheck,
+  Brain
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
@@ -65,6 +70,19 @@ interface Version {
   created_at: string;
   created_by: string;
   notes: string;
+}
+
+interface TemplateField {
+  id: string;
+  key: string;
+}
+
+interface CustomFieldTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  applies_to: string;
+  field_definitions: TemplateField[];
 }
 
 const riskLevels: Record<string, { label: string; color: string; icon: any; description: string }> = {
@@ -115,6 +133,10 @@ export default function UseCaseDetailPage() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editKey, setEditKey] = useState('');
   const [editValue, setEditValue] = useState('');
+  
+  // Templates state
+  const [applicableTemplates, setApplicableTemplates] = useState<CustomFieldTemplate[]>([]);
+  const [templateFields, setTemplateFields] = useState<CustomField[]>([]);
 
   useEffect(() => {
     loadData();
@@ -132,7 +154,11 @@ export default function UseCaseDetailPage() {
       setUseCase(useCaseData);
       
       // Load custom fields
-      setCustomFields(useCaseData.custom_fields || []);
+      const existingFields = useCaseData.custom_fields || [];
+      setCustomFields(existingFields);
+
+      // Load and apply templates
+      await loadAndApplyTemplates(useCaseData.ai_act_level, existingFields);
 
       const { data: versionsData, error: versionsError } = await supabase
         .from('use_case_versions')
@@ -159,6 +185,48 @@ export default function UseCaseDetailPage() {
       toast({ title: 'Error', description: error.message || 'No se pudo cargar el caso de uso', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadAndApplyTemplates(aiActLevel: string, existingFields: CustomField[]) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      // Get templates that apply to this use case (global + specific risk level)
+      const { data: templates, error } = await supabase
+        .from('custom_field_templates')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_active', true)
+        .or(`applies_to.eq.global,applies_to.eq.${aiActLevel}`);
+
+      if (error) throw error;
+      
+      setApplicableTemplates(templates || []);
+
+      // Extract template fields that don't already exist in custom_fields
+      const existingKeys = new Set(existingFields.map(f => f.key.toLowerCase()));
+      const fieldsFromTemplates: CustomField[] = [];
+
+      (templates || []).forEach((template: CustomFieldTemplate) => {
+        template.field_definitions.forEach((fieldDef: TemplateField) => {
+          // Only add if this key doesn't already exist
+          if (!existingKeys.has(fieldDef.key.toLowerCase())) {
+            fieldsFromTemplates.push({
+              id: `template-${template.id}-${fieldDef.id}`,
+              key: fieldDef.key,
+              value: '', // Empty by default
+              isFromTemplate: true,
+              templateName: template.name
+            } as CustomField & { isFromTemplate: boolean; templateName: string });
+          }
+        });
+      });
+
+      setTemplateFields(fieldsFromTemplates);
+    } catch (error) {
+      console.error('Error loading templates:', error);
     }
   }
 
@@ -330,6 +398,40 @@ export default function UseCaseDetailPage() {
     setEditingField(null);
     setEditKey('');
     setEditValue('');
+  }
+
+  // Add a field from a template (pre-filled key, user provides value)
+  async function addTemplateField(key: string, value: string) {
+    setUpdating(true);
+    try {
+      const newField: CustomField = {
+        id: crypto.randomUUID(),
+        key: key,
+        value: value
+      };
+      
+      const updatedFields = [...customFields, newField];
+      
+      const { error } = await supabase
+        .from('use_cases')
+        .update({ 
+          custom_fields: updatedFields,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', useCaseId);
+
+      if (error) throw error;
+      
+      setCustomFields(updatedFields);
+      // Remove from template fields since it's now saved
+      setTemplateFields(prev => prev.filter(f => f.key !== key));
+      
+      toast({ title: 'Campo guardado', description: `El campo "${key}" se ha añadido correctamente.` });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdating(false);
+    }
   }
 
   async function createVersion() {
@@ -679,10 +781,38 @@ export default function UseCaseDetailPage() {
                   Información Adicional
                 </CardTitle>
                 <CardDescription>
-                  Añade campos personalizados con información adicional sobre este caso de uso.
+                  Campos personalizados con información adicional sobre este caso de uso.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Templates Info */}
+                {applicableTemplates.length > 0 && (
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                      <LayoutTemplate className="w-4 h-4" />
+                      Plantillas aplicadas
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {applicableTemplates.map((template) => (
+                        <Badge key={template.id} variant="secondary" className="bg-purple-100 text-purple-800">
+                          <LayoutTemplate className="w-3 h-3 mr-1" />
+                          {template.name}
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className="text-sm text-purple-700 mt-2">
+                      Los campos de estas plantillas aparecen marcados con 
+                      <span className="inline-flex items-center mx-1 px-1.5 py-0.5 bg-purple-100 text-purple-800 text-xs rounded">plantilla</span>
+                      y se añaden automáticamente a este caso de uso.
+                    </p>
+                    <Link href="/dashboard/inventory/templates">
+                      <Button variant="link" size="sm" className="text-purple-700 p-0 mt-1">
+                        Gestionar plantillas →
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+
                 {/* Add new field form */}
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <h4 className="font-semibold text-blue-900 mb-3">Añadir nuevo campo</h4>
@@ -721,13 +851,79 @@ export default function UseCaseDetailPage() {
                   </Button>
                 </div>
 
-                {/* Custom fields list */}
+                {/* Template Fields (empty fields from templates) */}
+                {templateFields.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                      <LayoutTemplate className="w-4 h-4 text-purple-600" />
+                      Campos de plantillas
+                    </h4>
+                    {templateFields.map((field) => (
+                      <div key={field.id} className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <GripVertical className="w-5 h-5 text-purple-400" />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h5 className="font-medium text-gray-900">{field.key}</h5>
+                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                  plantilla
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-500 italic">Campo vacío - rellena el valor para añadirlo</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              placeholder="Introduce valor..."
+                              className="px-3 py-1.5 border border-purple-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const value = (e.target as HTMLInputElement).value;
+                                  if (value.trim()) {
+                                    addTemplateField(field.key, value.trim());
+                                    (e.target as HTMLInputElement).value = '';
+                                  }
+                                }
+                              }}
+                            />
+                            <Button
+                              onClick={(e) => {
+                                const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                                const value = input.value;
+                                if (value.trim()) {
+                                  addTemplateField(field.key, value.trim());
+                                  input.value = '';
+                                }
+                              }}
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Custom fields list (saved fields) */}
                 <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Campos guardados
+                  </h4>
                   {customFields.length === 0 ? (
                     <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
                       <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p>No hay campos adicionales.</p>
-                      <p className="text-sm mt-1">Añade información personalizada usando el formulario de arriba.</p>
+                      <p>No hay campos guardados aún.</p>
+                      <p className="text-sm mt-1">
+                        {templateFields.length > 0 
+                          ? 'Rellena los campos de plantilla arriba o añade campos personalizados nuevos.'
+                          : 'Añade información personalizada usando el formulario de arriba.'}
+                      </p>
                     </div>
                   ) : (
                     customFields.map((field) => (
