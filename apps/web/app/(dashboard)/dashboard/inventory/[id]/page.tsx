@@ -193,7 +193,9 @@ export default function UseCaseDetailPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      // Get global templates
+      console.log('Loading templates for ai_act_level:', aiActLevel);
+
+      // Get global templates (applies_to = 'global')
       const { data: globalTemplates, error: globalError } = await supabase
         .from('custom_field_templates')
         .select('*')
@@ -201,27 +203,45 @@ export default function UseCaseDetailPage() {
         .eq('is_active', true)
         .eq('applies_to', 'global');
 
-      if (globalError) throw globalError;
+      if (globalError) {
+        console.error('Error loading global templates:', globalError);
+        throw globalError;
+      }
 
-      // Get risk-specific templates
-      const { data: riskTemplates, error: riskError } = await supabase
-        .from('custom_field_templates')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('is_active', true)
-        .eq('applies_to', aiActLevel);
+      console.log('Global templates found:', globalTemplates?.length || 0);
 
-      if (riskError) throw riskError;
+      // Get risk-specific templates (only if aiActLevel is provided and not 'global')
+      let riskTemplates: CustomFieldTemplate[] = [];
+      if (aiActLevel && aiActLevel !== 'global' && aiActLevel !== 'unclassified') {
+        const { data: riskData, error: riskError } = await supabase
+          .from('custom_field_templates')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('is_active', true)
+          .eq('applies_to', aiActLevel);
 
-      // Combine templates
-      const allTemplates = [...(globalTemplates || []), ...(riskTemplates || [])];
-      setApplicableTemplates(allTemplates);
+        if (riskError) {
+          console.error('Error loading risk-specific templates:', riskError);
+        } else {
+          riskTemplates = riskData || [];
+          console.log('Risk-specific templates found for', aiActLevel, ':', riskTemplates.length);
+        }
+      }
+
+      // Combine templates - global first, then specific
+      const allTemplates = [...(globalTemplates || []), ...riskTemplates];
+      
+      // Remove duplicates (in case a template is both global and matches risk level)
+      const uniqueTemplates = Array.from(new Map(allTemplates.map(t => [t.id, t])).values());
+      
+      console.log('Total unique applicable templates:', uniqueTemplates.length);
+      setApplicableTemplates(uniqueTemplates);
 
       // Extract template fields that don't already exist in custom_fields
       const existingKeys = new Set(existingFields.map(f => f.key.toLowerCase()));
       const fieldsFromTemplates: CustomField[] = [];
 
-      allTemplates.forEach((template: CustomFieldTemplate) => {
+      uniqueTemplates.forEach((template: CustomFieldTemplate) => {
         template.field_definitions.forEach((fieldDef: TemplateField) => {
           // Only add if this key doesn't already exist
           if (!existingKeys.has(fieldDef.key.toLowerCase())) {
@@ -236,6 +256,7 @@ export default function UseCaseDetailPage() {
         });
       });
 
+      console.log('Template fields to display:', fieldsFromTemplates.length);
       setTemplateFields(fieldsFromTemplates);
     } catch (error) {
       console.error('Error loading templates:', error);
@@ -644,8 +665,8 @@ export default function UseCaseDetailPage() {
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <h4 className="font-semibold text-gray-900 mb-2">Estado del Producto</h4>
                     <p className="text-sm text-gray-600 mb-4">
-                      {useCase.is_active 
-                        ? 'Este caso de uso está actualmente activo y en uso.' 
+                      {useCase.is_active
+                        ? 'Este caso de uso está actualmente activo y en uso.'
                         : 'Este caso de uso ha sido marcado como obsoleto.'}
                     </p>
                     <div className="flex gap-3">
@@ -679,6 +700,53 @@ export default function UseCaseDetailPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Campos Personalizados - Mostrar en Resumen */}
+              {(customFields.length > 0 || templateFields.length > 0) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      Información Adicional
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {/* Campos guardados */}
+                      {customFields.map((field) => (
+                        <div key={field.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div>
+                            <h5 className="font-medium text-gray-900 text-sm">{field.key}</h5>
+                            <p className="text-gray-600">{field.value}</p>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Campos de plantilla pendientes (vacíos) */}
+                      {templateFields.map((field) => (
+                        <div key={field.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                          <div className="flex items-center gap-2">
+                            <h5 className="font-medium text-slate-700 text-sm">{field.key}</h5>
+                            <Badge variant="secondary" className="text-xs bg-slate-200 text-slate-600">
+                              plantilla
+                            </Badge>
+                          </div>
+                          <span className="text-sm text-slate-400 italic">Sin completar</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t">
+                      <Link href={`/dashboard/inventory/${useCaseId}?tab=additional`}>
+                        <Button variant="outline" size="sm">
+                          <Pencil className="w-4 h-4 mr-2" />
+                          Editar en Información Adicional
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
@@ -967,26 +1035,26 @@ export default function UseCaseDetailPage() {
               <CardContent className="space-y-6">
                 {/* Templates Info */}
                 {applicableTemplates.length > 0 && (
-                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
-                      <LayoutTemplate className="w-4 h-4" />
+                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                    <h4 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                      <LayoutTemplate className="w-4 h-4 text-slate-600" />
                       Plantillas aplicadas
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {applicableTemplates.map((template) => (
-                        <Badge key={template.id} variant="secondary" className="bg-purple-100 text-purple-800">
+                        <Badge key={template.id} variant="secondary" className="bg-slate-200 text-slate-700">
                           <LayoutTemplate className="w-3 h-3 mr-1" />
                           {template.name}
                         </Badge>
                       ))}
                     </div>
-                    <p className="text-sm text-purple-700 mt-2">
-                      Los campos de estas plantillas aparecen marcados con 
-                      <span className="inline-flex items-center mx-1 px-1.5 py-0.5 bg-purple-100 text-purple-800 text-xs rounded">plantilla</span>
+                    <p className="text-sm text-slate-600 mt-2">
+                      Los campos de estas plantillas aparecen marcados con
+                      <span className="inline-flex items-center mx-1 px-1.5 py-0.5 bg-slate-200 text-slate-700 text-xs rounded">plantilla</span>
                       y se añaden automáticamente a este caso de uso.
                     </p>
                     <Link href="/dashboard/inventory/templates">
-                      <Button variant="link" size="sm" className="text-purple-700 p-0 mt-1">
+                      <Button variant="link" size="sm" className="text-slate-600 p-0 mt-1">
                         Gestionar plantillas →
                       </Button>
                     </Link>
@@ -1035,29 +1103,29 @@ export default function UseCaseDetailPage() {
                 {templateFields.length > 0 && (
                   <div className="space-y-3">
                     <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                      <LayoutTemplate className="w-4 h-4 text-purple-600" />
+                      <LayoutTemplate className="w-4 h-4 text-slate-600" />
                       Campos de plantillas
                     </h4>
                     {templateFields.map((field) => (
-                      <div key={field.id} className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <div key={field.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <GripVertical className="w-5 h-5 text-purple-400" />
+                            <GripVertical className="w-5 h-5 text-slate-400" />
                             <div>
                               <div className="flex items-center gap-2">
                                 <h5 className="font-medium text-gray-900">{field.key}</h5>
-                                <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                <Badge variant="secondary" className="text-xs bg-slate-200 text-slate-700">
                                   plantilla
                                 </Badge>
                               </div>
-                              <p className="text-sm text-gray-500 italic">Campo vacío - rellena el valor para añadirlo</p>
+                              <p className="text-sm text-slate-500 italic">Campo vacío - rellena el valor para añadirlo</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
                               placeholder="Introduce valor..."
-                              className="px-3 py-1.5 border border-purple-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   const value = (e.target as HTMLInputElement).value;
