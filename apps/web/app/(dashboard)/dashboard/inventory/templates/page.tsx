@@ -39,8 +39,7 @@ import {
   AlertTriangle,
   ShieldAlert,
   Shield,
-  ShieldCheck,
-  Brain
+  ShieldCheck
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -60,12 +59,11 @@ interface Template {
 }
 
 const riskLevels = [
-  { value: 'global', label: 'Todos los casos de uso', icon: Globe, color: 'bg-blue-100 text-blue-800' },
+  { value: 'global', label: 'Global (todos los casos)', icon: Globe, color: 'bg-blue-100 text-blue-800' },
   { value: 'prohibited', label: 'Prohibido', icon: AlertTriangle, color: 'bg-red-100 text-red-800' },
-  { value: 'high', label: 'Alto Riesgo', icon: ShieldAlert, color: 'bg-orange-100 text-orange-800' },
-  { value: 'limited', label: 'Riesgo Limitado', icon: Shield, color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'minimal', label: 'Riesgo Mínimo', icon: ShieldCheck, color: 'bg-green-100 text-green-800' },
-  { value: 'gpai', label: 'GPAI', icon: Brain, color: 'bg-purple-100 text-purple-800' },
+  { value: 'high_risk', label: 'Alto Riesgo', icon: ShieldAlert, color: 'bg-orange-100 text-orange-800' },
+  { value: 'limited_risk', label: 'Riesgo Limitado', icon: Shield, color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'minimal_risk', label: 'Riesgo Mínimo', icon: ShieldCheck, color: 'bg-green-100 text-green-800' },
   { value: 'unclassified', label: 'Sin clasificar', icon: FileText, color: 'bg-gray-100 text-gray-800' },
 ];
 
