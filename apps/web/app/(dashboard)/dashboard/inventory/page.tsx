@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Pencil, Eye, Search, LayoutDashboard, ArrowLeft } from 'lucide-react';
+import { Plus, Pencil, Eye, Search, LayoutDashboard, ArrowLeft, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -30,20 +30,7 @@ interface UseCase {
   created_at: string;
 }
 
-// Helper function to map API risk levels to RiskBadge levels
-// This is a guess based on common patterns and the dashboard page's mapping
-type RiskLevel = 'prohibited' | 'high' | 'limited' | 'minimal' | 'unclassified';
 
-function mapApiRiskLevelForBadge(apiLevel: string): RiskLevel {
-  const mapping: Record<string, RiskLevel> = {
-    'prohibited': 'prohibited',
-    'high_risk': 'high',
-    'limited_risk': 'limited',
-    'minimal_risk': 'minimal',
-    'unclassified': 'unclassified',
-  };
-  return mapping[apiLevel] || 'unclassified';
-}
 
 // Define table columns
 const columns = [
@@ -120,6 +107,33 @@ export default function InventoryPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este caso de uso? Esta acción no se puede deshacer.')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('use_cases')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast({
+        title: 'Eliminado',
+        description: 'El caso de uso ha sido eliminado correctamente.',
+      });
+      
+      // Refresh the list
+      fetchUseCases();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo eliminar el caso de uso.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const renderCell = (useCase: UseCase, accessor: string) => {
     switch (accessor) {
       case 'name':
@@ -135,7 +149,7 @@ export default function InventoryPage() {
       case 'status':
         return <Badge variant="outline" className="capitalize">{useCase.status}</Badge>;
       case 'ai_act_level':
-        return <RiskBadge level={mapApiRiskLevelForBadge(useCase.ai_act_level)} />;
+        return <RiskBadge level={useCase.ai_act_level || 'unclassified'} />;
       case 'actions':
         return (
           <div className="flex gap-2">
@@ -143,6 +157,14 @@ export default function InventoryPage() {
               <Link href={`/dashboard/inventory/${useCase.id}`}>
                 <Eye className="h-4 w-4" />
               </Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => handleDelete(useCase.id)}
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         );
@@ -155,6 +177,14 @@ export default function InventoryPage() {
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Volver al Dashboard
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-2xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
           <p className="text-gray-600 mt-1">Lista y gestiona tus sistemas de IA</p>
         </div>

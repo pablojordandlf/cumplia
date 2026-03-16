@@ -247,10 +247,12 @@ export default function UseCaseDetailPage() {
                 {useCase.ai_act_level === 'unclassified' ? 'Clasificar' : 'Reclasificar'}
               </Button>
             </Link>
-            <Button variant="outline" onClick={() => {}}>
-              <Pencil className="w-4 h-4 mr-2" />
-              Editar
-            </Button>
+            <Link href={`/dashboard/inventory/${useCaseId}/edit`}>
+              <Button variant="outline">
+                <Pencil className="w-4 h-4 mr-2" />
+                Editar
+              </Button>
+            </Link>
             <Button variant="destructive" onClick={deleteUseCase}>
               <Trash2 className="w-4 h-4 mr-2" />
               Eliminar

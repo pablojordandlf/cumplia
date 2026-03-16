@@ -121,6 +121,7 @@ export default function ClassifyUseCasePage() {
   const [calculating, setCalculating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [stepValidation, setStepValidation] = useState<Record<number, boolean>>({});
 
   const form = useForm<z.infer<typeof classificationSchema>>({
     resolver: zodResolver(classificationSchema),
@@ -177,7 +178,7 @@ export default function ClassifyUseCasePage() {
       const { data: { session } } = await supabase.auth.getSession();
       const { error } = await supabase.from('use_cases').update({
         ai_act_level: riskLevel, classification_data: values, status: 'classified',
-        updated_at: new Date().toISOString(), updated_by: session?.user?.id,
+        updated_at: new Date().toISOString(),
       }).eq('id', useCaseId);
       if (error) throw error;
       setResult(riskLevel);
@@ -221,6 +222,66 @@ export default function ClassifyUseCasePage() {
 
   const totalSteps = selectedSystemType === 'specific_purpose' ? 4 : 2;
   const progressValue = (currentStep / totalSteps) * 100;
+
+  const validateStep = (step: number): boolean => {
+    const values = form.getValues();
+    
+    if (step === 1) {
+      // Step 1: System type must be selected (always has default value)
+      return !!values.systemType;
+    }
+    
+    if (step === 2) {
+      // Step 2: All Article 5 fields must be answered
+      return (
+        values.isSubliminal !== undefined &&
+        values.isSocialScoring !== undefined &&
+        values.isRealTimeBiometric !== undefined &&
+        values.exploitsVulnerabilities !== undefined
+      );
+    }
+    
+    if (step === 3 && selectedSystemType === 'specific_purpose') {
+      // Step 3: All Article 6 fields must be answered
+      return (
+        values.isBiometricIdentification !== undefined &&
+        values.isCriticalInfrastructure !== undefined &&
+        values.isEducationVocational !== undefined &&
+        values.isEmployment !== undefined &&
+        values.isAccessToServices !== undefined &&
+        values.isLawEnforcement !== undefined &&
+        values.isMigrationAsylum !== undefined &&
+        values.isJusticeDemocratic !== undefined &&
+        values.isSafetyComponent !== undefined
+      );
+    }
+    
+    if (step === 4 && selectedSystemType === 'specific_purpose') {
+      // Step 4: All Article 50 fields must be answered
+      return (
+        values.interactsWithHumans !== undefined &&
+        values.isEmotionRecognition !== undefined &&
+        values.isBiometricCategorization !== undefined &&
+        values.generatesDeepfakes !== undefined
+      );
+    }
+    
+    return true;
+  };
+
+  const handleNextStep = () => {
+    const isValid = validateStep(currentStep);
+    if (!isValid) {
+      toast({
+        title: 'Campos incompletos',
+        description: 'Por favor, responde todas las preguntas antes de continuar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setStepValidation(prev => ({ ...prev, [currentStep]: true }));
+    setCurrentStep(prev => prev + 1);
+  };
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
@@ -341,7 +402,7 @@ export default function ClassifyUseCasePage() {
                 <div className="flex justify-between pt-4">
                   <Button type="button" variant="outline" onClick={() => setCurrentStep(Math.max(1, currentStep - 1))} disabled={currentStep === 1}>Anterior</Button>
                   {currentStep < totalSteps ? (
-                    <Button type="button" onClick={() => setCurrentStep(currentStep + 1)}>Siguiente</Button>
+                    <Button type="button" onClick={handleNextStep}>Siguiente</Button>
                   ) : (
                     <Button type="submit" disabled={calculating}>{calculating ? 'Calculando...' : 'Finalizar Clasificación'}</Button>
                   )}
