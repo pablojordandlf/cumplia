@@ -193,23 +193,35 @@ export default function UseCaseDetailPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      // Get templates that apply to this use case (global + specific risk level)
-      const { data: templates, error } = await supabase
+      // Get global templates
+      const { data: globalTemplates, error: globalError } = await supabase
         .from('custom_field_templates')
         .select('*')
         .eq('user_id', session.user.id)
         .eq('is_active', true)
-        .or(`applies_to.eq.global,applies_to.eq.${aiActLevel}`);
+        .eq('applies_to', 'global');
 
-      if (error) throw error;
-      
-      setApplicableTemplates(templates || []);
+      if (globalError) throw globalError;
+
+      // Get risk-specific templates
+      const { data: riskTemplates, error: riskError } = await supabase
+        .from('custom_field_templates')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_active', true)
+        .eq('applies_to', aiActLevel);
+
+      if (riskError) throw riskError;
+
+      // Combine templates
+      const allTemplates = [...(globalTemplates || []), ...(riskTemplates || [])];
+      setApplicableTemplates(allTemplates);
 
       // Extract template fields that don't already exist in custom_fields
       const existingKeys = new Set(existingFields.map(f => f.key.toLowerCase()));
       const fieldsFromTemplates: CustomField[] = [];
 
-      (templates || []).forEach((template: CustomFieldTemplate) => {
+      allTemplates.forEach((template: CustomFieldTemplate) => {
         template.field_definitions.forEach((fieldDef: TemplateField) => {
           // Only add if this key doesn't already exist
           if (!existingKeys.has(fieldDef.key.toLowerCase())) {
@@ -681,6 +693,7 @@ export default function UseCaseDetailPage() {
               <CardContent>
                 {useCase.classification_data ? (
                   <div className="space-y-6">
+                    {/* Tipo de Sistema */}
                     <div className="p-4 bg-blue-50 rounded-lg">
                       <h4 className="font-semibold text-blue-900 mb-2">Tipo de Sistema</h4>
                       <p className="text-blue-800">
@@ -689,6 +702,173 @@ export default function UseCaseDetailPage() {
                         {useCase.classification_data.systemType === 'gpai_system' && 'Sistema de IA de Propósito General (GPAI System)'}
                         {useCase.classification_data.systemType === 'specific_purpose' && 'Sistema de IA de Finalidad Específica'}
                       </p>
+                    </div>
+
+                    {/* Resumen del Checklist - Artículo 5 (Prohibiciones) */}
+                    {useCase.classification_data.systemType === 'specific_purpose' && (
+                      <>
+                        <div className="border rounded-lg overflow-hidden">
+                          <div className="bg-red-50 px-4 py-3 border-b">
+                            <h4 className="font-semibold text-red-900 flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4" />
+                              Artículo 5 - Sistemas Prohibidos
+                            </h4>
+                          </div>
+                          <div className="divide-y">
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Utiliza técnicas subliminales o manipulativas?</span>
+                              <Badge variant={useCase.classification_data.isSubliminal === 'yes' ? 'destructive' : 'secondary'}>
+                                {useCase.classification_data.isSubliminal === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Realiza puntuación social (social scoring)?</span>
+                              <Badge variant={useCase.classification_data.isSocialScoring === 'yes' ? 'destructive' : 'secondary'}>
+                                {useCase.classification_data.isSocialScoring === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Usa biometría en tiempo real en espacios públicos?</span>
+                              <Badge variant={useCase.classification_data.isRealTimeBiometric === 'yes' ? 'destructive' : 'secondary'}>
+                                {useCase.classification_data.isRealTimeBiometric === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Explota vulnerabilidades de grupos vulnerables?</span>
+                              <Badge variant={useCase.classification_data.exploitsVulnerabilities === 'yes' ? 'destructive' : 'secondary'}>
+                                {useCase.classification_data.exploitsVulnerabilities === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Resumen del Checklist - Artículo 6 (Alto Riesgo) */}
+                        <div className="border rounded-lg overflow-hidden">
+                          <div className="bg-orange-50 px-4 py-3 border-b">
+                            <h4 className="font-semibold text-orange-900 flex items-center gap-2">
+                              <ShieldAlert className="w-4 h-4" />
+                              Artículo 6 - Sistemas de Alto Riesgo
+                            </h4>
+                          </div>
+                          <div className="divide-y">
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Es sistema de identificación biométrica remota?</span>
+                              <Badge variant={useCase.classification_data.isBiometricIdentification === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isBiometricIdentification === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isBiometricIdentification === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Gestiona infraestructura crítica (transporte, agua, gas, electricidad)?</span>
+                              <Badge variant={useCase.classification_data.isCriticalInfrastructure === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isCriticalInfrastructure === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isCriticalInfrastructure === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Afecta a educación o formación profesional?</span>
+                              <Badge variant={useCase.classification_data.isEducationVocational === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isEducationVocational === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isEducationVocational === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Afecta a empleo, gestión de trabajadores o acceso a trabajo?</span>
+                              <Badge variant={useCase.classification_data.isEmployment === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isEmployment === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isEmployment === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Gestiona acceso a servicios esenciales (crédito, seguros, servicios públicos)?</span>
+                              <Badge variant={useCase.classification_data.isAccessToServices === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isAccessToServices === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isAccessToServices === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Usado por autoridades policiales o fuerzas del orden?</span>
+                              <Badge variant={useCase.classification_data.isLawEnforcement === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isLawEnforcement === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isLawEnforcement === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Gestiona migración, asilo o control de fronteras?</span>
+                              <Badge variant={useCase.classification_data.isMigrationAsylum === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isMigrationAsylum === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isMigrationAsylum === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Administra justicia o procesos democráticos?</span>
+                              <Badge variant={useCase.classification_data.isJusticeDemocratic === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isJusticeDemocratic === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isJusticeDemocratic === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Es componente de seguridad de producto regulado?</span>
+                              <Badge variant={useCase.classification_data.isSafetyComponent === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isSafetyComponent === 'yes' ? 'bg-orange-500' : ''}>
+                                {useCase.classification_data.isSafetyComponent === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Resumen del Checklist - Artículo 50 (Riesgo Limitado) */}
+                        <div className="border rounded-lg overflow-hidden">
+                          <div className="bg-yellow-50 px-4 py-3 border-b">
+                            <h4 className="font-semibold text-yellow-900 flex items-center gap-2">
+                              <Shield className="w-4 h-4" />
+                              Artículo 50 - Obligaciones de Transparencia
+                            </h4>
+                          </div>
+                          <div className="divide-y">
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Interactúa con humanos (chatbots, asistentes virtuales)?</span>
+                              <Badge variant={useCase.classification_data.interactsWithHumans === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.interactsWithHumans === 'yes' ? 'bg-yellow-500 text-yellow-950' : ''}>
+                                {useCase.classification_data.interactsWithHumans === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Reconoce emociones o características sociales?</span>
+                              <Badge variant={useCase.classification_data.isEmotionRecognition === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isEmotionRecognition === 'yes' ? 'bg-yellow-500 text-yellow-950' : ''}>
+                                {useCase.classification_data.isEmotionRecognition === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Categoriza personas por características biométricas?</span>
+                              <Badge variant={useCase.classification_data.isBiometricCategorization === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.isBiometricCategorization === 'yes' ? 'bg-yellow-500 text-yellow-950' : ''}>
+                                {useCase.classification_data.isBiometricCategorization === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                            <div className="px-4 py-3 flex justify-between items-center">
+                              <span className="text-gray-700">¿Genera deepfakes o contenido sintético?</span>
+                              <Badge variant={useCase.classification_data.generatesDeepfakes === 'yes' ? 'default' : 'secondary'} className={useCase.classification_data.generatesDeepfakes === 'yes' ? 'bg-yellow-500 text-yellow-950' : ''}>
+                                {useCase.classification_data.generatesDeepfakes === 'yes' ? 'Sí' : 'No'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Información específica para GPAI */}
+                    {useCase.classification_data.systemType?.startsWith('gpai') && (
+                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                          <Brain className="w-4 h-4" />
+                          Sistema de IA de Propósito General
+                        </h4>
+                        <p className="text-purple-800 text-sm">
+                          Los sistemas GPAI están sujetos a obligaciones específicas según el AI Act.
+                          {useCase.classification_data.systemType === 'gpai_sr' && (
+                            <span className="font-semibold"> Este modelo tiene riesgo sistémico y requiere evaluación adicional.</span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end">
+                      <Link href={`/dashboard/inventory/${useCaseId}/classify`}>
+                        <Button variant="outline">
+                          <Pencil className="w-4 h-4 mr-2" />
+                          Modificar Clasificación
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 ) : (
