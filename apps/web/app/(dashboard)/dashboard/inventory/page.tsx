@@ -125,8 +125,8 @@ export default function InventoryPage() {
       case 'name':
         return (
           <div className="flex items-center gap-2">
-            <Link href={`/dashboard/inventory/${useCase.id}/classify`}>
-              <a className="font-medium text-blue-600 hover:underline">{useCase.name}</a>
+            <Link href={`/dashboard/inventory/${useCase.id}`} className="font-medium text-blue-600 hover:underline">
+              {useCase.name}
             </Link>
           </div>
         );
@@ -139,15 +139,8 @@ export default function InventoryPage() {
       case 'actions':
         return (
           <div className="flex gap-2">
-            {/* TODO: Habilitar cuando exista página de edición
             <Button variant="outline" size="icon" asChild>
-              <Link href={`/dashboard/inventory/${useCase.id}/edit`}>
-                <Pencil className="h-4 w-4" />
-              </Link>
-            </Button>
-            */}
-            <Button variant="outline" size="icon" asChild>
-              <Link href={`/dashboard/inventory/${useCase.id}/classify`}>
+              <Link href={`/dashboard/inventory/${useCase.id}`}>
                 <Eye className="h-4 w-4" />
               </Link>
             </Button>

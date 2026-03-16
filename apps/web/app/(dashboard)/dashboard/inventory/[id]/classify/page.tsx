@@ -11,17 +11,13 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { 
   AlertCircle, 
   ChevronLeft, 
@@ -30,40 +26,48 @@ import {
   CheckCircle2,
   Brain,
   Users,
-  Building2
+  Building2,
+  HelpCircle,
+  Cpu,
+  Sparkles,
+  Bot,
+  Network
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 // Schema para el cuestionario de clasificación
 const classificationSchema = z.object({
+  // Tipo de sistema IA
+  systemType: z.enum(['standard', 'gpai', 'embedded', 'biometric', 'safety']),
+  
   // Artículo 5 - Sistemas prohibidos
-  isSubliminal: z.boolean(),
-  isSocialScoring: z.boolean(),
-  isRealTimeBiometric: z.boolean(),
-  exploitsVulnerabilities: z.boolean(),
+  isSubliminal: z.enum(['yes', 'no']),
+  isSocialScoring: z.enum(['yes', 'no']),
+  isRealTimeBiometric: z.enum(['yes', 'no']),
+  exploitsVulnerabilities: z.enum(['yes', 'no']),
   
   // Artículo 6 - Sistemas de alto riesgo (Anexo III)
-  isBiometricIdentification: z.boolean(),
-  isCriticalInfrastructure: z.boolean(),
-  isEducationVocational: z.boolean(),
-  isEmployment: z.boolean(),
-  isAccessToServices: z.boolean(),
-  isLawEnforcement: z.boolean(),
-  isMigrationAsylum: z.boolean(),
-  isJusticeDemocratic: z.boolean(),
+  isBiometricIdentification: z.enum(['yes', 'no']),
+  isCriticalInfrastructure: z.enum(['yes', 'no']),
+  isEducationVocational: z.enum(['yes', 'no']),
+  isEmployment: z.enum(['yes', 'no']),
+  isAccessToServices: z.enum(['yes', 'no']),
+  isLawEnforcement: z.enum(['yes', 'no']),
+  isMigrationAsylum: z.enum(['yes', 'no']),
+  isJusticeDemocratic: z.enum(['yes', 'no']),
   
   // Anexo II - Productos de seguridad
-  isSafetyComponent: z.boolean(),
+  isSafetyComponent: z.enum(['yes', 'no']),
   
   // GPAI
-  isGeneralPurposeAI: z.boolean(),
-  hasSystemicRisk: z.boolean(),
+  isGeneralPurposeAI: z.enum(['yes', 'no']),
+  hasSystemicRisk: z.enum(['yes', 'no']),
   
   // Interacción
-  interactsWithHumans: z.boolean(),
-  isEmotionRecognition: z.boolean(),
-  isBiometricCategorization: z.boolean(),
-  generatesDeepfakes: z.boolean(),
+  interactsWithHumans: z.enum(['yes', 'no']),
+  isEmotionRecognition: z.enum(['yes', 'no']),
+  isBiometricCategorization: z.enum(['yes', 'no']),
+  generatesDeepfakes: z.enum(['yes', 'no']),
 });
 
 const riskLevels = {
@@ -93,6 +97,107 @@ const riskLevels = {
   },
 };
 
+const systemTypes = [
+  { 
+    value: 'standard', 
+    label: 'Sistema de IA Estándar', 
+    description: 'Sistema de IA tradicional con propósito específico',
+    icon: Cpu
+  },
+  { 
+    value: 'gpai', 
+    label: 'Modelo de Propósito General (GPAI)', 
+    description: 'IA con capacidades generales aplicables a múltiples contextos (ej: GPT, Claude)',
+    icon: Sparkles
+  },
+  { 
+    value: 'embedded', 
+    label: 'Sistema de IA Embebido', 
+    description: 'IA integrada en productos de seguridad o dispositivos físicos',
+    icon: Bot
+  },
+  { 
+    value: 'biometric', 
+    label: 'Sistema Biométrico', 
+    description: 'IA para identificación, categorización o análisis de personas',
+    icon: Users
+  },
+  { 
+    value: 'safety', 
+    label: 'Componente de Seguridad', 
+    description: 'Sistema de seguridad regulado por legislación sectorial UE (Anexo II)',
+    icon: Shield
+  },
+];
+
+// Tooltip component
+function InfoTooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative inline-block ml-2">
+      <HelpCircle 
+        className="w-4 h-4 text-gray-400 cursor-help hover:text-gray-600"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+      />
+      {show && (
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 max-w-xs">
+          {text}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Selector Sí/No visual
+function YesNoSelector({ 
+  value, 
+  onChange, 
+  label, 
+  tooltip 
+}: { 
+  value: string; 
+  onChange: (val: 'yes' | 'no') => void;
+  label: string;
+  tooltip?: string;
+}) {
+  return (
+    <div className="rounded-lg border p-4 hover:border-gray-300 transition-colors cursor-pointer" onClick={() => onChange(value === 'yes' ? 'no' : 'yes')}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-gray-900">{label}</span>
+          {tooltip && <InfoTooltip text={tooltip} />}
+        </div>
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => onChange('yes')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              value === 'yes'
+                ? 'bg-green-500 text-white shadow-md'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Sí
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange('no')}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              value === 'no'
+                ? 'bg-gray-500 text-white shadow-md'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ClassifyUseCasePage() {
   const router = useRouter();
   const params = useParams();
@@ -106,27 +211,30 @@ export default function ClassifyUseCasePage() {
   const form = useForm<z.infer<typeof classificationSchema>>({
     resolver: zodResolver(classificationSchema),
     defaultValues: {
-      isSubliminal: false,
-      isSocialScoring: false,
-      isRealTimeBiometric: false,
-      exploitsVulnerabilities: false,
-      isBiometricIdentification: false,
-      isCriticalInfrastructure: false,
-      isEducationVocational: false,
-      isEmployment: false,
-      isAccessToServices: false,
-      isLawEnforcement: false,
-      isMigrationAsylum: false,
-      isJusticeDemocratic: false,
-      isSafetyComponent: false,
-      isGeneralPurposeAI: false,
-      hasSystemicRisk: false,
-      interactsWithHumans: false,
-      isEmotionRecognition: false,
-      isBiometricCategorization: false,
-      generatesDeepfakes: false,
+      systemType: 'standard',
+      isSubliminal: 'no',
+      isSocialScoring: 'no',
+      isRealTimeBiometric: 'no',
+      exploitsVulnerabilities: 'no',
+      isBiometricIdentification: 'no',
+      isCriticalInfrastructure: 'no',
+      isEducationVocational: 'no',
+      isEmployment: 'no',
+      isAccessToServices: 'no',
+      isLawEnforcement: 'no',
+      isMigrationAsylum: 'no',
+      isJusticeDemocratic: 'no',
+      isSafetyComponent: 'no',
+      isGeneralPurposeAI: 'no',
+      hasSystemicRisk: 'no',
+      interactsWithHumans: 'no',
+      isEmotionRecognition: 'no',
+      isBiometricCategorization: 'no',
+      generatesDeepfakes: 'no',
     },
   });
+
+  const isGPAI = form.watch('isGeneralPurposeAI') === 'yes';
 
   useEffect(() => {
     loadUseCase();
@@ -142,6 +250,21 @@ export default function ClassifyUseCasePage() {
 
       if (error) throw error;
       setUseCase(data);
+      
+      // Si hay classification_data previo, cargarlo
+      if (data?.classification_data) {
+        const prevData = data.classification_data;
+        // Convertir booleanos a 'yes'/'no'
+        const convertedData: any = { systemType: prevData.systemType || 'standard' };
+        Object.keys(prevData).forEach(key => {
+          if (typeof prevData[key] === 'boolean') {
+            convertedData[key] = prevData[key] ? 'yes' : 'no';
+          } else if (prevData[key] === 'yes' || prevData[key] === 'no') {
+            convertedData[key] = prevData[key];
+          }
+        });
+        form.reset(convertedData);
+      }
     } catch (error) {
       console.error('Error loading use case:', error);
       toast({
@@ -157,42 +280,43 @@ export default function ClassifyUseCasePage() {
 
   function calculateRiskLevel(values: z.infer<typeof classificationSchema>): string {
     // Artículo 5 - Prohibidos
-    if (values.isSubliminal || values.isSocialScoring || values.isRealTimeBiometric || values.exploitsVulnerabilities) {
+    if (values.isSubliminal === 'yes' || values.isSocialScoring === 'yes' || 
+        values.isRealTimeBiometric === 'yes' || values.exploitsVulnerabilities === 'yes') {
       return 'prohibited';
     }
 
     // Artículo 6 y Anexo III - Alto riesgo
     if (
-      values.isBiometricIdentification ||
-      values.isCriticalInfrastructure ||
-      values.isEducationVocational ||
-      values.isEmployment ||
-      values.isAccessToServices ||
-      values.isLawEnforcement ||
-      values.isMigrationAsylum ||
-      values.isJusticeDemocratic ||
-      values.isSafetyComponent
+      values.isBiometricIdentification === 'yes' ||
+      values.isCriticalInfrastructure === 'yes' ||
+      values.isEducationVocational === 'yes' ||
+      values.isEmployment === 'yes' ||
+      values.isAccessToServices === 'yes' ||
+      values.isLawEnforcement === 'yes' ||
+      values.isMigrationAsylum === 'yes' ||
+      values.isJusticeDemocratic === 'yes' ||
+      values.isSafetyComponent === 'yes'
     ) {
       return 'high_risk';
     }
 
     // GPAI con riesgo sistémico
-    if (values.isGeneralPurposeAI && values.hasSystemicRisk) {
+    if (values.isGeneralPurposeAI === 'yes' && values.hasSystemicRisk === 'yes') {
       return 'high_risk';
     }
 
     // Artículo 50 - Riesgo limitado
     if (
-      values.interactsWithHumans ||
-      values.isEmotionRecognition ||
-      values.isBiometricCategorization ||
-      values.generatesDeepfakes
+      values.interactsWithHumans === 'yes' ||
+      values.isEmotionRecognition === 'yes' ||
+      values.isBiometricCategorization === 'yes' ||
+      values.generatesDeepfakes === 'yes'
     ) {
       return 'limited_risk';
     }
 
     // GPAI sin riesgo sistémico
-    if (values.isGeneralPurposeAI && !values.hasSystemicRisk) {
+    if (values.isGeneralPurposeAI === 'yes' && values.hasSystemicRisk === 'no') {
       return 'limited_risk';
     }
 
@@ -206,6 +330,9 @@ export default function ClassifyUseCasePage() {
     try {
       const riskLevel = calculateRiskLevel(values);
       
+      // Obtener sesión actual para el user_id
+      const { data: { session } } = await supabase.auth.getSession();
+      
       // Actualizar el caso de uso con la clasificación
       const { error } = await supabase
         .from('use_cases')
@@ -214,6 +341,7 @@ export default function ClassifyUseCasePage() {
           classification_data: values,
           status: 'classified',
           updated_at: new Date().toISOString(),
+          updated_by: session?.user?.id,
         })
         .eq('id', useCaseId);
 
@@ -322,22 +450,6 @@ export default function ClassifyUseCasePage() {
           <Progress value={100} className="h-2" />
         </div>
 
-        {/* Info Card */}
-        <Card className="mb-6 bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Brain className="w-5 h-5 text-blue-600 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-blue-900">CumplIA te ayuda a clasificar</h3>
-                <p className="text-sm text-blue-700 mt-1">
-                  Responde las siguientes preguntas basadas en el Reglamento Europeo de IA. 
-                  CumplIA calculará automáticamente el nivel de riesgo de tu sistema.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Classification Form */}
         <Card>
           <CardHeader>
@@ -346,40 +458,91 @@ export default function ClassifyUseCasePage() {
               Cuestionario de Clasificación AI Act
             </CardTitle>
             <CardDescription>
-              Marca todas las opciones que apliquen a tu sistema de IA
+              Responde Sí o No a cada pregunta. Pasa el cursor sobre <HelpCircle className="w-3 h-3 inline" /> para más información.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {/* Artículo 5 - Prohibidos */}
+                
+                {/* Tipo de Sistema IA */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-red-900 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    Artículo 5: Prácticas Prohibidas
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Estos sistemas están prohibidos en la UE:
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                      <Cpu className="w-4 h-4" />
+                      Tipo de Sistema de IA
+                    </h3>
+                    <InfoTooltip text="El AI Act clasifica los sistemas de IA en diferentes categorías según su naturaleza y alcance." />
+                  </div>
                   
-                  <div className="grid grid-cols-1 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="systemType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="grid grid-cols-1 gap-3">
+                            {systemTypes.map((type) => {
+                              const Icon = type.icon;
+                              return (
+                                <button
+                                  key={type.value}
+                                  type="button"
+                                  onClick={() => field.onChange(type.value)}
+                                  className={`flex items-start gap-4 p-4 rounded-lg border-2 text-left transition-all hover:shadow-md ${
+                                    field.value === type.value
+                                      ? 'border-blue-500 bg-blue-50'
+                                      : 'border-gray-200 bg-white hover:border-gray-300'
+                                  }`}
+                                >
+                                  <div className={`p-2 rounded-lg ${
+                                    field.value === type.value ? 'bg-blue-100' : 'bg-gray-100'
+                                  }`}>
+                                    <Icon className={`w-5 h-5 ${
+                                      field.value === type.value ? 'text-blue-600' : 'text-gray-500'
+                                    }`} />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="font-medium text-gray-900">{type.label}</div>
+                                    <div className="text-sm text-gray-500">{type.description}</div>
+                                  </div>
+                                  {field.value === type.value && (
+                                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Artículo 5 - Prohibidos */}
+                <div className="space-y-4 pt-6 border-t">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-red-900 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      Artículo 5: Prácticas Prohibidas
+                    </h3>
+                    <InfoTooltip text="El Artículo 5 del AI Act prohíbe ciertas prácticas consideradas inaceptables para la UE. Si respondes Sí a alguna, el sistema será clasificado como PROHIBIDO." />
+                  </div>
+                  
+                  <div className="space-y-3">
                     <FormField
                       control={form.control}
                       name="isSubliminal"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem>
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
+                            <YesNoSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              label="¿Usa técnicas subliminales o manipuladoras que distorsionen el comportamiento causando daño?"
+                              tooltip="Técnicas que distorsionan el comportamiento de personas de manera que puedan causar daño psicológico o físico."
                             />
                           </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Técnicas subliminales o manipuladoras</FormLabel>
-                            <FormDescription>
-                              Técnicas que distorsionan el comportamiento de manera que cause daño
-                            </FormDescription>
-                          </div>
                         </FormItem>
                       )}
                     />
@@ -388,19 +551,15 @@ export default function ClassifyUseCasePage() {
                       control={form.control}
                       name="exploitsVulnerabilities"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem>
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
+                            <YesNoSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              label="¿Explota vulnerabilidades de grupos específicos (edad, discapacidad, situación social)?"
+                              tooltip="Aprovecha debilidades de personas debido a su edad, discapacidad, situación social o económica específica."
                             />
                           </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Explota vulnerabilidades de grupos específicos</FormLabel>
-                            <FormDescription>
-                              Aprovecha debilidades de personas por su edad, discapacidad o situación social
-                            </FormDescription>
-                          </div>
                         </FormItem>
                       )}
                     />
@@ -409,19 +568,15 @@ export default function ClassifyUseCasePage() {
                       control={form.control}
                       name="isSocialScoring"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem>
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
+                            <YesNoSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              label="¿Realiza puntuación social (social scoring) por autoridades públicas?"
+                              tooltip="Evaluación o clasificación de personas basada en comportamiento social o personalidad que conduce a tratamiento desfavorable."
                             />
                           </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Puntuación social (Social Scoring)</FormLabel>
-                            <FormDescription>
-                              Evaluación o clasificación de personas por autoridades públicas
-                            </FormDescription>
-                          </div>
                         </FormItem>
                       )}
                     />
@@ -430,325 +585,15 @@ export default function ClassifyUseCasePage() {
                       control={form.control}
                       name="isRealTimeBiometric"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormItem>
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
+                            <YesNoSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              label="¿Realiza identificación biométrica remota en tiempo real en espacios públicos para fines policiales?"
+                              tooltip="Identificación mediante biometría en tiempo real en espacios públicos por autoridades policiales (prohibido salvo excepciones muy limitadas)."
                             />
                           </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Identificación biométrica remota en tiempo real</FormLabel>
-                            <FormDescription>
-                              En espacios públicos para fines policiales (con excepciones limitadas)
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                {/* Artículo 6 - Alto riesgo */}
-                <div className="space-y-4 pt-6 border-t">
-                  <h3 className="font-semibold text-orange-900 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4" />
-                    Artículo 6: Sistemas de Alto Riesgo (Anexo III)
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    ¿Tu sistema se utiliza en alguno de estos ámbitos críticos?
-                  </p>
-
-                  <div className="grid grid-cols-1 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="isBiometricIdentification"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Identificación y categorización biométrica</FormLabel>
-                            <FormDescription>
-                              Sistemas de identificación remota (no en tiempo real), categorización por características protegidas
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isCriticalInfrastructure"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Gestión de infraestructura crítica</FormLabel>
-                            <FormDescription>
-                              Gestión de operaciones en agua, gas, electricidad, tráfico aéreo
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isEducationVocational"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Educación y formación profesional</FormLabel>
-                            <FormDescription>
-                              Determina acceso a educación, evaluación del aprendizaje, admisión
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isEmployment"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Empleo, gestión de trabajadores y acceso al empleo</FormLabel>
-                            <FormDescription>
-                              Selección de candidatos, promociones, evaluación de desempeño
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isAccessToServices"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Acceso a servicios esenciales y beneficios públicos</FormLabel>
-                            <FormDescription>
-                              Evaluación de elegibilidad para beneficios públicos, servicios de emergencia, créditos
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isLawEnforcement"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Aplicación de la ley</FormLabel>
-                            <FormDescription>
-                              Evaluación de riesgo de reincidencia, análisis de evidencia, perfilado policial
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isMigrationAsylum"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Migración, asilo y control de fronteras</FormLabel>
-                            <FormDescription>
-                              Verificación de documentos, evaluación de solicitudes de asilo, detección de irregularidades
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isJusticeDemocratic"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Administración de justicia y procesos democráticos</FormLabel>
-                            <FormDescription>
-                              Asistencia a jueces, investigación de hechos, influencia en procesos electorales
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                {/* GPAI */}
-                <div className="space-y-4 pt-6 border-t">
-                  <h3 className="font-semibold text-purple-900 flex items-center gap-2">
-                    <Building2 className="w-4 h-4" />
-                    Modelos de Propósito General (GPAI)
-                  </h3>
-
-                  <FormField
-                    control={form.control}
-                    name="isGeneralPurposeAI"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Modelo de IA de propósito general (GPAI)</FormLabel>
-                          <FormDescription>
-                            Sistema con capacidades generales que puede usarse en múltiples contextos (ej. GPT, Claude, Llama)
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  {form.watch('isGeneralPurposeAI') && (
-                    <FormField
-                      control={form.control}
-                      name="hasSystemicRisk"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 ml-6 border-purple-200 bg-purple-50">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-purple-900">Posee riesgo sistémico</FormLabel>
-                            <FormDescription className="text-purple-700">
-                              Alto impacto en mercado interior de UE: capacidades avanzadas, más de 10^25 FLOPs de entrenamiento
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-
-                {/* Riesgo limitado */}
-                <div className="space-y-4 pt-6 border-t">
-                  <h3 className="font-semibold text-yellow-900 flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Sistemas de Interacción (Art. 50)
-                  </h3>
-
-                  <div className="grid grid-cols-1 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="interactsWithHumans"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Interactúa con humanos (chatbots)</FormLabel>
-                            <FormDescription>
-                              Sistemas conversacionales donde el usuario debe saber que habla con IA
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isEmotionRecognition"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Reconocimiento de emociones</FormLabel>
-                            <FormDescription>
-                              Detecta o interpreta emociones o intenciones en contextos de trabajo o educación
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="generatesDeepfakes"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Generación de deepfakes o contenido sintético</FormLabel>
-                            <FormDescription>
-                              Crea o manipula contenido que parece auténtico (imagen, audio, video)
-                            </FormDescription>
-                          </div>
                         </FormItem>
                       )}
                     />
