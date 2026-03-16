@@ -390,15 +390,15 @@ export default function DashboardPage() {
 
                     return (
                       <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
-                        <div className="flex items-center gap-4 p-4 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer group">
-                          <div className={`p-2 rounded-lg ${riskInfo.bgColor}`}>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer group">
+                          <div className={`p-2 rounded-lg ${riskInfo.bgColor} self-start sm:self-auto`}>
                             <Icon className={`w-5 h-5 ${riskInfo.textColor}`} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
                               {system.name}
                             </h4>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                               <Badge variant="outline" className={`${riskInfo.bgColor} ${riskInfo.textColor} border-0 text-xs`}>
                                 {riskInfo.name}
                               </Badge>
@@ -407,14 +407,14 @@ export default function DashboardPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 sm:gap-0">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-gray-700">
                                 {system.completed_obligations}/{system.total_obligations}
                               </span>
                               <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
                             </div>
-                            <div className="w-24 h-1.5 bg-gray-200 rounded-full mt-1">
+                            <div className="w-20 sm:w-24 h-1.5 bg-gray-200 rounded-full mt-0 sm:mt-1">
                               <div 
                                 className="h-full bg-blue-500 rounded-full transition-all"
                                 style={{ width: `${progress}%` }}
@@ -543,30 +543,30 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
+          {/* Quick Actions - Compact */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Acciones Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Link href="/dashboard/inventory/new">
-                <Button variant="outline" className="w-full justify-start">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Añadir sistema IA
-                </Button>
-              </Link>
-              <Link href="/guia-ai-act">
-                <Button variant="outline" className="w-full justify-start">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Guía completa AI Act
-                </Button>
-              </Link>
-              <Link href="/pricing">
-                <Button variant="outline" className="w-full justify-start">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Ver planes
-                </Button>
-              </Link>
+            <CardContent className="p-4">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Acciones Rápidas</h4>
+              <div className="flex flex-col gap-1.5">
+                <Link href="/dashboard/inventory/new">
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8 hover:bg-gray-100">
+                    <Plus className="w-3.5 h-3.5 mr-2 text-blue-600" />
+                    Añadir sistema IA
+                  </Button>
+                </Link>
+                <Link href="/guia-ai-act">
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8 hover:bg-gray-100">
+                    <BookOpen className="w-3.5 h-3.5 mr-2 text-blue-600" />
+                    Guía completa AI Act
+                  </Button>
+                </Link>
+                <Link href="/pricing">
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8 hover:bg-gray-100">
+                    <Sparkles className="w-3.5 h-3.5 mr-2 text-blue-600" />
+                    Ver planes
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </div>
