@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AlertCircle, Clock, ShieldAlert, Shield, CheckCircle2, FileCheck, Info, Upload, FileText, Image, FileVideo, FileAudio, Trash2, Paperclip, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, Clock, ShieldAlert, Shield, CheckCircle2, FileCheck, Info, Upload, Download, FileText, Image, FileVideo, FileAudio, Trash2, Paperclip, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -118,6 +118,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
   const [uploadingObligation, setUploadingObligation] = useState<string | null>(null);
   const [expandedSuggestions, setExpandedSuggestions] = useState<string | null>(null);
   const [evidenceDescription, setEvidenceDescription] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [activeDialogObligation, setActiveDialogObligation] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
@@ -233,8 +234,13 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
     }
   };
 
-  const handleFileUpload = async (obligationKey: string, file: File) => {
-    if (file.size > MAX_FILE_SIZE) {
+  const handleFileUpload = async (obligationKey: string) => {
+    if (!selectedFile) {
+      toast({ title: 'Error', description: 'Selecciona un archivo primero', variant: 'destructive' });
+      return;
+    }
+
+    if (selectedFile.size > MAX_FILE_SIZE) {
       toast({ 
         title: 'Archivo demasiado grande', 
         description: 'El tamaño máximo permitido es 10MB. Por favor, comprime el archivo o sube una versión más ligera.', 
@@ -278,10 +284,10 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         setObligationsStatus(prev => ({ ...prev, [obligationKey]: newObligation }));
       }
 
-      const filePath = `${session.user.id}/${useCase.id}/${obligationKey}/${Date.now()}_${file.name}`;
+      const filePath = `${session.user.id}/${useCase.id}/${obligationKey}/${Date.now()}_${selectedFile.name}`;
       const { error: uploadError } = await supabase.storage
         .from('obligation-evidences')
-        .upload(filePath, file);
+        .upload(filePath, selectedFile);
 
       if (uploadError) throw uploadError;
 
@@ -291,9 +297,9 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
           obligation_id: obligationId,
           use_case_id: useCase.id,
           user_id: session.user.id,
-          file_name: file.name,
-          file_type: file.type,
-          file_size: file.size,
+          file_name: selectedFile.name,
+          file_type: selectedFile.type,
+          file_size: selectedFile.size,
           file_path: filePath,
           description: evidenceDescription || null,
         })
@@ -308,6 +314,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
       }));
 
       setEvidenceDescription('');
+      setSelectedFile(null);
       setActiveDialogObligation(null);
       toast({ title: 'Evidencia subida', description: 'El archivo se ha subido correctamente' });
     } catch (error: any) {
@@ -475,7 +482,13 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                         <span className="text-xs text-gray-500">({evidenceCount}/{MAX_EVIDENCES_PER_OBLIGATION})</span>
                       </div>
                       {evidenceCount < MAX_EVIDENCES_PER_OBLIGATION && (
-                        <Dialog open={isDialogOpen} onOpenChange={(open) => setActiveDialogObligation(open ? obligation.key : null)}>
+                        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                            setActiveDialogObligation(open ? obligation.key : null);
+                            if (!open) {
+                              setSelectedFile(null);
+                              setEvidenceDescription('');
+                            }
+                          }}>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" className="h-7 text-xs">
                               <Upload className="w-3 h-3 mr-1" />
@@ -497,11 +510,17 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                                   ref={fileInputRef}
                                   type="file"
                                   onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleFileUpload(obligation.key, file);
+                                    const file = e.target.files?.[0] || null;
+                                    setSelectedFile(file);
                                   }}
                                   disabled={isUploading}
                                 />
+                                {selectedFile && activeDialogObligation === obligation.key && (
+                                  <p className="text-xs text-green-600 flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    Archivo seleccionado: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                                  </p>
+                                )}
                               </div>
                               <div className="space-y-2">
                                 <label className="text-sm font-medium">Descripción (opcional)</label>
@@ -510,14 +529,26 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                                   value={evidenceDescription}
                                   onChange={(e) => setEvidenceDescription(e.target.value)}
                                   rows={3}
+                                  disabled={isUploading}
                                 />
                               </div>
-                              {isUploading && (
-                                <div className="flex items-center gap-2 text-sm text-blue-600">
-                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent" />
-                                  Subiendo archivo...
-                                </div>
-                              )}
+                              <Button
+                                onClick={() => handleFileUpload(obligation.key)}
+                                disabled={!selectedFile || isUploading}
+                                className="w-full"
+                              >
+                                {isUploading ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                                    Subiendo...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    Cargar evidencia
+                                  </>
+                                )}
+                              </Button>
                             </div>
                           </DialogContent>
                         </Dialog>
@@ -548,7 +579,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                                   className="h-7 w-7 p-0"
                                   onClick={() => downloadEvidence(evidence)}
                                 >
-                                  <FileText className="w-4 h-4 text-blue-600" />
+                                  <Download className="w-4 h-4 text-blue-600" />
                                 </Button>
                                 <Button
                                   variant="ghost"
