@@ -19,11 +19,15 @@ import {
   BarChart3,
   TrendingUp,
   AlertCircle,
-  FileCheck,
   ChevronRight,
   Sparkles,
   Info,
-  Zap
+  Zap,
+  Brain,
+  Bot,
+  Sparkles as SparklesIcon,
+  Ban,
+  MinusCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,8 +38,11 @@ interface DashboardStats {
   minimalRiskCount: number;
   prohibitedCount: number;
   unclassifiedCount: number;
+  gpaiModelCount: number;
+  gpaiSystemCount: number;
+  gpaiSrCount: number;
   completedObligations: number;
-  totalObligations: number;
+  totalApplicableObligations: number;
   recentSystems: RecentSystem[];
 }
 
@@ -57,7 +64,7 @@ const RISK_LEVELS = [
     textColor: 'text-red-600',
     bgColor: 'bg-red-50',
     borderColor: 'border-red-200',
-    icon: AlertTriangle,
+    icon: Ban,
     obligations: 2,
     examples: 'Sistemas de puntuación social, manipulación subliminal',
   },
@@ -98,8 +105,44 @@ const RISK_LEVELS = [
     examples: 'Recomendadores, filtros de spam, videojuegos',
   },
   {
+    key: 'gpai_model',
+    name: 'GPAI Model',
+    description: 'Modelo de IA de Propósito General',
+    color: 'bg-blue-500',
+    textColor: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    icon: Brain,
+    obligations: 3,
+    examples: 'GPT-4, Llama, Gemini base',
+  },
+  {
+    key: 'gpai_system',
+    name: 'GPAI System',
+    description: 'Sistema de IA de Propósito General',
+    color: 'bg-indigo-500',
+    textColor: 'text-indigo-600',
+    bgColor: 'bg-indigo-50',
+    borderColor: 'border-indigo-200',
+    icon: Bot,
+    obligations: 3,
+    examples: 'ChatGPT, Copilot Studio',
+  },
+  {
+    key: 'gpai_sr',
+    name: 'GPAI-SR',
+    description: 'Modelo GPAI con Riesgo Sistémico',
+    color: 'bg-purple-500',
+    textColor: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+    icon: SparklesIcon,
+    obligations: 7,
+    examples: 'Modelos >10²⁵ FLOP con evaluación de riesgos sistémicos',
+  },
+  {
     key: 'unclassified',
-    name: 'Sin Clasificar',
+    name: 'Por Clasificar',
     description: 'Sistemas pendientes de clasificación según el AI Act',
     color: 'bg-gray-400',
     textColor: 'text-gray-600',
@@ -151,8 +194,11 @@ export default function DashboardPage() {
     minimalRiskCount: 0,
     prohibitedCount: 0,
     unclassifiedCount: 0,
+    gpaiModelCount: 0,
+    gpaiSystemCount: 0,
+    gpaiSrCount: 0,
     completedObligations: 0,
-    totalObligations: 0,
+    totalApplicableObligations: 0,
     recentSystems: [],
   });
   const [loading, setLoading] = useState(true);
@@ -168,7 +214,7 @@ export default function DashboardPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      // Fetch systems count by risk level
+      // Fetch all systems for the user
       const { data: systems } = await supabase
         .from('use_cases')
         .select('ai_act_level, id')
@@ -179,15 +225,23 @@ export default function DashboardPage() {
       const minimalRiskCount = systems?.filter(s => s.ai_act_level === 'minimal_risk').length || 0;
       const prohibitedCount = systems?.filter(s => s.ai_act_level === 'prohibited').length || 0;
       const unclassifiedCount = systems?.filter(s => !s.ai_act_level || s.ai_act_level === 'unclassified').length || 0;
+      const gpaiModelCount = systems?.filter(s => s.ai_act_level === 'gpai_model').length || 0;
+      const gpaiSystemCount = systems?.filter(s => s.ai_act_level === 'gpai_system').length || 0;
+      const gpaiSrCount = systems?.filter(s => s.ai_act_level === 'gpai_sr').length || 0;
 
-      // Fetch obligations stats
+      // Fetch all obligations with their completion status
       const { data: obligations } = await supabase
         .from('use_case_obligations')
-        .select('is_completed')
+        .select('is_completed, use_case_id')
         .eq('user_id', session.user.id);
 
       const completedObligations = obligations?.filter(o => o.is_completed).length || 0;
-      const totalObligations = obligations?.length || 0;
+
+      // Calculate total applicable obligations based on each system's risk level
+      let totalApplicableObligations = 0;
+      systems?.forEach(system => {
+        totalApplicableObligations += getObligationsCountForLevel(system.ai_act_level);
+      });
 
       // Fetch recent systems with obligation counts
       const { data: recentSystemsData } = await supabase
@@ -223,8 +277,11 @@ export default function DashboardPage() {
         minimalRiskCount,
         prohibitedCount,
         unclassifiedCount,
+        gpaiModelCount,
+        gpaiSystemCount,
+        gpaiSrCount,
         completedObligations,
-        totalObligations,
+        totalApplicableObligations,
         recentSystems,
       });
     } catch (error) {
@@ -246,16 +303,19 @@ export default function DashboardPage() {
       limited_risk: 4,
       minimal_risk: 2,
       unclassified: 1,
+      gpai_model: 3,
+      gpai_system: 3,
+      gpai_sr: 7,
     };
     return counts[level] || 1;
   }
 
   function getRiskLevelInfo(level: string) {
-    return RISK_LEVELS.find(r => r.key === level) || RISK_LEVELS[4];
+    return RISK_LEVELS.find(r => r.key === level) || RISK_LEVELS.find(r => r.key === 'unclassified')!;
   }
 
-  const completionRate = stats.totalObligations > 0 
-    ? Math.round((stats.completedObligations / stats.totalObligations) * 100) 
+  const completionRate = stats.totalApplicableObligations > 0 
+    ? Math.round((stats.completedObligations / stats.totalApplicableObligations) * 100) 
     : 0;
 
   return (
@@ -278,70 +338,88 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Sistemas Totales</p>
-                <p className="text-3xl font-bold text-blue-900">{stats.totalSystems}</p>
+                <p className="text-xs font-medium text-blue-600">Sistemas Totales</p>
+                <p className="text-2xl font-bold text-blue-900">{stats.totalSystems}</p>
               </div>
-              <div className="p-3 bg-blue-200 rounded-full">
-                <BarChart3 className="w-6 h-6 text-blue-700" />
+              <div className="p-2 bg-blue-200 rounded-full">
+                <BarChart3 className="w-5 h-5 text-blue-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-red-600">Prohibido</p>
+                <p className="text-2xl font-bold text-red-900">{stats.prohibitedCount}</p>
+              </div>
+              <div className="p-2 bg-red-200 rounded-full">
+                <Ban className="w-5 h-5 text-red-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-orange-600">Alto Riesgo</p>
+                <p className="text-2xl font-bold text-orange-900">{stats.highRiskCount}</p>
+              </div>
+              <div className="p-2 bg-orange-200 rounded-full">
+                <AlertTriangle className="w-5 h-5 text-orange-700" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-yellow-600">Riesgo Limitado</p>
+                <p className="text-2xl font-bold text-yellow-900">{stats.limitedRiskCount}</p>
+              </div>
+              <div className="p-2 bg-yellow-200 rounded-full">
+                <Info className="w-5 h-5 text-yellow-700" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Obligaciones Cumplidas</p>
-                <p className="text-3xl font-bold text-green-900">{stats.completedObligations}</p>
+                <p className="text-xs font-medium text-green-600">Riesgo Mínimo</p>
+                <p className="text-2xl font-bold text-green-900">{stats.minimalRiskCount}</p>
               </div>
-              <div className="p-3 bg-green-200 rounded-full">
-                <FileCheck className="w-6 h-6 text-green-700" />
+              <div className="p-2 bg-green-200 rounded-full">
+                <MinusCircle className="w-5 h-5 text-green-700" />
               </div>
-            </div>
-            <div className="mt-3">
-              <Progress value={completionRate} className="h-2" />
-              <p className="text-xs text-green-600 mt-1">{completionRate}% completado</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-600">Alto Riesgo</p>
-                <p className="text-3xl font-bold text-orange-900">{stats.highRiskCount}</p>
+                <p className="text-xs font-medium text-gray-600">Por Clasificar</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.unclassifiedCount}</p>
               </div>
-              <div className="p-3 bg-orange-200 rounded-full">
-                <AlertTriangle className="w-6 h-6 text-orange-700" />
-              </div>
-            </div>
-            <p className="text-xs text-orange-600 mt-2">
-              {stats.highRiskCount > 0 ? `${stats.highRiskCount * 8} obligaciones` : 'Sin sistemas'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-yellow-600">Riesgo Limitado</p>
-                <p className="text-3xl font-bold text-yellow-900">{stats.limitedRiskCount}</p>
-              </div>
-              <div className="p-3 bg-yellow-200 rounded-full">
-                <Info className="w-6 h-6 text-yellow-700" />
+              <div className="p-2 bg-gray-200 rounded-full">
+                <Clock className="w-5 h-5 text-gray-700" />
               </div>
             </div>
-            <p className="text-xs text-yellow-600 mt-2">
-              {stats.limitedRiskCount > 0 ? `${stats.limitedRiskCount * 4} obligaciones` : 'Sin sistemas'}
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -458,7 +536,7 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-2">
                             <h4 className="font-semibold text-gray-900">{level.name}</h4>
                             <Badge variant="outline" className="text-xs">
-                              {level.obligations} obligaciones
+                              {level.obligations} oblig.
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600 mt-1">{level.description}</p>
@@ -496,12 +574,12 @@ export default function DashboardPage() {
                   <span className="font-semibold">{stats.completedObligations}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-blue-100">Obligaciones pendientes</span>
-                  <span className="font-semibold">{stats.totalObligations - stats.completedObligations}</span>
+                  <span className="text-blue-100">Obligaciones aplicables</span>
+                  <span className="font-semibold">{stats.totalApplicableObligations}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-blue-100">Total obligaciones</span>
-                  <span className="font-semibold">{stats.totalObligations}</span>
+                  <span className="text-blue-100">Obligaciones pendientes</span>
+                  <span className="font-semibold">{stats.totalApplicableObligations - stats.completedObligations}</span>
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-blue-500">
