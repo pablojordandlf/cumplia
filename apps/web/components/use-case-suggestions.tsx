@@ -74,18 +74,18 @@ export function UseCaseSuggestions({ onSelectCase }: UseCaseSuggestionsProps) {
       const { data, error } = await supabase
         .from('use_case_catalog')
         .select('id, name, description, sector, ai_act_level, typical_purpose')
-        .eq('is_active', true)
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       setCatalog(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading catalog:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los casos de ejemplo',
-        variant: 'destructive',
-      });
+      // Silently fail - don't show error toast to user, just log it
+      // The examples are optional enhancement, not critical functionality
+      setCatalog([]);
     } finally {
       setLoading(false);
     }
