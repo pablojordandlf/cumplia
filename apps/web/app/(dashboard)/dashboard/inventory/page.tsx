@@ -245,30 +245,31 @@ export default function InventoryPage() {
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 px-0 sm:px-4">
                 <ArrowLeft className="mr-1 h-4 w-4" />
-                Volver al Dashboard
+                <span className="hidden sm:inline">Volver al Dashboard</span>
               </Button>
             </Link>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
-          <p className="text-gray-600 mt-1">Lista y gestiona tus sistemas de IA</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">Lista y gestiona tus sistemas de IA</p>
         </div>
         <div className="flex gap-2">
           <Link href="/dashboard/inventory/templates">
-            <Button variant="outline">
-              <LayoutTemplate className="mr-2 h-4 w-4" />
-              Plantillas
+            <Button variant="outline" size="sm" className="sm:size-default">
+              <LayoutTemplate className="mr-0 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Plantillas</span>
             </Button>
           </Link>
           <Link href="/dashboard/inventory/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Añadir Caso de Uso
+            <Button size="sm" className="sm:size-default">
+              <Plus className="mr-0 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Añadir Caso de Uso</span>
+              <span className="sm:hidden">Añadir</span>
             </Button>
           </Link>
         </div>
@@ -300,7 +301,10 @@ export default function InventoryPage() {
                 <TableHeader>
                   <TableRow>
                     {columns.map((col) => (
-                      <TableHead key={col.accessor} className="whitespace-nowrap">
+                      <TableHead
+                        key={col.accessor}
+                        className={`whitespace-nowrap ${col.accessor === 'sector' ? 'hidden md:table-cell' : ''}`}
+                      >
                         {col.label}
                       </TableHead>
                     ))}
@@ -310,7 +314,10 @@ export default function InventoryPage() {
                   {filteredUseCases.map((useCase) => (
                     <TableRow key={useCase.id}>
                       {columns.map((col) => (
-                        <TableCell key={`${useCase.id}-${col.accessor}`} className="whitespace-nowrap">
+                        <TableCell
+                          key={`${useCase.id}-${col.accessor}`}
+                          className={`whitespace-nowrap ${col.accessor === 'sector' ? 'hidden md:table-cell' : ''}`}
+                        >
                           {renderCell(useCase, col.accessor)}
                         </TableCell>
                       ))}

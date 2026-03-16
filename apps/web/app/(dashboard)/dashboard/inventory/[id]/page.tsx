@@ -540,22 +540,23 @@ export default function UseCaseDetailPage() {
               <p className="text-gray-600 text-sm">{useCase.sector} • Creado el {format(new Date(useCase.created_at), 'dd/MM/yyyy', { locale: es })}</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Link href={`/dashboard/inventory/${useCaseId}/classify`}>
-              <Button variant="outline">
-                <Shield className="w-4 h-4 mr-2" />
-                {useCase.ai_act_level === 'unclassified' ? 'Clasificar' : 'Reclasificar'}
+              <Button variant="outline" size="sm" className="sm:size-default">
+                <Shield className="w-4 h-4 mr-0 sm:mr-2" />
+                <span className="hidden sm:inline">{useCase.ai_act_level === 'unclassified' ? 'Clasificar' : 'Reclasificar'}</span>
+                <span className="sm:hidden">{useCase.ai_act_level === 'unclassified' ? 'Clasif.' : 'Reclasif.'}</span>
               </Button>
             </Link>
             <Link href={`/dashboard/inventory/${useCaseId}/edit`}>
-              <Button variant="outline">
-                <Pencil className="w-4 h-4 mr-2" />
-                Editar
+              <Button variant="outline" size="sm" className="sm:size-default">
+                <Pencil className="w-4 h-4 mr-0 sm:mr-2" />
+                <span className="hidden sm:inline">Editar</span>
               </Button>
             </Link>
-            <Button variant="destructive" onClick={deleteUseCase}>
-              <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar
+            <Button variant="destructive" size="sm" className="sm:size-default" onClick={deleteUseCase}>
+              <Trash2 className="w-4 h-4 mr-0 sm:mr-2" />
+              <span className="hidden sm:inline">Eliminar</span>
             </Button>
           </div>
         </div>
@@ -618,12 +619,12 @@ export default function UseCaseDetailPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="summary" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="summary">Resumen</TabsTrigger>
-            <TabsTrigger value="classification">Clasificación</TabsTrigger>
-            <TabsTrigger value="settings">Estado</TabsTrigger>
-            <TabsTrigger value="additional">Información Adicional</TabsTrigger>
-            <TabsTrigger value="history">Historial</TabsTrigger>
+          <TabsList className="flex-wrap h-auto gap-1">
+            <TabsTrigger value="summary" className="text-xs sm:text-sm">Resumen</TabsTrigger>
+            <TabsTrigger value="classification" className="text-xs sm:text-sm">Clasificación</TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs sm:text-sm">Estado</TabsTrigger>
+            <TabsTrigger value="additional" className="text-xs sm:text-sm">Info. Adicional</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm">Historial</TabsTrigger>
           </TabsList>
 
           <TabsContent value="summary">

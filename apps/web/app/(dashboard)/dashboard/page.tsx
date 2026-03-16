@@ -543,32 +543,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Quick Actions - Compact */}
-          <Card>
-            <CardContent className="p-4">
-              <h4 className="text-sm font-semibold text-gray-900 mb-3">Acciones Rápidas</h4>
-              <div className="flex flex-col gap-1.5">
-                <Link href="/dashboard/inventory/new">
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8 hover:bg-gray-100">
-                    <Plus className="w-3.5 h-3.5 mr-2 text-blue-600" />
-                    Añadir sistema IA
-                  </Button>
-                </Link>
-                <Link href="/guia-ai-act">
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8 hover:bg-gray-100">
-                    <BookOpen className="w-3.5 h-3.5 mr-2 text-blue-600" />
-                    Guía completa AI Act
-                  </Button>
-                </Link>
-                <Link href="/pricing">
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8 hover:bg-gray-100">
-                    <Sparkles className="w-3.5 h-3.5 mr-2 text-blue-600" />
-                    Ver planes
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
