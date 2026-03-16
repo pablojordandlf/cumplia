@@ -458,7 +458,7 @@ export default function DashboardPage() {
                           <div className="flex items-center gap-2">
                             <h4 className="font-semibold text-gray-900">{level.name}</h4>
                             <Badge variant="outline" className="text-xs">
-                              {level.obligaciones} obligaciones
+                              {level.obligations} obligaciones
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600 mt-1">{level.description}</p>
