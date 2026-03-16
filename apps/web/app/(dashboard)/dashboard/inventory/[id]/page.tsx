@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
-  User,
   Package,
   FileText,
   Building2,
@@ -73,7 +72,6 @@ const aiActRoles: Record<string, string> = {
   importer: 'Importador',
 };
 
-// Tooltip para PoC
 function PoCTooltip() {
   const [show, setShow] = useState(false);
   return (
@@ -124,12 +122,46 @@ export default function UseCaseDetailPage() {
         .order('version_number', { ascending: false });
 
       if (versionsError) throw versionsError;
-      setVersions(versionsData || []);
+      
+      // If no versions exist but use case is classified, create initial version
+      if ((!versionsData || versionsData.length === 0) && useCaseData?.classification_data) {
+        await createInitialVersion(useCaseData);
+        const { data: newVersionsData } = await supabase
+          .from('use_case_versions')
+          .select('*')
+          .eq('use_case_id', useCaseId)
+          .order('version_number', { ascending: false });
+        setVersions(newVersionsData || []);
+      } else {
+        setVersions(versionsData || []);
+      }
     } catch (error: any) {
       console.error('Error loading data:', error);
       toast({ title: 'Error', description: error.message || 'No se pudo cargar el caso de uso', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function createInitialVersion(useCaseData: UseCase) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase
+        .from('use_case_versions')
+        .insert({
+          use_case_id: useCaseId,
+          version_number: 1,
+          classification_data: useCaseData.classification_data,
+          ai_act_level: useCaseData.ai_act_level,
+          created_by: session?.user?.id || useCaseData.created_by,
+          notes: 'Versión inicial - Clasificación original',
+        });
+
+      if (error) {
+        console.error('Error creating initial version:', error);
+      }
+    } catch (err) {
+      console.error('Error creating initial version:', err);
     }
   }
 
@@ -189,7 +221,8 @@ export default function UseCaseDetailPage() {
       toast({ title: 'Versión Creada', description: `Se ha creado la versión ${newVersionNumber}` });
       loadData();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      console.error('Error creating version:', error);
+      toast({ title: 'Error', description: error.message || 'No se pudo crear la versión', variant: 'destructive' });
     }
   }
 
@@ -227,7 +260,7 @@ export default function UseCaseDetailPage() {
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-5xl mx-auto">
-        {/* Header con navegación */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <Link href="/dashboard/inventory">
@@ -297,7 +330,16 @@ export default function UseCaseDetailPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Estado</p>
-                  <p className="font-semibold text-gray-900 mt-1 capitalize">{useCase.status.replace('_', ' ')}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`w-2 h-2 rounded-full ${useCase.is_active ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                    <p className="font-semibold text-gray-900 capitalize">{useCase.is_active ? 'Activo' : 'Obsoleto'}</p>
+                    {useCase.is_poc && (
+                      <Badge variant="secondary" className="text-xs">
+                        <FlaskConical className="w-3 h-3 mr-1" />
+                        PoC
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <div className="p-3 rounded-full bg-green-100">
                   <CheckCircle2 className="w-6 h-6 text-green-600" />
@@ -317,30 +359,81 @@ export default function UseCaseDetailPage() {
           </TabsList>
 
           <TabsContent value="summary">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Información General
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-1">Descripción</h4>
-                  <p className="text-gray-600">{useCase.description || 'Sin descripción'}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-6">
+              {/* Información General */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Información General
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">Sector</h4>
-                    <p className="text-gray-600 capitalize">{useCase.sector}</p>
+                    <h4 className="text-sm font-medium text-gray-700 mb-1">Descripción</h4>
+                    <p className="text-gray-600">{useCase.description || 'Sin descripción'}</p>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">Última actualización</h4>
-                    <p className="text-gray-600">{format(new Date(useCase.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-1">Sector</h4>
+                      <p className="text-gray-600 capitalize">{useCase.sector}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-1">Última actualización</h4>
+                      <p className="text-gray-600">{format(new Date(useCase.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Estado del Sistema - incluido en Resumen */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Estado del Sistema
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-2">Estado del Producto</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {useCase.is_active 
+                        ? 'Este caso de uso está actualmente activo y en uso.' 
+                        : 'Este caso de uso ha sido marcado como obsoleto.'}
+                    </p>
+                    <div className="flex gap-3">
+                      <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+                        useCase.is_active ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        <Play className="w-4 h-4" />
+                        {useCase.is_active ? 'Activo' : 'Inactivo'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-gray-900">¿Es una Prueba de Concepto (PoC)?</h4>
+                      <PoCTooltip />
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {useCase.is_poc
+                        ? 'Este caso de uso es una Prueba de Concepto (proyecto piloto).'
+                        : 'Este caso de uso es un sistema en producción.'}
+                    </p>
+                    <div className="flex gap-3">
+                      <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+                        useCase.is_poc ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        <FlaskConical className="w-4 h-4" />
+                        {useCase.is_poc ? 'Sí, es PoC' : 'No, es producción'}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="classification">
@@ -350,9 +443,6 @@ export default function UseCaseDetailPage() {
                   <Shield className="w-5 h-5" />
                   Clasificación AI Act
                 </CardTitle>
-                <CardDescription>
-                  Detalles de la clasificación según el Reglamento UE AI Act.
-                </CardDescription>
               </CardHeader>
               <CardContent>
                 {useCase.classification_data ? (
@@ -366,130 +456,6 @@ export default function UseCaseDetailPage() {
                         {useCase.classification_data.systemType === 'specific_purpose' && 'Sistema de IA de Finalidad Específica'}
                       </p>
                     </div>
-
-                    {useCase.classification_data.systemType === 'specific_purpose' && (
-                      <>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-3">Artículo 5 - Prácticas Prohibidas</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Técnicas subliminales/manipuladoras</span>
-                              <Badge variant={useCase.classification_data.isSubliminal === 'yes' ? 'destructive' : 'outline'}>
-                                {useCase.classification_data.isSubliminal === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Explota vulnerabilidades</span>
-                              <Badge variant={useCase.classification_data.exploitsVulnerabilities === 'yes' ? 'destructive' : 'outline'}>
-                                {useCase.classification_data.exploitsVulnerabilities === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Social scoring público</span>
-                              <Badge variant={useCase.classification_data.isSocialScoring === 'yes' ? 'destructive' : 'outline'}>
-                                {useCase.classification_data.isSocialScoring === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Biometría remota en tiempo real</span>
-                              <Badge variant={useCase.classification_data.isRealTimeBiometric === 'yes' ? 'destructive' : 'outline'}>
-                                {useCase.classification_data.isRealTimeBiometric === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-3">Artículo 6 - Sistemas de Alto Riesgo</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Identificación biométrica</span>
-                              <Badge variant={useCase.classification_data.isBiometricIdentification === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isBiometricIdentification === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Infraestructura crítica</span>
-                              <Badge variant={useCase.classification_data.isCriticalInfrastructure === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isCriticalInfrastructure === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Educación/formación</span>
-                              <Badge variant={useCase.classification_data.isEducationVocational === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isEducationVocational === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Empleo</span>
-                              <Badge variant={useCase.classification_data.isEmployment === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isEmployment === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Acceso a servicios</span>
-                              <Badge variant={useCase.classification_data.isAccessToServices === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isAccessToServices === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Aplicación de la ley</span>
-                              <Badge variant={useCase.classification_data.isLawEnforcement === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isLawEnforcement === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Migración/asilo</span>
-                              <Badge variant={useCase.classification_data.isMigrationAsylum === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isMigrationAsylum === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Justicia/procesos democráticos</span>
-                              <Badge variant={useCase.classification_data.isJusticeDemocratic === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isJusticeDemocratic === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Componente de seguridad (Anexo II)</span>
-                              <Badge variant={useCase.classification_data.isSafetyComponent === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isSafetyComponent === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-3">Artículo 50 - Obligaciones de Transparencia</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Interactúa con humanos</span>
-                              <Badge variant={useCase.classification_data.interactsWithHumans === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.interactsWithHumans === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Reconocimiento de emociones</span>
-                              <Badge variant={useCase.classification_data.isEmotionRecognition === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isEmotionRecognition === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Categorización biométrica</span>
-                              <Badge variant={useCase.classification_data.isBiometricCategorization === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.isBiometricCategorization === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">Genera deepfakes</span>
-                              <Badge variant={useCase.classification_data.generatesDeepfakes === 'yes' ? 'default' : 'outline'}>
-                                {useCase.classification_data.generatesDeepfakes === 'yes' ? 'Sí' : 'No'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
@@ -509,25 +475,19 @@ export default function UseCaseDetailPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />
-                  Configuración del Caso de Uso
+                  Configuración
                 </CardTitle>
-                <CardDescription>
-                  Gestiona el estado y características del caso de uso.
-                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Estado Activo/Obsoleto */}
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-semibold text-gray-900 mb-2">Estado del Producto</h4>
-                  <p className="text-sm text-gray-600 mb-4">Marca si este caso de uso está actualmente activo o ha quedado obsoleto.</p>
+                  <p className="text-sm text-gray-600 mb-4">Marca si este caso de uso está activo u obsoleto.</p>
                   <div className="flex gap-3">
                     <button
                       onClick={() => updateStatus({ is_active: true })}
                       disabled={updating || useCase.is_active}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                        useCase.is_active
-                          ? 'bg-green-500 text-white shadow-md'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        useCase.is_active ? 'bg-green-500 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                       }`}
                     >
                       <Play className="w-4 h-4" />
@@ -537,9 +497,7 @@ export default function UseCaseDetailPage() {
                       onClick={() => updateStatus({ is_active: false })}
                       disabled={updating || !useCase.is_active}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                        !useCase.is_active
-                          ? 'bg-gray-600 text-white shadow-md'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        !useCase.is_active ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                       }`}
                     >
                       <Square className="w-4 h-4" />
@@ -548,21 +506,18 @@ export default function UseCaseDetailPage() {
                   </div>
                 </div>
 
-                {/* Selector PoC */}
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <h4 className="font-semibold text-gray-900">¿Es una Prueba de Concepto (PoC)?</h4>
                     <PoCTooltip />
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">Indica si este caso de uso es un proyecto piloto o ya está en producción.</p>
+                  <p className="text-sm text-gray-600 mb-4">Indica si es un proyecto piloto.</p>
                   <div className="flex gap-3">
                     <button
                       onClick={() => updateStatus({ is_poc: true })}
                       disabled={updating || useCase.is_poc}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                        useCase.is_poc
-                          ? 'bg-blue-500 text-white shadow-md'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        useCase.is_poc ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                       }`}
                     >
                       <FlaskConical className="w-4 h-4" />
@@ -572,9 +527,7 @@ export default function UseCaseDetailPage() {
                       onClick={() => updateStatus({ is_poc: false })}
                       disabled={updating || !useCase.is_poc}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                        !useCase.is_poc
-                          ? 'bg-gray-600 text-white shadow-md'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        !useCase.is_poc ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                       }`}
                     >
                       <Package className="w-4 h-4" />
@@ -595,7 +548,7 @@ export default function UseCaseDetailPage() {
                     Historial de Versiones
                   </CardTitle>
                   <CardDescription>
-                    Registro de cambios en la clasificación del caso de uso.
+                    Registro de cambios en la clasificación.
                   </CardDescription>
                 </div>
                 <Button variant="outline" onClick={createVersion}>
@@ -608,7 +561,6 @@ export default function UseCaseDetailPage() {
                   <div className="text-center py-8 text-gray-500">
                     <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                     <p>No hay versiones guardadas.</p>
-                    <p className="text-sm">Las versiones se crean automáticamente al modificar la clasificación.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">

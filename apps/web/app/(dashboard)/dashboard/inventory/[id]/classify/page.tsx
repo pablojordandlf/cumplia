@@ -176,11 +176,36 @@ export default function ClassifyUseCasePage() {
     try {
       const riskLevel = calculateRiskLevel(values);
       const { data: { session } } = await supabase.auth.getSession();
-      const { error } = await supabase.from('use_cases').update({
+      
+      // Update the use case
+      const { error: updateError } = await supabase.from('use_cases').update({
         ai_act_level: riskLevel, classification_data: values, status: 'classified',
         updated_at: new Date().toISOString(),
       }).eq('id', useCaseId);
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Create initial version if this is the first classification
+      const { data: existingVersions } = await supabase
+        .from('use_case_versions')
+        .select('id')
+        .eq('use_case_id', useCaseId)
+        .limit(1);
+
+      if (!existingVersions || existingVersions.length === 0) {
+        const { error: versionError } = await supabase.from('use_case_versions').insert({
+          use_case_id: useCaseId,
+          version_number: 1,
+          classification_data: values,
+          ai_act_level: riskLevel,
+          created_by: session?.user?.id,
+          notes: 'Versión inicial - Primera clasificación',
+        });
+        if (versionError) {
+          console.error('Error creating initial version:', versionError);
+          // Don't block - version is optional
+        }
+      }
+
       setResult(riskLevel);
       toast({ title: 'Clasificación Completada', description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}` });
     } catch (error: any) {
