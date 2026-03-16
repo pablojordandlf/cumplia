@@ -214,11 +214,12 @@ export default function DashboardPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      // Fetch all systems for the user
+      // Fetch all systems for the user (excluding deleted)
       const { data: systems } = await supabase
         .from('use_cases')
         .select('ai_act_level, id')
-        .eq('user_id', session.user.id);
+        .eq('user_id', session.user.id)
+        .is('deleted_at', null);
 
       const highRiskCount = systems?.filter(s => s.ai_act_level === 'high_risk').length || 0;
       const limitedRiskCount = systems?.filter(s => s.ai_act_level === 'limited_risk').length || 0;
@@ -243,11 +244,12 @@ export default function DashboardPage() {
         totalApplicableObligations += getObligationsCountForLevel(system.ai_act_level);
       });
 
-      // Fetch recent systems with obligation counts
+      // Fetch recent systems with obligation counts (excluding deleted)
       const { data: recentSystemsData } = await supabase
         .from('use_cases')
         .select('id, name, ai_act_level, created_at')
         .eq('user_id', session.user.id)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(5);
 
