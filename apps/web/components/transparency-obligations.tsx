@@ -310,9 +310,21 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
       setEvidenceDescription('');
       setActiveDialogObligation(null);
       toast({ title: 'Evidencia subida', description: 'El archivo se ha subido correctamente' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading file:', error);
-      toast({ title: 'Error', description: 'Error al subir el archivo', variant: 'destructive' });
+      let errorMessage = 'Error al subir el archivo';
+      
+      if (error?.message?.includes('bucket')) {
+        errorMessage = 'El bucket de almacenamiento no existe. Contacta al administrador.';
+      } else if (error?.message?.includes('permission') || error?.message?.includes('policy')) {
+        errorMessage = 'No tienes permisos para subir archivos. Verifica las políticas de storage.';
+      } else if (error?.message?.includes('row-level security')) {
+        errorMessage = 'Error de seguridad: las tablas de base de datos necesitan configuración RLS.';
+      } else if (error?.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     } finally {
       setUploadingObligation(null);
     }
