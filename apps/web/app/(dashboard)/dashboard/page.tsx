@@ -18,7 +18,6 @@ import {
   BookOpen,
   BarChart3,
   TrendingUp,
-  AlertCircle,
   ChevronRight,
   Sparkles,
   Info,
@@ -154,37 +153,7 @@ const RISK_LEVELS = [
   },
 ];
 
-const OBLIGATIONS_GUIDE = [
-  {
-    level: 'Alto Riesgo',
-    obligations: [
-      { name: 'Registro UE', desc: 'Base de datos de sistemas de alto riesgo' },
-      { name: 'Documentación técnica', desc: 'Anexo IV del AI Act' },
-      { name: 'Logs automáticos', desc: 'Registro de eventos (Art. 12)' },
-      { name: 'Supervisión humana', desc: 'Oversight efectivo (Art. 14)' },
-      { name: 'Transparencia', desc: 'Info a usuarios (Art. 13)' },
-      { name: 'Gestión de riesgos', desc: 'Sistema continuo (Art. 9)' },
-      { name: 'Garantías de calidad', desc: 'Datos de entrenamiento (Art. 10)' },
-      { name: 'Evaluación conformidad', desc: 'Antes de puesta en mercado (Art. 43)' },
-    ],
-  },
-  {
-    level: 'Riesgo Limitado',
-    obligations: [
-      { name: 'Informar interacción IA', desc: 'Chatbots y sistemas conversacionales' },
-      { name: 'Divulgación contenido sintético', desc: 'Deepfakes, multimedia generada' },
-      { name: 'Notificar reconocimiento', desc: 'Emocional/biométrico' },
-      { name: 'Etiquetado texto IA', desc: 'Texto generado por IA' },
-    ],
-  },
-  {
-    level: 'Prohibido',
-    obligations: [
-      { name: 'Prohibición absoluta', desc: 'No implementar en UE' },
-      { name: 'Notificación autoridades', desc: 'Si se detecta uso prohibido' },
-    ],
-  },
-];
+
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -510,48 +479,24 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Risk Levels Guide */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-blue-600" />
-                Guía de Niveles de Riesgo AI Act
-              </CardTitle>
-              <CardDescription>
-                Clasificación de sistemas según el Reglamento UE de Inteligencia Artificial
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RISK_LEVELS.map((level) => {
-                  const Icon = level.icon;
-                  return (
-                    <div 
-                      key={level.key}
-                      className={`p-4 rounded-lg border ${level.borderColor} ${level.bgColor} hover:shadow-md transition-shadow`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-lg ${level.color} text-white`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-gray-900">{level.name}</h4>
-                            <Badge variant="outline" className="text-xs">
-                              {level.obligations} oblig.
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">{level.description}</p>
-                          <p className="text-xs text-gray-500 mt-2">
-                            <span className="font-medium">Ejemplos:</span> {level.examples}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
+          {/* Guía AI Act */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <Link href="/dashboard/guia">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900">Guía AI Act</h3>
+                    <p className="text-sm text-gray-500">
+                      Niveles de riesgo, clasificación de sistemas y obligaciones regulatorias
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Link>
           </Card>
         </div>
 
@@ -592,34 +537,6 @@ export default function DashboardPage() {
                   </Button>
                 </Link>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Obligations Guide */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Shield className="w-4 h-4 text-blue-600" />
-                Guía de Obligaciones
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {OBLIGATIONS_GUIDE.map((section) => (
-                <div key={section.level}>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">{section.level}</h4>
-                  <ul className="space-y-1.5">
-                    {section.obligations.map((obl, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <span className="font-medium text-gray-700">{obl.name}</span>
-                          <p className="text-xs text-gray-500">{obl.desc}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
             </CardContent>
           </Card>
 
