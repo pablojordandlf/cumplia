@@ -61,10 +61,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's organization membership and plan
+    // Get user's organization membership
     const { data: membership, error: membershipError } = await supabase
       .from('organization_members')
-      .select('role, organization_id, organizations!inner(id, name, subscription_plan)')
+      .select('role, organization_id')
       .eq('user_id', user.id)
       .single();
 
@@ -76,13 +76,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle Supabase nested query result
-    const organization = Array.isArray(membership.organizations) 
-      ? membership.organizations[0] 
-      : membership.organizations;
+    const organizationId = membership.organization_id;
+
+    // Get organization details separately
+    const { data: organization, error: orgError } = await supabase
+      .from('organizations')
+      .select('id, name, subscription_plan')
+      .eq('id', organizationId)
+      .single();
+
+    if (orgError || !organization) {
+      console.error('Organization error:', orgError);
+      return NextResponse.json(
+        { error: 'Forbidden: Organization not found' },
+        { status: 403 }
+      );
+    }
     
     const plan = organization?.subscription_plan || 'free';
-    const organizationId = membership.organization_id;
 
     // Check Pro requirement
     if (PRO_DOCUMENTS.includes(type) && plan === 'free') {
