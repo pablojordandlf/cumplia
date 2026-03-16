@@ -67,6 +67,7 @@ export function DocumentGenerationWizard({
   const [useCases, setUseCases] = useState<UseCase[]>([]);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [customProhibitedUse, setCustomProhibitedUse] = useState('');
   const [selectedUseCase, setSelectedUseCase] = useState<string>('');
   const { toast } = useToast();
 
@@ -81,6 +82,7 @@ export function DocumentGenerationWizard({
       setStep(1);
       setFormData({});
       setSelectedUseCase('');
+      setCustomProhibitedUse('');
     }
   }, [isOpen, documentType]);
 
@@ -112,6 +114,8 @@ export function DocumentGenerationWizard({
             sector: orgData.sector,
             size: orgData.size,
           });
+          // Initialize organization name in formData so user can edit it
+          setFormData(prev => ({ ...prev, organization_name: orgData.name }));
         }
       }
 
@@ -159,6 +163,15 @@ export function DocumentGenerationWizard({
         }
         return true;
       case 2:
+        // Validar nombre de organización
+        if (!formData.organization_name?.trim()) {
+          toast({
+            title: 'Campo requerido',
+            description: 'El nombre de la organización es obligatorio',
+            variant: 'destructive',
+          });
+          return false;
+        }
         // Validar campos obligatorios de la organización
         const orgFields = schema?.fields.filter(f => f.required && f.section === 'organization') || [];
         for (const field of orgFields) {
@@ -204,8 +217,7 @@ export function DocumentGenerationWizard({
         use_case_id: selectedUseCase || null,
         form_data: formData,
         organization_data: {
-          name: organization?.name,
-          ai_act_role: organization?.ai_act_role,
+          name: formData.organization_name || organization?.name,
           sector: organization?.sector,
           size: organization?.size,
         },
@@ -287,15 +299,19 @@ export function DocumentGenerationWizard({
           </Select>
         );
       case 'multiselect':
+        // Special handling for prohibited uses field with custom additions
+        const isProhibitedUsesField = field.id === 'include_prohibited_uses';
+        const currentValues = value || [];
+        const customUses = formData.custom_prohibited_uses || [];
+
         return (
           <div className="space-y-2">
             {field.options?.map((option) => (
               <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox
                   id={`${field.id}-${option.value}`}
-                  checked={(value || []).includes(option.value)}
+                  checked={currentValues.includes(option.value)}
                   onCheckedChange={(checked) => {
-                    const currentValues = value || [];
                     if (checked) {
                       updateFormData(field.id, [...currentValues, option.value]);
                     } else {
@@ -308,6 +324,72 @@ export function DocumentGenerationWizard({
                 </Label>
               </div>
             ))}
+            
+            {/* Custom prohibited uses for ai_policy */}
+            {isProhibitedUsesField && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">¿Quieres añadir usos prohibidos específicos de tu sector?</p>
+                
+                {/* List of custom uses */}
+                {customUses.length > 0 && (
+                  <div className="space-y-2 mb-3">
+                    {customUses.map((customUse: string, index: number) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">
+                        <span className="text-sm">{customUse}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-red-500"
+                          onClick={() => {
+                            const updated = customUses.filter((_: string, i: number) => i !== index);
+                            updateFormData('custom_prohibited_uses', updated);
+                          }}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Add custom use input */}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="ej: Uso de IA para evaluación psicológica sin consentimiento"
+                    value={customProhibitedUse}
+                    onChange={(e) => setCustomProhibitedUse(e.target.value)}
+                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (customProhibitedUse.trim()) {
+                          updateFormData('custom_prohibited_uses', [...customUses, customProhibitedUse.trim()]);
+                          setCustomProhibitedUse('');
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (customProhibitedUse.trim()) {
+                        updateFormData('custom_prohibited_uses', [...customUses, customProhibitedUse.trim()]);
+                        setCustomProhibitedUse('');
+                      }
+                    }}
+                    disabled={!customProhibitedUse.trim()}
+                  >
+                    Añadir
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Presiona Enter o haz clic en Añadir para incluir usos específicos de tu industria
+                </p>
+              </div>
+            )}
           </div>
         );
       case 'date':
@@ -435,24 +517,19 @@ export function DocumentGenerationWizard({
         <CardContent className="p-4 space-y-4">
           <div className="grid gap-4">
             <div className="space-y-2">
-              <Label htmlFor="org-name">Nombre de la organización</Label>
+              <Label htmlFor="organization_name">
+                Nombre de la organización
+                <span className="text-red-500 ml-1">*</span>
+              </Label>
               <Input
-                id="org-name"
-                value={organization?.name || ''}
-                disabled
-                className="bg-gray-50"
+                id="organization_name"
+                value={formData.organization_name || organization?.name || ''}
+                onChange={(e) => updateFormData('organization_name', e.target.value)}
+                placeholder="Nombre de tu empresa u organización"
               />
-              <p className="text-xs text-gray-500">Este dato se obtiene de tu perfil</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="org-role">Rol según AI Act</Label>
-              <Input
-                id="org-role"
-                value={organization?.ai_act_role || 'No especificado'}
-                disabled
-                className="bg-gray-50"
-              />
+              <p className="text-xs text-gray-500">
+                Puedes personalizar el nombre tal como aparecerá en el documento
+              </p>
             </div>
 
             {schema?.fields
@@ -541,14 +618,17 @@ export function DocumentGenerationWizard({
             
             <div className="flex justify-between py-2 border-b">
               <span className="text-gray-500">Organización</span>
-              <span className="font-medium">{organization?.name}</span>
+              <span className="font-medium">{formData.organization_name || organization?.name}</span>
             </div>
 
             <div className="mt-4">
               <h4 className="text-sm font-medium mb-2">Campos completados:</h4>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(formData)
-                  .filter(([_, value]) => value && (Array.isArray(value) ? value.length > 0 : true))
+                  .filter(([key, value]) => {
+                    if (key === 'custom_prohibited_uses' || key === 'organization_name') return false;
+                    return value && (Array.isArray(value) ? value.length > 0 : true);
+                  })
                   .map(([key]) => {
                     const field = schema?.fields.find(f => f.id === key);
                     return field ? (
@@ -559,6 +639,20 @@ export function DocumentGenerationWizard({
                     ) : null;
                   })}
               </div>
+              
+              {/* Show custom prohibited uses if any */}
+              {formData.custom_prohibited_uses && formData.custom_prohibited_uses.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs text-gray-500 mb-1">Usos prohibidos personalizados:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {formData.custom_prohibited_uses.map((use: string, index: number) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {use}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

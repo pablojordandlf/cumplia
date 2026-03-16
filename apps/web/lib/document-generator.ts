@@ -24,6 +24,7 @@ export interface DocumentData {
     classification?: string;
   }>;
   generatedAt: string;
+  formData?: Record<string, any>;
 }
 
 export async function generatePDF(data: DocumentData): Promise<Uint8Array> {
@@ -177,23 +178,38 @@ async function generateAIPolicyContent(
   addWrappedText: (text: string, size: number, bold?: boolean, indent?: number) => void,
   data: DocumentData
 ) {
+  const formData = data.formData || {};
+  
+  // Section 1: Objective and Scope (with form data if available)
   addWrappedText('1. OBJETIVO Y ALCANCE', 14, true);
-  addWrappedText(
-    `La presente política establece los principios y directrices para el uso responsable de sistemas de Inteligencia Artificial (IA) en ${data.organizationName}, en cumplimiento del Reglamento de la Unión Europea sobre Inteligencia Artificial (AI Act).`,
-    11
-  );
+  
+  const scopeText = formData.scope_description 
+    ? `${formData.scope_description} Esta política aplica a ${data.organizationName}.`
+    : `La presente política establece los principios y directrices para el uso responsable de sistemas de Inteligencia Artificial (IA) en ${data.organizationName}, en cumplimiento del Reglamento de la Unión Europea sobre Inteligencia Artificial (AI Act).`;
+  addWrappedText(scopeText, 11);
   addWrappedText(
     'Esta política aplica a todos los empleados, contratistas y terceros que utilicen o interactúen con sistemas de IA en el ámbito de sus funciones laborales.',
     11
   );
   
+  // Section 2: General Principles
   addWrappedText('2. PRINCIPIOS GENERALES', 14, true);
   addWrappedText('2.1 Uso Responsable: Los sistemas de IA deben utilizarse de manera ética, transparente y responsable.', 11);
   addWrappedText('2.2 Supervisión Humana: Las decisiones automatizadas significativas deben incluir supervisión humana adecuada.', 11);
   addWrappedText('2.3 Privacidad y Protección de Datos: El uso de IA debe respetar el RGPD y la normativa de protección de datos aplicable.', 11);
   addWrappedText('2.4 No Discriminación: Los sistemas de IA no deben generar resultados discriminatorios basados en características protegidas.', 11);
   
-  addWrappedText('3. SISTEMAS DE IA AUTORIZADOS', 14, true);
+  // Section 3: Responsible Department
+  if (formData.responsible_department) {
+    addWrappedText('3. DEPARTAMENTO RESPONSABLE', 14, true);
+    addWrappedText(
+      `El departamento de ${formData.responsible_department} será responsable de la supervisión y cumplimiento de esta política de uso de IA.`,
+      11
+    );
+  }
+  
+  // Section 4: Authorized Systems
+  addWrappedText(formData.responsible_department ? '4. SISTEMAS DE IA AUTORIZADOS' : '3. SISTEMAS DE IA AUTORIZADOS', 14, true);
   addWrappedText(
     'Solo podrán utilizarse sistemas de IA previamente evaluados y registrados en el inventario de sistemas de IA de la organización. El uso de sistemas no autorizados está prohibido.',
     11
@@ -206,22 +222,68 @@ async function generateAIPolicyContent(
     });
   }
   
-  addWrappedText('4. PROHIBICIONES', 14, true);
+  // Section 5: Prohibitions (with form data)
+  const prohibitedSectionNum = formData.responsible_department ? '5' : '4';
+  addWrappedText(`${prohibitedSectionNum}. PROHIBICIONES`, 14, true);
   addWrappedText('Queda estrictamente prohibido el uso de sistemas de IA para:', 11);
-  addWrappedText('• Sistemas de puntuación social por parte de autoridades públicas', 11, false, 20);
-  addWrappedText('• Manipulación subliminal o explotación de vulnerabilidades', 11, false, 20);
-  addWrappedText('• Clasificación biométrica remota en espacios públicos', 11, false, 20);
-  addWrappedText('• Sistemas de predicción delictiva basados en perfilado', 11, false, 20);
   
-  addWrappedText('5. INCUMPLIMIENTOS Y SANCIONES', 14, true);
+  // Map of prohibited use values to descriptions
+  const prohibitedUsesMap: Record<string, string> = {
+    social_scoring: 'Sistemas de puntuación social por parte de autoridades públicas',
+    subliminal: 'Manipulación subliminal o explotación de vulnerabilidades',
+    biometric_remote: 'Identificación biométrica remota en espacios públicos',
+    emotion_recognition: 'Reconocimiento de emociones en ámbitos educativos/laborales (salvo excepciones)',
+    predictive_policing: 'Sistemas de predicción delictiva basados en perfilado',
+  };
+  
+  const selectedProhibited = formData.include_prohibited_uses || [];
+  
+  if (selectedProhibited.length > 0) {
+    // Use selected prohibitions from form
+    selectedProhibited.forEach((use: string) => {
+      const description = prohibitedUsesMap[use] || use;
+      addWrappedText(`• ${description}`, 11, false, 20);
+    });
+  } else {
+    // Default prohibitions
+    addWrappedText('• Sistemas de puntuación social por parte de autoridades públicas', 11, false, 20);
+    addWrappedText('• Manipulación subliminal o explotación de vulnerabilidades', 11, false, 20);
+    addWrappedText('• Identificación biométrica remota en espacios públicos', 11, false, 20);
+    addWrappedText('• Sistemas de predicción delictiva basados en perfilado', 11, false, 20);
+  }
+  
+  // Custom prohibited uses from form
+  const customProhibited = formData.custom_prohibited_uses || [];
+  if (customProhibited.length > 0) {
+    addWrappedText('', 11);
+    addWrappedText('Además, en nuestra organización queda prohibido específicamente:', 11, true);
+    customProhibited.forEach((use: string) => {
+      addWrappedText(`• ${use}`, 11, false, 20);
+    });
+  }
+  
+  // Review frequency
+  if (formData.review_frequency) {
+    const frequencyText: Record<string, string> = {
+      annual: 'anualmente',
+      biannual: 'cada seis meses',
+      quarterly: 'trimestralmente',
+    };
+    const nextSectionNum = parseInt(prohibitedSectionNum) + 1;
+    addWrappedText(`${nextSectionNum}. REVISIÓN Y ACTUALIZACIÓN`, 14, true);
+    addWrappedText(
+      `Esta política será revisada ${frequencyText[formData.review_frequency] || formData.review_frequency} o cuando haya cambios significativos en la normativa aplicable.`,
+      11
+    );
+  }
+  
+  // Final section: Sanctions
+  const sanctionsSectionNum = formData.review_frequency 
+    ? parseInt(prohibitedSectionNum) + 2 
+    : parseInt(prohibitedSectionNum) + 1;
+  addWrappedText(`${sanctionsSectionNum}. INCUMPLIMIENTOS Y SANCIONES`, 14, true);
   addWrappedText(
     'El incumplimiento de esta política puede resultar en medidas disciplinarias, incluyendo la terminación de la relación laboral o contractual, además de las sanciones legales aplicables según el AI Act.',
-    11
-  );
-  
-  addWrappedText('6. REVISIÓN Y ACTUALIZACIÓN', 14, true);
-  addWrappedText(
-    'Esta política será revisada anualmente o cuando haya cambios significativos en la normativa aplicable.',
     11
   );
 }
