@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Get user's organization membership
     const { data: membership, error: membershipError } = await supabase
       .from('organization_members')
-      .select('role, organization_id')
+      .select('role, org_id')
       .eq('user_id', user.id)
       .single();
 
@@ -76,12 +76,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const organizationId = membership.organization_id;
+    const organizationId = membership.org_id;
 
     // Get organization details separately
     const { data: organization, error: orgError } = await supabase
       .from('organizations')
-      .select('id, name, subscription_plan')
+      .select('id, name, plan_name')
       .eq('id', organizationId)
       .single();
 
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const plan = organization?.subscription_plan || 'free';
+    const plan = organization?.plan_name || 'free';
 
     // Check Pro requirement
     if (PRO_DOCUMENTS.includes(type) && plan === 'free') {
@@ -175,17 +175,17 @@ export async function POST(request: NextRequest) {
       .insert({
         id: documentId,
         organization_id: organizationId,
-        created_by: user.id,
         type,
         title: titles[type] || 'Documento de Cumplimiento',
-        storage_path: storagePath,
-        public_url: publicUrl,
-        status: 'completed',
-        metadata: {
+        pdf_url: publicUrl,
+        content_json: {
+          created_by: user.id,
           use_case_id: use_case_id || null,
           form_data: form_data || {},
           organization_data: organization_data || {},
           generatedAt,
+          storagePath,
+          status: 'completed',
         },
       });
 
