@@ -94,7 +94,7 @@ const LEVEL_INFO: Record<string, { title: string; icon: any; reference: string }
 };
 
 const MAX_EVIDENCES_PER_OBLIGATION = 10;
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB - límite del bucket de Supabase
 
 function getFileIcon(fileType: string) {
   if (fileType.startsWith('image/')) return Image;
@@ -235,7 +235,11 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
 
   const handleFileUpload = async (obligationKey: string, file: File) => {
     if (file.size > MAX_FILE_SIZE) {
-      toast({ title: 'Error', description: 'El archivo no puede superar 50MB', variant: 'destructive' });
+      toast({ 
+        title: 'Archivo demasiado grande', 
+        description: 'El tamaño máximo permitido es 10MB. Por favor, comprime el archivo o sube una versión más ligera.', 
+        variant: 'destructive' 
+      });
       return;
     }
 
@@ -471,11 +475,12 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                               <DialogTitle>Subir evidencia</DialogTitle>
                               <DialogDescription>
                                 Adjunta documentos, imágenes o archivos que demuestren el cumplimiento de esta obligación.
+                                <span className="block mt-1 text-amber-600 font-medium">⚠️ Tamaño máximo: 10MB por archivo</span>
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
                               <div className="space-y-2">
-                                <label className="text-sm font-medium">Archivo (máx. 50MB)</label>
+                                <label className="text-sm font-medium">Archivo (máx. 10MB)</label>
                                 <Input
                                   ref={fileInputRef}
                                   type="file"
