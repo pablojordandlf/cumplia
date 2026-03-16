@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { generatePDF, uploadToStorage } from '@/lib/document-generator';
+import { generatePDF, uploadToStorage } from '../../../../../../lib/document-generator';
 import { randomUUID } from 'crypto';
 
 function getSupabaseClient() {

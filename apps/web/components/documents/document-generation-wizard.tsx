@@ -233,8 +233,16 @@ export function DocumentGenerationWizard({
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Error al generar documento');
+        let errorMessage = 'Error al generar documento';
+        try {
+          const error = await response.json();
+          errorMessage = error.detail || error.message || error.error || JSON.stringify(error);
+        } catch {
+          // Si no es JSON válido, leer como texto
+          const text = await response.text();
+          errorMessage = text || `Error ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       toast({
