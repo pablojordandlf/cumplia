@@ -113,7 +113,7 @@ export default function InventoryPage() {
       console.error('Error fetching use cases:', error);
       toast({
         title: 'Error',
-        description: error.message || 'No se pudieron cargar los casos de uso.',
+        description: error.message || 'No se pudieron cargar los sistemas de IA.',
         variant: 'destructive',
       });
     } finally {
@@ -153,7 +153,7 @@ export default function InventoryPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este caso de uso?')) return;
+    if (!confirm('¿Estás seguro de que deseas eliminar este sistema de IA?')) return;
     
     try {
       const { error } = await supabase
@@ -165,14 +165,14 @@ export default function InventoryPage() {
       
       toast({
         title: 'Eliminado',
-        description: 'El caso de uso ha sido eliminado correctamente.',
+        description: 'El sistema de IA ha sido eliminado correctamente.',
       });
       
       fetchUseCases();
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo eliminar el caso de uso.',
+        description: error.message || 'No se pudo eliminar el sistema de IA.',
         variant: 'destructive',
       });
     }

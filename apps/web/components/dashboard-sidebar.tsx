@@ -20,7 +20,7 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Casos de Uso",
+    title: "Sistemas de IA",
     href: "/dashboard/inventory",
     icon: FolderKanban,
   },

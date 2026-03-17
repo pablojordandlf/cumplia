@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 export interface PlanFeatures {
-  use_cases: number;        // -1 = unlimited
+  ai_systems: number;        // -1 = unlimited (Sistemas de IA, no casos de uso)
   users: number;            // -1 = unlimited
   ai_check_exports: number; // -1 = unlimited
   api_access: boolean;
@@ -16,13 +16,14 @@ export interface PlanFeatures {
 
 export interface Plan {
   id: string;
-  name: 'starter' | 'essential' | 'professional' | 'enterprise';
+  name: 'starter' | 'professional' | 'business' | 'enterprise';
   display_name: string;
   price_monthly: number;
   features: PlanFeatures;
 }
 
-// New plan structure aligned with landing page
+// Updated plan structure - March 2026
+// Changed from "use_cases" to "ai_systems" to align with AI Act terminology
 export const PLANS: Record<string, Plan> = {
   // Legacy mapping for backward compatibility
   free: {
@@ -31,7 +32,7 @@ export const PLANS: Record<string, Plan> = {
     display_name: 'Starter',
     price_monthly: 0,
     features: {
-      use_cases: 1,
+      ai_systems: 1,
       users: 1,
       ai_check_exports: 0,
       api_access: false,
@@ -47,7 +48,7 @@ export const PLANS: Record<string, Plan> = {
     display_name: 'Starter',
     price_monthly: 0,
     features: {
-      use_cases: 1,
+      ai_systems: 1,
       users: 1,
       ai_check_exports: 0,
       api_access: false,
@@ -57,14 +58,15 @@ export const PLANS: Record<string, Plan> = {
       priority_support: false,
     },
   },
+  // Legacy essential maps to professional (price change from 29€ to 99€)
   essential: {
-    id: 'essential',
-    name: 'essential',
-    display_name: 'Essential',
-    price_monthly: 29,
+    id: 'professional',
+    name: 'professional',
+    display_name: 'Professional',
+    price_monthly: 99,
     features: {
-      use_cases: 5,
-      users: 3,
+      ai_systems: 10,
+      users: 5,
       ai_check_exports: -1,
       api_access: false,
       integrations: false,
@@ -73,15 +75,15 @@ export const PLANS: Record<string, Plan> = {
       priority_support: false,
     },
   },
-  // Legacy pro maps to essential for backward compatibility
+  // Legacy pro maps to professional
   pro: {
-    id: 'essential',
-    name: 'essential',
-    display_name: 'Essential',
-    price_monthly: 29,
+    id: 'professional',
+    name: 'professional',
+    display_name: 'Professional',
+    price_monthly: 99,
     features: {
-      use_cases: 5,
-      users: 3,
+      ai_systems: 10,
+      users: 5,
       ai_check_exports: -1,
       api_access: false,
       integrations: false,
@@ -96,25 +98,25 @@ export const PLANS: Record<string, Plan> = {
     display_name: 'Professional',
     price_monthly: 99,
     features: {
-      use_cases: -1,
-      users: -1,
+      ai_systems: 10,
+      users: 5,
       ai_check_exports: -1,
-      api_access: true,
-      integrations: true,
-      custom_templates: true,
-      multi_department: true,
+      api_access: false,
+      integrations: false,
+      custom_templates: false,
+      multi_department: false,
       priority_support: true,
     },
   },
-  // Legacy business maps to professional
+  // New Business tier
   business: {
-    id: 'professional',
-    name: 'professional',
-    display_name: 'Professional',
-    price_monthly: 99,
+    id: 'business',
+    name: 'business',
+    display_name: 'Business',
+    price_monthly: 299,
     features: {
-      use_cases: -1,
-      users: -1,
+      ai_systems: 50,
+      users: 20,
       ai_check_exports: -1,
       api_access: true,
       integrations: true,
@@ -129,7 +131,7 @@ export const PLANS: Record<string, Plan> = {
     display_name: 'Enterprise',
     price_monthly: 0, // Custom pricing
     features: {
-      use_cases: -1,
+      ai_systems: -1,
       users: -1,
       ai_check_exports: -1,
       api_access: true,
@@ -162,7 +164,7 @@ export class PlanGate {
     // Determine plan from features
     const planName = Object.keys(PLANS).find(key => {
       const plan = PLANS[key];
-      return plan.features.use_cases === (data.use_cases || 0);
+      return plan.features.ai_systems === (data.ai_systems || 0);
     }) || 'starter';
 
     return new PlanGate(planName);
@@ -172,9 +174,14 @@ export class PlanGate {
     return this.plan;
   }
 
-  canCreateUseCase(currentCount: number): boolean {
-    const limit = this.plan.features.use_cases;
+  canCreateAISystem(currentCount: number): boolean {
+    const limit = this.plan.features.ai_systems;
     return limit === -1 || currentCount < limit;
+  }
+
+  // Backward compatibility alias
+  canCreateUseCase(currentCount: number): boolean {
+    return this.canCreateAISystem(currentCount);
   }
 
   hasAPIAccess(): boolean {
@@ -197,8 +204,13 @@ export class PlanGate {
     return this.plan.features.priority_support;
   }
 
+  getAISystemsLimit(): number {
+    return this.plan.features.ai_systems;
+  }
+
+  // Backward compatibility alias
   getUseCasesLimit(): number {
-    return this.plan.features.use_cases;
+    return this.getAISystemsLimit();
   }
 
   getUsersLimit(): number {
@@ -206,15 +218,19 @@ export class PlanGate {
   }
 
   isProOrHigher(): boolean {
-    return ['essential', 'professional', 'enterprise'].includes(this.plan.name);
+    return ['professional', 'business', 'enterprise'].includes(this.plan.name);
   }
 
   isEssentialOrHigher(): boolean {
-    return ['essential', 'professional', 'enterprise'].includes(this.plan.name);
+    return ['professional', 'business', 'enterprise'].includes(this.plan.name);
   }
 
   isProfessionalOrHigher(): boolean {
-    return ['professional', 'enterprise'].includes(this.plan.name);
+    return ['professional', 'business', 'enterprise'].includes(this.plan.name);
+  }
+
+  isBusinessOrHigher(): boolean {
+    return ['business', 'enterprise'].includes(this.plan.name);
   }
 
   isEnterprise(): boolean {
@@ -223,11 +239,12 @@ export class PlanGate {
 
   getUpgradeMessage(feature: string): string {
     const messages: Record<string, string> = {
-      use_cases: `Has alcanzado el límite de ${this.plan.features.use_cases} casos de uso. Actualiza a Essential para gestionar hasta 5 casos de uso.`,
-      api: 'El acceso a API requiere un plan Professional o superior.',
-      integrations: 'Las integraciones requieren un plan Professional o superior.',
-      custom_templates: 'Las plantillas personalizadas requieren un plan Professional o superior.',
-      multi_department: 'La gestión multi-departamento requiere un plan Professional o superior.',
+      ai_systems: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 10 sistemas.`,
+      use_cases: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 10 sistemas.`,
+      api: 'El acceso a API requiere un plan Business o superior.',
+      integrations: 'Las integraciones requieren un plan Business o superior.',
+      custom_templates: 'Las plantillas personalizadas requieren un plan Business o superior.',
+      multi_department: 'La gestión multi-departamento requiere un plan Business o superior.',
     };
     return messages[feature] || 'Esta función requiere un plan superior.';
   }

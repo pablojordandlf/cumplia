@@ -14,15 +14,17 @@ import {
   ArrowRight,
   Building2,
   Globe,
-  Scale
+  Scale,
+  Bot,
+  Cpu
 } from 'lucide-react';
 import { Header } from '@/components/landing-header';
 import { Footer } from '@/components/landing-footer';
 
 export const metadata = {
   title: 'CumplIA - Cumplimiento del AI Act para Empresas',
-  description: 'Plataforma SaaS que ayuda a empresas a cumplir con el Reglamento de IA de la UE (AI Act). Evaluación de riesgos, documentación y gestión de casos de uso de IA.',
-  keywords: 'AI Act, cumplimiento IA, regulación inteligencia artificial, IA responsable, GDPR, casos de uso IA',
+  description: 'Plataforma SaaS que ayuda a empresas a cumplir con el Reglamento de IA de la UE (AI Act). Evaluación de riesgos, documentación y gestión de sistemas de IA.',
+  keywords: 'AI Act, cumplimiento IA, regulación inteligencia artificial, IA responsable, GDPR, sistemas de IA',
 };
 
 function HeroSection() {
@@ -33,18 +35,18 @@ function HeroSection() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight mb-4 sm:mb-6">
             CumplIA simplifica el cumplimiento normativo
             <span className="block text-blue-600 mt-2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-              Gestiona tus Casos de Uso de IA sin Complicaciones
+              Gestiona tus Sistemas de IA sin Complicaciones
             </span>
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2 sm:px-0">
             La inteligencia artificial avanza a pasos agigantados. Asegúrate de que tu empresa 
             no solo cumpla con el reglamento más importante de IA de Europa, sino que prospere en él. 
-            CumplIA guía a tu organización caso de uso por caso de uso.
+            CumplIA guía a tu organización sistema por sistema.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
             <Link href="/register" className="w-full sm:w-auto">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto">
-                Evalúa tu primer caso gratis
+                Evalúa tu primer sistema gratis
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </Link>
@@ -119,7 +121,7 @@ function WhoAppliesSection() {
 
 function PainPointsSection() {
   const risks = [
-    { icon: AlertTriangle, title: "Sanciones Millonarias", description: "Multas de hasta el 7% de tu facturación global anual o 35M€, la mayor de ambas, por cada caso de uso no conforme.", color: "text-red-600", bgColor: "bg-red-50" },
+    { icon: AlertTriangle, title: "Sanciones Millonarias", description: "Multas de hasta el 7% de tu facturación global anual o 35M€, la mayor de ambas, por cada sistema de IA no conforme.", color: "text-red-600", bgColor: "bg-red-50" },
     { icon: Users, title: "Daño Reputacional", description: "Pérdida de confianza de clientes, socios e inversores por incumplimiento normativo.", color: "text-orange-600", bgColor: "bg-orange-50" },
     { icon: TrendingDown, title: "Retrasos en Innovación", description: "Bloqueo de proyectos de IA por incumplimiento, frenando tu crecimiento competitivo.", color: "text-yellow-600", bgColor: "bg-yellow-50" },
     { icon: AlertCircle, title: "Desventaja Competitiva", description: "Mientras tus competidores se adaptan, tú te quedas atrás en el mercado europeo.", color: "text-purple-600", bgColor: "bg-purple-50" }
@@ -157,10 +159,10 @@ function PainPointsSection() {
 
 function FeaturesSection() {
   const features = [
-    { icon: Shield, title: "Evaluación de Riesgos por Caso de Uso", description: "Identifica la clasificación de riesgo de cada caso de uso según el AI Act.", microcopy: "Clasificación automática según criterios del AI Act 2024." },
-    { icon: FileText, title: "Gestión de Documentación", description: "Crea y mantén expedientes técnicos unificados por caso de uso.", microcopy: "Documentación simplificada para auditorías." },
-    { icon: BookOpen, title: "Guía Experta Integrada", description: "Accede a checklists y plantillas para cada caso de uso.", microcopy: "Recursos actualizados del AI Act." },
-    { icon: Zap, title: "Generación de FRIA", description: "Genera automáticamente la Evaluación de Impacto en los Derechos Fundamentales (Art. 27).", microcopy: "Cumple con los requisitos más exigentes." }
+    { icon: Bot, title: "Inventario de Sistemas de IA", description: "Registra y gestiona todos los sistemas de IA de tu organización en un único lugar.", microcopy: "Inventario completo con clasificación automática según el AI Act." },
+    { icon: Shield, title: "Evaluación de Riesgos", description: "Identifica y gestiona los riesgos de cada sistema con el catálogo MIT de 50 riesgos.", microcopy: "Basado en el MIT AI Risk Repository 2024." },
+    { icon: FileText, title: "FRIA y Documentación", description: "Genera automáticamente la Evaluación de Impacto en Derechos Fundamentales (Art. 27).", microcopy: "Cumple con los requisitos más exigentes del AI Act." },
+    { icon: Zap, title: "Seguimiento de Obligaciones", description: "Checklists inteligentes adaptados al nivel de riesgo de cada sistema de IA.", microcopy: "Obligaciones específicas para Alto Riesgo, Limitado y Mínimo." }
   ];
 
   return (
@@ -194,9 +196,33 @@ function FeaturesSection() {
 
 function PricingSection() {
   const plans = [
-    { name: "Starter", price: "0€", period: "/mes", description: "Perfecto para validar tu primer caso de uso.", features: ["1 caso de uso", "1 sistema de IA", "Documentación básica", "Checklist cumplimiento", "Soporte email"], cta: "Empieza Gratis", popular: false },
-    { name: "Essential", price: "29€", period: "/mes", description: "Ideal para startups y PYMEs.", features: ["Hasta 5 casos de uso", "Hasta 3 sistemas IA", "5 documentos/mes", "FRIA básica", "Soporte prioritario"], cta: "Elige Essential", popular: true },
-    { name: "Professional", price: "99€", period: "/mes", description: "Casos de uso y sistemas ilimitados.", features: ["Casos de uso ilimitados", "Sistemas IA ilimitados", "Documentos ilimitados", "FRIA completa", "API access"], cta: "Elige Professional", popular: false }
+    { 
+      name: "Starter", 
+      price: "0€", 
+      period: "/mes", 
+      description: "Valida tu primer sistema de IA y conoce la plataforma.", 
+      features: ["1 Sistema de IA", "1 usuario", "Clasificación AI Act", "Obligaciones básicas", "Soporte community"], 
+      cta: "Empieza Gratis", 
+      popular: false 
+    },
+    { 
+      name: "Professional", 
+      price: "99€", 
+      period: "/mes", 
+      description: "Ideal para PYMEs y consultoras con varios sistemas.", 
+      features: ["Hasta 10 Sistemas de IA", "Hasta 5 usuarios", "FRIA completa (Art. 27)", "Gestión de riesgos", "10 documentos/mes"], 
+      cta: "Elige Professional", 
+      popular: true 
+    },
+    { 
+      name: "Business", 
+      price: "299€", 
+      period: "/mes", 
+      description: "Para empresas con múltiples departamentos.", 
+      features: ["Hasta 50 Sistemas de IA", "Hasta 20 usuarios", "API access", "Integraciones", "Documentos ilimitados"], 
+      cta: "Elige Business", 
+      popular: false 
+    }
   ];
 
   return (
@@ -204,7 +230,7 @@ function PricingSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Precios claros, basados en tu uso real</h2>
-          <p className="text-base sm:text-lg text-gray-600">Paga por los <strong>casos de uso</strong> que gestionas, no por usuarios.</p>
+          <p className="text-base sm:text-lg text-gray-600">Paga por los <strong>sistemas de IA</strong> que gestionas, no por usuarios.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
@@ -231,9 +257,20 @@ function PricingSection() {
         <div className="text-center mt-10">
           <Link href="/pricing"><Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">Ver comparativa completa<ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
         </div>
-        <p className="text-center mt-6 text-sm text-gray-500">
-          ¿Necesitas un plan personalizado? <a href="mailto:sales@cumplia.com" className="text-blue-600 hover:underline font-medium">Contacta con nosotros</a>
-        </p>
+        
+        {/* Enterprise CTA */}
+        <div className="mt-12 max-w-3xl mx-auto">
+          <div className="bg-gray-900 rounded-2xl p-6 text-white text-center">
+            <h3 className="text-xl font-bold mb-2">¿Necesitas más?</h3>
+            <p className="text-gray-300 mb-4">Plan Enterprise con sistemas ilimitados, SSO, SLA y Customer Success dedicado.</p>
+            <Link href="mailto:sales@cumplia.com">
+              <Button variant="outline" className="border-white text-white hover:bg-white/10">
+                Contactar Ventas
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );
