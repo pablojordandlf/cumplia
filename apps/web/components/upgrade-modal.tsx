@@ -5,17 +5,12 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { AlertTriangle, Sparkles } from 'lucide-react';
 
 interface UpgradeModalProps {
-  feature: 'documents' | 'use_cases' | 'managed_orgs';
+  feature: 'use_cases' | 'managed_orgs';
   isOpen: boolean;
   onClose: () => void;
 }
 
 const featureDescriptions: Record<UpgradeModalProps['feature'], { title: string; description: string; cta: string }> = {
-  documents: {
-    title: 'Funcionalidad Pro',
-    description: 'La generación de documentos requiere un plan Essential o superior. Genera documentos de cumplimiento automáticamente.',
-    cta: 'Ver planes',
-  },
   use_cases: {
     title: 'Límite alcanzado',
     description: 'Has alcanzado el límite de casos de uso en tu plan actual. Actualiza para gestionar más sistemas de IA.',

@@ -27,16 +27,6 @@ export async function GET(request: Request) {
       console.error('Error fetching use cases count:', useCasesError);
     }
 
-    // Get documents count
-    const { count: documentsCount, error: documentsError } = await supabase
-      .from('documents')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-
-    if (documentsError) {
-      console.error('Error fetching documents count:', documentsError);
-    }
-
     // Get users count (for organization if exists)
     let usersCount = 1; // Default to 1 (the owner)
     
@@ -59,7 +49,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       useCasesUsed: useCasesCount || 0,
-      documentsUsed: documentsCount || 0,
       usersUsed: usersCount,
       user: {
         id: user.id,

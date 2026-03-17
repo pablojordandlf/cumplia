@@ -197,25 +197,19 @@ function PlanFallback({ minPlan }: { minPlan: string }) {
 // Limit-based gate
 interface LimitGateProps {
   children: React.ReactNode;
-  type: "useCases" | "documents" | "users";
+  type: "useCases" | "users";
   fallback?: React.ReactNode;
 }
 
 export function LimitGate({ children, type, fallback }: LimitGateProps) {
   const checkName = type === "useCases" 
     ? "canCreateUseCase" 
-    : type === "documents" 
-    ? "canGenerateDocument" 
     : "canInviteUser";
 
   const labels: Record<string, { title: string; description: string }> = {
     useCases: {
       title: "Límite de sistemas alcanzado",
       description: "Has alcanzado el número máximo de sistemas de IA permitidos en tu plan.",
-    },
-    documents: {
-      title: "Límite de documentos alcanzado",
-      description: "Has alcanzado el número máximo de documentos permitidos en tu plan.",
     },
     users: {
       title: "Límite de usuarios alcanzado",

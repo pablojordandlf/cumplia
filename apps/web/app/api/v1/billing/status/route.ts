@@ -87,7 +87,6 @@ export async function GET(request: Request) {
       is_professional: mappedPlan === 'professional',
       limits: planData?.limits || {
         use_cases: mappedPlan === 'starter' ? 1 : mappedPlan === 'essential' ? 5 : -1,
-        documents: mappedPlan === 'starter' ? 0 : mappedPlan === 'essential' ? 5 : -1,
         users: mappedPlan === 'starter' ? 1 : mappedPlan === 'essential' ? 3 : -1,
       },
       user: {

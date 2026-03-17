@@ -8,11 +8,9 @@ export interface Permissions {
   plan: Plan;
   limits: {
     useCases: number;
-    documents: number;
     users: number;
   };
   features: {
-    friaGeneration: boolean;
     apiAccess: boolean;
     integrations: boolean;
     customTemplates: boolean;
@@ -24,18 +22,16 @@ export interface Permissions {
   };
   usage: {
     useCasesUsed: number;
-    documentsUsed: number;
     usersUsed: number;
   };
 }
 
 export interface PermissionChecks {
   canCreateUseCase: boolean;
-  canGenerateDocument: boolean;
   canInviteUser: boolean;
   hasFeature: (feature: keyof PlanFeatures) => boolean;
-  getRemaining: (type: "useCases" | "documents" | "users") => number;
-  getPercentage: (type: "useCases" | "documents" | "users") => number;
+  getRemaining: (type: "useCases" | "users") => number;
+  getPercentage: (type: "useCases" | "users") => number;
   isPlan: (planName: "starter" | "essential" | "professional" | "enterprise") => boolean;
   isEssentialOrHigher: boolean;
   isProfessionalOrHigher: boolean;
@@ -66,11 +62,9 @@ export function usePermissions(): {
           plan: starterPlan,
           limits: {
             useCases: starterPlan.features.use_cases,
-            documents: starterPlan.features.documents,
             users: starterPlan.features.users,
           },
           features: {
-            friaGeneration: starterPlan.features.fria_generation,
             apiAccess: starterPlan.features.api_access,
             integrations: starterPlan.features.integrations,
             customTemplates: starterPlan.features.custom_templates,
@@ -80,7 +74,7 @@ export function usePermissions(): {
             sla: starterPlan.features.sla || false,
             dedicatedManager: starterPlan.features.dedicated_manager || false,
           },
-          usage: { useCasesUsed: 0, documentsUsed: 0, usersUsed: 0 },
+          usage: { useCasesUsed: 0, usersUsed: 0 },
         });
         return;
       }
@@ -96,7 +90,7 @@ export function usePermissions(): {
       ]);
 
       let planName = "starter";
-      let usage = { useCasesUsed: 0, documentsUsed: 0, usersUsed: 0 };
+      let usage = { useCasesUsed: 0, usersUsed: 0 };
 
       if (planRes.ok) {
         const planData = await planRes.json();
@@ -118,7 +112,6 @@ export function usePermissions(): {
         const usageData = await usageRes.json();
         usage = {
           useCasesUsed: usageData.useCasesUsed || 0,
-          documentsUsed: usageData.documentsUsed || 0,
           usersUsed: usageData.usersUsed || 0,
         };
       }
@@ -129,11 +122,9 @@ export function usePermissions(): {
         plan,
         limits: {
           useCases: plan.features.use_cases,
-          documents: plan.features.documents,
           users: plan.features.users,
         },
         features: {
-          friaGeneration: plan.features.fria_generation,
           apiAccess: plan.features.api_access,
           integrations: plan.features.integrations,
           customTemplates: plan.features.custom_templates,
@@ -153,11 +144,9 @@ export function usePermissions(): {
         plan: starterPlan,
         limits: {
           useCases: starterPlan.features.use_cases,
-          documents: starterPlan.features.documents,
           users: starterPlan.features.users,
         },
         features: {
-          friaGeneration: starterPlan.features.fria_generation,
           apiAccess: starterPlan.features.api_access,
           integrations: starterPlan.features.integrations,
           customTemplates: starterPlan.features.custom_templates,
@@ -167,7 +156,7 @@ export function usePermissions(): {
           sla: starterPlan.features.sla || false,
           dedicatedManager: starterPlan.features.dedicated_manager || false,
         },
-        usage: { useCasesUsed: 0, documentsUsed: 0, usersUsed: 0 },
+        usage: { useCasesUsed: 0, usersUsed: 0 },
       });
     } finally {
       setIsLoading(false);
@@ -184,21 +173,18 @@ export function usePermissions(): {
         canCreateUseCase:
           permissions.limits.useCases === -1 ||
           permissions.usage.useCasesUsed < permissions.limits.useCases,
-        canGenerateDocument:
-          permissions.limits.documents === -1 ||
-          permissions.usage.documentsUsed < permissions.limits.documents,
         canInviteUser:
           permissions.limits.users === -1 ||
           permissions.usage.usersUsed < permissions.limits.users,
         hasFeature: (feature: keyof PlanFeatures) => {
           return !!permissions.plan.features[feature];
         },
-        getRemaining: (type: "useCases" | "documents" | "users") => {
+        getRemaining: (type: "useCases" | "users") => {
           const limit = permissions.limits[type];
           const used = permissions.usage[`${type}Used` as const];
           return limit === -1 ? Infinity : Math.max(0, limit - used);
         },
-        getPercentage: (type: "useCases" | "documents" | "users") => {
+        getPercentage: (type: "useCases" | "users") => {
           const limit = permissions.limits[type];
           const used = permissions.usage[`${type}Used` as const];
           if (limit === -1) return 0;
@@ -229,7 +215,6 @@ export function useFeature(feature: keyof PlanFeatures): {
   const { permissions, checks, isLoading } = usePermissions();
 
   const upgradeMessages: Record<string, string> = {
-    fria_generation: "La generación de FRIA requiere un plan Essential o superior",
     api_access: "El acceso a API requiere un plan Professional o superior",
     integrations: "Las integraciones requieren un plan Professional o superior",
     custom_templates: "Las plantillas personalizadas requieren un plan Professional o superior",
@@ -248,7 +233,7 @@ export function useFeature(feature: keyof PlanFeatures): {
 }
 
 // Hook for checking usage limits
-export function useLimit(type: "useCases" | "documents" | "users"): {
+export function useLimit(type: "useCases" | "users"): {
   limit: number;
   used: number;
   remaining: number;
@@ -270,8 +255,6 @@ export function useLimit(type: "useCases" | "documents" | "users"): {
     isLoading,
     canUse: type === "useCases" 
       ? (checks?.canCreateUseCase || false)
-      : type === "documents"
-      ? (checks?.canGenerateDocument || false)
       : (checks?.canInviteUser || false),
   };
 }

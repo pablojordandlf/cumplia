@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, FileText, Server, Users, ExternalLink, Crown, Building2, Sparkles, AlertCircle } from "lucide-react";
+import { CreditCard, Server, Users, ExternalLink, Crown, Building2, Sparkles, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +99,6 @@ export function SubscriptionStatus() {
   }
 
   const useCasesPercentage = checks.getPercentage("useCases");
-  const documentsPercentage = checks.getPercentage("documents");
   const usersPercentage = checks.getPercentage("users");
 
   const showWarning = (percentage: number) => percentage >= 80 && percentage < 100;
@@ -136,28 +135,6 @@ export function SubscriptionStatus() {
           )}
         </div>
 
-        {/* Documents Usage */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-green-500" />
-              <span>Documentos</span>
-            </div>
-            <span className="text-muted-foreground">
-              {permissions.usage.documentsUsed} / {permissions.limits.documents === -1 ? "∞" : permissions.limits.documents}
-            </span>
-          </div>
-          <Progress 
-            value={documentsPercentage} 
-            className={`h-2 ${showDanger(documentsPercentage) ? 'bg-red-200' : ''}`}
-          />
-          {plan.name === "essential" && showWarning(documentsPercentage) && (
-            <p className="text-xs text-amber-600">
-              Estás cerca del límite. Actualiza a Professional para documentos ilimitados.
-            </p>
-          )}
-        </div>
-
         {/* Users Usage */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
@@ -179,9 +156,7 @@ export function SubscriptionStatus() {
         <div className="pt-2 border-t">
           <p className="text-xs font-medium text-gray-500 mb-2">Características incluidas:</p>
           <div className="flex flex-wrap gap-1">
-            {permissions.features.friaGeneration && (
-              <Badge variant="outline" className="text-xs">FRIA</Badge>
-            )}
+  
             {permissions.features.apiAccess && (
               <Badge variant="outline" className="text-xs">API</Badge>
             )}

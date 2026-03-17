@@ -6,10 +6,9 @@ import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
   FolderKanban, 
-  FileText, 
   Settings,
-  Shield,
-  LayoutTemplate
+  LayoutTemplate,
+  Shield
 } from "lucide-react";
 
 const navItems = [
@@ -27,11 +26,6 @@ const navItems = [
     title: "Plantillas",
     href: "/dashboard/inventory/templates",
     icon: LayoutTemplate,
-  },
-  {
-    title: "Documentos",
-    href: "/dashboard/documents",
-    icon: FileText,
   },
   {
     title: "Configuración",
