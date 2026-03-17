@@ -9,7 +9,8 @@ import {
   Settings,
   LayoutTemplate,
   Shield,
-  GraduationCap
+  GraduationCap,
+  Settings2
 } from "lucide-react";
 
 const navItems = [
@@ -32,6 +33,11 @@ const navItems = [
     title: "Formación",
     href: "/dashboard/guia",
     icon: GraduationCap,
+  },
+  {
+    title: "Administración",
+    href: "/dashboard/admin",
+    icon: Settings2,
   },
   {
     title: "Configuración",
