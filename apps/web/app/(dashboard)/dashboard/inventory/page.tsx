@@ -94,7 +94,8 @@ export default function InventoryPage() {
         return;
       }
 
-      // Get user's organization
+      // Filter by user_id (personal use cases) OR organization_id (B2B use cases)
+      // This ensures backward compatibility with existing data
       const { data: membership } = await supabase
         .from('organization_members')
         .select('organization_id')
@@ -104,12 +105,21 @@ export default function InventoryPage() {
 
       const organizationId = membership?.organization_id;
 
-      const { data, error } = await supabase
+      // Build query: show use cases where user_id matches OR organization_id matches
+      let query = supabase
         .from('use_cases')
         .select('id, name, sector, status, ai_act_level, created_at')
-        .eq('organization_id', organizationId)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
+        .is('deleted_at', null);
+
+      if (organizationId) {
+        // In B2B mode: show use_cases from this organization OR personally owned
+        query = query.or(`organization_id.eq.${organizationId},user_id.eq.${session.user.id}`);
+      } else {
+        // Personal mode: only show user's own use cases
+        query = query.eq('user_id', session.user.id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
 

@@ -184,7 +184,7 @@ export default function DashboardPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      // Get user's organization
+      // Get user's organization for B2B filtering
       const { data: membership } = await supabase
         .from('organization_members')
         .select('organization_id')
@@ -194,12 +194,19 @@ export default function DashboardPage() {
 
       const organizationId = membership?.organization_id;
 
-      // Fetch all systems for the organization (excluding deleted)
-      const { data: systems } = await supabase
+      // Build filter: show use cases where user_id matches OR organization_id matches
+      let systemsQuery = supabase
         .from('use_cases')
         .select('ai_act_level, id')
-        .eq('organization_id', organizationId)
         .is('deleted_at', null);
+
+      if (organizationId) {
+        systemsQuery = systemsQuery.or(`organization_id.eq.${organizationId},user_id.eq.${session.user.id}`);
+      } else {
+        systemsQuery = systemsQuery.eq('user_id', session.user.id);
+      }
+
+      const { data: systems } = await systemsQuery;
 
       const highRiskCount = systems?.filter(s => s.ai_act_level === 'high_risk').length || 0;
       const limitedRiskCount = systems?.filter(s => s.ai_act_level === 'limited_risk').length || 0;
@@ -225,11 +232,19 @@ export default function DashboardPage() {
       });
 
       // Fetch recent systems with obligation counts (excluding deleted)
-      const { data: recentSystemsData } = await supabase
+      // Apply same user_id OR organization_id filter
+      let recentQuery = supabase
         .from('use_cases')
         .select('id, name, ai_act_level, created_at')
-        .eq('organization_id', organizationId)
-        .is('deleted_at', null)
+        .is('deleted_at', null);
+
+      if (organizationId) {
+        recentQuery = recentQuery.or(`organization_id.eq.${organizationId},user_id.eq.${session.user.id}`);
+      } else {
+        recentQuery = recentQuery.eq('user_id', session.user.id);
+      }
+
+      const { data: recentSystemsData } = await recentQuery
         .order('created_at', { ascending: false })
         .limit(5);
 
