@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Edit, Trash2, FileWarning, Shield, AlertTriangle, Info, CheckCircle2, Ban, Brain, Bot, Sparkles, Settings, Target, XCircle, PlusCircle, Power } from 'lucide-react';
+import { Plus, Edit, Trash2, FileWarning, Shield, Info, CheckCircle2, Ban, Settings, Target, XCircle, PlusCircle, Power } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskTemplateWithItems } from '@/types/risk-management';
@@ -29,33 +29,24 @@ import {
 } from "@/components/ui/tooltip";
 
 const RISK_LEVEL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  prohibited: Ban,
   high_risk: Shield,
   limited_risk: Info,
   minimal_risk: CheckCircle2,
-  prohibited: Ban,
-  gpai_model: Brain,
-  gpai_system: Bot,
-  gpai_sr: Sparkles,
 };
 
 const RISK_LEVEL_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  prohibited: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
   high_risk: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200' },
   limited_risk: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200' },
   minimal_risk: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200' },
-  prohibited: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
-  gpai_model: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
-  gpai_system: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-200' },
-  gpai_sr: { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200' },
 };
 
 const RISK_LEVEL_LABELS: Record<string, string> = {
+  prohibited: 'Prohibido',
   high_risk: 'Alto Riesgo',
   limited_risk: 'Riesgo Limitado',
   minimal_risk: 'Riesgo Mínimo',
-  prohibited: 'Prohibido',
-  gpai_model: 'GPAI Model',
-  gpai_system: 'GPAI System',
-  gpai_sr: 'GPAI-SR',
 };
 
 export function RiskTemplatesPanel() {
@@ -70,7 +61,17 @@ export function RiskTemplatesPanel() {
     
     const success = await deleteTemplate(templateToDelete.id);
     if (success) {
+      toast({
+        title: 'Plantilla eliminada',
+        description: `La plantilla "${templateToDelete.name}" ha sido eliminada correctamente.`,
+      });
       setTemplateToDelete(null);
+    } else {
+      toast({
+        title: 'Error al eliminar',
+        description: 'No se pudo eliminar la plantilla. Verifica que seas el propietario.',
+        variant: 'destructive',
+      });
     }
   };
 

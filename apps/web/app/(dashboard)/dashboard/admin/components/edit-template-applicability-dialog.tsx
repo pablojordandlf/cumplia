@@ -27,13 +27,10 @@ interface AISystem {
 }
 
 const AI_ACT_LEVELS = [
+  { value: 'prohibited', label: 'Prohibido', icon: Ban, color: 'text-red-600', bg: 'bg-red-50' },
   { value: 'high_risk', label: 'Alto Riesgo', icon: Shield, color: 'text-orange-600', bg: 'bg-orange-50' },
   { value: 'limited_risk', label: 'Riesgo Limitado', icon: Info, color: 'text-yellow-600', bg: 'bg-yellow-50' },
   { value: 'minimal_risk', label: 'Riesgo Mínimo', icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
-  { value: 'prohibited', label: 'Prohibido', icon: Ban, color: 'text-red-600', bg: 'bg-red-50' },
-  { value: 'gpai_model', label: 'GPAI Model', icon: Info, color: 'text-blue-600', bg: 'bg-blue-50' },
-  { value: 'gpai_system', label: 'GPAI System', icon: Info, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { value: 'gpai_sr', label: 'GPAI-SR', icon: Info, color: 'text-purple-600', bg: 'bg-purple-50' },
 ];
 
 export function EditTemplateApplicabilityDialog({ 
@@ -86,6 +83,7 @@ export function EditTemplateApplicabilityDialog({
         .from('use_cases')
         .select('id, name, ai_act_level, sector')
         .eq('user_id', session.user.id)
+        .is('deleted_at', null)
         .order('name');
 
       if (error) throw error;
