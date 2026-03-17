@@ -32,10 +32,15 @@ export interface RiskTemplate {
   ai_act_level: 'high_risk' | 'limited_risk' | 'minimal_risk';
   is_default: boolean;
   is_system: boolean;
+  is_active: boolean;
   organization_id: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  // Applicability rules
+  applies_to_levels: string[];  // AI Act risk levels this template applies to
+  excluded_systems: string[];   // System IDs explicitly excluded
+  included_systems: string[];   // System IDs explicitly included (exceptions)
 }
 
 export interface RiskTemplateItem {

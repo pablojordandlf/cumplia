@@ -96,7 +96,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, ai_act_level, risk_ids } = body;
+    const { 
+      name, 
+      description, 
+      ai_act_level, 
+      risk_ids,
+      applies_to_levels,
+      excluded_systems,
+      included_systems
+    } = body;
 
     // Validation
     if (!name || !ai_act_level) {
@@ -122,7 +130,11 @@ export async function POST(request: NextRequest) {
         ai_act_level,
         is_default: false,
         is_system: false,
-        created_by: user.id
+        is_active: true,
+        created_by: user.id,
+        applies_to_levels: applies_to_levels || [ai_act_level],
+        excluded_systems: excluded_systems || [],
+        included_systems: included_systems || []
       })
       .select()
       .single();

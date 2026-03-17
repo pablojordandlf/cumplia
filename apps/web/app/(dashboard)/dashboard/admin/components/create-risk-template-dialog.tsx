@@ -25,20 +25,26 @@ const AI_ACT_LEVELS = [
   { value: 'limited_risk', label: 'Riesgo Limitado', icon: Info },
   { value: 'minimal_risk', label: 'Riesgo Mínimo', icon: CheckCircle2 },
   { value: 'prohibited', label: 'Prohibido', icon: Ban },
-  { value: 'gpai_model', label: 'GPAI Model', icon: Brain },
-  { value: 'gpai_system', label: 'GPAI System', icon: Bot },
-  { value: 'gpai_sr', label: 'GPAI-SR', icon: Sparkles },
 ];
+
+const RISK_LEVEL_LABELS: Record<string, string> = {
+  high_risk: 'Alto Riesgo',
+  limited_risk: 'Riesgo Limitado',
+  minimal_risk: 'Riesgo Mínimo',
+  prohibited: 'Prohibido',
+};
 
 export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTemplateDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [aiActLevel, setAiActLevel] = useState('');
+  const [appliesToLevels, setAppliesToLevels] = useState<string[]>([]);
   const [catalogRisks, setCatalogRisks] = useState<RiskCatalog[]>([]);
   const [selectedRisks, setSelectedRisks] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [activeSection, setActiveSection] = useState<'basic' | 'risks' | 'applicability'>('basic');
   
   const { createTemplate } = useRiskTemplates({ autoFetch: false });
   const { toast } = useToast();
@@ -48,6 +54,13 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       fetchCatalogRisks();
     }
   }, [open]);
+
+  // Update appliesToLevels when aiActLevel changes
+  useEffect(() => {
+    if (aiActLevel) {
+      setAppliesToLevels([aiActLevel]);
+    }
+  }, [aiActLevel]);
 
   const fetchCatalogRisks = async () => {
     setLoadingCatalog(true);
@@ -77,6 +90,17 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
         newSet.add(riskId);
       }
       return newSet;
+    });
+  };
+
+  const toggleAppliesToLevel = (level: string) => {
+    setAppliesToLevels(prev => {
+      if (prev.includes(level)) {
+        // Don't allow unchecking the last level
+        if (prev.length === 1) return prev;
+        return prev.filter(l => l !== level);
+      }
+      return [...prev, level];
     });
   };
 
@@ -124,6 +148,7 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       description: description.trim() || undefined,
       ai_act_level: aiActLevel,
       risk_ids: Array.from(selectedRisks),
+      applies_to_levels: appliesToLevels,
     });
 
     setSubmitting(false);
@@ -133,14 +158,24 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       setName('');
       setDescription('');
       setAiActLevel('');
+      setAppliesToLevels([]);
       setSelectedRisks(new Set());
       setSearchQuery('');
+      setActiveSection('basic');
       onOpenChange(false);
     }
   };
 
   const handleClose = () => {
     if (!submitting) {
+      // Reset form
+      setName('');
+      setDescription('');
+      setAiActLevel('');
+      setAppliesToLevels([]);
+      setSelectedRisks(new Set());
+      setSearchQuery('');
+      setActiveSection('basic');
       onOpenChange(false);
     }
   };
@@ -181,10 +216,10 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
             </div>
 
             <div className="space-y-2">
-              <Label>Nivel AI Act * </Label>
+              <Label>Nivel AI Act Principal * </Label>
               <Select value={aiActLevel} onValueChange={setAiActLevel}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un nivel de riesgo" />
+                  <SelectValue placeholder="Selecciona el nivel principal" />
                 </SelectTrigger>
                 <SelectContent>
                   {AI_ACT_LEVELS.map((level) => (
@@ -197,6 +232,49 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-gray-500">
+                El nivel principal determina la categoría de la plantilla
+              </p>
+            </div>
+          </div>
+
+          {/* Applicability Section */}
+          <div className="space-y-4 border-t pt-4">
+            <div className="flex items-center justify-between">
+              <Label>Aplicabilidad </Label>
+              {appliesToLevels.length > 0 && (
+                <Badge variant="secondary">{appliesToLevels.length} nivel(es)</Badge>
+              )}
+            </div>
+            
+            <p className="text-sm text-gray-500">
+              Selecciona todos los niveles de riesgo a los que esta plantilla se aplicará:
+            </p>
+
+            <div className="space-y-2">
+              {AI_ACT_LEVELS.map((level) => {
+                const isSelected = appliesToLevels.includes(level.value);
+                return (
+                  <div
+                    key={level.value}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => toggleAppliesToLevel(level.value)}
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleAppliesToLevel(level.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <level.icon className="w-4 h-4" />
+                    <span className="text-sm">{level.label}</span>
+                    {isSelected && (
+                      <Badge variant="default" className="ml-auto text-xs">Aplica</Badge>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

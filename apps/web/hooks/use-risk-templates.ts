@@ -20,9 +20,18 @@ interface UseRiskTemplatesReturn {
     description?: string;
     ai_act_level: string;
     risk_ids: string[];
+    applies_to_levels?: string[];
+    excluded_systems?: string[];
+    included_systems?: string[];
   }) => Promise<RiskTemplate | null>;
   updateTemplate: (id: string, data: Partial<RiskTemplate>) => Promise<boolean>;
   deleteTemplate: (id: string) => Promise<boolean>;
+  toggleTemplateActive: (id: string, isActive: boolean) => Promise<boolean>;
+  updateApplicability: (id: string, data: {
+    applies_to_levels?: string[];
+    excluded_systems?: string[];
+    included_systems?: string[];
+  }) => Promise<boolean>;
 }
 
 export function useRiskTemplates({
@@ -64,6 +73,9 @@ export function useRiskTemplates({
     description?: string;
     ai_act_level: string;
     risk_ids: string[];
+    applies_to_levels?: string[];
+    excluded_systems?: string[];
+    included_systems?: string[];
   }): Promise<RiskTemplate | null> => {
     setLoading(true);
     setError(null);
@@ -141,6 +153,64 @@ export function useRiskTemplates({
     }
   }, []);
 
+  const toggleTemplateActive = useCallback(async (id: string, isActive: boolean): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/v1/risks/templates/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: isActive })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update template');
+      }
+
+      setTemplates(prev => prev.map(t => 
+        t.id === id ? { ...t, is_active: isActive } : t
+      ));
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateApplicability = useCallback(async (id: string, data: {
+    applies_to_levels?: string[];
+    excluded_systems?: string[];
+    included_systems?: string[];
+  }): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/v1/risks/templates/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update applicability');
+      }
+
+      await fetchTemplates(); // Refresh list
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchTemplates]);
+
   useEffect(() => {
     if (autoFetch) {
       fetchTemplates();
@@ -154,6 +224,8 @@ export function useRiskTemplates({
     fetchTemplates,
     createTemplate,
     updateTemplate,
-    deleteTemplate
+    deleteTemplate,
+    toggleTemplateActive,
+    updateApplicability
   };
 }
