@@ -26,8 +26,11 @@ const LEVEL_LABELS: Record<RiskLevel, string> = {
 };
 
 export function RiskMatrix({ risks }: RiskMatrixProps) {
+  // Filter only applicable risks for the matrix
+  const applicableRisks = risks.filter(r => r.applicable === true);
+  
   // Filter only assessed risks (those with probability and impact)
-  const assessedRisks = risks.filter(r => r.probability && r.impact);
+  const assessedRisks = applicableRisks.filter(r => r.probability && r.impact);
 
   // Build matrix
   const matrix: Record<string, Record<string, AISystemRisk[]>> = {};
@@ -216,11 +219,11 @@ export function RiskMatrix({ risks }: RiskMatrixProps) {
             </div>
           </div>
 
-          {/* Unassessed Risks */}
-          {risks.length > assessedRisks.length && (
+          {/* Unassessed Risks (only applicable ones) */}
+          {applicableRisks.length > assessedRisks.length && (
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <strong>{risks.length - assessedRisks.length}</strong> riesgos pendientes de evaluación 
+                <strong>{applicableRisks.length - assessedRisks.length}</strong> riesgos aplicables pendientes de evaluación 
                 (sin probabilidad o impacto asignados)
               </p>
             </div>

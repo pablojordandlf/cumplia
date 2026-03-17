@@ -219,14 +219,17 @@ export const getRiskManagementStatus = (
 ): RiskManagementStatus => {
   const config = AI_ACT_RISK_CONFIG[aiActLevel] || AI_ACT_RISK_CONFIG.unclassified;
   
-  const total = risks.length;
-  const assessed = risks.filter(r => r.status === 'assessed' || r.status === 'mitigated' || r.status === 'accepted').length;
-  const mitigated = risks.filter(r => r.status === 'mitigated').length;
-  const criticalOpen = risks.filter(r => 
+  // Filter only applicable risks for statistics
+  const applicableRisks = risks.filter(r => r.applicable === true);
+  
+  const total = applicableRisks.length;
+  const assessed = applicableRisks.filter(r => r.status === 'assessed' || r.status === 'mitigated' || r.status === 'accepted').length;
+  const mitigated = applicableRisks.filter(r => r.status === 'mitigated').length;
+  const criticalOpen = applicableRisks.filter(r => 
     (r.status === 'identified' || r.status === 'assessed') && 
     r.catalog_risk?.criticality === 'critical'
   ).length;
-  const highOpen = risks.filter(r => 
+  const highOpen = applicableRisks.filter(r => 
     (r.status === 'identified' || r.status === 'assessed') && 
     r.catalog_risk?.criticality === 'high'
   ).length;

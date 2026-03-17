@@ -21,8 +21,15 @@ import {
   AlertCircle,
   Shield,
   RefreshCw,
-  Lock
+  Lock,
+  EyeOff
 } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { 
   AISystemRisk, 
@@ -181,19 +188,27 @@ export function RiskRegistry({
       {/* Results count */}
       <p className="text-sm text-muted-foreground">
         Mostrando {filteredRisks.length} de {risks.length} riesgos
+        {risks.filter(r => r.applicable === true).length > 0 && (
+          <span className="ml-1">
+            ({risks.filter(r => r.applicable === true).length} aplicables, {' '}
+            {risks.filter(r => r.applicable !== true).length} no aplican)
+          </span>
+        )}
       </p>
 
-      {/* Risk List */}
+      {/* Risk List - Sort: applicable first, then non-applicable */}
       <div className="space-y-3">
-        {filteredRisks.map((risk) => {
+        {[...filteredRisks]
+          .sort((a, b) => (b.applicable === true ? 1 : 0) - (a.applicable === true ? 1 : 0))
+          .map((risk) => {
           const isApplicable = !!risk.applicable;
           return (
             <Card 
               key={risk.id}
-              className={`transition-colors ${
+              className={`transition-colors border ${
                 isApplicable 
-                  ? 'cursor-pointer hover:border-primary' 
-                  : 'opacity-50 bg-gray-50 cursor-not-allowed'
+                  ? 'cursor-pointer hover:border-primary border-solid' 
+                  : 'cursor-not-allowed border-dashed border-gray-300 bg-gray-50/30'
               }`}
               onClick={() => isApplicable && setSelectedRisk(risk)}
             >
@@ -250,18 +265,43 @@ export function RiskRegistry({
                   </div>
 
                   <div className="flex flex-col items-end gap-2">
-                    {/* Applicability Toggle */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {isApplicable ? 'Aplica' : 'No aplica'}
-                      </span>
-                      <Switch
-                        checked={!!risk.applicable}
-                        onCheckedChange={(checked) => {
-                          handleToggleApplicable(risk, checked === true);
-                        }}
-                        disabled={togglingRiskId === risk.id}
-                      />
+                    {/* Applicability Toggle - stopPropagation prevents opening detail */}
+                    <div 
+                      className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {!isApplicable && (
+                        <Badge variant="outline" className="text-gray-400 border-gray-300 text-xs">
+                          <EyeOff className="h-3 w-3 mr-1" />
+                          No aplica
+                        </Badge>
+                      )}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs ${isApplicable ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+                                {isApplicable ? 'Aplica' : 'No aplica'}
+                              </span>
+                              <Switch
+                                checked={!!risk.applicable}
+                                onCheckedChange={(checked) => {
+                                  handleToggleApplicable(risk, checked === true);
+                                }}
+                                disabled={togglingRiskId === risk.id}
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p className="max-w-xs">
+                              {isApplicable 
+                                ? 'Haz clic para marcar este riesgo como NO aplicable a tu sistema'
+                                : 'Haz clic para marcar este riesgo como aplicable y evaluarlo'
+                              }
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                     
                     <Badge className={RISK_STATUS_CONFIG[risk.status].color}>
