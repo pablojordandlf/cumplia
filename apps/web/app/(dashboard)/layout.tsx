@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
 
 export const dynamic = 'force-dynamic';
 
@@ -19,5 +20,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <div className="flex min-h-screen">
+      <DashboardSidebar />
+      <main className="flex-1 bg-gray-50">
+        {children}
+      </main>
+    </div>
+  );
 }

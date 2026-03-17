@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -10,7 +11,8 @@ import {
   LayoutTemplate,
   Shield,
   GraduationCap,
-  Settings2
+  Settings2,
+  LogOut
 } from "lucide-react";
 
 const navItems = [
@@ -48,9 +50,17 @@ const navItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
-    <aside className="w-64 min-h-screen bg-white border-r">
+    <aside className="w-64 min-h-screen bg-white border-r flex flex-col">
       <div className="p-6">
         <Link href="/" className="flex items-center space-x-2">
           <Shield className="h-8 w-8 text-blue-600" />
@@ -58,7 +68,7 @@ export function DashboardSidebar() {
         </Link>
       </div>
       
-      <nav className="px-4 py-2">
+      <nav className="px-4 py-2 flex-1">
         <ul className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -83,6 +93,17 @@ export function DashboardSidebar() {
           })}
         </ul>
       </nav>
+
+      {/* Logout Button */}
+      <div className="p-4 border-t">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
+        >
+          <LogOut className="h-5 w-5" />
+          Cerrar sesión
+        </button>
+      </div>
     </aside>
   );
 }
