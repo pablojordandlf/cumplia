@@ -200,7 +200,7 @@ function PricingSection() {
       name: "Starter", 
       price: "0€", 
       period: "/mes", 
-      description: "Valida tu primer sistema de IA y conoce la plataforma.", 
+      description: "Prueba la plataforma con tu primer sistema de IA.", 
       features: ["1 Sistema de IA", "1 usuario", "Clasificación AI Act", "Obligaciones básicas", "Soporte community"], 
       cta: "Empieza Gratis", 
       popular: false 
@@ -209,7 +209,7 @@ function PricingSection() {
       name: "Professional", 
       price: "99€", 
       period: "/mes", 
-      description: "Ideal para PYMEs y consultoras con varios sistemas.", 
+      description: "Ideal para consultoras y equipos pequeños.", 
       features: ["Hasta 10 Sistemas de IA", "Hasta 5 usuarios", "FRIA completa (Art. 27)", "Gestión de riesgos", "10 documentos/mes"], 
       cta: "Elige Professional", 
       popular: true 
@@ -218,9 +218,18 @@ function PricingSection() {
       name: "Business", 
       price: "299€", 
       period: "/mes", 
-      description: "Para empresas con múltiples departamentos.", 
+      description: "Para empresas medianas con múltiples equipos.", 
       features: ["Hasta 50 Sistemas de IA", "Hasta 20 usuarios", "API access", "Integraciones", "Documentos ilimitados"], 
       cta: "Elige Business", 
+      popular: false 
+    },
+    { 
+      name: "Enterprise", 
+      price: "Custom", 
+      period: "", 
+      description: "Para grandes organizaciones con necesidades avanzadas.", 
+      features: ["Sistemas de IA ilimitados", "Usuarios ilimitados", "SSO & On-premise", "SLA garantizado", "Customer Success"], 
+      cta: "Contactar Ventas", 
       popular: false 
     }
   ];
@@ -229,10 +238,10 @@ function PricingSection() {
     <section id="precios" className="py-12 sm:py-20 bg-gradient-to-b from-gray-50 to-blue-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Precios claros, basados en tu uso real</h2>
-          <p className="text-base sm:text-lg text-gray-600">Paga por los <strong>sistemas de IA</strong> que gestionas, no por usuarios.</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Planes para Empresas que cumplen con el AI Act</h2>
+          <p className="text-base sm:text-lg text-gray-600">Paga por los <strong>sistemas de IA</strong> que gestionas en tu organización.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <Card key={index} className={`border-0 shadow-xl ${plan.popular ? 'md:scale-105 ring-2 ring-blue-600' : ''}`}>
               {plan.popular && <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium">Más Popular</div>}
@@ -247,8 +256,8 @@ function PricingSection() {
                     <li key={idx} className="flex items-start space-x-2"><CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0 mt-0.5" /><span className="text-sm sm:text-base text-gray-600">{feature}</span></li>
                   ))}
                 </ul>
-                <Link href="/register">
-                  <Button className={`w-full mt-4 sm:mt-6 ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-900 hover:bg-gray-800'}`} size="lg">{plan.cta}</Button>
+                <Link href={plan.name === "Enterprise" ? "mailto:sales@cumplia.com" : "/register"}>
+                  <Button className={`w-full mt-4 sm:mt-6 ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : plan.name === "Enterprise" ? 'bg-gray-900 hover:bg-gray-800' : 'bg-gray-700 hover:bg-gray-800'}`} size="lg">{plan.cta}</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -256,20 +265,6 @@ function PricingSection() {
         </div>
         <div className="text-center mt-10">
           <Link href="/pricing"><Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">Ver comparativa completa<ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
-        </div>
-        
-        {/* Enterprise CTA */}
-        <div className="mt-12 max-w-3xl mx-auto">
-          <div className="bg-gray-900 rounded-2xl p-6 text-white text-center">
-            <h3 className="text-xl font-bold mb-2">¿Necesitas más?</h3>
-            <p className="text-gray-300 mb-4">Plan Enterprise con sistemas ilimitados, SSO, SLA y Customer Success dedicado.</p>
-            <Link href="mailto:sales@cumplia.com">
-              <Button variant="outline" className="border-white text-white hover:bg-white/10">
-                Contactar Ventas
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
         </div>
       </div>
     </section>
