@@ -38,8 +38,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Redirigir autenticados fuera de login/register
-  if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') && user) {
+  // Redirigir autenticados fuera de login/register (pero permitir ?switch=true para cambiar de cuenta)
+  const isSwitching = request.nextUrl.searchParams.get('switch') === 'true'
+  if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') && user && !isSwitching) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

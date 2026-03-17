@@ -22,7 +22,26 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [ssoResult, setSsoResult] = useState<SSODomainCheckResult | null>(null);
   const [isCheckingDomain, setIsCheckingDomain] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
   const router = useRouter();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user);
+      }
+    };
+    checkSession();
+  }, []);
+
+  // Sign out and clear session
+  const handleSwitchAccount = async () => {
+    await supabase.auth.signOut();
+    setCurrentUser(null);
+    router.refresh();
+  };
 
   // Check for SSO provider by domain
   const checkDomainSSO = useCallback(async (emailValue: string) => {
@@ -149,6 +168,31 @@ export default function LoginForm() {
           Introduce tus credenciales para acceder
         </CardDescription>
       </CardHeader>
+
+      {/* Show message if already logged in */}
+      {currentUser && (
+        <div className="mx-6 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800 text-center">
+            Sesión activa como <strong>{currentUser.email}</strong>
+          </p>
+          <div className="flex gap-2 mt-2 justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard')}
+            >
+              Continuar al dashboard
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSwitchAccount}
+            >
+              Cerrar sesión
+            </Button>
+          </div>
+        </div>
+      )}
       <CardContent className="grid gap-4">
         {/* Google OAuth */}
         <Button 
