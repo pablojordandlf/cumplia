@@ -1,39 +1,24 @@
+'use client';
 
-// hooks/use-organization.ts
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import {
+  Organization,
+  Member,
+  OrganizationLimits,
+  OrganizationUsage,
+  PLAN_LIMITS,
+} from '@/types/organization';
 
-import { useState, useEffect, createContext, useContext } from 'react';
-import { Organization, OrganizationUsageStats } from '@/types/organization'; // Assuming these types are defined
-import { Role } from '@/types/roles';
-
-// Placeholder for actual organization and usage data types
-// interface Organization {
-//   id: string;
-//   name: string;
-//   slug: string;
-//   plan: 'starter' | 'professional' | 'business' | 'enterprise';
-//   owner_id: string;
-//   seats_total: number;
-//   seats_used: number;
-//   // ... other properties
-// }
-
-// interface OrganizationUsageStats {
-//   ai_systems_count: number;
-//   users_count: number;
-//   documents_monthly_count: number;
-// }
-
-// Define the context type
 interface OrganizationContextType {
   organization: Organization | null;
-  members: any[]; // Replace 'any[]' with actual member type
-  usage: OrganizationUsageStats | null;
-  limits: any | null; // Replace 'any' with actual limits type
+  members: Member[];
+  usage: OrganizationUsage | null;
+  limits: OrganizationLimits | null;
   isLoading: boolean;
   error: string | null;
+  refresh: () => Promise<void>;
 }
 
-// Create the context with a default value
 const OrganizationContext = createContext<OrganizationContextType>({
   organization: null,
   members: [],
@@ -41,97 +26,94 @@ const OrganizationContext = createContext<OrganizationContextType>({
   limits: null,
   isLoading: true,
   error: null,
+  refresh: async () => {},
 });
 
-// Custom hook to provide the organization context
 export const useOrganization = () => useContext(OrganizationContext);
 
-// Provider component to fetch and manage organization data
-export const OrganizationProvider = ({ children }: { children: React.ReactNode }) => {
+// Hook for simple usage without provider
+export function useOrganizationSimple(organizationId?: string) {
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const [members, setMembers] = useState<any[]>([]);
-  const [usage, setUsage] = useState<OrganizationUsageStats | null>(null);
-  const [limits, setLimits] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [usage, setUsage] = useState<OrganizationUsage | null>(null);
+  const [limits, setLimits] = useState<OrganizationLimits | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Placeholder for fetching current organization ID (e.g., from auth context or URL params)
-  const currentOrganizationId = 'current-org-id'; // Replace with actual logic to get org ID
+  const fetchData = useCallback(async () => {
+    if (!organizationId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Fetch organization
+      const orgRes = await fetch(`/api/v1/organizations/${organizationId}`);
+      if (!orgRes.ok) throw new Error('Error al cargar organización');
+      const orgData: Organization = await orgRes.json();
+      setOrganization(orgData);
+
+      // Fetch members
+      const membersRes = await fetch(`/api/v1/organizations/${organizationId}/members`);
+      if (!membersRes.ok) throw new Error('Error al cargar miembros');
+      const membersData: Member[] = await membersRes.json();
+      setMembers(membersData);
+
+      // Fetch usage
+      const usageRes = await fetch(`/api/v1/organizations/${organizationId}/usage`);
+      if (!usageRes.ok) throw new Error('Error al cargar uso');
+      const usageData: OrganizationUsage = await usageRes.json();
+      setUsage(usageData);
+
+      // Set limits from plan
+      setLimits(PLAN_LIMITS[orgData.plan]);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId]);
 
   useEffect(() => {
-    const fetchOrganizationData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // In a real app, you would fetch organization details, members, usage, and limits from your API
-        // Example using placeholders (replace with actual API calls):
-        
-        // 1. Fetch Organization Details
-        const orgResponse = await fetch(`/api/v1/organizations/${currentOrganizationId}`);
-        if (!orgResponse.ok) throw new Error('Failed to fetch organization');
-        const orgData: Organization = await orgResponse.json();
-        setOrganization(orgData);
+    fetchData();
+  }, [fetchData]);
 
-        // 2. Fetch Organization Members
-        const membersResponse = await fetch(`/api/v1/organizations/${currentOrganizationId}/members`);
-        if (!membersResponse.ok) throw new Error('Failed to fetch members');
-        const membersData = await membersResponse.json();
-        setMembers(membersData);
-
-        // 3. Fetch Usage Stats
-        const usageResponse = await fetch(`/api/v1/organizations/${currentOrganizationId}/usage`);
-        if (!usageResponse.ok) throw new Error('Failed to fetch usage stats');
-        const usageData: OrganizationUsageStats = await usageResponse.json();
-        setUsage(usageData);
-
-        // 4. Fetch Plan Limits (this might be static or fetched)
-        // Assuming limits are derived from organization.plan and PLAN_LIMITS constant,
-        // or fetched if they are dynamic per organization.
-        // For now, we'll set it based on the organization's plan.
-        // const limitsResponse = await fetch(`/api/v1/organizations/${currentOrganizationId}/limits`);
-        // if (!limitsResponse.ok) throw new Error('Failed to fetch limits');
-        // const limitsData = await limitsResponse.json();
-        // setLimits(limitsData);
-        // For simplicity, let's mock limits based on organization plan
-        const mockLimits = PLAN_LIMITS[orgData.plan]; // Assuming PLAN_LIMITS is imported or globally available
-        setLimits(mockLimits);
-
-      } catch (err: any) {
-        console.error('Error fetching organization data:', err);
-        setError(err.message || 'Failed to load organization data.');
-        setOrganization(null);
-        setMembers([]);
-        setUsage(null);
-        setLimits(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (currentOrganizationId) {
-      fetchOrganizationData();
-    } else {
-      // If no organization selected/available, reset state
-      setOrganization(null);
-      setMembers([]);
-      setUsage(null);
-      setLimits(null);
-      setIsLoading(false);
-    }
-  }, [currentOrganizationId]); // Re-fetch if currentOrganizationId changes
-
-  const contextValue: OrganizationContextType = {
+  return {
     organization,
     members,
     usage,
     limits,
-    isLoading,
+    loading,
     error,
+    refresh: fetchData,
   };
+}
+
+interface OrganizationProviderProps {
+  children: React.ReactNode;
+  organizationId?: string;
+}
+
+export function OrganizationProvider({ children, organizationId }: OrganizationProviderProps) {
+  const { organization, members, usage, limits, loading, error, refresh } =
+    useOrganizationSimple(organizationId);
 
   return (
-    <OrganizationContext.Provider value={contextValue}>
+    <OrganizationContext.Provider
+      value={{
+        organization,
+        members,
+        usage,
+        limits,
+        isLoading: loading,
+        error,
+        refresh,
+      }}
+    >
       {children}
     </OrganizationContext.Provider>
   );
-};
+}
