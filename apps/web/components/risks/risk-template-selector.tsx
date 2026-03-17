@@ -42,7 +42,7 @@ const TEMPLATE_DESCRIPTIONS: Record<string, { icon: React.ReactNode; description
   },
   limited_risk: {
     icon: <Shield className="h-5 w-5 text-yellow-600" />,
-    description: 'Catálogo reducido con los 20 riesgos prioritarios recomendados para sistemas de riesgo limitado.'
+    description: 'Catálogo reducido con los 15 riesgos prioritarios recomendados para sistemas de riesgo limitado.'
   },
   minimal_risk: {
     icon: <AlertTriangle className="h-5 w-5 text-blue-600" />,
