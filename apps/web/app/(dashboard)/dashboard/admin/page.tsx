@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileWarning, FormInput, Settings2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FileWarning, FormInput, Settings2, ArrowLeft } from 'lucide-react';
 import { RiskTemplatesPanel } from './components/risk-templates-panel';
 import { CustomFieldsPanel } from './components/custom-fields-panel';
 
@@ -11,12 +13,20 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Settings2 className="w-8 h-8 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold">Administración</h1>
-          <p className="text-gray-500 mt-1">Gestiona tus plantillas y configuraciones</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Settings2 className="w-8 h-8 text-blue-600" />
+          <div>
+            <h1 className="text-3xl font-bold">Administración</h1>
+            <p className="text-gray-500 mt-1">Gestiona tus plantillas y configuraciones</p>
+          </div>
         </div>
+        <Link href="/dashboard">
+          <Button variant="outline" className="gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al Dashboard
+          </Button>
+        </Link>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

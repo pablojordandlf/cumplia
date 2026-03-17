@@ -5,8 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, FileWarning, Shield, AlertTriangle, Info, CheckCircle2, Ban, Brain, Bot, Sparkles, Settings, Target, XCircle, PlusCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, FileWarning, Shield, AlertTriangle, Info, CheckCircle2, Ban, Brain, Bot, Sparkles, Settings, Target, XCircle, PlusCircle, Power } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskTemplateWithItems } from '@/types/risk-management';
@@ -124,28 +123,34 @@ export function RiskTemplatesPanel() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {isSystem && (
+              {isSystem ? (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Switch
-                        checked={template.is_active}
-                        onCheckedChange={() => handleToggleActive(template)}
-                      />
+                      <Button
+                        variant={template.is_active ? 'default' : 'outline'}
+                        size="sm"
+                        className={`gap-2 ${template.is_active ? 'bg-green-600 hover:bg-green-700' : 'text-gray-500'}`}
+                        onClick={() => handleToggleActive(template)}
+                      >
+                        <Power className="w-4 h-4" />
+                        {template.is_active ? 'Activa' : 'Inactiva'}
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{template.is_active ? 'Desactivar plantilla' : 'Activar plantilla'}</p>
+                      <p>{template.is_active ? 'Clic para desactivar' : 'Clic para activar'}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              )}
-              {!isSystem && (
+              ) : (
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => setTemplateToDelete(template)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
-                  <Trash2 className="w-4 h-4 text-red-500" />
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Eliminar
                 </Button>
               )}
             </div>

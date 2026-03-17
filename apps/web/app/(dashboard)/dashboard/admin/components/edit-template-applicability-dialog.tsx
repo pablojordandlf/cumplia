@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Shield, Info, CheckCircle2, Ban, XCircle, PlusCircle } from 'lucide-react';
+import { Loader2, Shield, Info, CheckCircle2, Ban, XCircle, PlusCircle, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskTemplateWithItems } from '@/types/risk-management';
+import { supabase } from '@/lib/supabase';
 
 interface EditTemplateApplicabilityDialogProps {
   template: RiskTemplateWithItems;
@@ -18,21 +19,21 @@ interface EditTemplateApplicabilityDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const AI_ACT_LEVELS = [
-  { value: 'high_risk', label: 'Alto Riesgo', icon: Shield, color: 'text-orange-600' },
-  { value: 'limited_risk', label: 'Riesgo Limitado', icon: Info, color: 'text-yellow-600' },
-  { value: 'minimal_risk', label: 'Riesgo Mínimo', icon: CheckCircle2, color: 'text-green-600' },
-  { value: 'prohibited', label: 'Prohibido', icon: Ban, color: 'text-red-600' },
-];
+interface AISystem {
+  id: string;
+  name: string;
+  ai_act_level: string;
+  sector?: string;
+}
 
-// Mock AI systems - in real implementation, fetch from API
-const MOCK_AI_SYSTEMS = [
-  { id: 'sys-1', name: 'Sistema de Reclutamiento AI', risk_level: 'high_risk' },
-  { id: 'sys-2', name: 'Chatbot de Atención al Cliente', risk_level: 'limited_risk' },
-  { id: 'sys-3', name: 'Recomendador de Contenidos', risk_level: 'minimal_risk' },
-  { id: 'sys-4', name: 'Diagnóstico Médico AI', risk_level: 'high_risk' },
-  { id: 'sys-5', name: 'Sistema de Evaluación Crediticia', risk_level: 'high_risk' },
-  { id: 'sys-6', name: 'Filtro de Spam', risk_level: 'minimal_risk' },
+const AI_ACT_LEVELS = [
+  { value: 'high_risk', label: 'Alto Riesgo', icon: Shield, color: 'text-orange-600', bg: 'bg-orange-50' },
+  { value: 'limited_risk', label: 'Riesgo Limitado', icon: Info, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+  { value: 'minimal_risk', label: 'Riesgo Mínimo', icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
+  { value: 'prohibited', label: 'Prohibido', icon: Ban, color: 'text-red-600', bg: 'bg-red-50' },
+  { value: 'gpai_model', label: 'GPAI Model', icon: Info, color: 'text-blue-600', bg: 'bg-blue-50' },
+  { value: 'gpai_system', label: 'GPAI System', icon: Info, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+  { value: 'gpai_sr', label: 'GPAI-SR', icon: Info, color: 'text-purple-600', bg: 'bg-purple-50' },
 ];
 
 export function EditTemplateApplicabilityDialog({ 
@@ -45,9 +46,18 @@ export function EditTemplateApplicabilityDialog({
   const [includedSystems, setIncludedSystems] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'levels' | 'exceptions'>('levels');
+  const [aiSystems, setAiSystems] = useState<AISystem[]>([]);
+  const [loadingSystems, setLoadingSystems] = useState(false);
   
   const { updateApplicability } = useRiskTemplates({ autoFetch: false });
   const { toast } = useToast();
+
+  // Fetch AI systems from inventory
+  useEffect(() => {
+    if (open) {
+      fetchAiSystems();
+    }
+  }, [open]);
 
   // Initialize from template data
   useEffect(() => {
@@ -57,6 +67,41 @@ export function EditTemplateApplicabilityDialog({
       setIncludedSystems(template.included_systems || []);
     }
   }, [open, template]);
+
+  const fetchAiSystems = async () => {
+    setLoadingSystems(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        toast({
+          title: 'Error',
+          description: 'Debes iniciar sesión para ver tus sistemas de IA',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('use_cases')
+        .select('id, name, ai_act_level, sector')
+        .eq('user_id', session.user.id)
+        .order('name');
+
+      if (error) throw error;
+
+      setAiSystems(data || []);
+    } catch (error) {
+      console.error('Error fetching AI systems:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar los sistemas de IA',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingSystems(false);
+    }
+  };
 
   const toggleLevel = (level: string) => {
     setSelectedLevels(prev => {
@@ -120,19 +165,21 @@ export function EditTemplateApplicabilityDialog({
     }
   };
 
-  // Filter systems that would normally be covered by this template
-  const applicableSystems = MOCK_AI_SYSTEMS.filter(sys => 
-    selectedLevels.includes(sys.risk_level)
+  // Systems that match the selected levels (normally covered)
+  const applicableSystems = aiSystems.filter(sys => 
+    selectedLevels.includes(sys.ai_act_level)
   );
 
-  // Systems that could be exceptions (not in selected levels)
-  const exceptionSystems = MOCK_AI_SYSTEMS.filter(sys => 
-    !selectedLevels.includes(sys.risk_level)
+  // Systems that don't match selected levels (potential exceptions to include)
+  const exceptionSystems = aiSystems.filter(sys => 
+    !selectedLevels.includes(sys.ai_act_level)
   );
+
+  const getLevelConfig = (level: string) => AI_ACT_LEVELS.find(l => l.value === level) || AI_ACT_LEVELS[0];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Configurar Aplicabilidad</DialogTitle>
           <DialogDescription>
@@ -202,6 +249,7 @@ export function EditTemplateApplicabilityDialog({
                           {level.value === 'limited_risk' && 'Sistemas con interacción humana'}
                           {level.value === 'minimal_risk' && 'Sistemas de bajo impacto'}
                           {level.value === 'prohibited' && 'Sistemas no permitidos'}
+                          {level.value.startsWith('gpai') && 'Modelos y sistemas de propósito general'}
                         </p>
                       </div>
                       {isSelected && (
@@ -223,95 +271,131 @@ export function EditTemplateApplicabilityDialog({
                     AI_ACT_LEVELS.find(al => al.value === l)?.label
                   ).join(', ')}
                 </p>
+                {aiSystems.length === 0 && !loadingSystems && (
+                  <p className="text-sm text-orange-600 mt-2">
+                    No tienes sistemas de IA en tu inventario todavía.
+                  </p>
+                )}
               </div>
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Excluded Systems */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <XCircle className="w-5 h-5 text-red-500" />
-                  <h3 className="font-medium">Sistemas Excluidos</h3>
+              {loadingSystems ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                  <span className="ml-2 text-gray-600">Cargando sistemas de IA...</span>
                 </div>
-                <p className="text-sm text-gray-500">
-                  Sistemas que, aunque tengan un nivel de riesgo al que aplica la plantilla,
-                  estarán excluidos de forma explícita:
-                </p>
-                
-                <ScrollArea className="h-[150px] border rounded-md p-2">
-                  {applicableSystems.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-4">
-                      Primero selecciona niveles de riesgo en la pestaña anterior
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {applicableSystems.map(system => (
-                        <div
-                          key={system.id}
-                          className="flex items-center gap-3 p-2 rounded hover:bg-gray-50"
-                        >
-                          <Checkbox
-                            checked={excludedSystems.includes(system.id)}
-                            onCheckedChange={() => toggleExcludedSystem(system.id)}
-                          />
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{system.name}</p>
-                            <Badge variant="outline" className="text-xs">
-                              {AI_ACT_LEVELS.find(l => l.value === system.risk_level)?.label}
-                            </Badge>
-                          </div>
-                          {excludedSystems.includes(system.id) && (
-                            <Badge variant="destructive" className="text-xs">Excluido</Badge>
-                          )}
-                        </div>
-                      ))}
+              ) : aiSystems.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Building2 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No tienes sistemas de IA en tu inventario</p>
+                  <p className="text-sm mt-1">Añade sistemas primero para poder configurar excepciones</p>
+                </div>
+              ) : (
+                <>
+                  {/* Excluded Systems */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <XCircle className="w-5 h-5 text-red-500" />
+                      <h3 className="font-medium">Sistemas Excluidos</h3>
                     </div>
-                  )}
-                </ScrollArea>
-              </div>
+                    <p className="text-sm text-gray-500">
+                      Sistemas que tienen un nivel de riesgo al que aplica la plantilla,
+                      pero quieres excluir explícitamente:
+                    </p>
+                    
+                    <ScrollArea className="h-[200px] border rounded-md p-2">
+                      {applicableSystems.length === 0 ? (
+                        <p className="text-sm text-gray-400 text-center py-4">
+                          Primero selecciona niveles de riesgo en la pestaña anterior
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {applicableSystems.map(system => {
+                            const levelConfig = getLevelConfig(system.ai_act_level);
+                            return (
+                              <div
+                                key={system.id}
+                                className="flex items-center gap-3 p-2 rounded hover:bg-gray-50"
+                              >
+                                <Checkbox
+                                  checked={excludedSystems.includes(system.id)}
+                                  onCheckedChange={() => toggleExcludedSystem(system.id)}
+                                />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">{system.name}</p>
+                                  <div className="flex gap-2 mt-0.5">
+                                    <Badge variant="outline" className="text-xs">
+                                      {levelConfig.label}
+                                    </Badge>
+                                    {system.sector && (
+                                      <span className="text-xs text-gray-500">{system.sector}</span>
+                                    )}
+                                  </div>
+                                </div>
+                                {excludedSystems.includes(system.id) && (
+                                  <Badge variant="destructive" className="text-xs">Excluido</Badge>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </div>
 
-              {/* Included Systems (Exceptions) */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <PlusCircle className="w-5 h-5 text-green-500" />
-                  <h3 className="font-medium">Incluir como Excepción</h3>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Sistemas que, aunque NO tengan un nivel de riesgo al que aplica la plantilla,
-                  quieres incluir de forma explícita:
-                </p>
-                
-                <ScrollArea className="h-[150px] border rounded-md p-2">
-                  {exceptionSystems.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-4">
-                      No hay sistemas de otros niveles disponibles
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {exceptionSystems.map(system => (
-                        <div
-                          key={system.id}
-                          className="flex items-center gap-3 p-2 rounded hover:bg-gray-50"
-                        >
-                          <Checkbox
-                            checked={includedSystems.includes(system.id)}
-                            onCheckedChange={() => toggleIncludedSystem(system.id)}
-                          />
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{system.name}</p>
-                            <Badge variant="outline" className="text-xs">
-                              {AI_ACT_LEVELS.find(l => l.value === system.risk_level)?.label}
-                            </Badge>
-                          </div>
-                          {includedSystems.includes(system.id) && (
-                            <Badge className="text-xs bg-green-100 text-green-800">Incluido</Badge>
-                          )}
-                        </div>
-                      ))}
+                  {/* Included Systems (Exceptions) */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <PlusCircle className="w-5 h-5 text-green-500" />
+                      <h3 className="font-medium">Incluir como Excepción</h3>
                     </div>
-                  )}
-                </ScrollArea>
-              </div>
+                    <p className="text-sm text-gray-500">
+                      Sistemas que NO tienen un nivel de riesgo al que aplica la plantilla,
+                      pero quieres incluir de forma explícita:
+                    </p>
+                    
+                    <ScrollArea className="h-[200px] border rounded-md p-2">
+                      {exceptionSystems.length === 0 ? (
+                        <p className="text-sm text-gray-400 text-center py-4">
+                          No hay sistemas de otros niveles disponibles (todos coinciden con los niveles seleccionados)
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {exceptionSystems.map(system => {
+                            const levelConfig = getLevelConfig(system.ai_act_level);
+                            return (
+                              <div
+                                key={system.id}
+                                className="flex items-center gap-3 p-2 rounded hover:bg-gray-50"
+                              >
+                                <Checkbox
+                                  checked={includedSystems.includes(system.id)}
+                                  onCheckedChange={() => toggleIncludedSystem(system.id)}
+                                />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">{system.name}</p>
+                                  <div className="flex gap-2 mt-0.5">
+                                    <Badge variant="outline" className="text-xs">
+                                      {levelConfig.label}
+                                    </Badge>
+                                    {system.sector && (
+                                      <span className="text-xs text-gray-500">{system.sector}</span>
+                                    )}
+                                  </div>
+                                </div>
+                                {includedSystems.includes(system.id) && (
+                                  <Badge className="text-xs bg-green-100 text-green-800">Incluido</Badge>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
