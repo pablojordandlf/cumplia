@@ -1,53 +1,100 @@
 -- Migration: 20250317000005_cleanup_duplicate_templates.sql
 -- Description: Remove duplicate user templates that have similar names to system templates
 
--- Delete specific user-created templates that are duplicates of system templates
--- These were created before the system templates were in place
+-- First, we need to handle the foreign key constraint from ai_system_risks
+-- We'll set template_id to NULL for those records, or delete them if they're orphans
 
 DO $$
 DECLARE
+  v_template_id uuid;
   v_deleted_count int := 0;
 BEGIN
-  -- Delete "Riesgo Alto - Catálogo Completo" (user template, not system)
-  DELETE FROM risk_templates
+  -- =====================================================
+  -- STEP 1: Handle "Riesgo Alto - Catálogo Completo"
+  -- =====================================================
+  SELECT id INTO v_template_id
+  FROM risk_templates
   WHERE name = 'Riesgo Alto - Catálogo Completo'
     AND is_system = false;
   
-  GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
-  IF v_deleted_count > 0 THEN
-    RAISE NOTICE 'Deleted template: Riesgo Alto - Catálogo Completo';
+  IF v_template_id IS NOT NULL THEN
+    -- Remove references from ai_system_risks (set to NULL or delete orphaned risks)
+    -- Option A: Set template_id to NULL (keeps the risks but removes template link)
+    UPDATE ai_system_risks
+    SET template_id = NULL
+    WHERE template_id = v_template_id;
+    
+    -- Delete template items first (should cascade, but being explicit)
+    DELETE FROM risk_template_items
+    WHERE template_id = v_template_id;
+    
+    -- Now delete the template
+    DELETE FROM risk_templates
+    WHERE id = v_template_id;
+    
+    GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
+    RAISE NOTICE 'Deleted template: Riesgo Alto - Catálogo Completo (ID: %)', v_template_id;
   ELSE
     RAISE NOTICE 'Template not found: Riesgo Alto - Catálogo Completo';
   END IF;
 
-  -- Delete "Riesgo Limitado/Mínimo - Catálogo Reducido" (user template, not system)
-  DELETE FROM risk_templates
+  -- =====================================================
+  -- STEP 2: Handle "Riesgo Limitado/Mínimo - Catálogo Reducido"
+  -- =====================================================
+  SELECT id INTO v_template_id
+  FROM risk_templates
   WHERE name = 'Riesgo Limitado/Mínimo - Catálogo Reducido'
     AND is_system = false;
   
-  GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
-  IF v_deleted_count > 0 THEN
-    RAISE NOTICE 'Deleted template: Riesgo Limitado/Mínimo - Catálogo Reducido';
+  IF v_template_id IS NOT NULL THEN
+    -- Remove references from ai_system_risks
+    UPDATE ai_system_risks
+    SET template_id = NULL
+    WHERE template_id = v_template_id;
+    
+    -- Delete template items first
+    DELETE FROM risk_template_items
+    WHERE template_id = v_template_id;
+    
+    -- Now delete the template
+    DELETE FROM risk_templates
+    WHERE id = v_template_id;
+    
+    GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
+    RAISE NOTICE 'Deleted template: Riesgo Limitado/Mínimo - Catálogo Reducido (ID: %)', v_template_id;
   ELSE
     RAISE NOTICE 'Template not found: Riesgo Limitado/Mínimo - Catálogo Reducido';
   END IF;
 
-  -- Also check for any other potential duplicates with similar patterns
-  -- Delete any user template that might be a duplicate of system templates
-  DELETE FROM risk_templates
-  WHERE is_system = false 
-    AND (
-      name ILIKE '%Riesgo Alto%' 
-      OR name ILIKE '%Catálogo Completo%'
-      OR name ILIKE '%Riesgo Limitado%'
-      OR name ILIKE '%Catálogo Reducido%'
-    )
-    AND created_by IS NOT NULL;
-  
-  GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
-  IF v_deleted_count > 0 THEN
-    RAISE NOTICE 'Deleted % additional duplicate template(s)', v_deleted_count;
-  END IF;
+  -- =====================================================
+  -- STEP 3: Clean up any other similar duplicates
+  -- =====================================================
+  FOR v_template_id IN
+    SELECT id FROM risk_templates
+    WHERE is_system = false 
+      AND (
+        name ILIKE '%Riesgo Alto%' 
+        OR name ILIKE '%Catálogo Completo%'
+        OR name ILIKE '%Riesgo Limitado%'
+        OR name ILIKE '%Catálogo Reducido%'
+      )
+      AND created_by IS NOT NULL
+  LOOP
+    -- Remove references
+    UPDATE ai_system_risks
+    SET template_id = NULL
+    WHERE template_id = v_template_id;
+    
+    -- Delete items
+    DELETE FROM risk_template_items
+    WHERE template_id = v_template_id;
+    
+    -- Delete template
+    DELETE FROM risk_templates
+    WHERE id = v_template_id;
+    
+    RAISE NOTICE 'Deleted additional duplicate template (ID: %)', v_template_id;
+  END LOOP;
 
 END $$;
 
