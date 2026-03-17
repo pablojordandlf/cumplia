@@ -105,7 +105,7 @@ export default function EditUseCasePage() {
       console.error('Error loading use case:', error);
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo cargar el caso de uso.',
+        description: error.message || 'No se pudo cargar el sistema de IA.',
         variant: 'destructive',
       });
       router.push('/dashboard/inventory');
@@ -131,7 +131,7 @@ export default function EditUseCasePage() {
       if (error) throw error;
 
       toast({
-        title: 'Caso de Uso Actualizado',
+        title: 'Sistema de IA Actualizado',
         description: 'Los cambios han sido guardados correctamente.',
       });
       
@@ -169,7 +169,7 @@ export default function EditUseCasePage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar Caso de Uso</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Editar Sistema de IA</h1>
             <p className="text-gray-600">Modifica los datos de tu sistema de IA</p>
           </div>
         </div>
@@ -181,7 +181,7 @@ export default function EditUseCasePage() {
               Información del Sistema
             </CardTitle>
             <CardDescription>
-              Edita los datos básicos de tu caso de uso.
+              Edita los datos básicos de tu sistema de IA.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -192,7 +192,7 @@ export default function EditUseCasePage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre del Caso de Uso</FormLabel>
+                      <FormLabel>Nombre del Sistema de IA</FormLabel>
                       <FormControl>
                         <Input placeholder="Ej: Sistema de recomendación de productos" {...field} />
                       </FormControl>
@@ -246,7 +246,7 @@ export default function EditUseCasePage() {
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        El sector industrial o de actividad económica al que pertenece el caso de uso.
+                        El sector industrial o de actividad económica al que pertenece el sistema de IA.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

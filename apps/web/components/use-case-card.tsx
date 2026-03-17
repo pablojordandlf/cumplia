@@ -81,7 +81,7 @@ const UseCaseCard: React.FC<UseCaseCardProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                aria-label="Editar caso de uso" 
+                aria-label="Editar sistema de IA" 
                 className="text-gray-400 hover:text-blue-600 hover:bg-gray-100 w-8 h-8"
                 onClick={() => onEdit(id)}
               >
@@ -92,7 +92,7 @@ const UseCaseCard: React.FC<UseCaseCardProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                aria-label="Eliminar caso de uso" 
+                aria-label="Eliminar sistema de IA" 
                 className="text-gray-400 hover:text-red-600 hover:bg-gray-100 w-8 h-8"
                 onClick={() => onDelete(id)}
               >

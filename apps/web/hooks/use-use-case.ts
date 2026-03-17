@@ -56,7 +56,7 @@ export const useUseCase = (userId: string): UseCaseHook => {
 
   const classifyUseCase = async (id: string): Promise<UseCase | null> => {
     try {
-      // Obtener el caso de uso para enviar datos a la API
+      // Obtener el sistema de IA para enviar datos a la API
       const { data: useCase, error: fetchError } = await supabase
         .from('use_cases')
         .select('*')

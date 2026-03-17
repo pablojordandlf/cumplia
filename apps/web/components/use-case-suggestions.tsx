@@ -121,7 +121,7 @@ export function UseCaseSuggestions({ onSelectCase }: UseCaseSuggestionsProps) {
         <div>
           <h3 className="font-semibold text-amber-900">¿Necesitas inspiración?</h3>
           <p className="text-sm text-amber-700">
-            Selecciona un caso de uso típico para empezar rápidamente
+            Selecciona un sistema de IA típico para empezar rápidamente
           </p>
         </div>
       </div>

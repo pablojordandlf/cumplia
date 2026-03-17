@@ -12,9 +12,9 @@ interface EmptyStateProps {
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
-  title = 'No hay casos de uso',
-  description = 'Comienza creando tu primer caso de uso de IA para clasificarlo según el AI Act Europeo.',
-  actionLabel = 'Crear caso de uso',
+  title = 'No hay sistemas de IA',
+  description = 'Comienza creando tu primer sistema de IA de IA para clasificarlo según el AI Act Europeo.',
+  actionLabel = 'Crear sistema de IA',
   onAction,
   className,
 }) => {

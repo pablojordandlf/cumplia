@@ -255,7 +255,7 @@ export default function InventoryPage() {
               </Button>
             </Link>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Inventario de Casos de Uso</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Inventario de Sistemas de IA</h1>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">Lista y gestiona tus sistemas de IA</p>
         </div>
         <div className="flex gap-2">
@@ -268,7 +268,7 @@ export default function InventoryPage() {
           <Link href="/dashboard/inventory/new">
             <Button size="sm" className="sm:size-default">
               <Plus className="mr-0 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Añadir Caso de Uso</span>
+              <span className="hidden sm:inline">Añadir Sistema de IA</span>
               <span className="sm:hidden">Añadir</span>
             </Button>
           </Link>
@@ -278,7 +278,7 @@ export default function InventoryPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <span className="text-lg font-semibold">Lista de Casos de Uso</span>
+            <span className="text-lg font-semibold">Lista de Sistemas de IA</span>
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-gray-400" />
               <Input
@@ -293,7 +293,7 @@ export default function InventoryPage() {
         <CardContent>
           {filteredUseCases.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              {searchTerm ? 'No se encontraron casos de uso que coincidan con la búsqueda.' : 'No hay casos de uso registrados.'}
+              {searchTerm ? 'No se encontraron sistemas de IA que coincidan con la búsqueda.' : 'No hay sistemas de IA registrados.'}
             </div>
           ) : (
             <div className="overflow-x-auto">

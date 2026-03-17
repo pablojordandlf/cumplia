@@ -64,7 +64,7 @@ const systemTypes = [
   { value: 'gpai_model' as const, label: 'Modelo de IA de Propósito General (GPAI Model)', description: 'El activo es únicamente un modelo base (no incluye interfaz ni pipeline completo). Es capaz de realizar una amplia variedad de tareas y puede integrarse en otros sistemas o aplicaciones.', examples: 'Ejemplos: GPT-4, Llama, Gemini en su forma base.', icon: Brain },
   { value: 'gpai_sr' as const, label: 'Modelo GPAI con Riesgo Sistémico (GPAI-SR)', description: 'Igual que el tipo A, pero supera los 10²⁵ FLOP de entrenamiento o la Comisión Europea lo ha designado expresamente como tal por sus capacidades de gran impacto.', examples: 'Requiere evaluación de riesgos sistémicos y medidas de mitigación.', icon: Sparkles },
   { value: 'gpai_system' as const, label: 'Sistema de IA de Propósito General (GPAI System)', description: 'El activo es un sistema completo (con interfaz, pipeline u otros componentes) construido sobre un modelo GPAI y sin una finalidad de uso única y específica.', examples: 'Ejemplos: ChatGPT como producto, Copilot Studio sin configuración de dominio.', icon: Bot },
-  { value: 'specific_purpose' as const, label: 'Sistema de IA de Finalidad Específica', description: 'El activo es un sistema con un caso de uso concreto y definido. Esta es la categoría donde aplican los niveles de riesgo (prohibido, alto, limitado, mínimo).', examples: 'Ejemplos: modelo de scoring de crédito, chatbot de atención, sistema de detección de fraude.', icon: Cpu },
+  { value: 'specific_purpose' as const, label: 'Sistema de IA de Finalidad Específica', description: 'El activo es un sistema con un sistema de IA concreto y definido. Esta es la categoría donde aplican los niveles de riesgo (prohibido, alto, limitado, mínimo).', examples: 'Ejemplos: modelo de scoring de crédito, chatbot de atención, sistema de detección de fraude.', icon: Cpu },
 ];
 
 function InfoTooltip({ text }: { text: string }) {
@@ -153,7 +153,7 @@ export default function ClassifyUseCasePage() {
       }
     } catch (error) {
       console.error('Error loading use case:', error);
-      toast({ title: 'Error', description: 'No se pudo cargar el caso de uso', variant: 'destructive' });
+      toast({ title: 'Error', description: 'No se pudo cargar el sistema de IA', variant: 'destructive' });
       router.push('/dashboard/inventory');
     } finally { setLoading(false); }
   }
@@ -314,7 +314,7 @@ export default function ClassifyUseCasePage() {
         <div className="flex items-center gap-3 mb-6">
           <Link href="/dashboard/inventory"><Button variant="ghost" size="icon"><ChevronLeft className="w-6 h-6" /></Button></Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Clasificar Caso de Uso</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Clasificar Sistema de IA</h1>
             <p className="text-gray-600">Cuestionario de clasificación AI Act</p>
           </div>
         </div>
