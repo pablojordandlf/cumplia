@@ -1,7 +1,4 @@
-
-// lib/usage-limits.ts
-
-import { Plan } from '@/types/plans'; // Assuming Plan type exists
+import { OrganizationPlan } from '@/types/organization';
 
 interface PlanLimits {
   max_ai_systems: number;
@@ -10,21 +7,21 @@ interface PlanLimits {
   features: string[];
 }
 
-export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
+export const PLAN_LIMITS: Record<OrganizationPlan, PlanLimits> = {
   starter: {
     max_ai_systems: 1,
-    max_users: 1, // Only owner
+    max_users: 1,
     max_documents_monthly: 0,
     features: ['basic_compliance', 'risk_classification']
   },
   professional: {
     max_ai_systems: 15,
     max_users: 3,
-    max_documents_monthly: -1, // unlimited
+    max_documents_monthly: -1,
     features: ['full_fria', 'risk_management', 'evidence_registry', 'document_export']
   },
   business: {
-    max_ai_systems: -1, // unlimited
+    max_ai_systems: -1,
     max_users: 10,
     max_documents_monthly: -1,
     features: ['ai_assistant', 'advanced_risk_management', 'evidence_registry', 'custom_templates', 'multi_department']
@@ -37,7 +34,7 @@ export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
   }
 };
 
-// Mock interfaces for organization data, replace with actual types defined elsewhere
+// Organization usage interface
 interface OrganizationUsage {
   ai_systems_count: number;
   users_count: number;
@@ -46,54 +43,43 @@ interface OrganizationUsage {
 
 interface Organization {
   id: string;
-  plan: Plan;
+  plan: OrganizationPlan;
   seats_total: number;
-  // ... other organization properties
 }
-
-// Placeholder for fetching organization data - replace with actual API call or hook
-const fetchOrganizationData = async (organizationId: string): Promise<{ organization: Organization | null, usage: OrganizationUsage | null }> => {
-  // This is a mock function. In a real app, you would fetch this from your backend.
-  console.warn('fetchOrganizationData is a mock function. Replace with actual implementation.');
-  // Simulate fetching data
-  const mockOrg: Organization = {
-    id: organizationId,
-    plan: 'professional', // default to professional for mock
-    seats_total: 5,
-  };
-  const mockUsage: OrganizationUsage = {
-    ai_systems_count: 10,
-    users_count: 3,
-    documents_monthly_count: 50,
-  };
-  return { organization: mockOrg, usage: mockUsage };
-};
 
 // Check if organization can create a new AI system
 export const checkAILimit = async (organizationId: string): Promise<boolean> => {
-  const { organization, usage } = await fetchOrganizationData(organizationId);
-  if (!organization || !usage) return false; // Cannot check if data is missing
-
-  const limits = PLAN_LIMITS[organization.plan];
-  // -1 indicates unlimited
-  if (limits.max_ai_systems === -1) return true;
-
-  return usage.ai_systems_count < limits.max_ai_systems;
+  // Use the API to check limit
+  try {
+    const response = await fetch(`/api/v1/organizations/${organizationId}/limits`);
+    if (!response.ok) return false;
+    const data = await response.json();
+    return data.canCreateAISystem;
+  } catch {
+    return false;
+  }
 };
 
 // Check if organization can invite a new user
 export const checkUserLimit = async (organizationId: string): Promise<boolean> => {
-  const { organization, usage } = await fetchOrganizationData(organizationId);
-  if (!organization || !usage) return false; // Cannot check if data is missing
-
-  // Check against total seats purchased, if seats_total is not -1 (unlimited)
-  if (organization.seats_total === -1) return true; // Unlimited seats
-
-  return usage.users_count < organization.seats_total;
+  try {
+    const response = await fetch(`/api/v1/organizations/${organizationId}/limits`);
+    if (!response.ok) return false;
+    const data = await response.json();
+    return data.canInviteUser;
+  } catch {
+    return false;
+  }
 };
 
 // Get current usage statistics for an organization
 export const getUsageStats = async (organizationId: string): Promise<OrganizationUsage | null> => {
-  const { usage } = await fetchOrganizationData(organizationId);
-  return usage;
+  try {
+    const response = await fetch(`/api/v1/organizations/${organizationId}/usage`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.usage;
+  } catch {
+    return null;
+  }
 };
