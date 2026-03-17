@@ -1,260 +1,53 @@
-"use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { PLANS, type Plan, type PlanFeatures } from "@/lib/plans";
+// hooks/use-permissions.ts
 
-export interface Permissions {
-  plan: Plan;
-  limits: {
-    useCases: number;
-    users: number;
-  };
-  features: {
-    apiAccess: boolean;
-    integrations: boolean;
-    customTemplates: boolean;
-    multiDepartment: boolean;
-    prioritySupport: boolean;
-    sso: boolean;
-    sla: boolean;
-    dedicatedManager: boolean;
-  };
-  usage: {
-    useCasesUsed: number;
-    usersUsed: number;
-  };
-}
+import { useContext } from 'react';
+import { AuthContext } from '@/lib/auth-context'; // Assuming AuthContext is available and provides user info
+import { OrganizationContext } from './use-organization'; // Use the organization context
+import { Role } from '@/types/roles';
+import { Permission, hasPermission } from '@/lib/permissions';
 
-export interface PermissionChecks {
-  canCreateUseCase: boolean;
-  canInviteUser: boolean;
-  hasFeature: (feature: keyof PlanFeatures) => boolean;
-  getRemaining: (type: "useCases" | "users") => number;
-  getPercentage: (type: "useCases" | "users") => number;
-  isPlan: (planName: "starter" | "professional" | "business" | "enterprise") => boolean;
-  isEssentialOrHigher: boolean;
-  isProfessionalOrHigher: boolean;
-  isEnterprise: boolean;
-}
-
-export function usePermissions(): {
-  permissions: Permissions | null;
-  checks: PermissionChecks | null;
+interface UsePermissionsResult {
+  can: (permission: Permission) => boolean;
+  role: Role | null;
+  organization: string | null; // Or the full organization object/ID
   isLoading: boolean;
-  error: Error | null;
-  refresh: () => Promise<void>;
-} {
-  const [permissions, setPermissions] = useState<Permissions | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+}
 
-  const fetchPermissions = async () => {
-    try {
-      setIsLoading(true);
-      
-      // Get session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        // Return starter plan defaults if no session
-        const starterPlan = PLANS.starter;
-        setPermissions({
-          plan: starterPlan,
-          limits: {
-            useCases: starterPlan.features.ai_systems,
-            users: starterPlan.features.users,
-          },
-          features: {
-            apiAccess: starterPlan.features.api_access,
-            integrations: starterPlan.features.integrations,
-            customTemplates: starterPlan.features.custom_templates,
-            multiDepartment: starterPlan.features.multi_department,
-            prioritySupport: starterPlan.features.priority_support,
-            sso: starterPlan.features.sso || false,
-            sla: starterPlan.features.sla || false,
-            dedicatedManager: starterPlan.features.dedicated_manager || false,
-          },
-          usage: { useCasesUsed: 0, usersUsed: 0 },
-        });
-        return;
-      }
+// Mock for OrganizationContext, replace with actual import if it's complex
+// interface OrganizationContextType {
+//   organization: { id: string; name: string; role: Role } | null;
+//   members: any[];
+//   usage: any;
+//   limits: any;
+//   isLoading: boolean;
+// }
 
-      // Fetch plan and usage from API
-      const [planRes, usageRes] = await Promise.all([
-        fetch("/api/v1/billing/status", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }),
-        fetch("/api/v1/usage", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }),
-      ]);
+export const usePermissions = (): UsePermissionsResult => {
+  // Assume AuthContext provides the authenticated user and their current organization context (if any)
+  // If user is not logged in, or not in an organization, role and organization will be null.
+  const { user, isLoading: isAuthLoading } = useContext(AuthContext); 
+  const { organization, role, isLoading: isOrgLoading } = useContext(OrganizationContext);
 
-      let planName = "starter";
-      let usage = { useCasesUsed: 0, usersUsed: 0 };
+  // Determine the current user's role within the selected organization
+  // This logic might need to be more sophisticated if a user can belong to multiple orgs and switch context
+  const currentUserRole = organization?.role || null; // Assuming organization object from context has a role property
+  
+  const isLoading = isAuthLoading || isOrgLoading;
 
-      if (planRes.ok) {
-        const planData = await planRes.json();
-        // Map legacy plan names to new ones
-        const planMapping: Record<string, string> = {
-          'free': 'starter',
-          'starter': 'starter',
-          'pro': 'professional',
-          'essential': 'professional',
-          'business': 'business',
-          'professional': 'professional',
-          'enterprise': 'enterprise',
-          'agency': 'business',
-        };
-        planName = planMapping[planData.plan] || planData.plan || "starter";
-      }
-
-      if (usageRes.ok) {
-        const usageData = await usageRes.json();
-        usage = {
-          useCasesUsed: usageData.useCasesUsed || 0,
-          usersUsed: usageData.usersUsed || 0,
-        };
-      }
-
-      const plan = PLANS[planName] || PLANS.starter;
-
-      setPermissions({
-        plan,
-        limits: {
-          useCases: plan.features.ai_systems,
-          users: plan.features.users,
-        },
-        features: {
-          apiAccess: plan.features.api_access,
-          integrations: plan.features.integrations,
-          customTemplates: plan.features.custom_templates,
-          multiDepartment: plan.features.multi_department,
-          prioritySupport: plan.features.priority_support,
-          sso: plan.features.sso || false,
-          sla: plan.features.sla || false,
-          dedicatedManager: plan.features.dedicated_manager || false,
-        },
-        usage,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Unknown error"));
-      // Fallback to starter plan
-      const starterPlan = PLANS.starter;
-      setPermissions({
-        plan: starterPlan,
-        limits: {
-          useCases: starterPlan.features.ai_systems,
-          users: starterPlan.features.users,
-        },
-        features: {
-          apiAccess: starterPlan.features.api_access,
-          integrations: starterPlan.features.integrations,
-          customTemplates: starterPlan.features.custom_templates,
-          multiDepartment: starterPlan.features.multi_department,
-          prioritySupport: starterPlan.features.priority_support,
-          sso: starterPlan.features.sso || false,
-          sla: starterPlan.features.sla || false,
-          dedicatedManager: starterPlan.features.dedicated_manager || false,
-        },
-        usage: { useCasesUsed: 0, usersUsed: 0 },
-      });
-    } finally {
-      setIsLoading(false);
+  const can = (permission: Permission): boolean => {
+    if (isLoading || !currentUserRole) {
+      // While loading or if no role is determined, deny permission by default
+      return false;
     }
-  };
-
-  useEffect(() => {
-    fetchPermissions();
-  }, []);
-
-  // Compute permission checks
-  const checks: PermissionChecks | null = permissions
-    ? {
-        canCreateUseCase:
-          permissions.limits.useCases === -1 ||
-          permissions.usage.useCasesUsed < permissions.limits.useCases,
-        canInviteUser:
-          permissions.limits.users === -1 ||
-          permissions.usage.usersUsed < permissions.limits.users,
-        hasFeature: (feature: keyof PlanFeatures) => {
-          return !!permissions.plan.features[feature];
-        },
-        getRemaining: (type: "useCases" | "users") => {
-          const limit = permissions.limits[type];
-          const used = permissions.usage[`${type}Used` as const];
-          return limit === -1 ? Infinity : Math.max(0, limit - used);
-        },
-        getPercentage: (type: "useCases" | "users") => {
-          const limit = permissions.limits[type];
-          const used = permissions.usage[`${type}Used` as const];
-          if (limit === -1) return 0;
-          return Math.min((used / limit) * 100, 100);
-        },
-        isPlan: (planName) => permissions.plan.name === planName,
-        isEssentialOrHigher: ["professional", "business", "enterprise"].includes(permissions.plan.name),
-        isProfessionalOrHigher: ["professional", "business", "enterprise"].includes(permissions.plan.name),
-        isEnterprise: permissions.plan.name === "enterprise",
-      }
-    : null;
-
-  return {
-    permissions,
-    checks,
-    isLoading,
-    error,
-    refresh: fetchPermissions,
-  };
-}
-
-// Hook for checking a specific feature
-export function useFeature(feature: keyof PlanFeatures): {
-  hasAccess: boolean;
-  isLoading: boolean;
-  upgradeMessage: string;
-} {
-  const { permissions, checks, isLoading } = usePermissions();
-
-  const upgradeMessages: Record<string, string> = {
-    api_access: "El acceso a API requiere un plan Professional o superior",
-    integrations: "Las integraciones requieren un plan Professional o superior",
-    custom_templates: "Las plantillas personalizadas requieren un plan Professional o superior",
-    multi_department: "La gestión multi-departamento requiere un plan Professional o superior",
-    priority_support: "El soporte prioritario requiere un plan Professional o superior",
-    sso: "El SSO requiere un plan Professional",
-    sla: "El SLA garantizado requiere un plan Professional",
-    dedicated_manager: "El Account Manager dedicado requiere un plan Professional",
+    // Use the hasPermission function from lib/permissions.ts
+    return hasPermission(currentUserRole, permission);
   };
 
   return {
-    hasAccess: checks?.hasFeature(feature) || false,
+    can,
+    role: currentUserRole,
+    organization: organization?.id || null, // Return organization ID or null
     isLoading,
-    upgradeMessage: upgradeMessages[feature] || "Esta función requiere un plan superior",
   };
-}
-
-// Hook for checking usage limits
-export function useLimit(type: "useCases" | "users"): {
-  limit: number;
-  used: number;
-  remaining: number;
-  percentage: number;
-  isLoading: boolean;
-  canUse: boolean;
-} {
-  const { permissions, checks, isLoading } = usePermissions();
-
-  const usageKey = `${type}Used` as const;
-  const used = permissions?.usage[usageKey] || 0;
-  const limit = permissions?.limits[type] || 0;
-
-  return {
-    limit,
-    used,
-    remaining: checks?.getRemaining(type) || 0,
-    percentage: checks?.getPercentage(type) || 0,
-    isLoading,
-    canUse: type === "useCases" 
-      ? (checks?.canCreateUseCase || false)
-      : (checks?.canInviteUser || false),
-  };
-}
+};
