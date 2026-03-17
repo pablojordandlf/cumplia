@@ -186,7 +186,7 @@ export function RiskRegistry({
       {/* Risk List */}
       <div className="space-y-3">
         {filteredRisks.map((risk) => {
-          const isApplicable = risk.applicable !== false;
+          const isApplicable = !!risk.applicable;
           return (
             <Card 
               key={risk.id}
@@ -256,10 +256,11 @@ export function RiskRegistry({
                         {isApplicable ? 'Aplica' : 'No aplica'}
                       </span>
                       <Switch
-                        checked={isApplicable}
-                        onCheckedChange={(checked) => handleToggleApplicable(risk, checked)}
+                        checked={!!risk.applicable}
+                        onCheckedChange={(checked) => {
+                          handleToggleApplicable(risk, checked === true);
+                        }}
                         disabled={togglingRiskId === risk.id}
-                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                     
