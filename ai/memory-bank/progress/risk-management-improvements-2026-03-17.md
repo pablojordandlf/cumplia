@@ -94,6 +94,42 @@ apps/web/app/api/v1/ai-systems/[id]/risks/[riskId]/route.ts
 
 **Commit:** `24766a3`
 
+### Mejoras UX/UI 2026-03-17 13:00
+
+**Commit:** `858434a`
+
+#### 1. Fix Click en Switch
+- **Archivo:** `apps/web/components/risks/risk-registry.tsx`
+- **Problema:** Al hacer clic en el Switch, se abría el popup de detalle
+- **Solución:** Envolver el Switch en un div con `onClick={(e) => e.stopPropagation()}`
+- El clic en el Switch ahora solo cambia el toggle, sin abrir el popup
+
+#### 2. Mejorar Legibilidad de Riesgos "No Aplica"
+- **Cambios visuales:**
+  - Quitar `opacity-50` del Card que hacía el texto ilegible
+  - Usar `border-dashed border-gray-300 bg-gray-50/30` para diferenciar visualmente
+  - Añadir badge "No aplica" con icono EyeOff
+  - Mantener `cursor-not-allowed` para indicar que no se puede abrir
+  - Los riesgos "Aplica" usan borde sólido y hover normal
+  
+- **Ordenamiento:** Los riesgos "No aplica" aparecen al final de la lista
+
+#### 3. Tooltip en Switch
+- Añadido tooltip explicativo que cambia según el estado:
+  - Si "Aplica": "Haz clic para marcar este riesgo como NO aplicable"
+  - Si "No aplica": "Haz clic para marcar este riesgo como aplicable y evaluarlo"
+
+#### 4. Estadísticas Filtradas por Aplicables
+- **Archivos:** 
+  - `apps/web/types/risk-management.ts` - función `getRiskManagementStatus`
+  - `apps/web/components/risks/risk-matrix.tsx`
+  
+- **Cambios:**
+  - Todas las estadísticas (total, assessed, mitigated, critical_open) ahora usan solo riesgos con `applicable === true`
+  - La matriz de riesgos solo muestra riesgos aplicables
+  - El contador muestra: "X de Y riesgos (Z aplicables, W no aplican)"
+  - Los textos de "riesgos pendientes" especifican "riesgos aplicables pendientes"
+
 ### Próximos Pasos (Backlog)
 1. Probar flujo completo en staging
 2. Aplicar migración en base de datos de producción
