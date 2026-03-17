@@ -26,7 +26,8 @@ import {
   Bot,
   Sparkles as SparklesIcon,
   Ban,
-  MinusCircle
+  MinusCircle,
+  Settings2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -491,6 +492,26 @@ export default function DashboardPage() {
                     <h3 className="text-lg font-semibold text-gray-900">Guía AI Act</h3>
                     <p className="text-sm text-gray-500">
                       Niveles de riesgo, clasificación de sistemas y obligaciones regulatorias
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Link>
+          </Card>
+
+          {/* Administración */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <Link href="/dashboard/admin">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white">
+                    <Settings2 className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900">Administración</h3>
+                    <p className="text-sm text-gray-500">
+                      Gestiona plantillas de riesgos, campos personalizados y configuraciones
                     </p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400" />

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Eye, Search, ArrowLeft, Trash2, LayoutTemplate, FileCheck } from 'lucide-react';
+import { Plus, Eye, Search, ArrowLeft, Trash2, Settings2, FileCheck } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -259,10 +259,10 @@ export default function InventoryPage() {
           <p className="text-gray-600 mt-1 text-sm sm:text-base">Lista y gestiona tus sistemas de IA</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/dashboard/inventory/templates">
+          <Link href="/dashboard/admin">
             <Button variant="outline" size="sm" className="sm:size-default">
-              <LayoutTemplate className="mr-0 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Plantillas</span>
+              <Settings2 className="mr-0 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Administrar</span>
             </Button>
           </Link>
           <Link href="/dashboard/inventory/new">
