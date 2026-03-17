@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   Shield,
   AlertCircle,
-  Lock
+  Lock,
+  Plus
 } from 'lucide-react';
 import { 
   AISystemRisk, 
@@ -27,6 +28,7 @@ import { RiskRegistry } from './risk-registry';
 import { RiskMatrix } from './risk-matrix';
 import { RiskTemplateSelector } from './risk-template-selector';
 import { RiskProgressIndicator } from './risk-progress-indicator';
+import { AddCustomRiskDialog } from './add-custom-risk-dialog';
 
 interface RiskManagementTabProps {
   aiSystemId: string;
@@ -38,6 +40,7 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<RiskManagementStatus | null>(null);
   const [activeTab, setActiveTab] = useState('registry');
+  const [showAddRiskDialog, setShowAddRiskDialog] = useState(false);
   const { toast } = useToast();
 
   const config = AI_ACT_RISK_CONFIG[aiActLevel] || AI_ACT_RISK_CONFIG.unclassified;
@@ -195,10 +198,20 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
       {/* Risk Management Tabs */}
       {risks.length > 0 && (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="registry">Registro de Riesgos</TabsTrigger>
-            <TabsTrigger value="matrix">Matriz de Riesgos</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between gap-4">
+            <TabsList className="grid flex-1 grid-cols-2 max-w-md">
+              <TabsTrigger value="registry">Registro de Riesgos</TabsTrigger>
+              <TabsTrigger value="matrix">Matriz de Riesgos</TabsTrigger>
+            </TabsList>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAddRiskDialog(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Añadir Riesgos
+            </Button>
+          </div>
           
           <TabsContent value="registry" className="mt-4">
             <RiskRegistry 
@@ -216,6 +229,15 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
           </TabsContent>
         </Tabs>
       )}
+
+      {/* Add Custom Risk Dialog */}
+      <AddCustomRiskDialog
+        aiSystemId={aiSystemId}
+        existingRiskIds={risks.map(r => r.catalog_risk_id)}
+        open={showAddRiskDialog}
+        onOpenChange={setShowAddRiskDialog}
+        onRisksAdded={fetchRisks}
+      />
     </div>
   );
 }

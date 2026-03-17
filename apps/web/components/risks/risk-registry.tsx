@@ -1,4 +1,3 @@
-// components/risks/risk-registry.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { 
   Select,
   SelectContent,
@@ -14,33 +14,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { 
   Search, 
   Filter, 
   AlertTriangle, 
   CheckCircle, 
   AlertCircle,
   Shield,
-  Trash2,
   RefreshCw,
-  Plus,
-  ToggleLeft,
-  ToggleRight
+  Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { 
   AISystemRisk, 
-  RiskStatus, 
-  RiskLevel,
+  RiskStatus,
   RISK_STATUS_CONFIG,
   RISK_LEVEL_CONFIG
 } from '@/types/risk-management';
@@ -67,7 +53,7 @@ export function RiskRegistry({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [criticalityFilter, setCriticalityFilter] = useState<string>('all');
   const [selectedRisk, setSelectedRisk] = useState<AISystemRisk | null>(null);
-  const [riskToDelete, setRiskToDelete] = useState<AISystemRisk | null>(null);
+  const [togglingRiskId, setTogglingRiskId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -84,63 +70,37 @@ export function RiskRegistry({
     return matchesSearch && matchesStatus && matchesCriticality;
   });
 
-  const handleClearAll = async () => {
-    if (!confirm('¿Estás seguro de que deseas eliminar todos los riesgos de este sistema?')) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/v1/ai-systems/${aiSystemId}/risks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'clear' })
-      });
-
-      if (!response.ok) throw new Error('Failed to clear risks');
-
-      onRefresh();
-      toast({
-        title: 'Riesgos eliminados',
-        description: 'Todos los riesgos han sido eliminados del sistema'
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudieron eliminar los riesgos',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteRisk = async () => {
-    if (!riskToDelete) return;
-
-    setLoading(true);
+  const handleToggleApplicable = async (risk: AISystemRisk, newValue: boolean) => {
+    setTogglingRiskId(risk.id);
     try {
       const response = await fetch(
-        `/api/v1/ai-systems/${aiSystemId}/risks/${riskToDelete.id}`,
-        { method: 'DELETE' }
+        `/api/v1/ai-systems/${aiSystemId}/risks/${risk.id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ applicable: newValue })
+        }
       );
 
-      if (!response.ok) throw new Error('Failed to delete risk');
+      if (!response.ok) throw new Error('Failed to update risk');
 
-      onRiskDeleted(riskToDelete.id);
+      const data = await response.json();
+      onRiskUpdated(data.risk);
+      
       toast({
-        title: 'Riesgo eliminado',
-        description: 'El riesgo ha sido eliminado correctamente'
+        title: newValue ? 'Riesgo aplicable' : 'Riesgo no aplicable',
+        description: newValue 
+          ? 'El riesgo ahora está activo para evaluación'
+          : 'El riesgo ha sido marcado como no aplicable'
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'No se pudo eliminar el riesgo',
+        description: 'No se pudo actualizar el riesgo',
         variant: 'destructive'
       });
     } finally {
-      setLoading(false);
-      setRiskToDelete(null);
+      setTogglingRiskId(null);
     }
   };
 
@@ -159,26 +119,9 @@ export function RiskRegistry({
       case 'mitigated': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'assessed': return <Shield className="h-4 w-4 text-blue-600" />;
       case 'accepted': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'not_applicable': return <AlertCircle className="h-4 w-4 text-gray-400" />;
+      case 'not_applicable': return <Lock className="h-4 w-4 text-gray-400" />;
       default: return <AlertTriangle className="h-4 w-4 text-gray-600" />;
     }
-  };
-
-  const getApplicableBadge = (applicable: boolean) => {
-    if (applicable) {
-      return (
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          <ToggleRight className="h-3 w-3 mr-1" />
-          Aplica
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200">
-        <ToggleLeft className="h-3 w-3 mr-1" />
-        No aplica
-      </Badge>
-    );
   };
 
   return (
@@ -206,6 +149,7 @@ export function RiskRegistry({
               <SelectItem value="assessed">Evaluados</SelectItem>
               <SelectItem value="mitigated">Mitigados</SelectItem>
               <SelectItem value="accepted">Aceptados</SelectItem>
+              <SelectItem value="not_applicable">No Aplica</SelectItem>
             </SelectContent>
           </Select>
 
@@ -241,89 +185,96 @@ export function RiskRegistry({
 
       {/* Risk List */}
       <div className="space-y-3">
-        {filteredRisks.map((risk) => (
-          <Card 
-            key={risk.id}
-            className="cursor-pointer hover:border-primary transition-colors"
-            onClick={() => setSelectedRisk(risk)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm text-muted-foreground font-mono">
-                      #{risk.catalog_risk?.risk_number}
-                    </span>
-                    {getApplicableBadge(risk.applicable !== false)}
-                    <Badge 
-                      variant="outline" 
-                      className={getCriticalityColor(risk.catalog_risk?.criticality || '')}
-                    >
-                      {risk.catalog_risk?.criticality === 'critical' ? 'Crítico' :
-                       risk.catalog_risk?.criticality === 'high' ? 'Alto' :
-                       risk.catalog_risk?.criticality === 'medium' ? 'Medio' : 'Bajo'}
-                    </Badge>
-                    <Badge variant="outline">
-                      {risk.catalog_risk?.domain}
+        {filteredRisks.map((risk) => {
+          const isApplicable = risk.applicable !== false;
+          return (
+            <Card 
+              key={risk.id}
+              className={`transition-colors ${
+                isApplicable 
+                  ? 'cursor-pointer hover:border-primary' 
+                  : 'opacity-50 bg-gray-50 cursor-not-allowed'
+              }`}
+              onClick={() => isApplicable && setSelectedRisk(risk)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm text-muted-foreground font-mono">
+                        #{risk.catalog_risk?.risk_number}
+                      </span>
+                      <Badge 
+                        variant="outline" 
+                        className={getCriticalityColor(risk.catalog_risk?.criticality || '')}
+                      >
+                        {risk.catalog_risk?.criticality === 'critical' ? 'Crítico' :
+                         risk.catalog_risk?.criticality === 'high' ? 'Alto' :
+                         risk.catalog_risk?.criticality === 'medium' ? 'Medio' : 'Bajo'}
+                      </Badge>
+                      <Badge variant="outline">
+                        {risk.catalog_risk?.domain}
+                      </Badge>
+                    </div>
+                    <h4 className="font-medium mt-2 truncate">
+                      {risk.catalog_risk?.name}
+                    </h4>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                      {risk.catalog_risk?.description}
+                    </p>
+                    
+                    {/* Assessment preview */}
+                    {(risk.probability || risk.impact) && isApplicable && (
+                      <div className="flex items-center gap-4 mt-2 text-sm">
+                        {risk.probability && (
+                          <span className="text-muted-foreground">
+                            Probabilidad: <span className={RISK_LEVEL_CONFIG[risk.probability].color}>
+                              {RISK_LEVEL_CONFIG[risk.probability].label}
+                            </span>
+                          </span>
+                        )}
+                        {risk.impact && (
+                          <span className="text-muted-foreground">
+                            Impacto: <span className={RISK_LEVEL_CONFIG[risk.impact].color}>
+                              {RISK_LEVEL_CONFIG[risk.impact].label}
+                            </span>
+                          </span>
+                        )}
+                        {risk.residual_risk_score && (
+                          <span className="text-muted-foreground">
+                            Riesgo Residual: <span className="font-medium">{risk.residual_risk_score}/10</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2">
+                    {/* Applicability Toggle */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {isApplicable ? 'Aplica' : 'No aplica'}
+                      </span>
+                      <Switch
+                        checked={isApplicable}
+                        onCheckedChange={(checked) => handleToggleApplicable(risk, checked)}
+                        disabled={togglingRiskId === risk.id}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    
+                    <Badge className={RISK_STATUS_CONFIG[risk.status].color}>
+                      <span className="flex items-center gap-1">
+                        {getStatusIcon(risk.status)}
+                        {RISK_STATUS_CONFIG[risk.status].label}
+                      </span>
                     </Badge>
                   </div>
-                  <h4 className="font-medium mt-2 truncate">
-                    {risk.catalog_risk?.name}
-                  </h4>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                    {risk.catalog_risk?.description}
-                  </p>
-                  
-                  {/* Assessment preview */}
-                  {(risk.probability || risk.impact) && (
-                    <div className="flex items-center gap-4 mt-2 text-sm">
-                      {risk.probability && (
-                        <span className="text-muted-foreground">
-                          Probabilidad: <span className={RISK_LEVEL_CONFIG[risk.probability].color}>
-                            {RISK_LEVEL_CONFIG[risk.probability].label}
-                          </span>
-                        </span>
-                      )}
-                      {risk.impact && (
-                        <span className="text-muted-foreground">
-                          Impacto: <span className={RISK_LEVEL_CONFIG[risk.impact].color}>
-                            {RISK_LEVEL_CONFIG[risk.impact].label}
-                          </span>
-                        </span>
-                      )}
-                      {risk.residual_risk_score && (
-                        <span className="text-muted-foreground">
-                          Riesgo Residual: <span className="font-medium">{risk.residual_risk_score}/10</span>
-                        </span>
-                      )}
-                    </div>
-                  )}
                 </div>
-
-                <div className="flex flex-col items-end gap-2">
-                  <Badge className={RISK_STATUS_CONFIG[risk.status].color}>
-                    <span className="flex items-center gap-1">
-                      {getStatusIcon(risk.status)}
-                      {RISK_STATUS_CONFIG[risk.status].label}
-                    </span>
-                  </Badge>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setRiskToDelete(risk);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
 
         {filteredRisks.length === 0 && (
           <div className="text-center py-12">
@@ -332,20 +283,6 @@ export function RiskRegistry({
           </div>
         )}
       </div>
-
-      {/* Clear all button */}
-      {risks.length > 0 && (
-        <div className="flex justify-end pt-4">
-          <Button 
-            variant="destructive" 
-            onClick={handleClearAll}
-            disabled={loading}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Eliminar Todos los Riesgos
-          </Button>
-        </div>
-      )}
 
       {/* Risk Detail Modal */}
       {selectedRisk && (
@@ -360,28 +297,6 @@ export function RiskRegistry({
           }}
         />
       )}
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!riskToDelete} onOpenChange={() => setRiskToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar este riesgo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción eliminará el riesgo "{riskToDelete?.catalog_risk?.name}" 
-              de este sistema. Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteRisk}
-              className="bg-destructive text-destructive-foreground"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

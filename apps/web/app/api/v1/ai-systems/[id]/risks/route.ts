@@ -140,7 +140,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { template_id, action } = body;
+    const { template_id, catalog_risk_ids, action } = body;
 
     if (action === 'clear') {
       // Clear all existing risks for this system
@@ -160,9 +160,98 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ message: 'All risks cleared' });
     }
 
+    // Handle creation of individual risks from catalog
+    if (catalog_risk_ids && Array.isArray(catalog_risk_ids) && catalog_risk_ids.length > 0) {
+      // Verify all catalog risks exist
+      const { data: existingRisks, error: catalogError } = await supabase
+        .from('risk_catalog')
+        .select('id')
+        .in('id', catalog_risk_ids);
+
+      if (catalogError) {
+        console.error('Error fetching catalog risks:', catalogError);
+        return NextResponse.json(
+          { error: 'Failed to verify catalog risks' },
+          { status: 500 }
+        );
+      }
+
+      const validCatalogIds = existingRisks?.map(r => r.id) || [];
+      const invalidIds = catalog_risk_ids.filter(id => !validCatalogIds.includes(id));
+      
+      if (invalidIds.length > 0) {
+        return NextResponse.json(
+          { error: `Invalid catalog risk IDs: ${invalidIds.join(', ')}` },
+          { status: 400 }
+        );
+      }
+
+      // Check for existing risks to avoid duplicates
+      const { data: existingSystemRisks, error: existingError } = await supabase
+        .from('ai_system_risks')
+        .select('catalog_risk_id')
+        .eq('ai_system_id', aiSystemId)
+        .in('catalog_risk_id', validCatalogIds);
+
+      if (existingError) {
+        console.error('Error checking existing risks:', existingError);
+        return NextResponse.json(
+          { error: 'Failed to check existing risks' },
+          { status: 500 }
+        );
+      }
+
+      const existingCatalogIds = existingSystemRisks?.map(r => r.catalog_risk_id) || [];
+      const newCatalogIds = validCatalogIds.filter(id => !existingCatalogIds.includes(id));
+
+      if (newCatalogIds.length === 0) {
+        return NextResponse.json(
+          { error: 'All selected risks already exist for this system' },
+          { status: 400 }
+        );
+      }
+
+      // Create new risks - by default they don't apply
+      const newRisks = newCatalogIds.map(catalogRiskId => ({
+        ai_system_id: aiSystemId,
+        catalog_risk_id: catalogRiskId,
+        template_id: null,
+        status: 'not_applicable',
+        applicable: false,
+        probability: null,
+        impact: null,
+        residual_risk_score: null,
+        mitigation_measures: null,
+        responsible_person: null,
+        due_date: null,
+        notes: null
+      }));
+
+      const { data: createdRisks, error: createError } = await supabase
+        .from('ai_system_risks')
+        .insert(newRisks)
+        .select(`
+          *,
+          catalog_risk:catalog_risk_id(*)
+        `);
+
+      if (createError) {
+        console.error('Error creating individual risks:', createError);
+        return NextResponse.json(
+          { error: 'Failed to create risks' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        message: `Created ${createdRisks?.length || 0} new risks`,
+        risks: createdRisks
+      }, { status: 201 });
+    }
+
     if (!template_id) {
       return NextResponse.json(
-        { error: 'template_id is required' },
+        { error: 'template_id or catalog_risk_ids is required' },
         { status: 400 }
       );
     }
@@ -186,12 +275,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .delete()
       .eq('ai_system_id', aiSystemId);
 
-    // Create new risks from template
+    // Create new risks from template - by default they don't apply
     const newRisks = templateItems.map(item => ({
       ai_system_id: aiSystemId,
       catalog_risk_id: item.catalog_risk_id,
       template_id: template_id,
-      status: 'identified',
+      status: 'not_applicable',
+      applicable: false,
       probability: null,
       impact: null,
       residual_risk_score: null,

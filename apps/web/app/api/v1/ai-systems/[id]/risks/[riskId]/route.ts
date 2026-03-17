@@ -91,8 +91,23 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Build update object
     const updateData: Record<string, unknown> = {};
-    if (status) updateData.status = status;
-    if (applicable !== undefined) updateData.applicable = applicable;
+    
+    // Handle applicable toggle with automatic status update
+    if (applicable !== undefined) {
+      updateData.applicable = applicable;
+      // Auto-update status based on applicable value
+      if (applicable === false) {
+        updateData.status = 'not_applicable';
+      } else if (applicable === true && existingRisk.status === 'not_applicable') {
+        updateData.status = 'identified';
+      }
+    }
+    
+    // Only update status if not already set by applicable logic
+    if (status && !updateData.status) {
+      updateData.status = status;
+    }
+    
     if (probability !== undefined) updateData.probability = probability;
     if (impact !== undefined) updateData.impact = impact;
     if (residual_risk_score !== undefined) updateData.residual_risk_score = residual_risk_score;

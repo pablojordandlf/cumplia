@@ -1,4 +1,3 @@
-// components/risks/risk-detail-card.tsx
 'use client';
 
 import { useState } from 'react';
@@ -21,6 +20,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { 
@@ -34,10 +39,8 @@ import {
   User,
   FileText,
   Target,
-  ToggleLeft,
-  ToggleRight
+  Info
 } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { 
   AISystemRisk, 
@@ -48,6 +51,15 @@ import {
   calculateResidualRisk,
   getRiskLevelFromScore
 } from '@/types/risk-management';
+
+// Status descriptions for tooltips
+const STATUS_DESCRIPTIONS: Record<RiskStatus, string> = {
+  identified: 'Riesgo detectado pero pendiente de evaluación. Debes definir probabilidad e impacto.',
+  assessed: 'Riesgo analizado con probabilidad e impacto definidos. Requiere definir medidas de mitigación.',
+  mitigated: 'Se han implementado medidas de mitigación efectivas. El riesgo está controlado.',
+  accepted: 'Riesgo reconocido pero la organización decide no mitigarlo (asume el riesgo).',
+  not_applicable: 'Riesgo no relevante para este sistema IA. No requiere evaluación.'
+};
 
 interface RiskDetailCardProps {
   risk: AISystemRisk;
@@ -68,7 +80,44 @@ export function RiskDetailCard({
   const [editedRisk, setEditedRisk] = useState<AISystemRisk>(risk);
   const { toast } = useToast();
 
+  const validateForm = (): boolean => {
+    // Estado siempre requerido
+    if (!editedRisk.status) {
+      toast({
+        title: 'Campo requerido',
+        description: 'Debes seleccionar un Estado para el riesgo',
+        variant: 'destructive'
+      });
+      return false;
+    }
+
+    // Si el estado es assessed, mitigated o accepted, requerir probabilidad e impacto
+    const statesRequiringAssessment = ['assessed', 'mitigated', 'accepted'];
+    if (statesRequiringAssessment.includes(editedRisk.status)) {
+      if (!editedRisk.probability) {
+        toast({
+          title: 'Campo requerido',
+          description: 'Debes seleccionar la Probabilidad para evaluar el riesgo',
+          variant: 'destructive'
+        });
+        return false;
+      }
+      if (!editedRisk.impact) {
+        toast({
+          title: 'Campo requerido',
+          description: 'Debes seleccionar el Impacto para evaluar el riesgo',
+          variant: 'destructive'
+        });
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) return;
+
     setLoading(true);
     try {
       const response = await fetch(
@@ -78,7 +127,6 @@ export function RiskDetailCard({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             status: editedRisk.status,
-            applicable: editedRisk.applicable,
             probability: editedRisk.probability,
             impact: editedRisk.impact,
             mitigation_measures: editedRisk.mitigation_measures,
@@ -192,42 +240,8 @@ export function RiskDetailCard({
               </CardContent>
             </Card>
 
-            {/* Applicability Toggle */}
-            <Card className={editedRisk.applicable ? 'border-green-200 bg-green-50/30' : 'border-gray-200 bg-gray-50/30'}>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  {editedRisk.applicable ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertCircle className="h-4 w-4 text-gray-400" />}
-                  ¿Aplica este riesgo al sistema?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">
-                      {editedRisk.applicable ? 'Sí aplica a este sistema' : 'No aplica a este sistema'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {editedRisk.applicable 
-                        ? 'Este riesgo debe ser evaluado y gestionado para este sistema IA.'
-                        : 'Este riesgo no es relevante para este sistema IA y se excluirá de la gestión.'}
-                    </p>
-                  </div>
-                  <Switch
-                    checked={editedRisk.applicable}
-                    onCheckedChange={(checked) => 
-                      setEditedRisk(prev => ({ 
-                        ...prev, 
-                        applicable: checked,
-                        status: checked ? (prev.status === 'not_applicable' ? 'identified' : prev.status) : 'not_applicable'
-                      }))
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Assessment */}
-            <Card className={!editedRisk.applicable ? 'opacity-50 pointer-events-none' : ''}>
+            <Card>
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Target className="h-4 w-4" />
@@ -237,13 +251,32 @@ export function RiskDetailCard({
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="status">Estado</Label>
+                    <Label htmlFor="status" className="flex items-center gap-2">
+                      Estado
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            <div className="space-y-2">
+                              <p className="font-medium">Estados de riesgo:</p>
+                              {Object.entries(STATUS_DESCRIPTIONS).map(([status, desc]) => (
+                                <div key={status} className="text-xs">
+                                  <span className="font-medium">{RISK_STATUS_CONFIG[status as RiskStatus].label}:</span> {desc}
+                                </div>
+                              ))}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <span className="text-red-500">*</span>
+                    </Label>
                     <Select 
                       value={editedRisk.status} 
                       onValueChange={(value: RiskStatus) => 
                         setEditedRisk(prev => ({ ...prev, status: value }))
                       }
-                      disabled={!editedRisk.applicable}
                     >
                       <SelectTrigger id="status">
                         <SelectValue />
@@ -275,7 +308,9 @@ export function RiskDetailCard({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="probability">Probabilidad</Label>
+                    <Label htmlFor="probability">
+                      Probabilidad <span className="text-red-500">*</span>
+                    </Label>
                     <Select 
                       value={editedRisk.probability || ''} 
                       onValueChange={handleProbabilityChange}
@@ -293,7 +328,9 @@ export function RiskDetailCard({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="impact">Impacto</Label>
+                    <Label htmlFor="impact">
+                      Impacto <span className="text-red-500">*</span>
+                    </Label>
                     <Select 
                       value={editedRisk.impact || ''} 
                       onValueChange={handleImpactChange}
