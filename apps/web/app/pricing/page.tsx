@@ -32,7 +32,6 @@ const pricingTiers = [
       "Obligaciones básicas",
       "Checklist de cumplimiento",
       "Sin generación de documentos",
-      "Soporte community",
     ],
     ctaText: "Empieza Gratis",
     popular: false,
@@ -41,15 +40,15 @@ const pricingTiers = [
   },
   {
     name: "Professional",
-    monthlyPrice: 99,
-    yearlyPrice: 990,
+    monthlyPrice: 49,
+    yearlyPrice: 490,
     description: "Ideal para PYMEs y consultoras con varios sistemas de IA",
     features: [
-      "Hasta 10 Sistemas de IA",
-      "Hasta 5 usuarios",
+      "Hasta 15 Sistemas de IA",
+      "Hasta 3 usuarios",
       "FRIA completa (Art. 27)",
       "Gestión completa de riesgos",
-      "10 documentos/mes",
+      "Registro de evidencias",
       "Exportación PDF/DOCX",
       "Soporte email prioritario",
     ],
@@ -64,11 +63,11 @@ const pricingTiers = [
     yearlyPrice: 2990,
     description: "Para empresas con múltiples departamentos y necesidades avanzadas",
     features: [
-      "Hasta 50 Sistemas de IA",
-      "Hasta 20 usuarios",
-      "Documentos ilimitados",
-      "API access",
-      "Integraciones (Slack, Teams)",
+      "Sistemas de IA ilimitados",
+      "Hasta 10 usuarios",
+      "Asistente IA",
+      "Gestión de Riesgos avanzada",
+      "Registro de evidencias",
       "Plantillas personalizadas",
       "Gestión multi-departamento",
       "Soporte prioritario",
@@ -130,7 +129,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Enterprise CTA */}
+        {/* Enterprise CTA - Hidden temporarily
         <div className="mt-12 max-w-4xl mx-auto">
           <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -174,6 +173,7 @@ export default function PricingPage() {
             </div>
           </div>
         </div>
+        */}
 
         {/* Feature Comparison */}
         <div className="mt-20 max-w-4xl mx-auto">
@@ -186,29 +186,25 @@ export default function PricingPage() {
                   <th className="text-center py-4 px-4 font-medium">Starter</th>
                   <th className="text-center py-4 px-4 font-medium text-blue-600">Professional</th>
                   <th className="text-center py-4 px-4 font-medium">Business</th>
-                  <th className="text-center py-4 px-4 font-medium">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
                   <td className="py-3 px-4">Sistemas de IA</td>
                   <td className="text-center py-3 px-4">1</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">10</td>
-                  <td className="text-center py-3 px-4">50</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">15</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Usuarios</td>
                   <td className="text-center py-3 px-4">1</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">5</td>
-                  <td className="text-center py-3 px-4">20</td>
-                  <td className="text-center py-3 px-4">Ilimitados</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">3</td>
+                  <td className="text-center py-3 px-4">10</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Clasificación AI Act</td>
                   <td className="text-center py-3 px-4">✓</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
                   <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
@@ -216,20 +212,29 @@ export default function PricingPage() {
                   <td className="text-center py-3 px-4">Básicas</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">Completas</td>
                   <td className="text-center py-3 px-4">Completas</td>
-                  <td className="text-center py-3 px-4">Completas</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Gestión de riesgos</td>
                   <td className="text-center py-3 px-4">Básica</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">Completa</td>
-                  <td className="text-center py-3 px-4">Completa</td>
-                  <td className="text-center py-3 px-4">Completa</td>
+                  <td className="text-center py-3 px-4">Avanzada</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">FRIA (Art. 27)</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
                   <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Registro de evidencias</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">Asistente IA</td>
+                  <td className="text-center py-3 px-4">—</td>
+                  <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
@@ -237,27 +242,11 @@ export default function PricingPage() {
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">10</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
-                  <td className="text-center py-3 px-4">Ilimitados</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">API Access</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Integraciones</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Plantillas custom</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">✓</td>
                   <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
@@ -265,28 +254,12 @@ export default function PricingPage() {
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">—</td>
                   <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">SSO / SAML</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">SLA Garantizado</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Soporte</td>
-                  <td className="text-center py-3 px-4">Community</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">Email</td>
+                  <td className="text-center py-3 px-4">Email</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">Prioritario</td>
                   <td className="text-center py-3 px-4">Prioritario</td>
-                  <td className="text-center py-3 px-4">CSM Dedicado</td>
                 </tr>
               </tbody>
             </table>

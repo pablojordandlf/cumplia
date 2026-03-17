@@ -9,6 +9,9 @@ export interface PlanFeatures {
   custom_templates: boolean;
   multi_department: boolean;
   priority_support: boolean;
+  ai_assistant?: boolean;      // Asistente IA
+  risk_management?: boolean;   // Gestión de Riesgos
+  evidence_registry?: boolean; // Registro de evidencias
   sso?: boolean;
   sla?: boolean;
   dedicated_manager?: boolean;
@@ -58,21 +61,22 @@ export const PLANS: Record<string, Plan> = {
       priority_support: false,
     },
   },
-  // Legacy essential maps to professional (price change from 29€ to 99€)
+  // Legacy essential maps to professional (price change from 29€ to 49€)
   essential: {
     id: 'professional',
     name: 'professional',
     display_name: 'Professional',
-    price_monthly: 99,
+    price_monthly: 49,
     features: {
-      ai_systems: 10,
-      users: 5,
+      ai_systems: 15,
+      users: 3,
       ai_check_exports: -1,
       api_access: false,
       integrations: false,
       custom_templates: false,
       multi_department: false,
       priority_support: false,
+      evidence_registry: true,
     },
   },
   // Legacy pro maps to professional
@@ -80,32 +84,34 @@ export const PLANS: Record<string, Plan> = {
     id: 'professional',
     name: 'professional',
     display_name: 'Professional',
-    price_monthly: 99,
+    price_monthly: 49,
     features: {
-      ai_systems: 10,
-      users: 5,
+      ai_systems: 15,
+      users: 3,
       ai_check_exports: -1,
       api_access: false,
       integrations: false,
       custom_templates: false,
       multi_department: false,
       priority_support: false,
+      evidence_registry: true,
     },
   },
   professional: {
     id: 'professional',
     name: 'professional',
     display_name: 'Professional',
-    price_monthly: 99,
+    price_monthly: 49,
     features: {
-      ai_systems: 10,
-      users: 5,
+      ai_systems: 15,
+      users: 3,
       ai_check_exports: -1,
       api_access: false,
       integrations: false,
       custom_templates: false,
       multi_department: false,
       priority_support: true,
+      evidence_registry: true,
     },
   },
   // New Business tier
@@ -115,14 +121,17 @@ export const PLANS: Record<string, Plan> = {
     display_name: 'Business',
     price_monthly: 299,
     features: {
-      ai_systems: 50,
-      users: 20,
+      ai_systems: -1, // Unlimited
+      users: 10,
       ai_check_exports: -1,
-      api_access: true,
-      integrations: true,
+      api_access: false,
+      integrations: false,
       custom_templates: true,
       multi_department: true,
       priority_support: true,
+      ai_assistant: true,
+      risk_management: true,
+      evidence_registry: true,
     },
   },
   enterprise: {
