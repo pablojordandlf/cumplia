@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 // Assume helper functions for XML parsing and domain validation are available
 // import { parseSamlMetadata } from '@/lib/sso/samlParser';
 // import { is_valid_sso_domain, is_domain_available } from '@/lib/supabase/helpers';
@@ -42,10 +41,9 @@ interface SSProviderRequestBody {
   is_active?: boolean;
 }
 
-export async function GET(request: Request, { params }: { params: { id: string; providerId: string } }) {
-  const organizationId = params.id;
-  const providerId = params.providerId;
-  const supabase = createRouteHandlerClient({ cookies });
+export async function GET(request: Request, { params }: { params: Promise<{ id: string; providerId: string }> }) {
+  const { id: organizationId, providerId } = await params;
+  const supabase = await createClient();
 
   try {
     // Ensure the logged-in user has permission to view this provider within the organization.
@@ -68,17 +66,16 @@ export async function GET(request: Request, { params }: { params: { id: string; 
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string; providerId: string } }) {
-  const organizationId = params.id;
-  const providerId = params.providerId;
-  const supabase = createRouteHandlerClient({ cookies });
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string; providerId: string }> }) {
+  const { id: organizationId, providerId } = await params;
+  const supabase = await createClient();
   const body: SSProviderRequestBody = await request.json();
 
   try {
     // Ensure the logged-in user has permission to update this provider.
     // Authorization check here.
 
-    let updateData: Partial<SSProviderRequestBody> = {};
+    let updateData: any = {};
     let parsedMetadata = null;
 
     // Prepare update data, only including fields that are present in the request body
@@ -121,7 +118,8 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
       .from('sso_providers')
       .update(updateData)
       .eq('id', providerId)
-      .eq('organization_id', organizationId); // Ensure we only update within the correct organization
+      .eq('organization_id', organizationId)
+      .select(); // Added select to return updated data
 
     if (error) throw error;
     
@@ -141,10 +139,9 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string; providerId: string } }) {
-  const organizationId = params.id;
-  const providerId = params.providerId;
-  const supabase = createRouteHandlerClient({ cookies });
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string; providerId: string }> }) {
+  const { id: organizationId, providerId } = await params;
+  const supabase = await createClient();
 
   try {
     // Ensure the logged-in user has permission to delete this provider.

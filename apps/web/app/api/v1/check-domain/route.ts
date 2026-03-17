@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 
 // Assume helper function `is_valid_sso_domain` is available
 // import { is_valid_sso_domain } from '@/lib/supabase/helpers';
@@ -13,7 +12,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: false, error: 'Domain parameter is required' }, { status: 400 });
   }
 
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   try {
     // Check if the domain is valid and if an active SSO provider is configured for it.

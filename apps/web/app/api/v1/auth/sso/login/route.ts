@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/server';
 
 // Assume get_sso_provider_by_email helper function exists and is imported
 // import { get_sso_provider_by_email } from '@/lib/supabase/helpers';
@@ -12,7 +11,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 });
   }
 
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   // Function to get SSO provider based on email domain
   // This would query the 'sso_providers' table.

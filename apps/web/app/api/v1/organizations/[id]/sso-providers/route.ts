@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 // Assume helper functions for XML parsing and domain validation are available
 // import { parseSamlMetadata } from '@/lib/sso/samlParser';
 // import { is_valid_sso_domain, is_domain_available } from '@/lib/supabase/helpers';
@@ -33,9 +32,9 @@ const is_domain_available = async (supabase: any, domain: string, organizationId
   return true;
 };
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const organizationId = params.id;
-  const supabase = createRouteHandlerClient({ cookies });
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: organizationId } = await params;
+  const supabase = await createClient();
 
   try {
     const { data, error } = await supabase
@@ -64,9 +63,9 @@ interface SSProviderRequestBody {
   is_active: boolean;
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const organizationId = params.id;
-  const supabase = createRouteHandlerClient({ cookies });
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: organizationId } = await params;
+  const supabase = await createClient();
   const body: SSProviderRequestBody = await request.json();
 
   // Basic Validation
@@ -123,7 +122,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     const { data, error } = await supabase
       .from('sso_providers')
-      .insert([providerData]);
+      .insert([providerData])
+      .select();
 
     if (error) throw error;
 

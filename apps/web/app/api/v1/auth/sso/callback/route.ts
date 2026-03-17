@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/server';
 
 // Assume necessary imports for SAML/OIDC parsing and Supabase helpers
 // e.g., import saml2 from 'saml2-js'; // Example library for SAML
 // import { updateUserOrganization, createUserOrganization } from '@/lib/supabase/helpers';
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createClient();
 
   // The callback might receive data as form data (for SAML POST binding) or query parameters (for OIDC)
   // We need to handle both GET and POST requests for flexibility.

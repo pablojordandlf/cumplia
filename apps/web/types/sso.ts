@@ -59,6 +59,7 @@ export interface SSOProviderFormData {
   attribute_mapping?: SSOAttributeMapping;
   auto_provision: boolean;
   default_role: MemberRole;
+  is_active?: boolean;
 }
 
 export interface SSODomainCheckResult {
