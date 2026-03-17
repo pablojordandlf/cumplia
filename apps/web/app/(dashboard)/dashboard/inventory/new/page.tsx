@@ -209,7 +209,7 @@ export default function NewUseCasePage() {
               </svg>
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Nuevo Caso de Uso</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Nuevo Sistema de IA</h1>
         </div>
 
         <Card className="max-w-2xl mx-auto border-red-200">
@@ -258,14 +258,14 @@ export default function NewUseCasePage() {
       if (!session?.user) {
         toast({
           title: 'Error de Autenticación',
-          description: 'Debes iniciar sesión para crear un caso de uso.',
+          description: 'Debes iniciar sesión para crear un sistema de IA.',
           variant: 'destructive',
         });
         router.push('/auth/login'); // Adjust if your login path is different
         return;
       }
 
-      // Crear el caso de uso como borrador - ai_act_level será calculado en el paso 2
+      // Crear el sistema de IA como borrador - ai_act_level será calculado en el paso 2
       const { data: newUseCase, error } = await supabase.from('use_cases').insert([
         {
           user_id: session.user.id,
@@ -284,7 +284,7 @@ export default function NewUseCasePage() {
       if (error) throw error;
 
       toast({
-        title: 'Caso de Uso Creado',
+        title: 'Sistema de IA Creado',
         description: 'Continúa con el cuestionario de clasificación para determinar el nivel de riesgo AI Act.',
         variant: 'default',
       });
@@ -293,8 +293,8 @@ export default function NewUseCasePage() {
     } catch (error: any) {
       console.error('Error creating use case:', error);
       toast({
-        title: 'Error al Crear Caso de Uso',
-        description: error.message || 'Hubo un problema al guardar tu caso de uso. Inténtalo de nuevo.',
+        title: 'Error al Crear Sistema de IA',
+        description: error.message || 'Hubo un problema al guardar tu sistema de IA. Inténtalo de nuevo.',
         variant: 'destructive',
       });
     }
@@ -311,7 +311,7 @@ export default function NewUseCasePage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Nuevo Caso de Uso</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Nuevo Sistema de IA</h1>
             <p className="text-gray-600">Registra un nuevo sistema de IA en dos pasos</p>
           </div>
         </div>
@@ -367,7 +367,7 @@ export default function NewUseCasePage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre del Caso de Uso</FormLabel>
+                    <FormLabel>Nombre del Sistema de IA</FormLabel>
                     <FormControl>
                       <Input placeholder="Ej: Sistema de recomendación de productos" {...field} />
                     </FormControl>
@@ -421,7 +421,7 @@ export default function NewUseCasePage() {
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      El sector industrial o de actividad económica al que pertenece el caso de uso.
+                      El sector industrial o de actividad económica al que pertenece el sistema de IA.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -520,7 +520,7 @@ export default function NewUseCasePage() {
                   Información Adicional
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Añade campos personalizados con información adicional sobre este caso de uso.
+                  Añade campos personalizados con información adicional sobre este sistema de IA.
                 </p>
 
                 {/* Add new field form */}
