@@ -185,7 +185,7 @@ export default function UseCaseDetailPage() {
       }
     } catch (error: any) {
       console.error('Error loading data:', error);
-      toast({ title: 'Error', description: error.message || 'No se pudo cargar el caso de uso', variant: 'destructive' });
+      toast({ title: 'Error', description: error.message || 'No se pudo cargar el sistema de IA', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -308,7 +308,7 @@ export default function UseCaseDetailPage() {
   }
 
   async function deleteUseCase() {
-    if (!confirm('¿Estás seguro de que deseas eliminar este caso de uso? Esta acción no se puede deshacer.')) return;
+    if (!confirm('¿Estás seguro de que deseas eliminar este sistema de IA? Esta acción no se puede deshacer.')) return;
     
     try {
       const { error } = await supabase
@@ -317,7 +317,7 @@ export default function UseCaseDetailPage() {
         .eq('id', useCaseId);
 
       if (error) throw error;
-      toast({ title: 'Eliminado', description: 'El caso de uso ha sido eliminado.' });
+      toast({ title: 'Eliminado', description: 'El sistema de IA ha sido eliminado.' });
       router.push('/dashboard/inventory');
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -513,7 +513,7 @@ export default function UseCaseDetailPage() {
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h1 className="text-xl font-bold text-gray-900 mb-2">Caso de uso no encontrado</h1>
-            <p className="text-gray-600 mb-4">El caso de uso que buscas no existe o ha sido eliminado.</p>
+            <p className="text-gray-600 mb-4">El sistema de IA que buscas no existe o ha sido eliminado.</p>
             <Link href="/dashboard/inventory">
               <Button>Volver al Inventario</Button>
             </Link>
@@ -682,8 +682,8 @@ export default function UseCaseDetailPage() {
                     <h4 className="font-semibold text-gray-900 mb-2">Estado del Producto</h4>
                     <p className="text-sm text-gray-600 mb-4">
                       {useCase.is_active
-                        ? 'Este caso de uso está actualmente activo y en uso.'
-                        : 'Este caso de uso ha sido marcado como obsoleto.'}
+                        ? 'Este sistema de IA está actualmente activo y en uso.'
+                        : 'Este sistema de IA ha sido marcado como obsoleto.'}
                     </p>
                     <div className="flex gap-3">
                       <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
@@ -702,8 +702,8 @@ export default function UseCaseDetailPage() {
                     </div>
                     <p className="text-sm text-gray-600 mb-4">
                       {useCase.is_poc
-                        ? 'Este caso de uso es una Prueba de Concepto (proyecto piloto).'
-                        : 'Este caso de uso es un sistema en producción.'}
+                        ? 'Este sistema de IA es una Prueba de Concepto (proyecto piloto).'
+                        : 'Este sistema de IA es un sistema en producción.'}
                     </p>
                     <div className="flex gap-3">
                       <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
@@ -953,7 +953,7 @@ export default function UseCaseDetailPage() {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Shield className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p>Este caso de uso aún no ha sido clasificado.</p>
+                    <p>Este sistema de IA aún no ha sido clasificado.</p>
                     <Link href={`/dashboard/inventory/${useCaseId}/classify`}>
                       <Button className="mt-4">Iniciar Clasificación</Button>
                     </Link>
@@ -1009,7 +1009,7 @@ export default function UseCaseDetailPage() {
               <CardContent className="space-y-6">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-semibold text-gray-900 mb-2">Estado del Producto</h4>
-                  <p className="text-sm text-gray-600 mb-4">Marca si este caso de uso está activo u obsoleto.</p>
+                  <p className="text-sm text-gray-600 mb-4">Marca si este sistema de IA está activo u obsoleto.</p>
                   <div className="flex gap-3">
                     <button
                       onClick={() => updateStatus({ is_active: true })}
@@ -1075,7 +1075,7 @@ export default function UseCaseDetailPage() {
                   Información Adicional
                 </CardTitle>
                 <CardDescription>
-                  Campos personalizados con información adicional sobre este caso de uso.
+                  Campos personalizados con información adicional sobre este sistema de IA.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -1097,7 +1097,7 @@ export default function UseCaseDetailPage() {
                     <p className="text-sm text-slate-600 mt-2">
                       Los campos de estas plantillas aparecen marcados con
                       <span className="inline-flex items-center mx-1 px-1.5 py-0.5 bg-slate-200 text-slate-700 text-xs rounded">plantilla</span>
-                      y se añaden automáticamente a este caso de uso.
+                      y se añaden automáticamente a este sistema de IA.
                     </p>
                     <Link href="/dashboard/inventory/templates">
                       <Button variant="link" size="sm" className="text-slate-600 p-0 mt-1">

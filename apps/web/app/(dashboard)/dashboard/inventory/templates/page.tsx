@@ -210,7 +210,7 @@ export default function TemplatesPage() {
   }
 
   async function deleteTemplate(templateId: string) {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no afecta a los casos de uso existentes.')) {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no afecta a los sistemas de IA existentes.')) {
       return;
     }
 
@@ -262,7 +262,7 @@ export default function TemplatesPage() {
                 Plantillas de Campos
               </h1>
               <p className="text-gray-600 text-sm">
-                Define plantillas de campos personalizados que se aplicarán automáticamente a los casos de uso
+                Define plantillas de campos personalizados que se aplicarán automáticamente a los sistemas de IA
               </p>
             </div>
           </div>
@@ -280,9 +280,9 @@ export default function TemplatesPage() {
               <div>
                 <h3 className="font-medium text-blue-900">¿Cómo funcionan las plantillas?</h3>
                 <p className="text-sm text-blue-700 mt-1">
-                  Las plantillas permiten definir campos personalizados que se aplican automáticamente a los casos de uso. 
-                  Puedes crear plantillas que apliquen a todos los casos de uso o solo a los de un nivel de riesgo específico. 
-                  Los campos definidos en las plantillas aparecerán vacíos en cada caso de uso, listos para ser rellenados.
+                  Las plantillas permiten definir campos personalizados que se aplican automáticamente a los sistemas de IA. 
+                  Puedes crear plantillas que apliquen a todos los sistemas de IA o solo a los de un nivel de riesgo específico. 
+                  Los campos definidos en las plantillas aparecerán vacíos en cada sistema de IA, listos para ser rellenados.
                 </p>
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function TemplatesPage() {
               <LayoutTemplate className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No hay plantillas</h3>
               <p className="text-gray-600 mb-4">
-                Crea tu primera plantilla para automatizar los campos personalizados en tus casos de uso.
+                Crea tu primera plantilla para automatizar los campos personalizados en tus sistemas de IA.
               </p>
               <Button onClick={openCreateDialog}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -379,7 +379,7 @@ export default function TemplatesPage() {
                 {editingTemplate ? 'Editar Plantilla' : 'Nueva Plantilla'}
               </DialogTitle>
               <DialogDescription>
-                Define los campos que se añadirán automáticamente a los casos de uso.
+                Define los campos que se añadirán automáticamente a los sistemas de IA.
               </DialogDescription>
             </DialogHeader>
 
@@ -426,7 +426,7 @@ export default function TemplatesPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-sm text-gray-500">
-                  Esta plantilla se aplicará automáticamente a los casos de uso que coincidan con este criterio.
+                  Esta plantilla se aplicará automáticamente a los sistemas de IA que coincidan con este criterio.
                 </p>
               </div>
 
