@@ -62,6 +62,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const {
       status,
+      applicable,
       probability,
       impact,
       mitigation_measures,
@@ -91,6 +92,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Build update object
     const updateData: Record<string, unknown> = {};
     if (status) updateData.status = status;
+    if (applicable !== undefined) updateData.applicable = applicable;
     if (probability !== undefined) updateData.probability = probability;
     if (impact !== undefined) updateData.impact = impact;
     if (residual_risk_score !== undefined) updateData.residual_risk_score = residual_risk_score;

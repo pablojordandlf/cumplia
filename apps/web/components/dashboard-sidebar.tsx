@@ -8,7 +8,8 @@ import {
   FolderKanban, 
   Settings,
   LayoutTemplate,
-  Shield
+  Shield,
+  GraduationCap
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +27,11 @@ const navItems = [
     title: "Plantillas",
     href: "/dashboard/inventory/templates",
     icon: LayoutTemplate,
+  },
+  {
+    title: "Formación",
+    href: "/dashboard/guia",
+    icon: GraduationCap,
   },
   {
     title: "Configuración",

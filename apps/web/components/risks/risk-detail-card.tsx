@@ -33,8 +33,11 @@ import {
   Calendar,
   User,
   FileText,
-  Target
+  Target,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { 
   AISystemRisk, 
@@ -75,6 +78,7 @@ export function RiskDetailCard({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             status: editedRisk.status,
+            applicable: editedRisk.applicable,
             probability: editedRisk.probability,
             impact: editedRisk.impact,
             mitigation_measures: editedRisk.mitigation_measures,
@@ -188,8 +192,42 @@ export function RiskDetailCard({
               </CardContent>
             </Card>
 
+            {/* Applicability Toggle */}
+            <Card className={editedRisk.applicable ? 'border-green-200 bg-green-50/30' : 'border-gray-200 bg-gray-50/30'}>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  {editedRisk.applicable ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertCircle className="h-4 w-4 text-gray-400" />}
+                  ¿Aplica este riesgo al sistema?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      {editedRisk.applicable ? 'Sí aplica a este sistema' : 'No aplica a este sistema'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {editedRisk.applicable 
+                        ? 'Este riesgo debe ser evaluado y gestionado para este sistema IA.'
+                        : 'Este riesgo no es relevante para este sistema IA y se excluirá de la gestión.'}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={editedRisk.applicable}
+                    onCheckedChange={(checked) => 
+                      setEditedRisk(prev => ({ 
+                        ...prev, 
+                        applicable: checked,
+                        status: checked ? (prev.status === 'not_applicable' ? 'identified' : prev.status) : 'not_applicable'
+                      }))
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Assessment */}
-            <Card>
+            <Card className={!editedRisk.applicable ? 'opacity-50 pointer-events-none' : ''}>
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Target className="h-4 w-4" />
@@ -205,6 +243,7 @@ export function RiskDetailCard({
                       onValueChange={(value: RiskStatus) => 
                         setEditedRisk(prev => ({ ...prev, status: value }))
                       }
+                      disabled={!editedRisk.applicable}
                     >
                       <SelectTrigger id="status">
                         <SelectValue />

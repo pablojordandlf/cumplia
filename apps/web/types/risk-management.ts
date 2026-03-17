@@ -64,22 +64,23 @@ export interface AISystemRisk {
   ai_system_id: string;
   catalog_risk_id: string;
   template_id: string | null;
-  
+
   // Joined catalog data
   catalog_risk?: RiskCatalog;
-  
+
   // Assessment
   status: RiskStatus;
+  applicable: boolean; // Whether this risk applies to this AI system
   probability: RiskLevel | null;
   impact: RiskLevel | null;
   residual_risk_score: number | null;
-  
+
   // Mitigation
   mitigation_measures: string | null;
   responsible_person: string | null;
   due_date: string | null;
   completed_at: string | null;
-  
+
   // Metadata
   notes: string | null;
   created_at: string;

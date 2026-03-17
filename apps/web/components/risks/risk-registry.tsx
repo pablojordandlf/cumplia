@@ -32,7 +32,9 @@ import {
   Shield,
   Trash2,
   RefreshCw,
-  Plus
+  Plus,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -162,6 +164,23 @@ export function RiskRegistry({
     }
   };
 
+  const getApplicableBadge = (applicable: boolean) => {
+    if (applicable) {
+      return (
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <ToggleRight className="h-3 w-3 mr-1" />
+          Aplica
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200">
+        <ToggleLeft className="h-3 w-3 mr-1" />
+        No aplica
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* Filters */}
@@ -235,6 +254,7 @@ export function RiskRegistry({
                     <span className="text-sm text-muted-foreground font-mono">
                       #{risk.catalog_risk?.risk_number}
                     </span>
+                    {getApplicableBadge(risk.applicable !== false)}
                     <Badge 
                       variant="outline" 
                       className={getCriticalityColor(risk.catalog_risk?.criticality || '')}
