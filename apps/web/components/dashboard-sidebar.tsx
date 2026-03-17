@@ -27,17 +27,12 @@ const navItems = [
     icon: FolderKanban,
   },
   {
-    title: "Plantillas",
-    href: "/dashboard/inventory/templates",
-    icon: LayoutTemplate,
-  },
-  {
     title: "Formación",
     href: "/dashboard/guia",
     icon: GraduationCap,
   },
   {
-    title: "Administración",
+    title: "Templates",
     href: "/dashboard/admin",
     icon: Settings2,
   },
