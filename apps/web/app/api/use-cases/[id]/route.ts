@@ -30,7 +30,7 @@ async function getAuthenticatedClient() {
   return { supabase, session };
 }
 
-// GET /api/use-cases/[id] - Obtener caso de uso específico
+// GET /api/use-cases/[id] - Obtener sistema de IA específico
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -62,7 +62,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/use-cases/[id] - Actualizar caso de uso
+// PATCH /api/use-cases/[id] - Actualizar sistema de IA
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -117,7 +117,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/use-cases/[id] - Eliminar caso de uso
+// DELETE /api/use-cases/[id] - Eliminar sistema de IA
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

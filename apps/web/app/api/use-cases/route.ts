@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/use-cases - Crear nuevo caso de uso
+// POST /api/use-cases - Crear nuevo sistema de IA
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();

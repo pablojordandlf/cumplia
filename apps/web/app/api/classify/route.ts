@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 
 /**
  * API Route: POST /api/classify
- * Clasifica un caso de uso usando el motor AI Act
+ * Clasifica un sistema de IA usando el motor AI Act
  * Requiere autenticación
  */
 export async function POST(request: NextRequest) {
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar que el caso de uso pertenece al usuario
+    // Verificar que el sistema de IA pertenece al usuario
     const { data: useCase, error: fetchError } = await supabase
       .from('use_cases')
       .select('*')
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Clasificación AI Act basada en reglas/keywords
     const classification = classifyUseCase(name, description || '', sector || 'general');
 
-    // Actualizar el caso de uso en Supabase
+    // Actualizar el sistema de IA en Supabase
     const { data: updatedUseCase, error: updateError } = await supabase
       .from('use_cases')
       .update({
