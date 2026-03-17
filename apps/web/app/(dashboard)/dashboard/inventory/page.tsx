@@ -94,10 +94,20 @@ export default function InventoryPage() {
         return;
       }
 
+      // Get user's organization
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .single();
+
+      const organizationId = membership?.organization_id;
+
       const { data, error } = await supabase
         .from('use_cases')
         .select('id, name, sector, status, ai_act_level, created_at')
-        .eq('user_id', session.user.id)
+        .eq('organization_id', organizationId)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
@@ -107,7 +117,7 @@ export default function InventoryPage() {
       setUseCases(cases);
       setFilteredUseCases(cases);
 
-      await loadObligationsCounts(cases, session.user.id);
+      await loadObligationsCounts(cases);
 
     } catch (error: any) {
       console.error('Error fetching use cases:', error);
@@ -121,7 +131,7 @@ export default function InventoryPage() {
     }
   };
 
-  const loadObligationsCounts = async (cases: UseCase[], userId: string) => {
+  const loadObligationsCounts = async (cases: UseCase[]) => {
     try {
       const counts: Record<string, ObligationsCount> = {};
       const useCaseIds = cases.map(c => c.id);
@@ -131,7 +141,6 @@ export default function InventoryPage() {
         .from('use_case_obligations')
         .select('use_case_id')
         .in('use_case_id', useCaseIds)
-        .eq('user_id', userId)
         .eq('is_completed', true);
 
       const completedCounts: Record<string, number> = {};

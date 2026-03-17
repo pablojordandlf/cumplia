@@ -184,11 +184,21 @@ export default function DashboardPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      // Fetch all systems for the user (excluding deleted)
+      // Get user's organization
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .single();
+
+      const organizationId = membership?.organization_id;
+
+      // Fetch all systems for the organization (excluding deleted)
       const { data: systems } = await supabase
         .from('use_cases')
         .select('ai_act_level, id')
-        .eq('user_id', session.user.id)
+        .eq('organization_id', organizationId)
         .is('deleted_at', null);
 
       const highRiskCount = systems?.filter(s => s.ai_act_level === 'high_risk').length || 0;
@@ -200,11 +210,11 @@ export default function DashboardPage() {
       const gpaiSystemCount = systems?.filter(s => s.ai_act_level === 'gpai_system').length || 0;
       const gpaiSrCount = systems?.filter(s => s.ai_act_level === 'gpai_sr').length || 0;
 
-      // Fetch all obligations with their completion status
+      // Fetch all obligations for the organization
       const { data: obligations } = await supabase
         .from('use_case_obligations')
         .select('is_completed, use_case_id')
-        .eq('user_id', session.user.id);
+        .in('use_case_id', systems?.map(s => s.id) || []);
 
       const completedObligations = obligations?.filter(o => o.is_completed).length || 0;
 
@@ -218,7 +228,7 @@ export default function DashboardPage() {
       const { data: recentSystemsData } = await supabase
         .from('use_cases')
         .select('id, name, ai_act_level, created_at')
-        .eq('user_id', session.user.id)
+        .eq('organization_id', organizationId)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -228,8 +238,7 @@ export default function DashboardPage() {
           const { data: sysObligations } = await supabase
             .from('use_case_obligations')
             .select('*')
-            .eq('use_case_id', system.id)
-            .eq('user_id', session.user.id);
+            .eq('use_case_id', system.id);
 
           const completed = sysObligations?.filter((o: any) => o.is_completed).length || 0;
           const total = getObligationsCountForLevel(system.ai_act_level);
