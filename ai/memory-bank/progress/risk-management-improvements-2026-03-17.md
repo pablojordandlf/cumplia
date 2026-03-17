@@ -77,7 +77,24 @@ apps/web/app/api/v1/ai-systems/[id]/risks/route.ts
 apps/web/app/api/v1/ai-systems/[id]/risks/[riskId]/route.ts
 ```
 
+### Corrección 2026-03-17 12:45
+
+**Problema:** Los selectores daban error al pulsarlos y los riesgos no salían como "No aplica" por defecto.
+
+**Causas identificadas:**
+1. La migración SQL tenía `DEFAULT true` en lugar de `DEFAULT false`
+2. El manejo del valor booleano en el Switch no era consistente (usaba `risk.applicable !== false` en lugar de `!!risk.applicable`)
+
+**Correcciones aplicadas:**
+- `supabase/migrations/20250317000003_add_applicable_to_risks.sql`: Cambiado a `DEFAULT false`
+- `apps/web/components/risks/risk-registry.tsx`: 
+  - Usar `!!risk.applicable` para forzar booleano
+  - Simplificar el onCheckedChange del Switch
+  - Usar `isApplicable` consistentemente en todo el componente
+
+**Commit:** `24766a3`
+
 ### Próximos Pasos (Backlog)
 1. Probar flujo completo en staging
-2. Verificar que la columna `applicable` existe en base de datos
+2. Aplicar migración en base de datos de producción
 3. Considerar añadir notificaciones cuando un riesgo crítico no está mitigado
