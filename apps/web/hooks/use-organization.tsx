@@ -1,13 +1,8 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import {
-  Organization,
-  Member,
-  OrganizationLimits,
-  OrganizationUsage,
-  PLAN_LIMITS,
-} from '@/types/organization';
+import * as React from 'react';
+import type { Organization, Member, OrganizationLimits, OrganizationUsage } from '@/types/organization';
+import { PLAN_LIMITS } from '@/types/organization';
 
 interface OrganizationContextType {
   organization: Organization | null;
@@ -19,7 +14,7 @@ interface OrganizationContextType {
   refresh: () => Promise<void>;
 }
 
-const OrganizationContext = createContext<OrganizationContextType>({
+const OrganizationContext = React.createContext<OrganizationContextType>({
   organization: null,
   members: [],
   usage: null,
@@ -29,18 +24,20 @@ const OrganizationContext = createContext<OrganizationContextType>({
   refresh: async () => {},
 });
 
-export const useOrganization = () => useContext(OrganizationContext);
+export { OrganizationContext };
+
+export const useOrganization = () => React.useContext(OrganizationContext);
 
 // Hook for simple usage without provider
 export function useOrganizationSimple(organizationId?: string) {
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [usage, setUsage] = useState<OrganizationUsage | null>(null);
-  const [limits, setLimits] = useState<OrganizationLimits | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [organization, setOrganization] = React.useState<Organization | null>(null);
+  const [members, setMembers] = React.useState<Member[]>([]);
+  const [usage, setUsage] = React.useState<OrganizationUsage | null>(null);
+  const [limits, setLimits] = React.useState<OrganizationLimits | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = React.useCallback(async () => {
     if (!organizationId) {
       setLoading(false);
       return;
@@ -50,25 +47,21 @@ export function useOrganizationSimple(organizationId?: string) {
     setError(null);
 
     try {
-      // Fetch organization
       const orgRes = await fetch(`/api/v1/organizations/${organizationId}`);
       if (!orgRes.ok) throw new Error('Error al cargar organización');
       const orgData: Organization = await orgRes.json();
       setOrganization(orgData);
 
-      // Fetch members
       const membersRes = await fetch(`/api/v1/organizations/${organizationId}/members`);
       if (!membersRes.ok) throw new Error('Error al cargar miembros');
       const membersData: Member[] = await membersRes.json();
       setMembers(membersData);
 
-      // Fetch usage
       const usageRes = await fetch(`/api/v1/organizations/${organizationId}/usage`);
       if (!usageRes.ok) throw new Error('Error al cargar uso');
       const usageData: OrganizationUsage = await usageRes.json();
       setUsage(usageData);
 
-      // Set limits from plan
       setLimits(PLAN_LIMITS[orgData.plan]);
     } catch (err: any) {
       setError(err.message);
@@ -77,7 +70,7 @@ export function useOrganizationSimple(organizationId?: string) {
     }
   }, [organizationId]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
@@ -98,21 +91,20 @@ interface OrganizationProviderProps {
 }
 
 export function OrganizationProvider({ children, organizationId }: OrganizationProviderProps) {
-  const { organization, members, usage, limits, loading, error, refresh } =
-    useOrganizationSimple(organizationId);
+  const orgData = useOrganizationSimple(organizationId);
+
+  const value = {
+    organization: orgData.organization,
+    members: orgData.members,
+    usage: orgData.usage,
+    limits: orgData.limits,
+    isLoading: orgData.loading,
+    error: orgData.error,
+    refresh: orgData.refresh,
+  };
 
   return (
-    <OrganizationContext.Provider
-      value={{
-        organization,
-        members,
-        usage,
-        limits,
-        isLoading: loading,
-        error,
-        refresh,
-      }}
-    >
+    <OrganizationContext.Provider value={value}>
       {children}
     </OrganizationContext.Provider>
   );

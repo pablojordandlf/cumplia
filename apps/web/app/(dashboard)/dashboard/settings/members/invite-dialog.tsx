@@ -42,7 +42,7 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
     if (!email || !organization) return;
 
     // Check if at limit
-    if (limits?.maxUsers && usage?.users >= limits.maxUsers) {
+    if (limits?.maxUsers && usage?.users && usage.users >= limits.maxUsers) {
       toast.error('Has alcanzado el límite de usuarios para tu plan');
       return;
     }
@@ -129,7 +129,7 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
           {limits?.maxUsers && (
             <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
               💡 Tu plan permite hasta {limits.maxUsers} usuarios.
-              {usage?.users >= limits.maxUsers && (
+              {usage?.users && usage.users >= limits.maxUsers && (
                 <span className="block mt-1 font-medium">Has alcanzado el límite.</span>
               )}
             </div>

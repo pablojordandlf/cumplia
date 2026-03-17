@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { hasPermission, getCurrentContext } from '@/lib/permissions'; // Assuming these are correctly implemented
-import { Role } from '@/lib/types';
+import { hasPermission } from '@/lib/permissions';
+import { getCurrentContext } from '@/lib/server-context';
+import { MemberRole } from '@/types/organization';
 
 /**
  * GET /api/v1/organizations

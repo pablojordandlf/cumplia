@@ -1,21 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { hasPermission, getCurrentContext } from '@/lib/permissions';
-import { Role } from '@/lib/types';
+import { hasPermission } from '@/lib/permissions';
+import { getCurrentContext } from '@/lib/server-context';
+import { MemberRole } from '@/types/organization';
 
 /**
  * GET /api/v1/organizations/[id]
  * Fetches details of a specific organization.
  */
-export async function GET(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id: orgId } = await params;
   const supabase = await createClient();
-  const { user, organizationId: currentOrgId, role: currentUserRole } = await getCurrentContext(request);
+  const { user } = await getCurrentContext(request);
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  const orgId = params.id;
 
   try {
     // Fetch organization details first
@@ -43,20 +46,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       .single();
 
     if (memberError || !member) {
-      // User is not an active member of this organization
       return NextResponse.json({ error: 'Permission denied: You are not a member of this organization' }, { status: 403 });
     }
 
-    const userRoleInOrg = member.role as Role;
+    const userRoleInOrg = member.role as MemberRole;
 
-    // Check if the user has permission to view organization details
-    // Design doc implies Owner and Admin can see config, Viewer can only see members.
-    // For GET /details, let's assume Owner/Admin can see full details.
     if (!hasPermission(userRoleInOrg, 'read:organization')) {
       return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
     }
 
-    // If permissions are met, return the organization details
     return NextResponse.json({ organization });
 
   } catch (error) {
@@ -65,28 +63,24 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-// Placeholder for PUT and DELETE for organization details
-// These will be implemented in separate files following Next.js routing conventions for dynamic segments
-// e.g., /api/v1/organizations/[id]/route.ts for PUT/DELETE if needed there,
-// or separate files like update/route.ts etc. if not.
-// For now, PUT and DELETE will reside in the main organizations/route.ts for simplicity as per initial task.
-
 /**
  * PUT /api/v1/organizations/[id]
  * Update org details. Requires owner role.
  */
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id: orgId } = await params;
   const supabase = await createClient();
-  const { user, organizationId: _currentOrgId, role: _currentUserRole } = await getCurrentContext(request);
+  const { user } = await getCurrentContext(request);
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   
-  const orgId = params.id;
   const body = await request.json();
   
-  // Fetch organization details to verify ownership
   const { data: organization, error: orgError } = await supabase
     .from('organizations')
     .select('id, owner_id')
@@ -97,7 +91,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
   }
 
-  // Owner-only check for updating organization details
   if (organization.owner_id !== user.id) {
     return NextResponse.json({ error: 'Permission denied: Only the owner can update the organization.' }, { status: 403 });
   }
@@ -116,19 +109,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 
   if (settings !== undefined) {
-    updateData.settings = settings; // Assuming settings is a valid JSONB object
+    updateData.settings = settings;
   }
 
   if (Object.keys(updateData).length === 0) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
   }
 
-  // Perform the update, ensuring we still only allow owner to update
   const { data: updatedOrg, error: updateError } = await supabase
     .from('organizations')
     .update(updateData)
     .eq('id', orgId)
-    .eq('owner_id', user.id) // Double-check ownership
+    .eq('owner_id', user.id)
     .select()
     .single();
     
@@ -144,17 +136,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
  * DELETE /api/v1/organizations/[id]
  * Deletes an organization. Requires owner role.
  */
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id: orgId } = await params;
   const supabase = await createClient();
-  const { user, organizationId: _currentOrgId, role: _currentUserRole } = await getCurrentContext(request);
+  const { user } = await getCurrentContext(request);
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const orgId = params.id;
-
-  // Fetch organization details to verify ownership
   const { data: organization, error: orgError } = await supabase
     .from('organizations')
     .select('owner_id')
@@ -165,7 +158,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
   }
 
-  // Owner-only check for deleting organization
   if (organization.owner_id !== user.id) {
     return NextResponse.json(
       { error: 'Permission denied: Only the owner can delete the organization.' },
@@ -173,7 +165,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     );
   }
 
-  // Perform the deletion via Supabase (cascade delete should handle members)
   const { error: deleteError } = await supabase.from('organizations').delete().eq('id', orgId);
 
   if (deleteError) {

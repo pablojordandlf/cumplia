@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Users, AlertCircle } from 'lucide-react';
 
 export function UsageIndicator() {
-  const { organization, limits, usage, loading } = useOrganization();
+  const { organization, limits, usage, isLoading: loading } = useOrganization();
 
   if (loading || !limits || !usage) {
     return (

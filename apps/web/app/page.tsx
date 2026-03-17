@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -24,14 +26,6 @@ import { Header } from '@/components/landing-header';
 import { Footer } from '@/components/landing-footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-
-export const metadata = {
-  title: 'CumplIA - Cumplimiento del AI Act para Empresas',
-  description: 'Plataforma SaaS que ayuda a empresas a cumplir con el Reglamento de IA de la UE (AI Act). Evaluación de riesgos, documentación y gestión de sistemas de IA.',
-  keywords: 'AI Act, cumplimiento IA, regulación inteligencia artificial, IA responsable, GDPR, sistemas de IA',
-};
-
-'use client';
 
 function HeroSection() {
   const [currentWord, setCurrentWord] = useState(0);
@@ -187,16 +181,300 @@ function HeroSection() {
     </section>
   );
 }
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">24h</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Tiempo medio</div>
-            </div>
-          </motion.div
+
+function WhoAppliesSection() {
+  return (
+    <section id="who-applies" className="py-20 bg-white dark:bg-gray-950">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            ¿A quién aplica el AI Act?
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            El Reglamento de IA de la UE establece obligaciones según el nivel de riesgo de tu sistema
           </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {[
+            {
+              icon: AlertTriangle,
+              title: 'Riesgo Inaceptable',
+              color: 'text-red-600 bg-red-50 dark:bg-red-950',
+              desc: 'Sistemas prohibidos como manipulación subliminal o puntuación social.',
+              examples: 'Sistemas de vigilancia masiva, manipulación conductual'
+            },
+            {
+              icon: Shield,
+              title: 'Alto Riesgo',
+              color: 'text-orange-600 bg-orange-50 dark:bg-orange-950',
+              desc: 'Sistemas críticos que requieren cumplimiento estricto y evaluación de riesgos.',
+              examples: 'Salud, educación, empleo, seguridad, justicia'
+            },
+            {
+              icon: CheckCircle,
+              title: 'Riesgo Limitado',
+              color: 'text-blue-600 bg-blue-50 dark:bg-blue-950',
+              desc: 'Sistemas con transparencia obligatoria pero menos requisitos.',
+              examples: 'Chatbots, generación de contenido (deepfakes)'
+            },
+            {
+              icon: Star,
+              title: 'Riesgo Mínimo',
+              color: 'text-green-600 bg-green-50 dark:bg-green-950',
+              desc: 'Sistemas de bajo riesgo con cumplimiento voluntario recomendado.',
+              examples: 'Spam filters, recomendaciones básicas'
+            }
+          ].map((item, index) => (
+            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <div className={`w-14 h-14 rounded-xl ${item.color} flex items-center justify-center mb-4`}>
+                  <item.icon className="w-7 h-7" />
+                </div>
+                <CardTitle className="text-xl">{item.title}</CardTitle>
+                <CardDescription>{item.desc}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <strong>Ejemplos:</strong> {item.examples}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-function WhoAppliesSection() {
+function PainPointsSection() {
+  return (
+    <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            El cumplimiento no debería ser un dolor de cabeza
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Muchas empresas luchan con el AI Act. Estos son los problemas más comunes:
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {[
+            {
+              icon: AlertCircle,
+              title: 'Incertidumbre Legal',
+              desc: 'El reglamento es complejo y las sanciones pueden llegar al 7% de facturación global.'
+            },
+            {
+              icon: TrendingDown,
+              title: 'Pérdida de Tiempo',
+              desc: 'Evaluar manualmente cada sistema de IA consume semanas de trabajo de expertos.'
+            },
+            {
+              icon: FileText,
+              title: 'Documentación Excesiva',
+              desc: 'Se requieren decenas de documentos técnicos y de cumplimiento diferentes.'
+            }
+          ].map((item, index) => (
+            <div key={index} className="text-center">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <item.icon className="w-8 h-8 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {item.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeaturesSection() {
+  return (
+    <section id="features" className="py-20 bg-white dark:bg-gray-950">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Todo lo que necesitas para cumplir
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            CumplIA te guía paso a paso en todo el proceso de cumplimiento
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {[
+            {
+              icon: Bot,
+              title: 'Evaluación de Riesgos',
+              desc: 'Clasifica automáticamente tus sistemas de IA según el nivel de riesgo del AI Act.'
+            },
+            {
+              icon: FileText,
+              title: 'FRIA Automatizada',
+              desc: 'Genera Evaluaciones de Impacto en Riesgos de IA adaptadas a cada sistema.'
+            },
+            {
+              icon: Shield,
+              title: 'Registro de Cumplimiento',
+              desc: 'Mantén un registro actualizado de todas tus obligaciones y evidencias.'
+            },
+            {
+              icon: BookOpen,
+              title: 'Biblioteca de Plantillas',
+              desc: 'Accede a plantillas predefinidas de documentación requerida por el AI Act.'
+            },
+            {
+              icon: Zap,
+              title: 'Alertas Inteligentes',
+              desc: 'Recibe notificaciones sobre cambios en la regulación y fechas importantes.'
+            },
+            {
+              icon: Globe,
+              title: 'Multi-idioma',
+              desc: 'Plataforma disponible en español, inglés y otros idiomas de la UE.'
+            }
+          ].map((feature, index) => (
+            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+              <CardHeader>
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
+                  <feature.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle className="text-xl">{feature.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-300">{feature.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PricingSection() {
+  return (
+    <section id="pricing" className="py-20 bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Planes para Empresas
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Precios transparentes basados en el número de sistemas de IA que gestionas
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {[
+            {
+              name: 'Starter',
+              price: '0€',
+              period: '/mes',
+              description: 'Para empresas que quieren evaluar un único sistema',
+              features: [
+                '1 sistema de IA',
+                'Clasificación de riesgo',
+                'Guía básica de cumplimiento',
+                'Soporte por email'
+              ],
+              cta: 'Empezar Gratis',
+              href: '/register',
+              highlight: false
+            },
+            {
+              name: 'Professional',
+              price: '49€',
+              period: '/mes',
+              description: 'Para equipos con varios sistemas de IA',
+              features: [
+                '15 sistemas de IA',
+                '3 usuarios',
+                'FRIA automatizada',
+                'Gestión de riesgos',
+                'Registro de evidencias',
+                'Exportación de documentos',
+                'Soporte prioritario'
+              ],
+              cta: 'Prueba Gratis',
+              href: '/register?plan=professional',
+              highlight: true
+            },
+            {
+              name: 'Business',
+              price: '299€',
+              period: '/mes',
+              description: 'Para organizaciones con múltiples departamentos',
+              features: [
+                'Sistemas de IA ilimitados',
+                '10 usuarios',
+                'Asistente de IA',
+                'Gestión avanzada de riesgos',
+                'Plantillas personalizadas',
+                'Múltiples departamentos',
+                'Soporte dedicado'
+              ],
+              cta: 'Contactar Ventas',
+              href: '/contact?plan=business',
+              highlight: false
+            }
+          ].map((plan, index) => (
+            <Card 
+              key={index} 
+              className={`border-0 shadow-lg ${plan.highlight ? 'ring-2 ring-blue-500 shadow-xl' : ''}`}
+            >
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">{plan.price}</span>
+                  <span className="text-gray-500">{plan.period}</span>
+                </div>
+                <CardDescription className="mt-2">{plan.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {plan.features.map((feature, fIndex) => (
+                    <li key={fIndex} className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-600 dark:text-gray-300">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href={plan.href} className="block mt-8">
+                  <Button 
+                    className={`w-full ${plan.highlight ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                    variant={plan.highlight ? 'default' : 'outline'}
+                  >
+                    {plan.cta}
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <main className="min-h-screen">
+      <Header />
+      <HeroSection />
+      <WhoAppliesSection />
+      <PainPointsSection />
+      <FeaturesSection />
+      <PricingSection />
+      <Footer />
+    </main>
+  );
+}

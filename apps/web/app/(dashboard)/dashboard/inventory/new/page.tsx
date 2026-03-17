@@ -31,7 +31,7 @@ import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Squ
 import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 import { LimitGate } from '@/components/permission-gate';
-import { useLimit } from '@/hooks/use-permissions';
+import { useLimit } from '@/hooks/use-limit';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 

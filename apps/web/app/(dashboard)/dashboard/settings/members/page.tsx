@@ -43,7 +43,7 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 
 export default function MembersPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
-  const { organization, members, loading, refresh } = useOrganization();
+  const { organization, members, isLoading: loading, refresh } = useOrganization();
   const { can } = usePermissions();
 
   const activeMembers = members.filter((m) => m.status === 'active');
