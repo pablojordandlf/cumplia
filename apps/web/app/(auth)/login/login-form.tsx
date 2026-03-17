@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Building2, Loader2 } from 'lucide-react';
+import { SSODomainCheckResult } from '@/types/sso';
 
 // URL base para redirecciones
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
@@ -18,7 +20,81 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ssoResult, setSsoResult] = useState<SSODomainCheckResult | null>(null);
+  const [isCheckingDomain, setIsCheckingDomain] = useState(false);
   const router = useRouter();
+
+  // Check for SSO provider by domain
+  const checkDomainSSO = useCallback(async (emailValue: string) => {
+    if (!emailValue || !emailValue.includes('@')) {
+      setSsoResult(null);
+      return;
+    }
+
+    const domain = emailValue.split('@')[1];
+    if (!domain || domain.length < 3) {
+      setSsoResult(null);
+      return;
+    }
+
+    setIsCheckingDomain(true);
+    try {
+      const response = await fetch(`/api/v1/auth/check-domain?domain=${encodeURIComponent(domain)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSsoResult(data);
+      } else {
+        setSsoResult(null);
+      }
+    } catch {
+      setSsoResult(null);
+    } finally {
+      setIsCheckingDomain(false);
+    }
+  }, []);
+
+  // Debounced domain check
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (email.includes('@')) {
+        checkDomainSSO(email);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [email, checkDomainSSO]);
+
+  // SSO Login
+  const handleSSOLogin = async () => {
+    if (!email || !ssoResult?.hasSSO) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/v1/auth/sso/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Error al iniciar sesión con SSO');
+        setIsLoading(false);
+        return;
+      }
+
+      // Redirect to IdP
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error en la autenticación SSO');
+      setIsLoading(false);
+    }
+  };
 
   // Login con email/password
   const handleLogin = async (e: React.FormEvent) => {
@@ -113,35 +189,85 @@ export default function LoginForm() {
           </div>
         </div>
 
+        {/* SSO Button (shown when domain has SSO configured) */}
+        {ssoResult?.hasSSO && ssoResult.provider && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+            <Button 
+              variant="outline" 
+              onClick={handleSSOLogin}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Building2 className="h-4 w-4" />
+              )}
+              Continuar con {ssoResult.provider.name}
+            </Button>
+            <p className="text-xs text-center text-muted-foreground mt-2">
+              Tu empresa usa autenticación SSO
+            </p>
+          </div>
+        )}
+
         {/* Email/Password Form */}
         <form onSubmit={handleLogin} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="tu@empresa.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@empresa.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+              />
+              {isCheckingDomain && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Entrando...' : 'Iniciar Sesión'}
-          </Button>
+          
+          {/* Only show password field if no SSO detected */}
+          {(!ssoResult?.hasSSO) && (
+            <div className="grid gap-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+          )}
+          
+          {/* Show login button only if no SSO or for non-SSO domains */}
+          {(!ssoResult?.hasSSO) && (
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Entrando...' : 'Iniciar Sesión'}
+            </Button>
+          )}
+          
+          {/* When SSO is detected, show alternative login option */}
+          {ssoResult?.hasSSO && (
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setSsoResult(null)}
+                className="text-sm text-muted-foreground underline hover:text-primary"
+              >
+                Usar email y contraseña en su lugar
+              </button>
+            </div>
+          )}
         </form>
 
         {error && (
