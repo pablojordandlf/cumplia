@@ -47,16 +47,17 @@ export function SubscriptionStatus() {
             Professional
           </Badge>
         );
-      case "essential":
+      case "business":
         return (
           <Badge className="bg-blue-500 hover:bg-blue-600">
-            <Sparkles className="h-3 w-3 mr-1" />
-            Essential
+            <Building2 className="h-3 w-3 mr-1" />
+            Business
           </Badge>
         );
       case "starter":
         return (
           <Badge variant="secondary">
+            <Sparkles className="h-3 w-3 mr-1" />
             Starter
           </Badge>
         );
@@ -178,17 +179,17 @@ export function SubscriptionStatus() {
             <Link href="/pricing" className="w-full">
               <Button className="w-full">
                 <Sparkles className="h-4 w-4 mr-2" />
-                Actualizar a Essential
-              </Button>
-            </Link>
-          ) : plan.name === "essential" ? (
-            <Link href="/pricing?plan=professional" className="w-full">
-              <Button variant="outline" className="w-full">
-                <Building2 className="h-4 w-4 mr-2" />
-                Ver Professional
+                Actualizar a Professional
               </Button>
             </Link>
           ) : plan.name === "professional" ? (
+            <Link href="/pricing?plan=business" className="w-full">
+              <Button variant="outline" className="w-full">
+                <Building2 className="h-4 w-4 mr-2" />
+                Ver Business
+              </Button>
+            </Link>
+          ) : plan.name === "business" ? (
             <Link href="/pricing?plan=enterprise" className="w-full">
               <Button variant="outline" className="w-full">
                 <Crown className="h-4 w-4 mr-2" />

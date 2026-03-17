@@ -32,7 +32,7 @@ export interface PermissionChecks {
   hasFeature: (feature: keyof PlanFeatures) => boolean;
   getRemaining: (type: "useCases" | "users") => number;
   getPercentage: (type: "useCases" | "users") => number;
-  isPlan: (planName: "starter" | "essential" | "professional" | "enterprise") => boolean;
+  isPlan: (planName: "starter" | "professional" | "business" | "enterprise") => boolean;
   isEssentialOrHigher: boolean;
   isProfessionalOrHigher: boolean;
   isEnterprise: boolean;
@@ -61,7 +61,7 @@ export function usePermissions(): {
         setPermissions({
           plan: starterPlan,
           limits: {
-            useCases: starterPlan.features.use_cases,
+            useCases: starterPlan.features.ai_systems,
             users: starterPlan.features.users,
           },
           features: {
@@ -98,12 +98,12 @@ export function usePermissions(): {
         const planMapping: Record<string, string> = {
           'free': 'starter',
           'starter': 'starter',
-          'pro': 'essential',
-          'essential': 'essential',
-          'business': 'professional',
+          'pro': 'professional',
+          'essential': 'professional',
+          'business': 'business',
           'professional': 'professional',
           'enterprise': 'enterprise',
-          'agency': 'professional',
+          'agency': 'business',
         };
         planName = planMapping[planData.plan] || planData.plan || "starter";
       }
@@ -121,7 +121,7 @@ export function usePermissions(): {
       setPermissions({
         plan,
         limits: {
-          useCases: plan.features.use_cases,
+          useCases: plan.features.ai_systems,
           users: plan.features.users,
         },
         features: {
@@ -143,7 +143,7 @@ export function usePermissions(): {
       setPermissions({
         plan: starterPlan,
         limits: {
-          useCases: starterPlan.features.use_cases,
+          useCases: starterPlan.features.ai_systems,
           users: starterPlan.features.users,
         },
         features: {
@@ -191,9 +191,9 @@ export function usePermissions(): {
           return Math.min((used / limit) * 100, 100);
         },
         isPlan: (planName) => permissions.plan.name === planName,
-        isEssentialOrHigher: ["essential", "professional"].includes(permissions.plan.name),
-        isProfessionalOrHigher: permissions.plan.name === "professional",
-        isEnterprise: false, // Enterprise deprecated, mapped to professional
+        isEssentialOrHigher: ["professional", "business", "enterprise"].includes(permissions.plan.name),
+        isProfessionalOrHigher: ["professional", "business", "enterprise"].includes(permissions.plan.name),
+        isEnterprise: permissions.plan.name === "enterprise",
       }
     : null;
 

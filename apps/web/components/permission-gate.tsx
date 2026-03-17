@@ -58,15 +58,15 @@ interface PlanGateProps {
 }
 
 export function PlanGate({ children, minPlan, fallback }: PlanGateProps) {
-  const planHierarchy = ["starter", "essential", "professional", "enterprise"];
-  
+  const planHierarchy = ["starter", "professional", "business", "enterprise"];
+
   return (
     <PermissionGate
       check={(checks) => {
         const currentIndex = planHierarchy.indexOf(
           checks.isPlan("enterprise") ? "enterprise" :
-          checks.isPlan("professional") ? "professional" :
-          checks.isPlan("essential") ? "essential" : "starter"
+          checks.isPlan("business") ? "business" :
+          checks.isPlan("professional") ? "professional" : "starter"
         );
         const minIndex = planHierarchy.indexOf(minPlan);
         return currentIndex >= minIndex;
