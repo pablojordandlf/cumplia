@@ -36,6 +36,8 @@ import {
   Brain
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { RiskManagementTab } from '@/components/risks/risk-management-tab';
+import { AI_ACT_RISK_CONFIG } from '@/types/risk-management';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -622,6 +624,18 @@ export default function UseCaseDetailPage() {
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="summary" className="text-xs sm:text-sm">Resumen</TabsTrigger>
             <TabsTrigger value="classification" className="text-xs sm:text-sm">Clasificación</TabsTrigger>
+            <TabsTrigger value="risks" className="text-xs sm:text-sm">
+              <span className="flex items-center gap-1">
+                <ShieldAlert className="h-3 w-3" />
+                Riesgos
+                {useCase && (() => {
+                  const config = AI_ACT_RISK_CONFIG[useCase.ai_act_level];
+                  if (config?.availability === 'required') return <span className="text-red-500">*</span>;
+                  if (config?.availability === 'recommended') return <span className="text-yellow-500">•</span>;
+                  return null;
+                })()}
+              </span>
+            </TabsTrigger>
             <TabsTrigger value="settings" className="text-xs sm:text-sm">Estado</TabsTrigger>
             <TabsTrigger value="additional" className="text-xs sm:text-sm">Info. Adicional</TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm">Historial</TabsTrigger>
@@ -944,6 +958,41 @@ export default function UseCaseDetailPage() {
                       <Button className="mt-4">Iniciar Clasificación</Button>
                     </Link>
                   </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="risks">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5" />
+                  Gestión de Riesgos
+                </CardTitle>
+                <CardDescription>
+                  {useCase && AI_ACT_RISK_CONFIG[useCase.ai_act_level] ? (
+                    <>
+                      Nivel AI Act: <strong>{AI_ACT_RISK_CONFIG[useCase.ai_act_level].label}</strong>
+                      {' — '}
+                      {AI_ACT_RISK_CONFIG[useCase.ai_act_level].availability === 'required' 
+                        ? 'Gestión de riesgos obligatoria según Artículo 9'
+                        : AI_ACT_RISK_CONFIG[useCase.ai_act_level].availability === 'recommended'
+                        ? 'Gestión de riesgos recomendada'
+                        : 'Gestión de riesgos opcional'
+                      }
+                    </>
+                  ) : (
+                    'Gestión de riesgos según nivel de clasificación AI Act'
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {useCase && (
+                  <RiskManagementTab 
+                    aiSystemId={useCase.id} 
+                    aiActLevel={useCase.ai_act_level} 
+                  />
                 )}
               </CardContent>
             </Card>
