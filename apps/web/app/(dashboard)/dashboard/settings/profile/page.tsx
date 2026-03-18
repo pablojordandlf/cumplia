@@ -161,16 +161,17 @@ export default function ProfilePage() {
         .from('organization_members')
         .select('id, organization_id, role, status, organizations(name, plan)')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (memberError) {
         console.error('Error fetching membership:', memberError);
-        toast.error('Error al cargar tu rol: ' + memberError.message);
+        toast.error('Error RLS al cargar tu rol: ' + memberError.message);
       } else if (memberData) {
         console.log('Membership loaded:', memberData);
         setMembership(memberData as unknown as OrganizationMember);
       } else {
         console.warn('No membership found for user:', user.id);
+        toast.warning('No se encontró tu membresía en ninguna organización');
       }
 
     } catch (error) {
