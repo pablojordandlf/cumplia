@@ -21,11 +21,10 @@ import {
 } from '@/components/ui/table';
 import { InviteDialog } from './invite-dialog';
 import { UsageIndicator } from './usage-indicator';
-import { useOrganization } from '@/hooks/use-organization';
-import { usePermissions } from '@/hooks/use-permissions';
 import { Member, MemberRole } from '@/types/organization';
 import { MoreHorizontal, Mail, UserX, Shield, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 const ROLE_COLORS: Record<MemberRole, string> = {
   owner: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -43,16 +42,81 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 
 export default function MembersPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
-  const { organization, members, isLoading: loading, refresh } = useOrganization();
-  const { can } = usePermissions();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<MemberRole | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    try {
+      setLoading(true);
+      
+      // Obtener usuario actual
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // Obtener organización del usuario
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('organization_id, role')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (memberError || !memberData) {
+        setLoading(false);
+        return;
+      }
+
+      setOrganizationId(memberData.organization_id);
+      setCurrentUserRole(memberData.role);
+
+      // Obtener miembros de la organización
+      const { data: membersData, error: membersError } = await supabase
+        .from('organization_members')
+        .select('*')
+        .eq('organization_id', memberData.organization_id);
+
+      if (membersError) {
+        toast.error('Error al cargar miembros');
+      } else {
+        setMembers(membersData || []);
+      }
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      toast.error('Error al cargar datos');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const activeMembers = members.filter((m) => m.status === 'active');
   const pendingInvites = members.filter((m) => m.status === 'pending');
 
+  const can = (permission: string): boolean => {
+    if (!currentUserRole) return false;
+    const rolePerms: Record<MemberRole, string[]> = {
+      owner: ['invite:member', 'update:member:role', 'remove:member'],
+      admin: ['invite:member', 'update:member:role', 'remove:member'],
+      editor: ['invite:member'],
+      viewer: [],
+    };
+    return rolePerms[currentUserRole]?.includes(permission) || false;
+  };
+
   const handleUpdateRole = async (memberId: string, newRole: MemberRole) => {
+    if (!organizationId) return;
+    
     try {
       const response = await fetch(
-        `/api/v1/organizations/${organization?.id}/members/${memberId}`,
+        `/api/v1/organizations/${organizationId}/members/${memberId}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -63,18 +127,19 @@ export default function MembersPage() {
       if (!response.ok) throw new Error('Error al actualizar rol');
 
       toast.success('Rol actualizado correctamente');
-      refresh();
+      fetchData();
     } catch (error) {
       toast.error('Error al actualizar rol');
     }
   };
 
   const handleRemoveMember = async (memberId: string) => {
+    if (!organizationId) return;
     if (!confirm('¿Estás seguro de que deseas eliminar a este miembro?')) return;
 
     try {
       const response = await fetch(
-        `/api/v1/organizations/${organization?.id}/members/${memberId}`,
+        `/api/v1/organizations/${organizationId}/members/${memberId}`,
         {
           method: 'DELETE',
         }
@@ -83,16 +148,18 @@ export default function MembersPage() {
       if (!response.ok) throw new Error('Error al eliminar miembro');
 
       toast.success('Miembro eliminado correctamente');
-      refresh();
+      fetchData();
     } catch (error) {
       toast.error('Error al eliminar miembro');
     }
   };
 
   const handleResendInvite = async (memberId: string) => {
+    if (!organizationId) return;
+    
     try {
       const response = await fetch(
-        `/api/v1/organizations/${organization?.id}/invites/resend`,
+        `/api/v1/organizations/${organizationId}/invites/resend`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -313,7 +380,7 @@ export default function MembersPage() {
         </Card>
       )}
 
-      <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} onSuccess={refresh} />
+      <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} onSuccess={fetchData} />
     </div>
   );
 }

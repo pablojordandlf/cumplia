@@ -45,9 +45,8 @@ const settingsSections = [
     title: 'Organización',
     description: 'Configura el nombre, logo y detalles de tu organización.',
     icon: Building,
-    href: '#',
+    href: '/dashboard/settings/organization',
     color: 'bg-green-500',
-    comingSoon: true,
   },
   {
     title: 'Notificaciones',

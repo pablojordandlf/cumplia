@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -8,17 +8,56 @@ import { SSOProviderList } from '@/components/sso/sso-provider-list';
 import { SSOProviderSetup } from '@/components/sso/sso-provider-setup';
 import { Plus, Shield, AlertTriangle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useOrganization } from '@/hooks/use-organization';
-import { usePermissions } from '@/hooks/use-permissions';
+import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
+import { MemberRole } from '@/types/organization';
 
 export default function SSOSettingsPage() {
-  const { organization, isLoading: orgLoading } = useOrganization();
-  const { role, isLoading: permLoading } = usePermissions();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<MemberRole | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const isAdmin = role === 'owner' || role === 'admin';
-  const isLoading = orgLoading || permLoading;
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    try {
+      setIsLoading(true);
+      
+      // Obtener usuario actual
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Obtener organización del usuario
+      const { data: memberData, error: memberError } = await supabase
+        .from('organization_members')
+        .select('organization_id, role')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (memberError || !memberData) {
+        setIsLoading(false);
+        return;
+      }
+
+      setOrganizationId(memberData.organization_id);
+      setCurrentUserRole(memberData.role);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Error al cargar datos');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const isAdmin = currentUserRole === 'owner' || currentUserRole === 'admin';
 
   if (isLoading) {
     return (
@@ -28,7 +67,7 @@ export default function SSOSettingsPage() {
     );
   }
 
-  if (!organization) {
+  if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">No se encontró la organización</p>
@@ -51,7 +90,7 @@ export default function SSOSettingsPage() {
 
   const handleSuccess = () => {
     setIsDialogOpen(false);
-    setRefreshKey(prev => prev + 1); // Force refresh of provider list
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -94,7 +133,7 @@ export default function SSOSettingsPage() {
                 <DialogTitle>Nuevo Proveedor SSO</DialogTitle>
               </DialogHeader>
               <SSOProviderSetup
-                organizationId={organization.id}
+                organizationId={organizationId}
                 onSuccess={handleSuccess}
                 onCancel={() => setIsDialogOpen(false)}
               />
@@ -104,7 +143,7 @@ export default function SSOSettingsPage() {
         <CardContent>
           <SSOProviderList 
             key={refreshKey}
-            organizationId={organization.id} 
+            organizationId={organizationId} 
           />
         </CardContent>
       </Card>
@@ -120,7 +159,7 @@ export default function SSOSettingsPage() {
           <div>
             <p className="text-sm font-medium">Entity ID (Issuer):</p>
             <code className="text-sm bg-muted px-2 py-1 rounded block mt-1">
-              {`https://auth.supabase.co/sso/saml/${organization.id}`}
+              {`https://auth.supabase.co/sso/saml/${organizationId}`}
             </code>
           </div>
           <div>

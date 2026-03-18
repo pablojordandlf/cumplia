@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,11 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useOrganization } from '@/hooks/use-organization';
-import { usePermissions } from '@/hooks/use-permissions';
 import { MemberRole } from '@/types/organization';
 import { toast } from 'sonner';
 import { Mail, UserPlus, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface InviteDialogProps {
   open: boolean;
@@ -33,16 +32,55 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<MemberRole>('viewer');
   const [loading, setLoading] = useState(false);
-  const { organization, limits, usage } = useOrganization();
-  const { can } = usePermissions();
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<MemberRole | null>(null);
+  const [maxUsers, setMaxUsers] = useState<number | null>(null);
+  const [currentUsers, setCurrentUsers] = useState<number>(0);
+
+  useEffect(() => {
+    if (open) {
+      fetchOrgData();
+    }
+  }, [open]);
+
+  async function fetchOrgData() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: memberData } = await supabase
+        .from('organization_members')
+        .select('organization_id, role, organizations(max_users)')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (memberData) {
+        setOrganizationId(memberData.organization_id);
+        setCurrentUserRole(memberData.role);
+        setMaxUsers(memberData.organizations?.max_users || null);
+
+        // Contar usuarios actuales
+        const { count } = await supabase
+          .from('organization_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', memberData.organization_id)
+          .eq('status', 'active');
+        
+        setCurrentUsers(count || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching org data:', error);
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !organization) return;
+    if (!email || !organizationId) return;
 
     // Check if at limit
-    if (limits?.maxUsers && usage?.users && usage.users >= limits.maxUsers) {
+    if (maxUsers && currentUsers >= maxUsers) {
       toast.error('Has alcanzado el límite de usuarios para tu plan');
       return;
     }
@@ -50,7 +88,7 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/v1/organizations/${organization.id}/members/invite`, {
+      const response = await fetch(`/api/v1/organizations/${organizationId}/members/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, role }),
@@ -76,9 +114,8 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
   // Check if user can assign this role
   const canAssignRole = (roleToAssign: MemberRole): boolean => {
     const roleHierarchy = { owner: 4, admin: 3, editor: 2, viewer: 1 };
-    const userRole = organization?.currentUserRole;
-    if (!userRole) return false;
-    return roleHierarchy[userRole] > roleHierarchy[roleToAssign];
+    if (!currentUserRole) return false;
+    return roleHierarchy[currentUserRole] > roleHierarchy[roleToAssign];
   };
 
   return (
@@ -126,10 +163,10 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
             </p>
           </div>
 
-          {limits?.maxUsers && (
+          {maxUsers && (
             <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
-              💡 Tu plan permite hasta {limits.maxUsers} usuarios.
-              {usage?.users && usage.users >= limits.maxUsers && (
+              💡 Tu plan permite hasta {maxUsers} usuarios.
+              {currentUsers >= maxUsers && (
                 <span className="block mt-1 font-medium">Has alcanzado el límite.</span>
               )}
             </div>
