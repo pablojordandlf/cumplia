@@ -58,7 +58,9 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
       if (memberData) {
         setOrganizationId(memberData.organization_id);
         setCurrentUserRole(memberData.role);
-        setMaxUsers(memberData.organizations?.max_users || null);
+        // organizations is returned as an array from embedded query
+        const orgArray = memberData.organizations as any[];
+        setMaxUsers(orgArray?.[0]?.max_users || null);
 
         // Contar usuarios actuales
         const { count } = await supabase

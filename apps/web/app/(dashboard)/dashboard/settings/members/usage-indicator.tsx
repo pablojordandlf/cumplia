@@ -33,7 +33,9 @@ export function UsageIndicator() {
         .single();
 
       if (memberData) {
-        setTotal(memberData.organizations?.max_users || null);
+        // organizations is returned as an array from embedded query
+        const orgArray = memberData.organizations as any[];
+        setTotal(orgArray?.[0]?.max_users || null);
 
         const { count } = await supabase
           .from('organization_members')
