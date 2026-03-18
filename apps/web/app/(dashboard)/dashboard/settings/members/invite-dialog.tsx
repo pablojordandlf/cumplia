@@ -57,21 +57,24 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
         .eq('id', organizationId)
         .single();
 
+      const org = orgData as any;
+      
       if (orgError) {
         console.error('Error fetching org data:', orgError);
         // Fallback: buscar max_users en tabla plans
+        const planName = org?.plan_name || org?.plan || 'free';
         const { data: planData } = await supabase
           .from('plans')
           .select('limits')
-          .eq('name', orgData?.plan_name || orgData?.plan || 'free')
+          .eq('name', planName)
           .single();
         
         const limits = planData?.limits as any;
-        setMaxUsers(limits?.users || limits?.max_users || orgData?.seats_total || 1);
+        setMaxUsers(limits?.users || limits?.max_users || org?.seats_total || 1);
       } else {
         // Intentar obtener max_users de varias fuentes
-        const limits = orgData?.subscriptions?.[0]?.plans as any;
-        const seatsTotal = orgData?.seats_total;
+        const limits = org?.subscriptions?.[0]?.plans as any;
+        const seatsTotal = org?.seats_total;
         const planLimits = limits?.max_users || limits?.seats_limit;
         
         setMaxUsers(planLimits || seatsTotal || 1);

@@ -22,7 +22,7 @@ import {
 import { InviteDialog } from './invite-dialog';
 import { UsageIndicator } from './usage-indicator';
 import { Member, MemberRole } from '@/types/organization';
-import { MoreHorizontal, Mail, UserX, Shield, User, Loader2, AlertCircle } from 'lucide-react';
+import { MoreHorizontal, Mail, UserX, Shield, User, Loader2, AlertCircle, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { Alert, AlertDescription } from '@/components/ui/alert';
