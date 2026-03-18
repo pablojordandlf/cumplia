@@ -156,10 +156,10 @@ export default function ProfilePage() {
       setProfile(userProfile);
       setFormData({ full_name: userProfile.full_name || '' });
 
-      // Obtener membresía en organización
+      // Obtener membresía en organización (sin JOIN para simplificar)
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('id, organization_id, role, status, organizations(name, plan)')
+        .select('id, organization_id, role, status')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -167,11 +167,24 @@ export default function ProfilePage() {
         console.error('Error fetching membership:', memberError);
         toast.error('Error RLS al cargar tu rol: ' + memberError.message);
       } else if (memberData) {
-        console.log('Membership loaded:', memberData);
-        setMembership(memberData as unknown as OrganizationMember);
+        console.log('Membership loaded (basic):', memberData);
+        
+        // Ahora obtener la info de la organización por separado
+        const { data: orgData } = await supabase
+          .from('organizations')
+          .select('name, plan')
+          .eq('id', memberData.organization_id)
+          .maybeSingle();
+        
+        const fullMembership = {
+          ...memberData,
+          organizations: orgData ? [orgData] : []
+        };
+        
+        setMembership(fullMembership as OrganizationMember);
       } else {
         console.warn('No membership found for user:', user.id);
-        toast.warning('No se encontró tu membresía en ninguna organización');
+        toast.warning('No se encontró tu membresía. Verifica que las políticas RLS estén aplicadas.');
       }
 
     } catch (error) {
