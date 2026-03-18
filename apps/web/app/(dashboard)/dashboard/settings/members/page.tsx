@@ -22,9 +22,10 @@ import {
 import { InviteDialog } from './invite-dialog';
 import { UsageIndicator } from './usage-indicator';
 import { Member, MemberRole } from '@/types/organization';
-import { MoreHorizontal, Mail, UserX, Shield, User } from 'lucide-react';
+import { MoreHorizontal, Mail, UserX, Shield, User, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const ROLE_COLORS: Record<MemberRole, string> = {
   owner: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -40,12 +41,31 @@ const ROLE_LABELS: Record<MemberRole, string> = {
   viewer: 'Visualizador',
 };
 
+interface OrganizationMember {
+  id: string;
+  organization_id: string;
+  user_id: string | null;
+  email: string;
+  name: string | null;
+  role: MemberRole;
+  status: 'active' | 'pending' | 'invited';
+  invited_by: string | null;
+  invite_expires_at: string | null;
+  created_at: string;
+  profiles?: {
+    full_name: string | null;
+  } | null;
+}
+
 export default function MembersPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<MemberRole | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pendingInvites, setPendingInvites] = useState<OrganizationMember[]>([]);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -53,167 +73,204 @@ export default function MembersPage() {
 
   async function fetchData() {
     try {
-      setLoading(true);
+      setIsLoading(true);
+      setError(null);
       
       // Obtener usuario actual
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
-      // Obtener organización del usuario
+      // Obtener organización del usuario con plan
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('organization_id, role')
+        .select('organization_id, role, organizations!inner(id, plan, plan_name, max_users)')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .single();
 
       if (memberError || !memberData) {
-        setLoading(false);
+        console.error('Error getting member data:', memberError);
+        setError('No se pudo acceder a la información de tu organización. Verifica que tienes acceso activo.');
+        setIsLoading(false);
         return;
       }
 
       setOrganizationId(memberData.organization_id);
       setCurrentUserRole(memberData.role);
 
-      // Obtener miembros de la organización
+      // Obtener miembros activos con sus perfiles
       const { data: membersData, error: membersError } = await supabase
         .from('organization_members')
-        .select('*')
-        .eq('organization_id', memberData.organization_id);
+        .select(`
+          id,
+          organization_id,
+          user_id,
+          email,
+          name,
+          role,
+          status,
+          invited_by,
+          invite_expires_at,
+          created_at,
+          profiles(full_name)
+        `)
+        .eq('organization_id', memberData.organization_id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: true });
 
       if (membersError) {
-        toast.error('Error al cargar miembros');
-      } else {
-        setMembers(membersData || []);
+        console.error('Error fetching members:', membersError);
+        setError('Error al cargar los miembros del equipo.');
+        setIsLoading(false);
+        return;
       }
+
+      // Obtener invitaciones pendientes
+      const { data: invitesData, error: invitesError } = await supabase
+        .from('organization_members')
+        .select(`
+          id,
+          organization_id,
+          user_id,
+          email,
+          name,
+          role,
+          status,
+          invited_by,
+          invite_expires_at,
+          created_at
+        `)
+        .eq('organization_id', memberData.organization_id)
+        .eq('status', 'invited')
+        .order('created_at', { ascending: false });
+
+      if (invitesError) {
+        console.error('Error fetching invites:', invitesError);
+      }
+
+      // Transformar datos al formato esperado
+      const transformedMembers: Member[] = (membersData || []).map((m: any) => ({
+        id: m.id,
+        organizationId: m.organization_id,
+        userId: m.user_id,
+        email: m.email,
+        name: m.name || m.profiles?.full_name || m.email.split('@')[0],
+        role: m.role as MemberRole,
+        status: m.status as 'active' | 'pending' | 'invited',
+        invitedBy: m.invited_by,
+        inviteExpiresAt: m.invite_expires_at,
+        createdAt: m.created_at,
+        updatedAt: m.created_at,
+      }));
+
+      setMembers(transformedMembers);
+      setPendingInvites((invitesData || []) as OrganizationMember[]);
+      setIsLoading(false);
     } catch (error) {
-      console.error('Error fetching members:', error);
-      toast.error('Error al cargar datos');
-    } finally {
-      setLoading(false);
+      console.error('Error fetching data:', error);
+      setError('Error inesperado al cargar los datos del equipo.');
+      setIsLoading(false);
     }
   }
 
-  const activeMembers = members.filter((m) => m.status === 'active');
-  const pendingInvites = members.filter((m) => m.status === 'pending');
-
-  const can = (permission: string): boolean => {
-    if (!currentUserRole) return false;
-    const rolePerms: Record<MemberRole, string[]> = {
-      owner: ['invite:member', 'update:member:role', 'remove:member'],
-      admin: ['invite:member', 'update:member:role', 'remove:member'],
-      editor: ['invite:member'],
-      viewer: [],
-    };
-    return rolePerms[currentUserRole]?.includes(permission) || false;
-  };
-
-  const handleUpdateRole = async (memberId: string, newRole: MemberRole) => {
-    if (!organizationId) return;
-    
+  const handleResendInvite = async (inviteId: string) => {
     try {
-      const response = await fetch(
-        `/api/v1/organizations/${organizationId}/members/${memberId}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role: newRole }),
-        }
-      );
+      const { error } = await supabase
+        .from('organization_members')
+        .update({ 
+          invite_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() 
+        })
+        .eq('id', inviteId);
 
-      if (!response.ok) throw new Error('Error al actualizar rol');
-
-      toast.success('Rol actualizado correctamente');
+      if (error) throw error;
+      
+      toast.success('Invitación reenviada');
       fetchData();
     } catch (error) {
-      toast.error('Error al actualizar rol');
+      toast.error('Error al reenviar la invitación');
     }
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!organizationId) return;
-    if (!confirm('¿Estás seguro de que deseas eliminar a este miembro?')) return;
+    if (!confirm('¿Estás seguro de que quieres eliminar a este miembro?')) return;
 
     try {
-      const response = await fetch(
-        `/api/v1/organizations/${organizationId}/members/${memberId}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const { error } = await supabase
+        .from('organization_members')
+        .delete()
+        .eq('id', memberId);
 
-      if (!response.ok) throw new Error('Error al eliminar miembro');
-
-      toast.success('Miembro eliminado correctamente');
+      if (error) throw error;
+      
+      toast.success('Miembro eliminado');
       fetchData();
     } catch (error) {
-      toast.error('Error al eliminar miembro');
+      toast.error('Error al eliminar el miembro');
     }
   };
 
-  const handleResendInvite = async (memberId: string) => {
-    if (!organizationId) return;
-    
-    try {
-      const response = await fetch(
-        `/api/v1/organizations/${organizationId}/invites/resend`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ memberId }),
-        }
-      );
+  const canManageMembers = currentUserRole === 'owner' || currentUserRole === 'admin';
 
-      if (!response.ok) throw new Error('Error al reenviar invitación');
-
-      toast.success('Invitación reenviada');
-    } catch (error) {
-      toast.error('Error al reenviar invitación');
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-64 bg-gray-200 rounded"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <span className="ml-2 text-gray-600">Cargando equipo...</span>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="container mx-auto py-8 max-w-6xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Miembros del Equipo</h1>
-          <p className="text-gray-600 mt-1">
-            Gestiona quién tiene acceso a la organización
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <UsageIndicator />
-          {can('invite:member') && (
-            <Button onClick={() => setInviteOpen(true)}>
-              <Mail className="w-4 h-4 mr-2" />
-              Invitar Miembro
-            </Button>
+  if (error) {
+    return (
+      <div className="container mx-auto py-8 max-w-4xl">
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button 
+          onClick={() => { setIsRetrying(true); fetchData(); setIsRetrying(false); }}
+          disabled={isRetrying}
+          className="mt-4"
+        >
+          {isRetrying ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Reintentando...</>
+          ) : (
+            'Reintentar'
           )}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Miembros del Equipo</h1>
+          <p className="text-gray-500 mt-1">Gestiona quién tiene acceso a tu organización</p>
         </div>
+        {canManageMembers && (
+          <Button onClick={() => setInviteOpen(true)}>
+            <UserPlus className="w-4 h-4 mr-2" />
+            Invitar Miembro
+          </Button>
+        )}
       </div>
 
-      {/* Active Members */}
-      <Card className="mb-8">
+      {/* Usage Indicator */}
+      <div className="mb-6">
+        <UsageIndicator />
+      </div>
+
+      {/* Active Members Table */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Miembros Activos ({activeMembers.length})
-          </CardTitle>
+          <CardTitle>Miembros Activos</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -222,40 +279,42 @@ export default function MembersPage() {
                 <TableHead>Miembro</TableHead>
                 <TableHead>Rol</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead className="w-12"></TableHead>
+                <TableHead>Unido</TableHead>
+                <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {activeMembers.map((member) => (
+              {members.map((member) => (
                 <TableRow key={member.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-blue-100 text-blue-700">
-                          {member.name?.charAt(0) || member.email.charAt(0)}
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {member.name?.charAt(0).toUpperCase() || 
+                           member.email.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-medium">{member.name || 'Sin nombre'}</div>
-                        <div className="text-sm text-gray-500">{member.email}</div>
+                        <p className="font-medium">{member.name || member.email}</p>
+                        <p className="text-sm text-gray-500">{member.email}</p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={ROLE_COLORS[member.role]}
-                    >
+                    <Badge className={ROLE_COLORS[member.role]}>
                       {ROLE_LABELS[member.role]}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">
-                      Activo
+                    <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                      {member.status === 'active' ? 'Activo' : 'Pendiente'}
                     </Badge>
                   </TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {new Date(member.createdAt).toLocaleDateString('es-ES')}
+                  </TableCell>
                   <TableCell>
-                    {can('update:member:role') && member.role !== 'owner' && (
+                    {canManageMembers && member.role !== 'owner' && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
@@ -263,21 +322,17 @@ export default function MembersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleUpdateRole(member.id, 'admin')}
-                          >
-                            Cambiar a Administrador
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleUpdateRole(member.id, 'editor')}
-                          >
-                            Cambiar a Editor
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleUpdateRole(member.id, 'viewer')}
-                          >
-                            Cambiar a Visualizador
-                          </DropdownMenuItem>
+                          {currentUserRole === 'owner' && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                // Cambiar rol - implementar según necesidad
+                                toast.info('Función de cambio de rol próximamente');
+                              }}
+                            >
+                              <Shield className="w-4 h-4 mr-2" />
+                              Cambiar Rol
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             onClick={() => handleRemoveMember(member.id)}
                             className="text-red-600"
@@ -291,10 +346,10 @@ export default function MembersPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {activeMembers.length === 0 && (
+              {members.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-gray-500">
-                    No hay miembros activos
+                  <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                    No hay miembros activos en tu organización.
                   </TableCell>
                 </TableRow>
               )}
@@ -305,12 +360,9 @@ export default function MembersPage() {
 
       {/* Pending Invites */}
       {pendingInvites.length > 0 && (
-        <Card>
+        <Card className="mt-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              Invitaciones Pendientes ({pendingInvites.length})
-            </CardTitle>
+            <CardTitle>Invitaciones Pendientes</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -319,33 +371,21 @@ export default function MembersPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Rol</TableHead>
                   <TableHead>Expira</TableHead>
-                  <TableHead className="w-12"></TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pendingInvites.map((invite) => (
                   <TableRow key={invite.id}>
+                    <TableCell>{invite.email}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-gray-100">
-                            <Mail className="h-4 w-4 text-gray-500" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>{invite.email}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={ROLE_COLORS[invite.role]}
-                      >
-                        {ROLE_LABELS[invite.role]}
+                      <Badge className={ROLE_COLORS[invite.role]}>
+                        {ROLE_LABELS[invite.role as MemberRole]}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {invite.inviteExpiresAt
-                        ? new Date(invite.inviteExpiresAt).toLocaleDateString()
+                    <TableCell className="text-sm text-gray-500">
+                      {invite.invite_expires_at 
+                        ? new Date(invite.invite_expires_at).toLocaleDateString('es-ES')
                         : 'Sin expiración'}
                     </TableCell>
                     <TableCell>
@@ -380,7 +420,13 @@ export default function MembersPage() {
         </Card>
       )}
 
-      <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} onSuccess={fetchData} />
+      <InviteDialog 
+        open={inviteOpen} 
+        onClose={() => setInviteOpen(false)} 
+        onSuccess={fetchData} 
+        organizationId={organizationId}
+        currentUserRole={currentUserRole}
+      />
     </div>
   );
 }

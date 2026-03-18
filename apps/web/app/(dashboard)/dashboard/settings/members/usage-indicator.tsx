@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Users, AlertCircle } from 'lucide-react';
+import { Users, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export function UsageIndicator() {
-  const [used, setUsed] = useState(0);
+  const [used, setUsed] = useState<number>(0);
   const [total, setTotal] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchUsage();
@@ -17,81 +17,132 @@ export function UsageIndicator() {
 
   async function fetchUsage() {
     try {
-      setLoading(true);
+      setIsLoading(true);
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
-      const { data: memberData } = await supabase
+      // Obtener organización del usuario con sus datos
+      const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('organization_id, organizations(max_users)')
+        .select('organization_id, organizations!inner(id, seats_total, plan, plan_name, seats_used)')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .single();
 
-      if (memberData) {
-        // organizations is returned as an array from embedded query
-        const orgArray = memberData.organizations as any[];
-        setTotal(orgArray?.[0]?.max_users || null);
+      if (memberError || !memberData) {
+        console.error('Error fetching member data:', memberError);
+        setIsLoading(false);
+        return;
+      }
 
-        const { count } = await supabase
-          .from('organization_members')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', memberData.organization_id)
-          .eq('status', 'active');
+      const orgId = memberData.organization_id;
+      
+      // Obtener seats_used directamente de organizations
+      const orgArray = memberData.organizations as any[];
+      const orgData = orgArray?.[0];
+      
+      if (orgData) {
+        // Primero intentar usar seats_total del registro de organization
+        let maxUsers = orgData?.seats_total;
+        let currentUsed = orgData?.seats_used || 0;
         
-        setUsed(count || 0);
+        // Si no hay seats_total, buscar en tabla plans mediante plan o plan_name
+        if (!maxUsers) {
+          const planName = orgData?.plan_name || orgData?.plan || 'free';
+          const { data: planData } = await supabase
+            .from('plans')
+            .select('limits')
+            .eq('name', planName)
+            .single();
+          
+          if (planData?.limits) {
+            const limits = planData.limits as any;
+            maxUsers = limits?.users || limits?.max_users || 1;
+          }
+        }
+
+        // Contar miembros activos
+        if (!currentUsed) {
+          const { count, error: countError } = await supabase
+            .from('organization_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', orgId)
+            .eq('status', 'active');
+          
+          if (!countError) {
+            currentUsed = count || 0;
+          }
+        }
+
+        setTotal(maxUsers || 1);
+        setUsed(currentUsed);
       }
     } catch (error) {
       console.error('Error fetching usage:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
-  if (loading || total === null) {
+  if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Users className="w-4 h-4" />
-        <span>Cargando...</span>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-full border bg-gray-50 border-gray-200">
+        <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+        <span className="text-sm text-gray-500">Cargando...</span>
       </div>
     );
   }
 
-  const percentage = total > 0 ? Math.round((used / total) * 100) : 0;
+  // Si no hay límite o es ilimitado, mostrar contador simple
+  if (total === null || total === -1) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 rounded-full border bg-blue-50 border-blue-200">
+        <Users className="h-4 w-4 text-blue-600" />
+        <span className="text-sm font-medium text-blue-700">
+          {used} usuarios
+        </span>
+      </div>
+    );
+  }
 
-  const getColor = () => {
-    if (percentage >= 100) return 'text-red-600 bg-red-50 border-red-200';
-    if (percentage >= 80) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    return 'text-blue-600 bg-blue-50 border-blue-200';
-  };
+  // Calcular porcentaje
+  const percentage = Math.min(100, Math.max(0, Math.round((used / total) * 100)));
+  
+  // Determinar color basado en uso
+  let badgeClasses = 'bg-blue-50 text-blue-700 border-blue-200';
+  let progressColor = 'bg-blue-500';
+  
+  if (percentage >= 100) {
+    badgeClasses = 'bg-red-50 text-red-700 border-red-200';
+    progressColor = 'bg-red-500';
+  } else if (percentage >= 80) {
+    badgeClasses = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    progressColor = 'bg-yellow-500';
+  }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm ${getColor()}`}>
-          <Users className="w-4 h-4" />
-          <span className="font-medium">
-            {used}/{total === -1 ? '∞' : total} usuarios
+    <div className={`flex flex-col gap-1 px-3 py-2 rounded-lg border ${badgeClasses}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4" />
+          <span className="text-sm font-medium">
+            {used}/{total} usuarios
           </span>
-          {percentage >= 100 && <AlertCircle className="w-4 h-4" />}
         </div>
-      </TooltipTrigger>
-      <TooltipContent side="bottom">
-        <div className="w-48">
-          <p className="text-sm mb-2">Uso de licencias</p>
-          <Progress value={percentage} className="h-2" />
-          <p className="text-xs text-gray-500 mt-1">
-            {used} de {total === -1 ? 'ilimitados' : total} usuarios utilizados
-          </p>
-          {percentage >= 100 && (
-            <p className="text-xs text-red-500 mt-1">Has alcanzado el límite</p>
-          )}
-        </div>
-      </TooltipContent>
-    </Tooltip>
+        <span className="text-xs font-medium">
+          {percentage}%
+        </span>
+      </div>
+      <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div 
+          className={`h-full ${progressColor} transition-all duration-300`}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
   );
 }

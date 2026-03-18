@@ -26,53 +26,71 @@ interface InviteDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  organizationId: string | null;
+  currentUserRole: MemberRole | null;
 }
 
-export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
+export function InviteDialog({ open, onClose, onSuccess, organizationId, currentUserRole }: InviteDialogProps) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<MemberRole>('viewer');
   const [loading, setLoading] = useState(false);
-  const [organizationId, setOrganizationId] = useState<string | null>(null);
-  const [currentUserRole, setCurrentUserRole] = useState<MemberRole | null>(null);
   const [maxUsers, setMaxUsers] = useState<number | null>(null);
   const [currentUsers, setCurrentUsers] = useState<number>(0);
+  const [usageLoading, setUsageLoading] = useState(true);
 
   useEffect(() => {
-    if (open) {
-      fetchOrgData();
+    if (open && organizationId) {
+      fetchUsageData();
     }
-  }, [open]);
+  }, [open, organizationId]);
 
-  async function fetchOrgData() {
+  async function fetchUsageData() {
+    if (!organizationId) return;
+    
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: memberData } = await supabase
-        .from('organization_members')
-        .select('organization_id, role, organizations(max_users)')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
+      setUsageLoading(true);
+      
+      // Obtener datos de la organización incluyendo plan y límites
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('seats_total, plan, plan_name, subscriptions(plans:plan_id(max_users, seats_limit))')
+        .eq('id', organizationId)
         .single();
 
-      if (memberData) {
-        setOrganizationId(memberData.organization_id);
-        setCurrentUserRole(memberData.role);
-        // organizations is returned as an array from embedded query
-        const orgArray = memberData.organizations as any[];
-        setMaxUsers(orgArray?.[0]?.max_users || null);
-
-        // Contar usuarios actuales
-        const { count } = await supabase
-          .from('organization_members')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', memberData.organization_id)
-          .eq('status', 'active');
+      if (orgError) {
+        console.error('Error fetching org data:', orgError);
+        // Fallback: buscar max_users en tabla plans
+        const { data: planData } = await supabase
+          .from('plans')
+          .select('limits')
+          .eq('name', orgData?.plan_name || orgData?.plan || 'free')
+          .single();
         
+        const limits = planData?.limits as any;
+        setMaxUsers(limits?.users || limits?.max_users || orgData?.seats_total || 1);
+      } else {
+        // Intentar obtener max_users de varias fuentes
+        const limits = orgData?.subscriptions?.[0]?.plans as any;
+        const seatsTotal = orgData?.seats_total;
+        const planLimits = limits?.max_users || limits?.seats_limit;
+        
+        setMaxUsers(planLimits || seatsTotal || 1);
+      }
+
+      // Contar usuarios actuales
+      const { count, error: countError } = await supabase
+        .from('organization_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('status', 'active');
+      
+      if (!countError) {
         setCurrentUsers(count || 0);
       }
     } catch (error) {
-      console.error('Error fetching org data:', error);
+      console.error('Error fetching usage data:', error);
+    } finally {
+      setUsageLoading(false);
     }
   }
 
@@ -82,8 +100,8 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
     if (!email || !organizationId) return;
 
     // Check if at limit
-    if (maxUsers && currentUsers >= maxUsers) {
-      toast.error('Has alcanzado el límite de usuarios para tu plan');
+    if (maxUsers && currentUsers >= maxUsers && maxUsers !== -1) {
+      toast.error(`Has alcanzado el límite de ${maxUsers} usuarios para tu plan. Actualiza tu plan para invitar más miembros.`);
       return;
     }
 
@@ -117,7 +135,7 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
   const canAssignRole = (roleToAssign: MemberRole): boolean => {
     const roleHierarchy = { owner: 4, admin: 3, editor: 2, viewer: 1 };
     if (!currentUserRole) return false;
-    return roleHierarchy[currentUserRole] > roleHierarchy[roleToAssign];
+    return roleHierarchy[currentUserRole] >= roleHierarchy[roleToAssign];
   };
 
   return (
@@ -136,7 +154,7 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
             <Input
               id="email"
               type="email"
-              placeholder="colleague@company.com"
+              placeholder="juan@empresa.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -151,25 +169,45 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
                 <SelectValue placeholder="Selecciona un rol" />
               </SelectTrigger>
               <SelectContent>
+                {currentUserRole === 'owner' && (
+                  <SelectItem value="owner">Propietario</SelectItem>
+                )}
                 {canAssignRole('admin') && (
                   <SelectItem value="admin">Administrador</SelectItem>
                 )}
-                <SelectItem value="editor">Editor</SelectItem>
+                {canAssignRole('editor') && (
+                  <SelectItem value="editor">Editor</SelectItem>
+                )}
                 <SelectItem value="viewer">Visualizador</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-sm text-gray-500">
-              {role === 'admin' && 'Puede gestionar miembros y configuración'}
+              {role === 'owner' && 'Control total de la organización'}
+              {role === 'admin' && 'Puede gestionar miembros y configuración de la organización'}
               {role === 'editor' && 'Puede crear y editar sistemas de IA'}
               {role === 'viewer' && 'Solo puede ver información, no editar'}
             </p>
           </div>
 
-          {maxUsers && (
-            <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-700">
-              💡 Tu plan permite hasta {maxUsers} usuarios.
-              {currentUsers >= maxUsers && (
-                <span className="block mt-1 font-medium">Has alcanzado el límite.</span>
+          {!usageLoading && maxUsers !== null && (
+            <div className={`p-3 rounded-lg text-sm ${
+              currentUsers >= maxUsers && maxUsers !== -1 
+                ? 'bg-red-50 text-red-700' 
+                : 'bg-blue-50 text-blue-700'
+            }`}>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{currentUsers >= maxUsers && maxUsers !== -1 ? '⚠️' : '💡'}</span>
+                <span>
+                  {maxUsers === -1 
+                    ? `Usuarios: ${currentUsers} / Ilimitado`
+                    : `Usuarios: ${currentUsers} / ${maxUsers}`
+                  }
+                </span>
+              </div>
+              {currentUsers >= maxUsers && maxUsers !== -1 && (
+                <span className="block mt-1 font-medium">
+                  Has alcanzado el límite de usuarios.
+                </span>
               )}
             </div>
           )}
@@ -178,7 +216,10 @@ export function InviteDialog({ open, onClose, onSuccess }: InviteDialogProps) {
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading || !email}>
+            <Button 
+              type="submit" 
+              disabled={loading || !email || (maxUsers !== null && maxUsers !== -1 && currentUsers >= maxUsers)}
+            >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

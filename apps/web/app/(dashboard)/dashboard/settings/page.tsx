@@ -16,15 +16,21 @@ import {
   Building,
   Bell,
   Palette,
-  User
+  User,
+  AlertCircle,
+  Loader2,
+  RefreshCw,
+  Clock
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Organization {
   id: string;
   name: string;
   plan: string;
+  plan_name: string;
 }
 
 const settingsSections = [
@@ -48,6 +54,7 @@ const settingsSections = [
     icon: Shield,
     href: '/dashboard/settings/sso',
     color: 'bg-purple-500',
+    comingSoon: true,
   },
   {
     title: 'Organización',
@@ -74,74 +81,132 @@ const settingsSections = [
   },
 ];
 
+const PLAN_LABELS: Record<string, string> = {
+  free: 'Gratuito',
+  starter: 'Starter',
+  pro: 'Professional',
+  professional: 'Professional',
+  business: 'Business',
+  enterprise: 'Enterprise',
+};
+
 export default function SettingsPage() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchOrganization() {
       try {
         setIsLoading(true);
+        setError(null);
         
         // Obtener usuario actual
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+          setError('Debes iniciar sesión para acceder a la configuración.');
           setIsLoading(false);
           return;
         }
 
-        // Obtener organización del usuario
+        // Obtener organización del usuario con datos embebidos
         const { data: memberData, error: memberError } = await supabase
           .from('organization_members')
-          .select('organization_id')
+          .select('organization_id, organizations!inner(id, name, plan, plan_name)')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .single();
 
         if (memberError || !memberData) {
+          console.error('Error fetching member:', memberError);
+          setError('No se encontró tu membresía en ninguna organización activa.');
           setIsLoading(false);
           return;
         }
 
-        // Obtener datos de la organización
-        const { data: orgData, error: orgError } = await supabase
-          .from('organizations')
-          .select('id, name, plan')
-          .eq('id', memberData.organization_id)
-          .single();
+        // organizations viene como array desde la relación embebida
+        const orgArray = memberData.organizations as any[];
+        const orgData = orgArray?.[0];
 
-        if (orgError) {
-          toast({
-            title: 'Error',
-            description: 'No se pudo cargar la información de la organización',
-            variant: 'destructive',
-          });
-        } else {
-          setOrganization(orgData);
+        if (!orgData || !orgData.id) {
+          setError('No se encontró la información de la organización.');
+          setIsLoading(false);
+          return;
         }
+
+        setOrganization({
+          id: orgData.id,
+          name: orgData.name || 'Sin nombre',
+          plan: orgData.plan || orgData.plan_name || 'free',
+          plan_name: orgData.plan_name || orgData.plan || 'free',
+        });
       } catch (error) {
         console.error('Error fetching organization:', error);
+        setError('Error inesperado al cargar la información de la organización.');
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchOrganization();
-  }, [toast]);
+  }, []);
+
+  async function handleRetry() {
+    setIsLoading(true);
+    setError(null);
+    // Re-fetch
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError('Debes iniciar sesión.');
+      setIsLoading(false);
+      return;
+    }
+    
+    const { data: memberData } = await supabase
+      .from('organization_members')
+      .select('organization_id, organizations!inner(id, name, plan, plan_name)')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+
+    if (memberData) {
+      const orgArray = memberData.organizations as any[];
+      const orgData = orgArray?.[0];
+      if (orgData) {
+        setOrganization({
+          id: orgData.id,
+          name: orgData.name || 'Sin nombre',
+          plan: orgData.plan || orgData.plan_name || 'free',
+          plan_name: orgData.plan_name || orgData.plan || 'free',
+        });
+        setError(null);
+      }
+    }
+    setIsLoading(false);
+  }
 
   if (isLoading) {
     return (
       <div className="container mx-auto py-8 max-w-4xl">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 bg-gray-200 rounded"></div>
-          <div className="h-4 w-96 bg-gray-200 rounded"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <span className="ml-2 text-gray-600">Cargando configuración...</span>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8 max-w-4xl">
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button onClick={handleRetry} variant="outline">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Reintentar
+        </Button>
       </div>
     );
   }
@@ -166,12 +231,16 @@ export default function SettingsPage() {
                   {organization.name}
                 </h2>
                 <p className="text-sm text-gray-500">
-                  Plan: <span className="capitalize font-medium">{organization.plan}</span>
+                  Plan: <span className="capitalize font-medium">
+                    {PLAN_LABELS[organization.plan_name] || organization.plan_name || 'Gratuito'}
+                  </span>
                 </p>
               </div>
-              <Button variant="outline" size="sm">
-                Editar
-              </Button>
+              <Link href="/dashboard/settings/organization">
+                <Button variant="outline" size="sm">
+                  Editar
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -199,7 +268,8 @@ export default function SettingsPage() {
                         {section.title}
                       </h3>
                       {section.comingSoon && (
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                          <Clock className="w-3 h-3" />
                           Próximamente
                         </span>
                       )}
@@ -238,10 +308,10 @@ export default function SettingsPage() {
               </p>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" disabled>
                 Documentación
               </Button>
-              <Button size="sm">
+              <Button size="sm" disabled>
                 Contactar Soporte
               </Button>
             </div>
