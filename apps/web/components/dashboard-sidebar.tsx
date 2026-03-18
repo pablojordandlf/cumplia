@@ -80,7 +80,10 @@ function SidebarContent({
         <ul className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+            // Dashboard solo activo en ruta exacta, otros items activos en subrutas también
+            const isActive = item.href === '/dashboard' 
+              ? pathname === item.href 
+              : pathname === item.href || pathname?.startsWith(item.href + "/");
             
             return (
               <li key={item.href}>
@@ -174,7 +177,10 @@ export function MobileBottomNav() {
       <ul className="flex justify-around items-center h-16">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+          // Dashboard solo activo en ruta exacta
+          const isActive = item.href === '/dashboard'
+            ? pathname === item.href
+            : pathname === item.href || pathname?.startsWith(item.href + "/");
           
           return (
             <li key={item.href}>

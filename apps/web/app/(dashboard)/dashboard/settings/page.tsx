@@ -1,11 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { 
   Card, 
   CardContent, 
-  CardDescription, 
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
@@ -18,7 +17,14 @@ import {
   Bell,
   Palette
 } from 'lucide-react';
-import { useOrganization } from '@/hooks/use-organization';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
+
+interface Organization {
+  id: string;
+  name: string;
+  plan: string;
+}
 
 const settingsSections = [
   {
@@ -62,8 +68,60 @@ const settingsSections = [
 ];
 
 export default function SettingsPage() {
-  const { organization, isLoading } = useOrganization();
-  const router = useRouter();
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchOrganization() {
+      try {
+        setIsLoading(true);
+        
+        // Obtener usuario actual
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+
+        // Obtener organización del usuario
+        const { data: memberData, error: memberError } = await supabase
+          .from('organization_members')
+          .select('organization_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+
+        if (memberError || !memberData) {
+          setIsLoading(false);
+          return;
+        }
+
+        // Obtener datos de la organización
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('id, name, plan')
+          .eq('id', memberData.organization_id)
+          .single();
+
+        if (orgError) {
+          toast({
+            title: 'Error',
+            description: 'No se pudo cargar la información de la organización',
+            variant: 'destructive',
+          });
+        } else {
+          setOrganization(orgData);
+        }
+      } catch (error) {
+        console.error('Error fetching organization:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchOrganization();
+  }, [toast]);
 
   if (isLoading) {
     return (
