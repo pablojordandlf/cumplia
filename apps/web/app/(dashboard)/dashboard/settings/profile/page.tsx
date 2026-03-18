@@ -161,11 +161,16 @@ export default function ProfilePage() {
         .from('organization_members')
         .select('id, organization_id, role, status, organizations(name, plan)')
         .eq('user_id', user.id)
-        .eq('status', 'active')
         .single();
 
-      if (!memberError && memberData) {
+      if (memberError) {
+        console.error('Error fetching membership:', memberError);
+        toast.error('Error al cargar tu rol: ' + memberError.message);
+      } else if (memberData) {
+        console.log('Membership loaded:', memberData);
         setMembership(memberData as unknown as OrganizationMember);
+      } else {
+        console.warn('No membership found for user:', user.id);
       }
 
     } catch (error) {
@@ -250,6 +255,7 @@ export default function ProfilePage() {
   }
 
   const role = membership?.role || 'viewer';
+  console.log('Role from membership:', membership?.role, '| Final role used:', role);
   const roleInfo = roleConfig[role];
   const RoleIcon = roleInfo.icon;
 
