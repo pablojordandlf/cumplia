@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Building,
   Bell,
-  Palette
+  Palette,
+  User
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -27,6 +28,13 @@ interface Organization {
 }
 
 const settingsSections = [
+  {
+    title: 'Mi Perfil',
+    description: 'Gestiona tu información personal, avatar y preferencias.',
+    icon: User,
+    href: '/dashboard/settings/profile',
+    color: 'bg-indigo-500',
+  },
   {
     title: 'Miembros del Equipo',
     description: 'Gestiona quién tiene acceso a tu organización y sus roles.',

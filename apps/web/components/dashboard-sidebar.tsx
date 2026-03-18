@@ -16,7 +16,8 @@ import {
   Shield,
   LogOut,
   Menu,
-  X
+  X,
+  User
 } from "lucide-react";
 
 const navItems = [
@@ -106,8 +107,21 @@ function SidebarContent({
         </ul>
       </nav>
 
-      {/* Logout Button */}
-      <div className="p-4 border-t">
+      {/* Profile & Logout */}
+      <div className="p-4 border-t space-y-1">
+        <Link
+          href="/dashboard/settings/profile"
+          onClick={onNavigate}
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+            pathname === '/dashboard/settings/profile'
+              ? "bg-blue-50 text-blue-600"
+              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          )}
+        >
+          <User className="h-5 w-5" />
+          Mi Perfil
+        </Link>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
