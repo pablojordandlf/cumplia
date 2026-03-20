@@ -1,7 +1,7 @@
-import { PricingCard } from "@/components/pricing-card";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle, HelpCircle, Info, Building2 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -19,65 +19,68 @@ export const metadata: Metadata = {
   },
 };
 
-const pricingTiers = [
-  {
-    name: "Starter",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    description: "Valida tu primer sistema de IA y conoce la plataforma",
-    features: [
-      "1 Sistema de IA",
-      "1 usuario",
-      "Clasificación AI Act",
-      "Obligaciones básicas",
-      "Checklist de cumplimiento",
-      "Sin generación de documentos",
-    ],
-    ctaText: "Empieza Gratis",
-    popular: false,
-    stripePriceIdMonthly: "",
-    stripePriceIdYearly: "",
-  },
-  {
-    name: "Professional",
-    monthlyPrice: 49,
-    yearlyPrice: 490,
-    description: "Ideal para PYMEs y consultoras con varios sistemas de IA",
-    features: [
-      "Hasta 15 Sistemas de IA",
-      "Hasta 3 usuarios",
-      "FRIA completa (Art. 27)",
-      "Gestión completa de riesgos",
-      "Registro de evidencias",
-      "Exportación PDF/DOCX",
-      "Soporte email prioritario",
-    ],
-    ctaText: "Elige Professional",
-    popular: true,
-    stripePriceIdMonthly: "price_professional_monthly",
-    stripePriceIdYearly: "price_professional_yearly",
-  },
-  {
-    name: "Business",
-    monthlyPrice: 299,
-    yearlyPrice: 2990,
-    description: "Para empresas con múltiples departamentos y necesidades avanzadas",
-    features: [
-      "Sistemas de IA ilimitados",
-      "Hasta 10 usuarios",
-      "Asistente IA",
-      "Gestión de Riesgos avanzada",
-      "Registro de evidencias",
-      "Plantillas personalizadas",
-      "Gestión multi-departamento",
-      "Soporte prioritario",
-    ],
-    ctaText: "Elige Business",
-    popular: false,
-    stripePriceIdMonthly: "price_business_monthly",
-    stripePriceIdYearly: "price_business_yearly",
-  },
-];
+const starterTier = {
+  name: "Starter",
+  description: "Valida tu primer sistema de IA y conoce la plataforma",
+  features: [
+    "1 Sistema de IA",
+    "1 usuario",
+    "Clasificación AI Act",
+    "Obligaciones básicas",
+    "Checklist de cumplimiento",
+    "Sin generación de documentos",
+  ],
+  ctaText: "Empieza Gratis",
+  popular: false,
+  stripeLink: "/register",
+};
+
+const professionalTier = {
+  name: "Professional",
+  description: "Ideal para PYMEs y consultoras con varios sistemas de IA",
+  features: [
+    "Hasta 15 Sistemas de IA",
+    "Hasta 3 usuarios",
+    "FRIA completa (Art. 27)",
+    "Gestión completa de riesgos",
+    "Registro de evidencias",
+    "Exportación PDF/DOCX",
+    "Soporte email prioritario",
+  ],
+  ctaText: "Elige Professional",
+  popular: true,
+  originalPrice: 149,
+  monthlyPrice: 99,
+  yearlyPrice: 990,
+  badge: "🔥 Oferta de lanzamiento",
+  badgeColor: "bg-green-500/20 text-green-400",
+  yearlySavings: "Ahorra 600€/año",
+  additionalSavings: "o 990€/año (ahorra 198€)",
+};
+
+const businessTier = {
+  name: "Business",
+  description: "Para empresas con múltiples departamentos y necesidades avanzadas",
+  features: [
+    "Sistemas de IA ilimitados",
+    "Hasta 10 usuarios",
+    "Asistente IA",
+    "Gestión de Riesgos avanzada",
+    "Registro de evidencias",
+    "Plantillas personalizadas",
+    "Gestión multi-departamento",
+    "Soporte prioritario",
+  ],
+  ctaText: "Elige Business",
+  popular: false,
+  originalPrice: 349,
+  monthlyPrice: 249,
+  yearlyPrice: 2490,
+  badge: "💼 Precio especial PYMEs",
+  badgeColor: "bg-blue-500/20 text-blue-400",
+  yearlySavings: "Ahorra 1.200€/año",
+  additionalSavings: "o 2.490€/año (ahorra 498€)",
+};
 
 export default function PricingPage() {
   return (
@@ -113,20 +116,101 @@ export default function PricingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {pricingTiers.map((tier) => (
-            <PricingCard
-              key={tier.name}
-              name={tier.name}
-              description={tier.description}
-              monthlyPrice={tier.monthlyPrice}
-              yearlyPrice={tier.yearlyPrice}
-              features={tier.features}
-              ctaText={tier.ctaText}
-              popular={tier.popular}
-              stripePriceIdMonthly={tier.stripePriceIdMonthly}
-              stripePriceIdYearly={tier.stripePriceIdYearly}
-            />
-          ))}
+          {/* Starter Card */}
+          <div className="relative rounded-2xl border bg-card p-6 shadow-sm flex flex-col">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">{starterTier.name}</h3>
+              <p className="text-sm text-muted-foreground">{starterTier.description}</p>
+            </div>
+            <div className="text-center mb-6">
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-5xl font-bold text-white">0€</span>
+                <span className="text-slate-400">/mes</span>
+              </div>
+              <Badge className="mt-2 bg-slate-500/20 text-slate-300">Gratis para siempre</Badge>
+              <p className="text-xs text-slate-500 mt-2">Sin tarjeta de crédito</p>
+            </div>
+            <ul className="space-y-3 mb-6 flex-1">
+              {starterTier.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href={starterTier.stripeLink}>
+              <Button className="w-full" variant="outline">
+                {starterTier.ctaText}
+              </Button>
+            </Link>
+          </div>
+
+          {/* Professional Card */}
+          <div className="relative rounded-2xl border-2 border-blue-500 bg-card p-6 shadow-lg flex flex-col">
+            {professionalTier.popular && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-blue-500 text-white">Más popular</Badge>
+              </div>
+            )}
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">{professionalTier.name}</h3>
+              <p className="text-sm text-muted-foreground">{professionalTier.description}</p>
+            </div>
+            <div className="text-center mb-6">
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-slate-500 line-through text-lg">{professionalTier.originalPrice}€</span>
+                <span className="text-5xl font-bold text-white">{professionalTier.monthlyPrice}€</span>
+                <span className="text-slate-400">/mes</span>
+              </div>
+              <Badge className={`mt-2 ${professionalTier.badgeColor}`}>{professionalTier.badge}</Badge>
+              <p className="text-sm text-blue-400 mt-2">{professionalTier.yearlySavings}</p>
+              <p className="text-xs text-slate-500 mt-1">{professionalTier.additionalSavings}</p>
+            </div>
+            <ul className="space-y-3 mb-6 flex-1">
+              {professionalTier.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/register">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                {professionalTier.ctaText}
+              </Button>
+            </Link>
+          </div>
+
+          {/* Business Card */}
+          <div className="relative rounded-2xl border bg-card p-6 shadow-sm flex flex-col">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">{businessTier.name}</h3>
+              <p className="text-sm text-muted-foreground">{businessTier.description}</p>
+            </div>
+            <div className="text-center mb-6">
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-slate-500 line-through text-lg">{businessTier.originalPrice}€</span>
+                <span className="text-5xl font-bold text-white">{businessTier.monthlyPrice}€</span>
+                <span className="text-slate-400">/mes</span>
+              </div>
+              <Badge className={`mt-2 ${businessTier.badgeColor}`}>{businessTier.badge}</Badge>
+              <p className="text-sm text-blue-400 mt-2">{businessTier.yearlySavings}</p>
+              <p className="text-xs text-slate-500 mt-1">{businessTier.additionalSavings}</p>
+            </div>
+            <ul className="space-y-3 mb-6 flex-1">
+              {businessTier.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm">
+                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/register">
+              <Button className="w-full" variant="outline">
+                {businessTier.ctaText}
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Enterprise CTA - Hidden temporarily
