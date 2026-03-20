@@ -142,7 +142,7 @@ export async function fetchUserOrganization(maxRetries = 3, retryDelay = 500) {
 
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('organization_id, role, organizations!inner(id, name, plan_name, seats_total, seats_used, max_users)')
+        .select('organization_id, role, organizations!organization_id(id, name, plan_name, seats_total, seats_used, max_users)')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .single();

@@ -37,7 +37,7 @@ export function UsageIndicator() {
       for (let attempt = 0; attempt < 3; attempt++) {
         const result = await supabase
           .from('organization_members')
-          .select('organization_id, organizations!inner(id, seats_total, plan_name, seats_used)')
+          .select('organization_id, organizations!organization_id(id, seats_total, plan_name, seats_used)')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .single();

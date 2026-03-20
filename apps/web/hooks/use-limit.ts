@@ -40,7 +40,7 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
         // Get user's organization
         const { data: membership } = await supabase
           .from('organization_members')
-          .select('organization_id, organizations!inner(plan)')
+          .select('organization_id, organizations!organization_id(plan)')
           .eq('user_id', session.user.id)
           .eq('status', 'active')
           .single();

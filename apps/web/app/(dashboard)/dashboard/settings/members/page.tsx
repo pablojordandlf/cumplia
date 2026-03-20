@@ -94,7 +94,7 @@ export default function MembersPage() {
       for (let attempt = 0; attempt < 3; attempt++) {
         const result = await supabase
           .from('organization_members')
-          .select('organization_id, role, organizations!inner(id, plan_name, max_users, seats_total)')
+          .select('organization_id, role, organizations!organization_id(id, plan_name, max_users, seats_total)')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .single();
