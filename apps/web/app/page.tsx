@@ -247,7 +247,7 @@ function EndToEndSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {capabilities.map((item, index) => (
             <motion.div
               key={index}
@@ -255,9 +255,9 @@ function EndToEndSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group p-8 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all duration-300"
+              className="group p-6 sm:p-8 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all duration-300"
             >
-              <div className="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-blue-500/20 transition-colors">
                 <item.icon className="w-7 h-7 text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
@@ -323,7 +323,7 @@ function WhoAppliesSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {riskLevels.map((item, index) => (
             <motion.div
               key={index}
@@ -331,9 +331,9 @@ function WhoAppliesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`p-6 rounded-2xl bg-slate-950 ${item.borderColor} border hover:border-opacity-50 transition-all`}
+              className={`p-5 sm:p-6 rounded-2xl bg-slate-950 ${item.borderColor} border hover:border-opacity-50 transition-all`}
             >
-              <div className={`w-12 h-12 rounded-xl ${item.bgColor} flex items-center justify-center mb-4`}>
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${item.bgColor} flex items-center justify-center mb-3 sm:mb-4`}>
                 <item.icon className={`w-6 h-6 ${item.color}`} />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
@@ -381,7 +381,7 @@ function PainPointsSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 max-w-5xl mx-auto">
           {pains.map((item, index) => (
             <motion.div
               key={index}
@@ -389,9 +389,9 @@ function PainPointsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="text-center p-8 rounded-2xl bg-slate-900/50 border border-slate-800"
+              className="text-center p-6 sm:p-8 rounded-2xl bg-slate-900/50 border border-slate-800"
             >
-              <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
                 <item.icon className="w-8 h-8 text-red-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-4">
@@ -455,7 +455,7 @@ function FeaturesSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {features.map((feature, index) => (
             <motion.div
               key={index}
@@ -463,9 +463,9 @@ function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group p-8 rounded-2xl bg-slate-950 border border-slate-800 hover:border-blue-500/50 transition-all duration-300"
+              className="group p-6 sm:p-8 rounded-2xl bg-slate-950 border border-slate-800 hover:border-blue-500/50 transition-all duration-300"
             >
-              <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-blue-500/20 transition-colors">
                 <feature.icon className="w-6 h-6 text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
@@ -546,7 +546,7 @@ function PricingSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
@@ -554,7 +554,7 @@ function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`rounded-2xl p-8 ${
+              className={`rounded-2xl p-6 sm:p-8 ${
                 plan.highlight 
                   ? 'bg-gradient-to-b from-blue-600/20 to-slate-900 border-2 border-blue-500/50' 
                   : 'bg-slate-900 border border-slate-800'
@@ -580,7 +580,7 @@ function PricingSection() {
 
               <Link href={plan.href}>
                 <Button 
-                  className={`w-full py-6 text-lg ${
+                  className={`w-full min-h-[56px] py-5 sm:py-6 text-base sm:text-lg ${
                     plan.highlight 
                       ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                       : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'

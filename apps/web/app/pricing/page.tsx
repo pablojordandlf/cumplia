@@ -96,19 +96,19 @@ export default function PricingPage() {
           </p>
           
           {/* Explicación de Sistemas de IA */}
-          <div className="mt-8 p-6 bg-blue-50 rounded-xl max-w-3xl mx-auto">
-            <div className="flex items-start gap-3 text-left">
-              <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+          <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-blue-50 rounded-xl max-w-3xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-start gap-3 text-left">
+              <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0 sm:mt-1" />
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">¿Qué es un Sistema de IA?</h3>
                 <p className="text-gray-600 text-sm mb-3">
                   Según el AI Act, un <strong>sistema de IA</strong> es cualquier aplicación basada en inteligencia artificial 
                   que tu empresa desarrolle, despliegue o utilice. Cada sistema debe evaluarse y documentarse individualmente.
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs bg-white px-3 py-1 rounded-full text-gray-600 border">1 chatbot = 1 sistema</span>
-                  <span className="text-xs bg-white px-3 py-1 rounded-full text-gray-600 border">1 motor de recomendación = 1 sistema</span>
-                  <span className="text-xs bg-white px-3 py-1 rounded-full text-gray-600 border">1 herramienta de análisis CV = 1 sistema</span>
+                <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-gray-600 border text-center">1 chatbot = 1 sistema</span>
+                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-gray-600 border text-center">1 motor de recomendación = 1 sistema</span>
+                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-gray-600 border text-center">1 herramienta de análisis CV = 1 sistema</span>
                 </div>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function PricingPage() {
               ))}
             </ul>
             <Link href={starterTier.stripeLink}>
-              <Button className="w-full" variant="outline">
+              <Button className="w-full min-h-[52px] text-base" variant="outline">
                 {starterTier.ctaText}
               </Button>
             </Link>
@@ -175,7 +175,7 @@ export default function PricingPage() {
               ))}
             </ul>
             <Link href="/register">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button className="w-full min-h-[52px] text-base bg-blue-600 hover:bg-blue-700">
                 {professionalTier.ctaText}
               </Button>
             </Link>
@@ -206,7 +206,7 @@ export default function PricingPage() {
               ))}
             </ul>
             <Link href="/register">
-              <Button className="w-full" variant="outline">
+              <Button className="w-full min-h-[52px] text-base" variant="outline">
                 {businessTier.ctaText}
               </Button>
             </Link>

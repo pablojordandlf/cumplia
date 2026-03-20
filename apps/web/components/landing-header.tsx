@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Shield, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -62,52 +63,60 @@ export function Header() {
         </div>
 
         {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-800 bg-slate-950">
-            <nav className="flex flex-col py-4 space-y-2">
-              <a 
-                href="#who-applies" 
-                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                AI Act
-              </a>
-              <a 
-                href="#features" 
-                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Funciones
-              </a>
-              <Link 
-                href="/pricing" 
-                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Precios
-              </Link>
-              <Link 
-                href="/guia-ai-act" 
-                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Guía
-              </Link>
-              <div className="border-t border-slate-800 pt-4 mt-2 px-4 space-y-3">
-                <Link href="/login" className="block w-full" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
-                    Iniciar Sesión
-                  </Button>
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="md:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-xl"
+            >
+              <nav className="flex flex-col py-4 space-y-1">
+                <a 
+                  href="#who-applies" 
+                  className="mx-4 px-4 py-4 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  AI Act
+                </a>
+                <a 
+                  href="#features" 
+                  className="mx-4 px-4 py-4 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Funciones
+                </a>
+                <Link 
+                  href="/pricing" 
+                  className="mx-4 px-4 py-4 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Precios
                 </Link>
-                <Link href="/register" className="block w-full" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                    Registrarse
-                  </Button>
+                <Link 
+                  href="/guia-ai-act" 
+                  className="mx-4 px-4 py-4 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-xl transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Guía
                 </Link>
-              </div>
-            </nav>
-          </div>
-        )}
+                <div className="border-t border-slate-800 pt-4 mt-2 px-4 space-y-3">
+                  <Link href="/login" className="block w-full" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full min-h-[52px] text-base border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                      Iniciar Sesión
+                    </Button>
+                  </Link>
+                  <Link href="/register" className="block w-full" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full min-h-[52px] text-base bg-blue-600 hover:bg-blue-700">
+                      Registrarse
+                    </Button>
+                  </Link>
+                </div>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </header>
   );
