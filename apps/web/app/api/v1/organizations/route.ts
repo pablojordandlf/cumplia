@@ -25,7 +25,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { data, error } = await supabase
       .from('organization_members')
-      .select('organization:organizations(*)') // Selects organization details
+      .select('organization:organizations!organization_id(*)') // Selects organization details
       .eq('user_id', user.id)
       .eq('status', 'active'); // Only active memberships
 
