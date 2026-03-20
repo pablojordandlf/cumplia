@@ -40,10 +40,9 @@ function HeroSection() {
   const [currentWord, setCurrentWord] = useState(0);
   const rotatingWords = [
     "CUMPLIMIENTO",
-    "TRANSPARENCIA", 
+    "TRANSPARENCIA",
     "SEGURIDAD",
-    "CONFIANZA",
-    "PROSPERIDAD"
+    "CONFIANZA"
   ];
 
   useEffect(() => {
@@ -66,13 +65,13 @@ function HeroSection() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto text-center sm:text-left">
           {/* Badge */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-6 sm:mb-8"
           >
             <Sparkles className="h-4 w-4" />
             <span>Compliance del AI Act simplificado</span>
@@ -83,14 +82,13 @@ function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight mb-8"
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-6 sm:mb-8"
           >
             <span className="block">GESTIÓN DE IA.</span>
             <span className="relative inline-block mt-2">
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
                 {rotatingWords[currentWord]}
               </span>
-              <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
             </span>
           </motion.h1>
 
@@ -99,28 +97,17 @@ function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl sm:text-2xl text-slate-400 mb-6 max-w-2xl"
+            className="text-lg sm:text-xl md:text-2xl text-slate-400 mb-8 max-w-2xl mx-auto sm:mx-0"
           >
-            Gestiona tus Sistemas de IA sin Complicaciones
-          </motion.p>
-
-          {/* Description */}
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg text-slate-500 mb-10 max-w-2xl"
-          >
-            La inteligencia artificial avanza a pasos agigantados. Asegúrate de que tu empresa 
-            no solo cumpla con el reglamento más importante de IA de Europa, sino que prospere en él.
+            Cumple con el AI Act de Europa sin complicaciones
           </motion.p>
 
           {/* CTAs */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 mb-12"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-4 mb-10 justify-center sm:justify-start"
           >
             <Link href="/register" className="w-full sm:w-auto">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-10 py-7 w-full sm:w-auto shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 transition-all">
@@ -139,16 +126,16 @@ function HeroSection() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-wrap items-center gap-8 text-sm text-slate-500"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-wrap items-center justify-center sm:justify-start gap-6 text-sm text-slate-500"
           >
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>Sin tarjeta de crédito</span>
+              <span>Sin tarjeta</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>Setup en 5 minutos</span>
+              <span>Setup en 5 min</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-emerald-500" />
