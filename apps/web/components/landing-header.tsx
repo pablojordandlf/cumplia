@@ -9,34 +9,34 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-blue-600" />
-            <span className="text-xl sm:text-2xl font-bold text-gray-900">CumplIA</span>
+            <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-blue-500" />
+            <span className="text-xl sm:text-2xl font-bold text-white">CumplIA</span>
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <a href="#riesgos" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              El Riesgo
+          <nav className="hidden md:flex items-center space-x-8">
+            <a href="#who-applies" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">
+              AI Act
             </a>
-            <a href="#solucion" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Solución
+            <a href="#features" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">
+              Funciones
             </a>
-            <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+            <Link href="/pricing" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">
               Precios
             </Link>
-            <Link href="/guia-ai-act" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Guía AI Act
+            <Link href="/guia-ai-act" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">
+              Guía
             </Link>
           </nav>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <Link href="/login">
-              <Button variant="ghost">
+              <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-slate-800">
                 Iniciar Sesión
               </Button>
             </Link>
@@ -49,55 +49,53 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
           >
             {mobileMenuOpen ? (
-              <X className="h-6 w-6 text-gray-700" />
+              <X className="h-6 w-6 text-slate-300" />
             ) : (
-              <Menu className="h-6 w-6 text-gray-700" />
+              <Menu className="h-6 w-6 text-slate-300" />
             )}
           </button>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-white">
+          <div className="md:hidden border-t border-slate-800 bg-slate-950">
             <nav className="flex flex-col py-4 space-y-2">
-              <Link 
-                href="/#riesgos" 
-                className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+              <a 
+                href="#who-applies" 
+                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
-                scroll={false}
               >
-                El Riesgo
-              </Link>
-              <Link 
-                href="/#solucion" 
-                className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                AI Act
+              </a>
+              <a 
+                href="#features" 
+                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
-                scroll={false}
               >
-                Solución
-              </Link>
+                Funciones
+              </a>
               <Link 
                 href="/pricing" 
-                className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Precios
               </Link>
               <Link 
                 href="/guia-ai-act" 
-                className="px-4 py-3 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                className="px-4 py-3 text-base font-medium text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Guía AI Act
+                Guía
               </Link>
-              <div className="border-t pt-4 mt-2 px-4 space-y-3">
+              <div className="border-t border-slate-800 pt-4 mt-2 px-4 space-y-3">
                 <Link href="/login" className="block w-full" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
                     Iniciar Sesión
                   </Button>
                 </Link>
