@@ -21,6 +21,7 @@ import { MemberRole } from '@/types/organization';
 import { toast } from 'sonner';
 import { Mail, UserPlus, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useAuthReady } from '@/lib/auth-helpers';
 
 interface InviteDialogProps {
   open: boolean;
@@ -53,7 +54,7 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
       // Obtener datos de la organización incluyendo plan y límites
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .select('seats_total, plan, plan_name, subscriptions(plans:plan_id(max_users, seats_limit))')
+        .select('seats_total, plan_name, subscriptions(plans:plan_id(max_users, seats_limit))')
         .eq('id', organizationId)
         .single();
 
@@ -62,7 +63,7 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
       if (orgError) {
         console.error('Error fetching org data:', orgError);
         // Fallback: buscar max_users en tabla plans
-        const planName = org?.plan_name || org?.plan || 'free';
+        const planName = org?.plan_name || 'free';
         const { data: planData } = await supabase
           .from('plans')
           .select('limits')

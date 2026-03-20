@@ -25,6 +25,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuthReady, fetchUserOrganization } from '@/lib/auth-helpers';
 
 interface Organization {
   id: string;
@@ -94,51 +95,39 @@ export default function SettingsPage() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Esperar a que la autenticación esté lista antes de hacer peticiones
+  const { isReady: isAuthReady, user, error: authError } = useAuthReady();
 
   useEffect(() => {
+    // Solo hacer la petición cuando la autenticación esté lista
+    if (!isAuthReady) return;
+    
     async function fetchOrganization() {
       try {
         setIsLoading(true);
         setError(null);
         
-        // Obtener usuario actual
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError || !user) {
           setError('Debes iniciar sesión para acceder a la configuración.');
           setIsLoading(false);
           return;
         }
 
-        // Obtener organización del usuario con datos embebidos
-        const { data: memberData, error: memberError } = await supabase
-          .from('organization_members')
-          .select('organization_id, organizations!inner(id, name, plan, plan_name)')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .single();
+        const { data, error: orgError } = await fetchUserOrganization();
 
-        if (memberError || !memberData) {
-          console.error('Error fetching member:', memberError);
-          setError('No se encontró tu membresía en ninguna organización activa.');
-          setIsLoading(false);
-          return;
-        }
-
-        // organizations viene como array desde la relación embebida
-        const orgArray = memberData.organizations as any[];
-        const orgData = orgArray?.[0];
-
-        if (!orgData || !orgData.id) {
-          setError('No se encontró la información de la organización.');
+        if (orgError || !data) {
+          console.error('Error fetching organization:', orgError);
+          setError(orgError || 'No se encontró tu membresía en ninguna organización activa.');
           setIsLoading(false);
           return;
         }
 
         setOrganization({
-          id: orgData.id,
-          name: orgData.name || 'Sin nombre',
-          plan: orgData.plan || orgData.plan_name || 'free',
-          plan_name: orgData.plan_name || orgData.plan || 'free',
+          id: data.organization.id,
+          name: data.organization.name,
+          plan: data.organization.plan_name,
+          plan_name: data.organization.plan_name,
         });
       } catch (error) {
         console.error('Error fetching organization:', error);
@@ -149,48 +138,36 @@ export default function SettingsPage() {
     }
 
     fetchOrganization();
-  }, []);
+  }, [isAuthReady, user, authError]);
 
   async function handleRetry() {
     setIsLoading(true);
     setError(null);
-    // Re-fetch
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setError('Debes iniciar sesión.');
-      setIsLoading(false);
-      return;
-    }
     
-    const { data: memberData } = await supabase
-      .from('organization_members')
-      .select('organization_id, organizations!inner(id, name, plan, plan_name)')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
-
-    if (memberData) {
-      const orgArray = memberData.organizations as any[];
-      const orgData = orgArray?.[0];
-      if (orgData) {
-        setOrganization({
-          id: orgData.id,
-          name: orgData.name || 'Sin nombre',
-          plan: orgData.plan || orgData.plan_name || 'free',
-          plan_name: orgData.plan_name || orgData.plan || 'free',
-        });
-        setError(null);
-      }
+    const { data, error: orgError } = await fetchUserOrganization();
+    
+    if (orgError || !data) {
+      setError(orgError || 'No se pudo cargar la información.');
+    } else {
+      setOrganization({
+        id: data.organization.id,
+        name: data.organization.name,
+        plan: data.organization.plan_name,
+        plan_name: data.organization.plan_name,
+      });
+      setError(null);
     }
     setIsLoading(false);
   }
 
-  if (isLoading) {
+  if (!isAuthReady || isLoading) {
     return (
       <div className="container mx-auto py-8 max-w-4xl">
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="ml-2 text-gray-600">Cargando configuración...</span>
+          <span className="ml-2 text-gray-600">
+            {!isAuthReady ? 'Inicializando sesión...' : 'Cargando configuración...'}
+          </span>
         </div>
       </div>
     );

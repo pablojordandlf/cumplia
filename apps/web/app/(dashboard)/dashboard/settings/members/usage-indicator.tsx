@@ -5,33 +5,56 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Users, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useAuthReady } from '@/lib/auth-helpers';
 
 export function UsageIndicator() {
   const [used, setUsed] = useState<number>(0);
   const [total, setTotal] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Esperar a que la autenticación esté lista
+  const { isReady: isAuthReady, user } = useAuthReady();
 
   useEffect(() => {
-    fetchUsage();
-  }, []);
+    if (isAuthReady) {
+      fetchUsage();
+    }
+  }, [isAuthReady]);
 
   async function fetchUsage() {
     try {
       setIsLoading(true);
       
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setIsLoading(false);
         return;
       }
 
-      // Obtener organización del usuario con sus datos
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('organization_id, organizations!inner(id, seats_total, plan, plan_name, seats_used)')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
+      // Obtener organización del usuario con sus datos (con reintentos)
+      let memberData = null;
+      let memberError = null;
+      
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const result = await supabase
+          .from('organization_members')
+          .select('organization_id, organizations!inner(id, seats_total, plan_name, seats_used)')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        
+        memberData = result.data;
+        memberError = result.error;
+        
+        // Si no hay error o es PGRST116 (no rows), no reintentar
+        if (!result.error || result.error.code === 'PGRST116') {
+          break;
+        }
+        
+        // Esperar antes de reintentar
+        if (attempt < 2) {
+          await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)));
+        }
+      }
 
       if (memberError || !memberData) {
         console.error('Error fetching member data:', memberError);
@@ -50,9 +73,9 @@ export function UsageIndicator() {
         let maxUsers = orgData?.seats_total;
         let currentUsed = orgData?.seats_used || 0;
         
-        // Si no hay seats_total, buscar en tabla plans mediante plan o plan_name
+        // Si no hay seats_total, buscar en tabla plans mediante plan_name
         if (!maxUsers) {
-          const planName = orgData?.plan_name || orgData?.plan || 'free';
+          const planName = orgData?.plan_name || 'free';
           const { data: planData } = await supabase
             .from('plans')
             .select('limits')

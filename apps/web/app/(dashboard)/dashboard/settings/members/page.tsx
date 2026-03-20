@@ -26,6 +26,7 @@ import { MoreHorizontal, Mail, UserX, Shield, User, Loader2, AlertCircle, UserPl
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuthReady } from '@/lib/auth-helpers';
 
 const ROLE_COLORS: Record<MemberRole, string> = {
   owner: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -66,34 +67,66 @@ export default function MembersPage() {
   const [error, setError] = useState<string | null>(null);
   const [pendingInvites, setPendingInvites] = useState<OrganizationMember[]>([]);
   const [isRetrying, setIsRetrying] = useState(false);
+  
+  // Esperar a que la autenticación esté lista
+  const { isReady: isAuthReady, user } = useAuthReady();
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthReady) {
+      fetchData();
+    }
+  }, [isAuthReady]);
 
-  async function fetchData() {
+  async function fetchData(retryCount = 0) {
     try {
       setIsLoading(true);
       setError(null);
       
-      // Obtener usuario actual
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setIsLoading(false);
         return;
       }
 
-      // Obtener organización del usuario con plan
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('organization_id, role, organizations!inner(id, plan, plan_name, max_users)')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
+      // Obtener organización del usuario con plan (con reintentos)
+      let memberData = null;
+      let memberError = null;
+      
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const result = await supabase
+          .from('organization_members')
+          .select('organization_id, role, organizations!inner(id, plan_name, max_users, seats_total)')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        
+        memberData = result.data;
+        memberError = result.error;
+        
+        // Si no hay error o es PGRST116 (no rows), no reintentar
+        if (!result.error || result.error.code === 'PGRST116') {
+          break;
+        }
+        
+        // Esperar antes de reintentar
+        if (attempt < 2) {
+          await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)));
+        }
+      }
 
-      if (memberError || !memberData) {
-        console.error('Error getting member data:', memberError);
-        setError('No se pudo acceder a la información de tu organización. Verifica que tienes acceso activo.');
+      if (memberError) {
+        // PGRST116 = no rows returned, mensaje amigable
+        if (memberError.code === 'PGRST116') {
+          setError('No se encontró tu membresía en ninguna organización activa. Contacta con soporte si crees que esto es un error.');
+        } else {
+          console.error('Error getting member data:', memberError);
+          setError('No se pudo acceder a la información de tu organización. Verifica que tienes acceso activo.');
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (!memberData) {
+        setError('No se encontró tu membresía en ninguna organización activa.');
         setIsLoading(false);
         return;
       }
@@ -214,12 +247,14 @@ export default function MembersPage() {
 
   const canManageMembers = currentUserRole === 'owner' || currentUserRole === 'admin';
 
-  if (isLoading) {
+  if (!isAuthReady || isLoading) {
     return (
       <div className="container mx-auto py-8">
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="ml-2 text-gray-600">Cargando equipo...</span>
+          <span className="ml-2 text-gray-600">
+            {!isAuthReady ? 'Inicializando sesión...' : 'Cargando equipo...'}
+          </span>
         </div>
       </div>
     );

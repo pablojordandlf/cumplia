@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Building, Loader2, Save, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { useAuthReady } from '@/lib/auth-helpers';
 
 interface Organization {
   id: string;
@@ -35,33 +36,66 @@ export default function OrganizationSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Esperar a que la autenticación esté lista
+  const { isReady: isAuthReady, user } = useAuthReady();
 
   useEffect(() => {
-    fetchOrganization();
-  }, []);
+    if (isAuthReady) {
+      fetchOrganization();
+    }
+  }, [isAuthReady]);
 
-  async function fetchOrganization() {
+  async function fetchOrganization(retryCount = 0) {
     try {
       setIsLoading(true);
       setError(null);
       
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setError('Debes iniciar sesión para ver la configuración de la organización.');
         setIsLoading(false);
         return;
       }
 
-      // Obtener el miembro actual con datos de organización
-      const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
-        .select('organization_id, organizations!inner(id, name, plan, plan_name, seats_total, seats_used)')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
+      // Obtener el miembro actual con datos de organización (con reintentos)
+      let memberData = null;
+      let memberError = null;
+      
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const result = await supabase
+          .from('organization_members')
+          .select('organization_id, organizations!inner(id, name, plan_name, seats_total, seats_used)')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        
+        memberData = result.data;
+        memberError = result.error;
+        
+        // Si no hay error o es PGRST116 (no rows), no reintentar
+        if (!result.error || result.error.code === 'PGRST116') {
+          break;
+        }
+        
+        // Esperar antes de reintentar
+        if (attempt < 2) {
+          await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)));
+        }
+      }
 
-      if (memberError || !memberData) {
-        console.error('Error fetching organization member:', memberError);
+      if (memberError) {
+        // PGRST116 = no rows returned, mensaje amigable
+        if (memberError.code === 'PGRST116') {
+          setError('No se encontró tu membresía en ninguna organización activa. Contacta con soporte si crees que esto es un error.');
+        } else {
+          console.error('Error fetching organization member:', memberError);
+          setError('No se pudo acceder a la información de tu organización. Verifica que tienes acceso activo.');
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (!memberData) {
         setError('No se encontró tu membresía en ninguna organización activa.');
         setIsLoading(false);
         return;
@@ -80,15 +114,15 @@ export default function OrganizationSettingsPage() {
       const org: Organization = {
         id: orgData.id,
         name: orgData.name || 'Sin nombre',
-        plan: orgData.plan || orgData.plan_name || 'free',
-        plan_name: orgData.plan_name || orgData.plan || 'free',
+        plan: orgData.plan_name || 'free',
+        plan_name: orgData.plan_name || 'free',
         seats_total: orgData.seats_total || 1,
         seats_used: orgData.seats_used || 1,
       };
 
       setOrganization(org);
       setOrgName(org.name);
-      setOrgPlan(org.plan_name || org.plan);
+      setOrgPlan(org.plan_name);
     } catch (err) {
       console.error('Error fetching organization:', err);
       setError('Error inesperado al cargar la información de la organización.');
@@ -119,12 +153,14 @@ export default function OrganizationSettingsPage() {
     }
   };
 
-  if (isLoading) {
+  if (!isAuthReady || isLoading) {
     return (
       <div className="container mx-auto py-8 max-w-4xl">
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="ml-2 text-gray-600">Cargando organización...</span>
+          <span className="ml-2 text-gray-600">
+            {!isAuthReady ? 'Inicializando sesión...' : 'Cargando organización...'}
+          </span>
         </div>
       </div>
     );
@@ -137,7 +173,7 @@ export default function OrganizationSettingsPage() {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
-        <Button onClick={fetchOrganization} variant="outline">
+        <Button onClick={() => fetchOrganization()} variant="outline">
           <RefreshCw className="w-4 h-4 mr-2" />
           Reintentar
         </Button>
@@ -154,7 +190,7 @@ export default function OrganizationSettingsPage() {
             No se encontró la organización. Verifica que tienes acceso activo.
           </AlertDescription>
         </Alert>
-        <Button onClick={fetchOrganization} variant="outline">
+        <Button onClick={() => fetchOrganization()} variant="outline">
           <RefreshCw className="w-4 h-4 mr-2" />
           Reintentar
         </Button>
