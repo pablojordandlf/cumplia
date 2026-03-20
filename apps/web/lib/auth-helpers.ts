@@ -123,6 +123,9 @@ export function useAuthReady(maxWaitMs = 5000): AuthState {
 /**
  * Función para obtener la organización del usuario actual con reintentos
  * Maneja el error PGRST116 (no rows returned) de forma graceful
+ * 
+ * NOTA: Usa consultas separadas para evitar problemas de relación ambigua
+ * entre organization_members y organizations
  */
 export async function fetchUserOrganization(maxRetries = 3, retryDelay = 500) {
   let lastError: any = null;
@@ -140,9 +143,10 @@ export async function fetchUserOrganization(maxRetries = 3, retryDelay = 500) {
         return { data: null, error: 'No hay sesión activa' };
       }
 
+      // PASO 1: Obtener membresía sin join
       const { data: memberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('organization_id, role, organizations!organization_id(id, name, plan_name, seats_total, seats_used, max_users)')
+        .select('organization_id, role')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .single();
@@ -167,11 +171,14 @@ export async function fetchUserOrganization(maxRetries = 3, retryDelay = 500) {
         return { data: null, error: 'No se encontró membresía activa' };
       }
 
-      // organizations viene como array desde la relación embebida
-      const orgArray = memberData.organizations as any[];
-      const orgData = orgArray?.[0];
+      // PASO 2: Obtener datos de la organización por separado
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('id, name, plan_name, seats_total, seats_used, max_users')
+        .eq('id', memberData.organization_id)
+        .single();
 
-      if (!orgData) {
+      if (orgError || !orgData) {
         return { data: null, error: 'No se encontró la información de la organización' };
       }
 

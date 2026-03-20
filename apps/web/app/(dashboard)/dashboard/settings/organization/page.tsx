@@ -57,14 +57,14 @@ export default function OrganizationSettingsPage() {
         return;
       }
 
-      // Obtener el miembro actual con datos de organización (con reintentos)
+      // PASO 1: Obtener membresía del usuario (sin join)
       let memberData = null;
       let memberError = null;
       
       for (let attempt = 0; attempt < 3; attempt++) {
         const result = await supabase
           .from('organization_members')
-          .select('organization_id, organizations!organization_id(id, name, plan_name, seats_total, seats_used)')
+          .select('organization_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .single();
@@ -101,11 +101,14 @@ export default function OrganizationSettingsPage() {
         return;
       }
 
-      // organizations viene como array desde la relación
-      const orgArray = memberData.organizations as any[];
-      const orgData = orgArray?.[0];
+      // PASO 2: Obtener datos de la organización por separado
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('id, name, plan_name, seats_total, seats_used')
+        .eq('id', memberData.organization_id)
+        .single();
 
-      if (!orgData || !orgData.id) {
+      if (orgError || !orgData) {
         setError('No se encontró la información de tu organización.');
         setIsLoading(false);
         return;

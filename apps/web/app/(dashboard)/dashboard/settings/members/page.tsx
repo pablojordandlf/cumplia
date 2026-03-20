@@ -87,14 +87,14 @@ export default function MembersPage() {
         return;
       }
 
-      // Obtener organización del usuario con plan (con reintentos)
+      // PASO 1: Obtener membresía del usuario (sin join)
       let memberData = null;
       let memberError = null;
       
       for (let attempt = 0; attempt < 3; attempt++) {
         const result = await supabase
           .from('organization_members')
-          .select('organization_id, role, organizations!organization_id(id, plan_name, max_users, seats_total)')
+          .select('organization_id, role')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .single();
@@ -127,6 +127,20 @@ export default function MembersPage() {
 
       if (!memberData) {
         setError('No se encontró tu membresía en ninguna organización activa.');
+        setIsLoading(false);
+        return;
+      }
+
+      // PASO 2: Obtener datos de la organización por separado
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('id, plan_name, max_users, seats_total')
+        .eq('id', memberData.organization_id)
+        .single();
+
+      if (orgError) {
+        console.error('Error getting org data:', orgError);
+        setError('No se pudo acceder a la información de tu organización.');
         setIsLoading(false);
         return;
       }

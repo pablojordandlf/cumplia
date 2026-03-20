@@ -30,14 +30,14 @@ export function UsageIndicator() {
         return;
       }
 
-      // Obtener organización del usuario con sus datos (con reintentos)
+      // PASO 1: Obtener membresía del usuario (sin join)
       let memberData = null;
       let memberError = null;
       
       for (let attempt = 0; attempt < 3; attempt++) {
         const result = await supabase
           .from('organization_members')
-          .select('organization_id, organizations!organization_id(id, seats_total, plan_name, seats_used)')
+          .select('organization_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .single();
@@ -64,46 +64,53 @@ export function UsageIndicator() {
 
       const orgId = memberData.organization_id;
       
-      // Obtener seats_used directamente de organizations
-      const orgArray = memberData.organizations as any[];
-      const orgData = orgArray?.[0];
+      // PASO 2: Obtener datos de la organización por separado
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('id, seats_total, plan_name, seats_used')
+        .eq('id', orgId)
+        .single();
       
-      if (orgData) {
-        // Primero intentar usar seats_total del registro de organization
-        let maxUsers = orgData?.seats_total;
-        let currentUsed = orgData?.seats_used || 0;
-        
-        // Si no hay seats_total, buscar en tabla plans mediante plan_name
-        if (!maxUsers) {
-          const planName = orgData?.plan_name || 'free';
-          const { data: planData } = await supabase
-            .from('plans')
-            .select('limits')
-            .eq('name', planName)
-            .single();
-          
-          if (planData?.limits) {
-            const limits = planData.limits as any;
-            maxUsers = limits?.users || limits?.max_users || 1;
-          }
-        }
-
-        // Contar miembros activos
-        if (!currentUsed) {
-          const { count, error: countError } = await supabase
-            .from('organization_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', orgId)
-            .eq('status', 'active');
-          
-          if (!countError) {
-            currentUsed = count || 0;
-          }
-        }
-
-        setTotal(maxUsers || 1);
-        setUsed(currentUsed);
+      if (orgError || !orgData) {
+        console.error('Error fetching org data:', orgError);
+        setIsLoading(false);
+        return;
       }
+      
+      // Primero intentar usar seats_total del registro de organization
+      let maxUsers = orgData?.seats_total;
+      let currentUsed = orgData?.seats_used || 0;
+        
+      // Si no hay seats_total, buscar en tabla plans mediante plan_name
+      if (!maxUsers) {
+        const planName = orgData?.plan_name || 'free';
+        const { data: planData } = await supabase
+          .from('plans')
+          .select('limits')
+          .eq('name', planName)
+          .single();
+        
+        if (planData?.limits) {
+          const limits = planData.limits as any;
+          maxUsers = limits?.users || limits?.max_users || 1;
+        }
+      }
+
+      // Contar miembros activos
+      if (!currentUsed) {
+        const { count, error: countError } = await supabase
+          .from('organization_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId)
+          .eq('status', 'active');
+        
+        if (!countError) {
+          currentUsed = count || 0;
+        }
+      }
+
+      setTotal(maxUsers || 1);
+      setUsed(currentUsed);
     } catch (error) {
       console.error('Error fetching usage:', error);
     } finally {

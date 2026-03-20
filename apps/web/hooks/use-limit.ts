@@ -37,17 +37,23 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
           return;
         }
 
-        // Get user's organization
+        // Get user's organization membership
         const { data: membership } = await supabase
           .from('organization_members')
-          .select('organization_id, organizations!organization_id(plan)')
+          .select('organization_id')
           .eq('user_id', session.user.id)
           .eq('status', 'active')
           .single();
 
         if (membership?.organization_id) {
-          // B2B: Use organization plan
-          const orgPlan = (membership.organizations as any)?.plan || 'starter';
+          // B2B: Get organization plan separately
+          const { data: orgData } = await supabase
+            .from('organizations')
+            .select('plan')
+            .eq('id', membership.organization_id)
+            .single();
+          
+          const orgPlan = orgData?.plan || 'starter';
           const planLimit = PLAN_LIMITS[orgPlan] || 1;
           setLimit(planLimit);
 
