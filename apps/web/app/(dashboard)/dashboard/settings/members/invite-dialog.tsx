@@ -37,6 +37,7 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
   const [loading, setLoading] = useState(false);
   const [maxUsers, setMaxUsers] = useState<number | null>(null);
   const [currentUsers, setCurrentUsers] = useState<number>(0);
+  const [currentViewers, setCurrentViewers] = useState<number>(0);
   const [usageLoading, setUsageLoading] = useState(true);
 
   useEffect(() => {

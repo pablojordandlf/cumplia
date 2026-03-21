@@ -10,18 +10,18 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      // Ensure user has organization and membership
-      await ensureUserOrganization(supabase)
+      // Check if user has organization - redirect to onboarding if not
+      const redirectUrl = await getRedirectUrl(supabase, next)
       
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
       
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`)
+        return NextResponse.redirect(`${origin}${redirectUrl}`)
       } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
+        return NextResponse.redirect(`https://${forwardedHost}${redirectUrl}`)
       } else {
-        return NextResponse.redirect(`${origin}${next}`)
+        return NextResponse.redirect(`${origin}${redirectUrl}`)
       }
     }
   }
@@ -29,79 +29,54 @@ export async function GET(request: Request) {
   return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
 }
 
-async function ensureUserOrganization(supabase: Awaited<ReturnType<typeof createClient>>) {
+async function getRedirectUrl(supabase: Awaited<ReturnType<typeof createClient>>, defaultNext: string): Promise<string> {
   try {
     // Get current user
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) return '/login'
 
-    // Check if user already has a membership
+    // Check if user already has an active membership
     const { data: existingMembership } = await supabase
       .from('organization_members')
-      .select('id')
+      .select('id, status')
       .eq('user_id', user.id)
+      .eq('status', 'active')
       .limit(1)
       .single()
 
-    if (existingMembership) return // User already has organization
+    if (existingMembership) {
+      // User has organization - redirect to dashboard
+      return defaultNext
+    }
 
-    // Check if user has an organization as owner
-    const { data: existingOrg } = await supabase
-      .from('organizations')
-      .select('id')
-      .eq('owner_id', user.id)
+    // Check if user has a pending invitation
+    const { data: pendingInvite } = await supabase
+      .from('organization_members')
+      .select('id, organization_id, status')
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
       .limit(1)
       .single()
 
-    if (existingOrg) {
-      // Org exists but membership missing - create it
-      await supabase.from('organization_members').insert({
-        organization_id: existingOrg.id,
-        user_id: user.id,
-        email: user.email,
-        role: 'owner',
-        status: 'active',
-        invited_by: user.id
-      })
-      return
+    if (pendingInvite) {
+      // User has pending invitation - accept it automatically
+      await supabase
+        .from('organization_members')
+        .update({ 
+          status: 'active',
+          joined_at: new Date().toISOString()
+        })
+        .eq('id', pendingInvite.id)
+      
+      return defaultNext
     }
 
-    // Create new organization for user
-    const companyName = user.user_metadata?.company_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Mi Organización'
-    const slug = `${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${user.id.slice(0, 8)}`
-
-    const { data: newOrg, error: orgError } = await supabase
-      .from('organizations')
-      .insert({
-        name: companyName,
-        slug: slug,
-        owner_id: user.id,
-        plan: 'starter',
-        seats_total: 1,
-        seats_used: 1
-      })
-      .select('id')
-      .single()
-
-    if (orgError || !newOrg) {
-      console.error('Error creating organization:', orgError)
-      return
-    }
-
-    // Create membership for owner
-    const { error: memberError } = await supabase.from('organization_members').insert({
-      organization_id: newOrg.id,
-      user_id: user.id,
-      email: user.email,
-      role: 'owner',
-      status: 'active',
-      invited_by: user.id
-    })
-
-    if (memberError) {
-      console.error('Error creating membership:', memberError)
-    }
+    // No organization - redirect to onboarding
+    return '/onboarding/organization'
+    
   } catch (error) {
-    console.error('Error in ensureUserOrganization:', error)
+    console.error('Error in getRedirectUrl:', error)
+    // On error, default to dashboard (user will be redirected to onboarding if needed)
+    return defaultNext
   }
 }
