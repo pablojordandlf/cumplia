@@ -190,29 +190,14 @@ function TrustedBySection() {
 function EndToEndSection() {
   const capabilities = [
     {
-      icon: Search,
-      title: "Discover",
-      desc: "Visibilidad completa de todos los modelos de IA en tu empresa"
-    },
-    {
       icon: ClipboardCheck,
       title: "Inventory",
       desc: "Inventario centralizado de sistemas de IA con metadatos"
     },
     {
       icon: Shield,
-      title: "Assess",
-      desc: "Evaluación automática de riesgos según el AI Act"
-    },
-    {
-      icon: FileText,
-      title: "Document",
-      desc: "Generación automática de FRIA y documentación"
-    },
-    {
-      icon: Lock,
-      title: "Secure",
-      desc: "Controles de seguridad y gobernanza integrados"
+      title: "Análisis de Riesgos IA",
+      desc: "Evaluación avanzada y personalizada de riesgos de tus sistemas IA"
     },
     {
       icon: Bell,
@@ -225,16 +210,16 @@ function EndToEndSection() {
     <section className="py-24 bg-slate-950">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">End-to-End AI Governance</p>
+          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">AI Governance</p>
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Gobierno de IA de extremo a extremo
+            Gobierno de IA accesible
           </h2>
           <p className="text-lg text-slate-400">
-            Una plataforma integral diseñada para la velocidad, complejidad y escala de los ecosistemas empresariales de IA
+            Una plataforma basada en la sencillez, facilidad de uso, y escala de tus sistemas de IA
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
           {capabilities.map((item, index) => (
             <motion.div
               key={index}
@@ -249,85 +234,6 @@ function EndToEndSection() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
               <p className="text-slate-400">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function WhoAppliesSection() {
-  const riskLevels = [
-    {
-      icon: AlertTriangle,
-      title: 'Riesgo Inaceptable',
-      color: 'text-red-400',
-      bgColor: 'bg-red-500/10',
-      borderColor: 'border-red-500/20',
-      desc: 'Sistemas prohibidos como manipulación subliminal o puntuación social.',
-      examples: 'Sistemas de vigilancia masiva, manipulación conductual'
-    },
-    {
-      icon: Shield,
-      title: 'Alto Riesgo',
-      color: 'text-orange-400',
-      bgColor: 'bg-orange-500/10',
-      borderColor: 'border-orange-500/20',
-      desc: 'Sistemas críticos que requieren cumplimiento estricto y evaluación de riesgos.',
-      examples: 'Salud, educación, empleo, seguridad, justicia'
-    },
-    {
-      icon: CheckCircle,
-      title: 'Riesgo Limitado',
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/10',
-      borderColor: 'border-blue-500/20',
-      desc: 'Sistemas con transparencia obligatoria pero menos requisitos.',
-      examples: 'Chatbots, generación de contenido (deepfakes)'
-    },
-    {
-      icon: Star,
-      title: 'Riesgo Mínimo',
-      color: 'text-emerald-400',
-      bgColor: 'bg-emerald-500/10',
-      borderColor: 'border-emerald-500/20',
-      desc: 'Sistemas de bajo riesgo con cumplimiento voluntario recomendado.',
-      examples: 'Spam filters, recomendaciones básicas'
-    }
-  ];
-
-  return (
-    <section id="who-applies" className="py-24 bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">Compliance Framework</p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            ¿A quién aplica el AI Act?
-          </h2>
-          <p className="text-lg text-slate-400">
-            El Reglamento de IA de la UE establece obligaciones según el nivel de riesgo de tu sistema
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
-          {riskLevels.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className={`p-5 sm:p-6 rounded-2xl bg-slate-950 ${item.borderColor} border hover:border-opacity-50 transition-all`}
-            >
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${item.bgColor} flex items-center justify-center mb-3 sm:mb-4`}>
-                <item.icon className={`w-6 h-6 ${item.color}`} />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-              <p className="text-slate-400 text-sm mb-4">{item.desc}</p>
-              <p className="text-xs text-slate-500">
-                <strong className="text-slate-400">Ejemplos:</strong> {item.examples}
-              </p>
             </motion.div>
           ))}
         </div>
@@ -386,6 +292,93 @@ function PainPointsSection() {
               </h3>
               <p className="text-slate-400">
                 {item.desc}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhoAppliesSection() {
+  const riskLevels = [
+    {
+      icon: AlertTriangle,
+      title: 'Riesgo Inaceptable',
+      color: 'text-red-400',
+      bgColor: 'bg-red-500/10',
+      borderColor: 'border-red-500/20',
+      desc: 'Sistemas prohibidos como manipulación subliminal o puntuación social.',
+      examples: 'Sistemas de vigilancia masiva, manipulación conductual'
+    },
+    {
+      icon: Shield,
+      title: 'Alto Riesgo',
+      color: 'text-orange-400',
+      bgColor: 'bg-orange-500/10',
+      borderColor: 'border-orange-500/20',
+      desc: 'Sistemas críticos que requieren cumplimiento estricto y evaluación de riesgos.',
+      examples: 'Salud, educación, empleo, seguridad, justicia'
+    },
+    {
+      icon: CheckCircle,
+      title: 'Riesgo Limitado',
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/20',
+      desc: 'Sistemas con transparencia obligatoria pero menos requisitos.',
+      examples: 'Chatbots, generación de contenido (deepfakes)'
+    },
+    {
+      icon: Star,
+      title: 'Riesgo Mínimo',
+      color: 'text-emerald-400',
+      bgColor: 'bg-emerald-500/10',
+      borderColor: 'border-emerald-500/20',
+      desc: 'Sistemas de bajo riesgo con cumplimiento voluntario recomendado.',
+      examples: 'Spam filters, recomendaciones básicas'
+    }
+  ];
+
+  return (
+    <section id="who-applies" className="py-24 bg-slate-900">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-8">
+          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">Compliance Framework</p>
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+            ¿A quién aplica el AI Act?
+          </h2>
+          <p className="text-lg text-slate-400">
+            El Reglamento de IA de la UE establece obligaciones según el nivel de riesgo de tu sistema
+          </p>
+        </div>
+
+        <div className="max-w-3xl mx-auto mb-12">
+          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <p className="text-slate-300 text-center">
+              <strong className="text-white">Aplica a todas las empresas</strong> que utilicen IA en su día a día o sean proveedores de sistemas de IA, independientemente de su tamaño o sector.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
+          {riskLevels.map((item, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className={`p-5 sm:p-6 rounded-2xl bg-slate-950 ${item.borderColor} border hover:border-opacity-50 transition-all`}
+            >
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${item.bgColor} flex items-center justify-center mb-3 sm:mb-4`}>
+                <item.icon className={`w-6 h-6 ${item.color}`} />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+              <p className="text-slate-400 text-sm mb-4">{item.desc}</p>
+              <p className="text-xs text-slate-500">
+                <strong className="text-slate-400">Ejemplos:</strong> {item.examples}
               </p>
             </motion.div>
           ))}
@@ -474,6 +467,7 @@ function PricingSection() {
       description: 'Para empresas que quieren evaluar un único sistema',
       features: [
         '1 sistema de IA',
+        '1 usuario',
         'Clasificación de riesgo',
         'Guía básica de cumplimiento',
         'Soporte por email'
@@ -484,11 +478,11 @@ function PricingSection() {
     },
     {
       name: 'Professional',
-      price: '49€',
+      price: '99€',
       period: '/mes',
       description: 'Para equipos con varios sistemas de IA',
       features: [
-        '15 sistemas de IA',
+        '5 sistemas de IA',
         '3 usuarios',
         'FRIA automatizada',
         'Gestión de riesgos',
@@ -506,7 +500,7 @@ function PricingSection() {
       period: '/mes',
       description: 'Para organizaciones con múltiples departamentos',
       features: [
-        'Sistemas de IA ilimitados',
+        '15 sistemas de IA',
         '10 usuarios',
         'Asistente de IA',
         'Gestión avanzada de riesgos',
@@ -516,6 +510,24 @@ function PricingSection() {
       ],
       cta: 'Contactar Ventas',
       href: '/contact?plan=business',
+      highlight: false
+    },
+    {
+      name: 'Enterprise',
+      price: 'Custom',
+      period: '',
+      description: 'Para grandes organizaciones con necesidades específicas',
+      features: [
+        'Sistemas de IA ilimitados',
+        'Usuarios ilimitados',
+        'SSO y autenticación avanzada',
+        'On-premise disponible',
+        'API completa',
+        'SLA garantizado',
+        'Account manager dedicado'
+      ],
+      cta: 'Contactar Ventas',
+      href: '/contact?plan=enterprise',
       highlight: false
     }
   ];
@@ -533,7 +545,7 @@ function PricingSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
@@ -560,14 +572,14 @@ function PricingSection() {
                 {plan.features.map((feature, fIndex) => (
                   <li key={fIndex} className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    <span className="text-slate-300">{feature}</span>
+                    <span className="text-slate-300 text-sm">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Link href={plan.href}>
                 <Button 
-                  className={`w-full min-h-[56px] py-5 sm:py-6 text-base sm:text-lg ${
+                  className={`w-full min-h-[56px] py-5 sm:py-6 text-base ${
                     plan.highlight 
                       ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                       : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
@@ -591,8 +603,8 @@ export default function HomePage() {
       <HeroSection />
       <TrustedBySection />
       <EndToEndSection />
-      <WhoAppliesSection />
       <PainPointsSection />
+      <WhoAppliesSection />
       <FeaturesSection />
       <PricingSection />
       <Footer />
