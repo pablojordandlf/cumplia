@@ -124,8 +124,8 @@ export default function PricingPage() {
             </div>
             <div className="text-center mb-6">
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-5xl font-bold text-white">0€</span>
-                <span className="text-slate-400">/mes</span>
+                <span className="text-5xl font-bold text-slate-900">0€</span>
+                <span className="text-slate-500">/mes</span>
               </div>
               <Badge className="mt-2 bg-slate-500/20 text-slate-300">Gratis para siempre</Badge>
               <p className="text-xs text-slate-500 mt-2">Sin tarjeta de crédito</p>
@@ -157,13 +157,13 @@ export default function PricingPage() {
               <p className="text-sm text-muted-foreground">{professionalTier.description}</p>
             </div>
             <div className="text-center mb-6">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-slate-500 line-through text-lg">{professionalTier.originalPrice}€</span>
-                <span className="text-5xl font-bold text-white">{professionalTier.monthlyPrice}€</span>
-                <span className="text-slate-400">/mes</span>
+              <div className="flex items-baseline justify-center gap-1 flex-wrap">
+                <span className="text-slate-400 line-through text-lg">{professionalTier.originalPrice}€</span>
+                <span className="text-5xl font-bold text-slate-900">{professionalTier.monthlyPrice}€</span>
+                <span className="text-slate-500">/mes</span>
               </div>
               <Badge className={`mt-2 ${professionalTier.badgeColor}`}>{professionalTier.badge}</Badge>
-              <p className="text-sm text-blue-400 mt-2">{professionalTier.yearlySavings}</p>
+              <p className="text-sm text-emerald-600 font-medium mt-2">{professionalTier.yearlySavings}</p>
               <p className="text-xs text-slate-500 mt-1">{professionalTier.additionalSavings}</p>
             </div>
             <ul className="space-y-3 mb-6 flex-1">
@@ -188,13 +188,13 @@ export default function PricingPage() {
               <p className="text-sm text-muted-foreground">{businessTier.description}</p>
             </div>
             <div className="text-center mb-6">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-slate-500 line-through text-lg">{businessTier.originalPrice}€</span>
-                <span className="text-5xl font-bold text-white">{businessTier.monthlyPrice}€</span>
-                <span className="text-slate-400">/mes</span>
+              <div className="flex items-baseline justify-center gap-1 flex-wrap">
+                <span className="text-slate-400 line-through text-lg">{businessTier.originalPrice}€</span>
+                <span className="text-5xl font-bold text-slate-900">{businessTier.monthlyPrice}€</span>
+                <span className="text-slate-500">/mes</span>
               </div>
               <Badge className={`mt-2 ${businessTier.badgeColor}`}>{businessTier.badge}</Badge>
-              <p className="text-sm text-blue-400 mt-2">{businessTier.yearlySavings}</p>
+              <p className="text-sm text-emerald-600 font-medium mt-2">{businessTier.yearlySavings}</p>
               <p className="text-xs text-slate-500 mt-1">{businessTier.additionalSavings}</p>
             </div>
             <ul className="space-y-3 mb-6 flex-1">

@@ -479,6 +479,7 @@ function PricingSection() {
     {
       name: 'Professional',
       price: '99€',
+      originalPrice: '149',
       period: '/mes',
       description: 'Para equipos con varios sistemas de IA',
       features: [
@@ -490,13 +491,18 @@ function PricingSection() {
         'Exportación de documentos',
         'Soporte prioritario'
       ],
-      cta: 'Prueba Gratis',
+      cta: 'Elige Professional',
       href: '/register?plan=professional',
-      highlight: true
+      highlight: true,
+      badge: '🔥 Oferta de lanzamiento',
+      badgeColor: 'bg-green-500/20 text-green-400',
+      yearlySavings: 'Ahorra 600€/año',
+      additionalSavings: 'o 990€/año (ahorra 198€)'
     },
     {
       name: 'Business',
       price: '299€',
+      originalPrice: '349',
       period: '/mes',
       description: 'Para organizaciones con múltiples departamentos',
       features: [
@@ -508,9 +514,13 @@ function PricingSection() {
         'Múltiples departamentos',
         'Soporte dedicado'
       ],
-      cta: 'Contactar Ventas',
+      cta: 'Elige Business',
       href: '/contact?plan=business',
-      highlight: false
+      highlight: false,
+      badge: '💼 Precio especial PYMEs',
+      badgeColor: 'bg-blue-500/20 text-blue-400',
+      yearlySavings: 'Ahorra 1.200€/año',
+      additionalSavings: 'o 2.490€/año (ahorra 498€)'
     },
     {
       name: 'Enterprise',
@@ -561,11 +571,25 @@ function PricingSection() {
             >
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-1 mb-2">
+                <div className="flex items-baseline justify-center gap-1 flex-wrap mb-2">
+                  {plan.originalPrice && (
+                    <span className="text-slate-400 line-through text-lg mr-2">{plan.originalPrice}€</span>
+                  )}
                   <span className="text-5xl font-bold text-white">{plan.price}</span>
                   <span className="text-slate-500">{plan.period}</span>
                 </div>
-                <p className="text-slate-400 text-sm">{plan.description}</p>
+                {plan.badge && (
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-2 ${plan.badgeColor || 'bg-blue-500/20 text-blue-400'}`}>
+                    {plan.badge}
+                  </span>
+                )}
+                {plan.yearlySavings && (
+                  <p className="text-sm text-emerald-400 font-medium">{plan.yearlySavings}</p>
+                )}
+                {plan.additionalSavings && (
+                  <p className="text-xs text-slate-500 mt-1">{plan.additionalSavings}</p>
+                )}
+                <p className="text-slate-400 text-sm mt-2">{plan.description}</p>
               </div>
 
               <ul className="space-y-4 mb-8">
