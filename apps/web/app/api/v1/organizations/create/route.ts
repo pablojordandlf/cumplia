@@ -1,9 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
+    // Client for auth operations (uses anon key with RLS)
     const supabase = await createClient();
+    
+    // Admin client for DB operations (bypasses RLS)
+    const adminSupabase = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -48,8 +56,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create organization
-    const { data: organization, error: orgError } = await supabase
+    // Create organization using admin client (bypasses RLS)
+    const { data: organization, error: orgError } = await adminSupabase
       .from('organizations')
       .insert({
         name: name.trim(),
@@ -77,8 +85,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create owner membership
-    const { error: memberError } = await supabase
+    // Create owner membership using admin client
+    const { error: memberError } = await adminSupabase
       .from('organization_members')
       .insert({
         organization_id: organization.id,
@@ -92,7 +100,7 @@ export async function POST(request: Request) {
     if (memberError) {
       console.error('Error creating membership:', memberError);
       // Rollback: delete organization
-      await supabase.from('organizations').delete().eq('id', organization.id);
+      await adminSupabase.from('organizations').delete().eq('id', organization.id);
       return NextResponse.json(
         { message: 'Error al asignar membresía', error: memberError.message },
         { status: 500 }
