@@ -55,11 +55,13 @@ export async function POST(request: Request) {
         name: name.trim(),
         slug: generateSlug(name.trim()),
         owner_id: user.id,
-        size: size || null,
-        industry: industry || null,
-        country: country,
+        plan: plan,
+        seats_total: getMaxUsers(plan),
+        seats_used: 1,
         settings: {
-          plan: plan,
+          size: size || null,
+          industry: industry || null,
+          country: country,
           max_ai_systems: getMaxAiSystems(plan),
           max_users: getMaxUsers(plan),
         },
@@ -81,10 +83,10 @@ export async function POST(request: Request) {
       .insert({
         organization_id: organization.id,
         user_id: user.id,
+        email: user.email || '',
         role: 'owner',
         status: 'active',
         invited_by: user.id,
-        joined_at: new Date().toISOString(),
       });
 
     if (memberError) {
