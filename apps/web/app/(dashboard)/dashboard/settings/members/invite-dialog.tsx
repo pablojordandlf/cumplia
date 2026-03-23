@@ -55,7 +55,8 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
       const orgRes = await fetch(`/api/v1/organizations/${organizationId}`);
       if (orgRes.ok) {
         const orgData = await orgRes.json();
-        setMaxSeats(orgData.data?.seatsTotal || 1);
+        // API returns { organization: {...} } with snake_case fields
+        setMaxSeats(orgData.organization?.seats_total || 1);
       }
 
       // Count current active members
