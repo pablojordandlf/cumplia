@@ -347,17 +347,19 @@ export default function NewUseCasePage() {
       </div>
 
       {/* Sección de inspiración - Casos de uso sugeridos - AHORA ANTES DEL PASO 1 */}
-      <UseCaseSuggestions 
-        onSelectCase={(useCase) => {
-          form.setValue('name', useCase.name);
-          form.setValue('description', useCase.description);
-          form.setValue('sector', useCase.sector as any);
-          toast({
-            title: 'Caso precargado',
-            description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.`,
-          });
-        }}
-      />
+      <div className="max-w-3xl mx-auto mb-6">
+        <UseCaseSuggestions
+          onSelectCase={(useCase) => {
+            form.setValue('name', useCase.name);
+            form.setValue('description', useCase.description);
+            form.setValue('sector', useCase.sector as any);
+            toast({
+              title: 'Caso precargado',
+              description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.`,
+            });
+          }}
+        />
+      </div>
 
       <Card className="max-w-3xl mx-auto">
         <CardHeader>

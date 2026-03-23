@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json(
@@ -96,10 +96,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { 
-      name, 
-      description, 
-      ai_act_level, 
+    const {
+      name,
+      description,
+      ai_act_level,
       risk_ids,
       applies_to_levels,
       excluded_systems,
@@ -121,6 +121,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get user's active organization
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (membershipError || !membership) {
+      return NextResponse.json(
+        { error: 'No active organization found for user' },
+        { status: 403 }
+      );
+    }
+
     // Create template
     const { data: template, error: templateError } = await supabase
       .from('risk_templates')
@@ -132,6 +149,7 @@ export async function POST(request: NextRequest) {
         is_system: false,
         is_active: true,
         created_by: user.id,
+        organization_id: membership.organization_id,
         applies_to_levels: applies_to_levels || [ai_act_level],
         excluded_systems: excluded_systems || [],
         included_systems: included_systems || []
