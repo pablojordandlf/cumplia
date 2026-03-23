@@ -289,14 +289,147 @@ export default function UseCaseDetailPage() {
           </div>
         )}
 
-        {/* Risk Management Tab with permissions */}
-        {useCase && (
-          <RiskManagementTab 
-            aiSystemId={useCase.id} 
-            aiActLevel={useCase.ai_act_level}
-            isReadOnly={isViewer}
-          />
-        )}
+        {/* Tabs Navigation */}
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
+            <TabsTrigger value="general">Información General</TabsTrigger>
+            <TabsTrigger value="obligations">Obligaciones</TabsTrigger>
+            <TabsTrigger value="risks">Gestión de Riesgos</TabsTrigger>
+          </TabsList>
+
+          {/* Tab: Información General */}
+          <TabsContent value="general" className="space-y-6">
+            {/* Risk Level Banner */}
+            <Card className={`border-l-4 ${riskInfo.color.replace('bg-', 'border-l-').split(' ')[0]}`}>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-lg ${riskInfo.color}`}>
+                    <RiskIcon className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900">Nivel de Riesgo AI Act</h3>
+                      <Badge className={riskInfo.color}>{riskInfo.label}</Badge>
+                    </div>
+                    <p className="text-gray-600 text-sm">{riskInfo.description}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Información del Sistema
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {useCase.description && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Descripción</label>
+                    <p className="text-gray-600 mt-1">{useCase.description}</p>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Sector</label>
+                    <p className="text-gray-600 mt-1 capitalize">{useCase.sector}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Rol según AI Act</label>
+                    <p className="text-gray-600 mt-1">{aiActRoles[useCase.ai_act_role] || useCase.ai_act_role}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Estado</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      {useCase.is_poc ? (
+                        <>
+                          <FlaskConical className="w-4 h-4 text-blue-600" />
+                          <span className="text-gray-600">Prueba de Concepto (PoC)</span>
+                          <PoCTooltip />
+                        </>
+                      ) : (
+                        <>
+                          <Package className="w-4 h-4 text-gray-600" />
+                          <span className="text-gray-600">En Producción</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Última actualización</label>
+                    <p className="text-gray-600 mt-1">
+                      {format(new Date(useCase.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Custom Fields */}
+                {customFields.length > 0 && (
+                  <div className="border-t pt-4 mt-4">
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Campos Personalizados</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {customFields.map((field) => (
+                        <div key={field.id} className="bg-gray-50 p-3 rounded-lg">
+                          <span className="text-sm font-medium text-gray-700">{field.key}</span>
+                          <p className="text-gray-600 text-sm">{field.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Classification Data */}
+            {useCase.classification_data && Object.keys(useCase.classification_data).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="w-5 h-5" />
+                    Datos de Clasificación
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {Object.entries(useCase.classification_data).map(([key, value]: [string, any]) => (
+                      <div key={key} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
+                        <span className="text-sm text-gray-600 capitalize">{key.replace(/_/g, ' ')}</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {typeof value === 'boolean' ? (value ? 'Sí' : 'No') : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Tab: Obligaciones */}
+          <TabsContent value="obligations">
+            <TransparencyObligations 
+              aiSystemId={useCase.id} 
+              aiActLevel={useCase.ai_act_level}
+              isReadOnly={isViewer}
+            />
+          </TabsContent>
+
+          {/* Tab: Gestión de Riesgos */}
+          <TabsContent value="risks">
+            <RiskManagementTab 
+              aiSystemId={useCase.id} 
+              aiActLevel={useCase.ai_act_level}
+              isReadOnly={isViewer}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
