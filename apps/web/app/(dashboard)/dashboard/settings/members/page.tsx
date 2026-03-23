@@ -49,8 +49,10 @@ interface UnifiedMember {
   name?: string;
   role: MemberRole;
   status: string;
-  createdAt: string;
+  createdAt?: string;
+  created_at?: string;
   inviteExpiresAt?: string;
+  invite_expires_at?: string;
 }
 
 export default function MembersPage() {
@@ -166,8 +168,8 @@ export default function MembersPage() {
           name: m.name || m.email.split('@')[0],
           role: m.role,
           status: m.status as 'active' | 'invited' | 'suspended' | 'removed',
-          createdAt: m.createdAt,
-          updatedAt: m.createdAt,
+          createdAt: m.created_at || m.createdAt || new Date().toISOString(),
+          updatedAt: m.created_at || m.createdAt || new Date().toISOString(),
         }));
 
       const pendingInvitations: PendingInvitation[] = unifiedMembers
@@ -180,10 +182,10 @@ export default function MembersPage() {
           role: m.role,
           status: 'pending' as const,
           inviteToken: '', // Not exposed in listing
-          inviteExpiresAt: m.inviteExpiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          inviteExpiresAt: m.invite_expires_at || m.inviteExpiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           invitedBy: '', // Not exposed in listing
-          createdAt: m.createdAt,
-          updatedAt: m.createdAt,
+          createdAt: m.created_at || m.createdAt || new Date().toISOString(),
+          updatedAt: m.created_at || m.createdAt || new Date().toISOString(),
         }));
 
       setMembers(activeMembers);
@@ -336,7 +338,7 @@ export default function MembersPage() {
                 <TableHead>Miembro</TableHead>
                 <TableHead>Rol</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead>Unido</TableHead>
+                <TableHead>Fecha creado</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
