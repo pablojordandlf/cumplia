@@ -133,12 +133,38 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         );
       }
     } else {
-      // For custom templates, check ownership
+      // For custom templates, check ownership and organization membership
       if (existingTemplate.created_by !== user.id) {
         return NextResponse.json(
           { error: 'Not authorized to modify this template' },
           { status: 403 }
         );
+      }
+
+      // Verify user has editor role in the template's organization
+      if (existingTemplate.organization_id) {
+        const { data: membership, error: membershipError } = await supabase
+          .from('organization_members')
+          .select('role')
+          .eq('organization_id', existingTemplate.organization_id)
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+
+        if (membershipError || !membership) {
+          return NextResponse.json(
+            { error: 'Not authorized to modify this template - not an organization member' },
+            { status: 403 }
+          );
+        }
+
+        const allowedRoles = ['owner', 'admin', 'editor'];
+        if (!allowedRoles.includes(membership.role)) {
+          return NextResponse.json(
+            { error: 'Not authorized - editor role required' },
+            { status: 403 }
+          );
+        }
       }
 
       // Update template
@@ -270,6 +296,32 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         { error: 'Not authorized to delete this template' },
         { status: 403 }
       );
+    }
+
+    // Verify user has editor role in the template's organization
+    if (existingTemplate.organization_id) {
+      const { data: membership, error: membershipError } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', existingTemplate.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (membershipError || !membership) {
+        return NextResponse.json(
+          { error: 'Not authorized to delete this template - not an organization member' },
+          { status: 403 }
+        );
+      }
+
+      const allowedRoles = ['owner', 'admin', 'editor'];
+      if (!allowedRoles.includes(membership.role)) {
+        return NextResponse.json(
+          { error: 'Not authorized - editor role required' },
+          { status: 403 }
+        );
+      }
     }
 
     // Delete template (cascade will delete items)
