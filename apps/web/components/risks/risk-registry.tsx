@@ -22,7 +22,8 @@ import {
   Shield,
   RefreshCw,
   Lock,
-  EyeOff
+  EyeOff,
+  Eye
 } from 'lucide-react';
 import {
   Tooltip,
@@ -46,6 +47,7 @@ interface RiskRegistryProps {
   onRiskUpdated: (risk: AISystemRisk) => void;
   onRiskDeleted: (riskId: string) => void;
   onRefresh: () => void;
+  isReadOnly?: boolean;
 }
 
 export function RiskRegistry({ 
@@ -54,7 +56,8 @@ export function RiskRegistry({
   aiActLevel,
   onRiskUpdated, 
   onRiskDeleted,
-  onRefresh
+  onRefresh,
+  isReadOnly = false
 }: RiskRegistryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -78,6 +81,15 @@ export function RiskRegistry({
   });
 
   const handleToggleApplicable = async (risk: AISystemRisk, newValue: boolean) => {
+    if (isReadOnly) {
+      toast({
+        title: 'Sin permisos',
+        description: 'No tienes permisos para modificar riesgos',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setTogglingRiskId(risk.id);
     try {
       const response = await fetch(
@@ -133,6 +145,14 @@ export function RiskRegistry({
 
   return (
     <div className="space-y-4">
+      {/* Read-only notice */}
+      {isReadOnly && (
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+          <span className="font-medium">Modo Visualizador:</span> Solo puedes ver los riesgos. 
+          Contacta a un administrador para realizar evaluaciones o modificaciones.
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -207,10 +227,14 @@ export function RiskRegistry({
               key={risk.id}
               className={`transition-colors border ${
                 isApplicable 
-                  ? 'cursor-pointer hover:border-primary border-solid' 
+                  ? `border-solid ${isReadOnly ? 'cursor-default' : 'cursor-pointer hover:border-primary'}`
                   : 'cursor-not-allowed border-dashed border-gray-300 bg-gray-50/30'
               }`}
-              onClick={() => isApplicable && setSelectedRisk(risk)}
+              onClick={() => {
+                if (isApplicable) {
+                  setSelectedRisk(risk);
+                }
+              }}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -276,32 +300,43 @@ export function RiskRegistry({
                           No aplica
                         </Badge>
                       )}
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-2">
-                              <span className={`text-xs ${isApplicable ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
-                                {isApplicable ? 'Aplica' : 'No aplica'}
-                              </span>
-                              <Switch
-                                checked={!!risk.applicable}
-                                onCheckedChange={(checked) => {
-                                  handleToggleApplicable(risk, checked === true);
-                                }}
-                                disabled={togglingRiskId === risk.id}
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            <p className="max-w-xs">
-                              {isApplicable 
-                                ? 'Haz clic para marcar este riesgo como NO aplicable a tu sistema'
-                                : 'Haz clic para marcar este riesgo como aplicable y evaluarlo'
-                              }
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      {isReadOnly ? (
+                        // Read-only indicator instead of switch
+                        <Badge variant="outline" className="text-xs">
+                          {isApplicable ? (
+                            <><Eye className="h-3 w-3 mr-1" /> Aplica</>
+                          ) : (
+                            <><EyeOff className="h-3 w-3 mr-1" /> No aplica</>
+                          )}
+                        </Badge>
+                      ) : (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs ${isApplicable ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+                                  {isApplicable ? 'Aplica' : 'No aplica'}
+                                </span>
+                                <Switch
+                                  checked={!!risk.applicable}
+                                  onCheckedChange={(checked) => {
+                                    handleToggleApplicable(risk, checked === true);
+                                  }}
+                                  disabled={togglingRiskId === risk.id}
+                                />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              <p className="max-w-xs">
+                                {isApplicable 
+                                  ? 'Haz clic para marcar este riesgo como NO aplicable a tu sistema'
+                                  : 'Haz clic para marcar este riesgo como aplicable y evaluarlo'
+                                }
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </div>
                     
                     <Badge className={RISK_STATUS_CONFIG[risk.status].color}>
@@ -336,6 +371,7 @@ export function RiskRegistry({
             onRiskUpdated(updated);
             setSelectedRisk(null);
           }}
+          isReadOnly={isReadOnly}
         />
       )}
     </div>

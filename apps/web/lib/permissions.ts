@@ -1,5 +1,8 @@
 import { MemberRole } from '@/types/organization';
 
+// Re-export MemberRole for convenience
+export type { MemberRole };
+
 // Permission definitions
 export type Permission = 
   | 'ai_systems:read'
@@ -17,6 +20,7 @@ export type Permission =
   | 'members:invite'
   | 'members:remove'
   | 'members:update_role'
+  | 'organization:read'
   | 'organization:update'
   | 'organization:delete'
   | 'templates:manage'
@@ -31,7 +35,7 @@ export const ROLE_PERMISSIONS: Record<MemberRole, Permission[]> = {
     'obligations:read', 'obligations:manage',
     'evidences:read', 'evidences:create', 'evidences:delete',
     'members:read', 'members:invite', 'members:remove', 'members:update_role',
-    'organization:update',
+    'organization:read', 'organization:update',
     'templates:manage',
     'reports:read', 'reports:generate',
   ],
@@ -41,7 +45,7 @@ export const ROLE_PERMISSIONS: Record<MemberRole, Permission[]> = {
     'obligations:read', 'obligations:manage',
     'evidences:read', 'evidences:create', 'evidences:delete',
     'members:read', 'members:invite', 'members:remove', 'members:update_role',
-    'organization:update',
+    'organization:read', 'organization:update',
     'templates:manage',
     'reports:read', 'reports:generate',
   ],
@@ -51,6 +55,7 @@ export const ROLE_PERMISSIONS: Record<MemberRole, Permission[]> = {
     'obligations:read', 'obligations:manage',
     'evidences:read', 'evidences:create',
     'members:read',
+    'organization:read',
     'reports:read', 'reports:generate',
   ],
   viewer: [
@@ -58,6 +63,7 @@ export const ROLE_PERMISSIONS: Record<MemberRole, Permission[]> = {
     'risks:read',
     'obligations:read',
     'evidences:read',
+    'organization:read',
     'reports:read',
   ],
 };

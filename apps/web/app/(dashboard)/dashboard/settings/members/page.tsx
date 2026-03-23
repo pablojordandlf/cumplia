@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/table';
 import { InviteDialog } from './invite-dialog';
 import { UsageIndicator } from './usage-indicator';
-import { Member, MemberRole } from '@/types/organization';
+import { Member, MemberRole, PendingInvitation } from '@/types/organization';
 import { MoreHorizontal, Mail, UserX, Shield, User, Loader2, AlertCircle, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -42,30 +42,25 @@ const ROLE_LABELS: Record<MemberRole, string> = {
   viewer: 'Visualizador',
 };
 
-interface OrganizationMember {
+interface UnifiedMember {
   id: string;
-  organization_id: string;
-  user_id: string | null;
+  type: 'member' | 'invitation';
   email: string;
-  name: string | null;
+  name?: string;
   role: MemberRole;
-  status: 'active' | 'pending' | 'invited';
-  invited_by: string | null;
-  invite_expires_at: string | null;
-  created_at: string;
-  profiles?: {
-    full_name: string | null;
-  } | null;
+  status: string;
+  createdAt: string;
+  inviteExpiresAt?: string;
 }
 
 export default function MembersPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvitation[]>([]);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<MemberRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pendingInvites, setPendingInvites] = useState<OrganizationMember[]>([]);
   const [isRetrying, setIsRetrying] = useState(false);
   
   // Esperar a que la autenticación esté lista
@@ -148,73 +143,51 @@ export default function MembersPage() {
       setOrganizationId(memberData.organization_id);
       setCurrentUserRole(memberData.role);
 
-      // Obtener miembros activos con sus perfiles
-      const { data: membersData, error: membersError } = await supabase
-        .from('organization_members')
-        .select(`
-          id,
-          organization_id,
-          user_id,
-          email,
-          name,
-          role,
-          status,
-          invited_by,
-          invite_expires_at,
-          created_at,
-          profiles(full_name)
-        `)
-        .eq('organization_id', memberData.organization_id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: true });
-
-      if (membersError) {
-        console.error('Error fetching members:', membersError);
+      // Obtener miembros e invitaciones pendientes usando la API unificada
+      const membersRes = await fetch(`/api/v1/organizations/${memberData.organization_id}/members`);
+      if (!membersRes.ok) {
+        console.error('Error fetching members:', await membersRes.text());
         setError('Error al cargar los miembros del equipo.');
         setIsLoading(false);
         return;
       }
 
-      // Obtener invitaciones pendientes
-      const { data: invitesData, error: invitesError } = await supabase
-        .from('organization_members')
-        .select(`
-          id,
-          organization_id,
-          user_id,
-          email,
-          name,
-          role,
-          status,
-          invited_by,
-          invite_expires_at,
-          created_at
-        `)
-        .eq('organization_id', memberData.organization_id)
-        .eq('status', 'invited')
-        .order('created_at', { ascending: false });
+      const membersResponse = await membersRes.json();
+      const unifiedMembers: UnifiedMember[] = membersResponse.data || [];
 
-      if (invitesError) {
-        console.error('Error fetching invites:', invitesError);
-      }
+      // Separar miembros activos de invitaciones pendientes
+      const activeMembers: Member[] = unifiedMembers
+        .filter((m: UnifiedMember) => m.type === 'member')
+        .map((m: UnifiedMember) => ({
+          id: m.id,
+          organizationId: memberData.organization_id,
+          userId: m.id, // Will be populated from actual data
+          email: m.email,
+          name: m.name || m.email.split('@')[0],
+          role: m.role,
+          status: m.status as 'active' | 'invited' | 'suspended' | 'removed',
+          createdAt: m.createdAt,
+          updatedAt: m.createdAt,
+        }));
 
-      // Transformar datos al formato esperado
-      const transformedMembers: Member[] = (membersData || []).map((m: any) => ({
-        id: m.id,
-        organizationId: m.organization_id,
-        userId: m.user_id,
-        email: m.email,
-        name: m.name || m.profiles?.full_name || m.email.split('@')[0],
-        role: m.role as MemberRole,
-        status: m.status as 'active' | 'pending' | 'invited',
-        invitedBy: m.invited_by,
-        inviteExpiresAt: m.invite_expires_at,
-        createdAt: m.created_at,
-        updatedAt: m.created_at,
-      }));
+      const pendingInvitations: PendingInvitation[] = unifiedMembers
+        .filter((m: UnifiedMember) => m.type === 'invitation')
+        .map((m: UnifiedMember) => ({
+          id: m.id,
+          organizationId: memberData.organization_id,
+          email: m.email,
+          name: m.name,
+          role: m.role,
+          status: 'pending' as const,
+          inviteToken: '', // Not exposed in listing
+          inviteExpiresAt: m.inviteExpiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          invitedBy: '', // Not exposed in listing
+          createdAt: m.createdAt,
+          updatedAt: m.createdAt,
+        }));
 
-      setMembers(transformedMembers);
-      setPendingInvites((invitesData || []) as OrganizationMember[]);
+      setMembers(activeMembers);
+      setPendingInvites(pendingInvitations);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -224,38 +197,73 @@ export default function MembersPage() {
   }
 
   const handleResendInvite = async (inviteId: string) => {
+    if (!organizationId) return;
+    
     try {
-      const { error } = await supabase
-        .from('organization_members')
-        .update({ 
-          invite_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() 
-        })
-        .eq('id', inviteId);
+      // POST to regenerate invite token
+      const response = await fetch(`/api/v1/organizations/${organizationId}/members`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'resend',
+          invitationId: inviteId 
+        }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to resend invitation');
+      }
       
       toast.success('Invitación reenviada');
       fetchData();
     } catch (error) {
       toast.error('Error al reenviar la invitación');
+      console.error(error);
     }
   };
 
   const handleRemoveMember = async (memberId: string) => {
+    if (!organizationId) return;
     if (!confirm('¿Estás seguro de que quieres eliminar a este miembro?')) return;
 
     try {
-      const { error } = await supabase
-        .from('organization_members')
-        .delete()
-        .eq('id', memberId);
+      const response = await fetch(`/api/v1/organizations/${organizationId}/members?memberId=${memberId}`, {
+        method: 'DELETE',
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to remove member');
+      }
       
       toast.success('Miembro eliminado');
       fetchData();
     } catch (error) {
       toast.error('Error al eliminar el miembro');
+      console.error(error);
+    }
+  };
+
+  const handleCancelInvite = async (inviteId: string) => {
+    if (!organizationId) return;
+    if (!confirm('¿Estás seguro de que quieres cancelar esta invitación?')) return;
+
+    try {
+      const response = await fetch(`/api/v1/organizations/${organizationId}/members?invitationId=${inviteId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to cancel invitation');
+      }
+      
+      toast.success('Invitación cancelada');
+      fetchData();
+    } catch (error) {
+      toast.error('Error al cancelar la invitación');
+      console.error(error);
     }
   };
 
@@ -429,12 +437,12 @@ export default function MembersPage() {
                     <TableCell>{invite.email}</TableCell>
                     <TableCell>
                       <Badge className={ROLE_COLORS[invite.role]}>
-                        {ROLE_LABELS[invite.role as MemberRole]}
+                        {ROLE_LABELS[invite.role]}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-gray-500">
-                      {invite.invite_expires_at 
-                        ? new Date(invite.invite_expires_at).toLocaleDateString('es-ES')
+                      {invite.inviteExpiresAt 
+                        ? new Date(invite.inviteExpiresAt).toLocaleDateString('es-ES')
                         : 'Sin expiración'}
                     </TableCell>
                     <TableCell>
@@ -452,7 +460,7 @@ export default function MembersPage() {
                             Reenviar
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleRemoveMember(invite.id)}
+                            onClick={() => handleCancelInvite(invite.id)}
                             className="text-red-600"
                           >
                             <UserX className="w-4 h-4 mr-2" />

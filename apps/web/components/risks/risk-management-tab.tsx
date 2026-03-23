@@ -16,7 +16,8 @@ import {
   Shield,
   AlertCircle,
   Lock,
-  Plus
+  Plus,
+  Eye
 } from 'lucide-react';
 import { 
   AISystemRisk, 
@@ -33,9 +34,10 @@ import { AddCustomRiskDialog } from './add-custom-risk-dialog';
 interface RiskManagementTabProps {
   aiSystemId: string;
   aiActLevel: string;
+  isReadOnly?: boolean;
 }
 
-export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabProps) {
+export function RiskManagementTab({ aiSystemId, aiActLevel, isReadOnly = false }: RiskManagementTabProps) {
   const [risks, setRisks] = useState<AISystemRisk[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<RiskManagementStatus | null>(null);
@@ -176,8 +178,8 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
         />
       )}
 
-      {/* Template Selector (only if no risks yet) */}
-      {risks.length === 0 && (
+      {/* Template Selector (only if no risks yet AND not read-only) */}
+      {risks.length === 0 && !isReadOnly && (
         <Card>
           <CardHeader>
             <CardTitle>Iniciar Gestión de Riesgos</CardTitle>
@@ -195,6 +197,26 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
         </Card>
       )}
 
+      {/* Read-only notice when no risks */}
+      {risks.length === 0 && isReadOnly && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="rounded-full bg-blue-100 p-4 mb-4">
+                <Eye className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                Sin Riesgos Registrados
+              </h3>
+              <p className="text-blue-700 max-w-md">
+                Este sistema de IA aún no tiene riesgos registrados. 
+                Contacta a un administrador para iniciar la gestión de riesgos.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Risk Management Tabs */}
       {risks.length > 0 && (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -203,14 +225,16 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
               <TabsTrigger value="registry">Registro de Riesgos</TabsTrigger>
               <TabsTrigger value="matrix">Matriz de Riesgos</TabsTrigger>
             </TabsList>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowAddRiskDialog(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Añadir Riesgos
-            </Button>
+            {!isReadOnly && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAddRiskDialog(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Añadir Riesgos
+              </Button>
+            )}
           </div>
           
           <TabsContent value="registry" className="mt-4">
@@ -221,6 +245,7 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
               onRiskUpdated={handleRiskUpdated}
               onRiskDeleted={handleRiskDeleted}
               onRefresh={fetchRisks}
+              isReadOnly={isReadOnly}
             />
           </TabsContent>
           
@@ -231,13 +256,15 @@ export function RiskManagementTab({ aiSystemId, aiActLevel }: RiskManagementTabP
       )}
 
       {/* Add Custom Risk Dialog */}
-      <AddCustomRiskDialog
-        aiSystemId={aiSystemId}
-        existingRiskIds={risks.map(r => r.catalog_risk_id)}
-        open={showAddRiskDialog}
-        onOpenChange={setShowAddRiskDialog}
-        onRisksAdded={fetchRisks}
-      />
+      {!isReadOnly && (
+        <AddCustomRiskDialog
+          aiSystemId={aiSystemId}
+          existingRiskIds={risks.map(r => r.catalog_risk_id)}
+          open={showAddRiskDialog}
+          onOpenChange={setShowAddRiskDialog}
+          onRisksAdded={fetchRisks}
+        />
+      )}
     </div>
   );
 }

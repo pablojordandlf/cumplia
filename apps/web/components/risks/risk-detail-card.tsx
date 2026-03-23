@@ -67,6 +67,7 @@ interface RiskDetailCardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRiskUpdated: (risk: AISystemRisk) => void;
+  isReadOnly?: boolean;
 }
 
 export function RiskDetailCard({ 
@@ -74,7 +75,8 @@ export function RiskDetailCard({
   aiSystemId,
   open, 
   onOpenChange,
-  onRiskUpdated
+  onRiskUpdated,
+  isReadOnly = false
 }: RiskDetailCardProps) {
   const [loading, setLoading] = useState(false);
   const [editedRisk, setEditedRisk] = useState<AISystemRisk>(risk);
@@ -116,6 +118,15 @@ export function RiskDetailCard({
   };
 
   const handleSave = async () => {
+    if (isReadOnly) {
+      toast({
+        title: 'Sin permisos',
+        description: 'No tienes permisos para editar riesgos',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -208,6 +219,14 @@ export function RiskDetailCard({
           </DialogTitle>
         </DialogHeader>
 
+        {/* Read-only notice */}
+        {isReadOnly && (
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+            <span className="font-medium">Modo Visualizador:</span> Solo puedes ver la información del riesgo. 
+            Contacta a un administrador para realizar modificaciones.
+          </div>
+        )}
+
         <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
           <div className="space-y-6">
             {/* Risk Info */}
@@ -277,6 +296,7 @@ export function RiskDetailCard({
                       onValueChange={(value: RiskStatus) => 
                         setEditedRisk(prev => ({ ...prev, status: value }))
                       }
+                      disabled={isReadOnly}
                     >
                       <SelectTrigger id="status">
                         <SelectValue />
@@ -314,6 +334,7 @@ export function RiskDetailCard({
                     <Select 
                       value={editedRisk.probability || ''} 
                       onValueChange={handleProbabilityChange}
+                      disabled={isReadOnly}
                     >
                       <SelectTrigger id="probability">
                         <SelectValue placeholder="Seleccionar..." />
@@ -334,6 +355,7 @@ export function RiskDetailCard({
                     <Select 
                       value={editedRisk.impact || ''} 
                       onValueChange={handleImpactChange}
+                      disabled={isReadOnly}
                     >
                       <SelectTrigger id="impact">
                         <SelectValue placeholder="Seleccionar..." />
@@ -363,13 +385,15 @@ export function RiskDetailCard({
                   <Label htmlFor="mitigation">Medidas de Mitigación</Label>
                   <Textarea
                     id="mitigation"
-                    placeholder="Describe las medidas implementadas o planificadas para mitigar este riesgo..."
+                    placeholder={isReadOnly ? "" : "Describe las medidas implementadas o planificadas para mitigar este riesgo..."}
                     value={editedRisk.mitigation_measures || ''}
                     onChange={(e) => setEditedRisk(prev => ({ 
                       ...prev, 
                       mitigation_measures: e.target.value 
                     }))}
                     rows={3}
+                    disabled={isReadOnly}
+                    className={isReadOnly ? "bg-gray-100" : ""}
                   />
                 </div>
 
@@ -387,6 +411,8 @@ export function RiskDetailCard({
                         ...prev, 
                         responsible_person: e.target.value 
                       }))}
+                      disabled={isReadOnly}
+                      className={isReadOnly ? "bg-gray-100" : ""}
                     />
                   </div>
 
@@ -403,6 +429,8 @@ export function RiskDetailCard({
                         ...prev, 
                         due_date: e.target.value 
                       }))}
+                      disabled={isReadOnly}
+                      className={isReadOnly ? "bg-gray-100" : ""}
                     />
                   </div>
                 </div>
@@ -419,36 +447,49 @@ export function RiskDetailCard({
               </CardHeader>
               <CardContent>
                 <Textarea
-                  placeholder="Notas, comentarios o evidencia adicional..."
+                  placeholder={isReadOnly ? "" : "Notas, comentarios o evidencia adicional..."}
                   value={editedRisk.notes || ''}
                   onChange={(e) => setEditedRisk(prev => ({ 
                     ...prev, 
                     notes: e.target.value 
                   }))}
                   rows={3}
+                  disabled={isReadOnly}
+                  className={isReadOnly ? "bg-gray-100" : ""}
                 />
               </CardContent>
             </Card>
 
-            {/* Save Button */}
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar Cambios
-                  </>
-                )}
-              </Button>
-            </div>
+            {/* Save Button - Only show if not read-only */}
+            {!isReadOnly && (
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave} disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Guardar Cambios
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+            
+            {/* Close button for read-only mode */}
+            {isReadOnly && (
+              <div className="flex justify-end gap-2 pt-4">
+                <Button onClick={() => onOpenChange(false)}>
+                  Cerrar
+                </Button>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </DialogContent>

@@ -51,7 +51,7 @@ export async function GET(
 
     const userRoleInOrg = member.role as MemberRole;
 
-    if (!hasPermission(userRoleInOrg, 'read:organization')) {
+    if (!hasPermission(userRoleInOrg, 'organization:read')) {
       return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
     }
 
