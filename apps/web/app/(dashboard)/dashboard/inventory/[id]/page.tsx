@@ -51,7 +51,6 @@ interface UseCase {
   ai_act_level: string;
   ai_act_role: string;
   status: string;
-  is_active: boolean;
   is_poc: boolean;
   created_at: string;
   updated_at: string;

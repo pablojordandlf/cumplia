@@ -275,7 +275,6 @@ export default function NewUseCasePage() {
           ai_act_role: values.ai_act_role,
           status: 'draft',
           ai_act_level: 'unclassified',
-          is_active: values.is_active,
           is_poc: values.is_poc,
           custom_fields: customFields.length > 0 ? customFields : [],
         },
@@ -435,43 +434,6 @@ export default function NewUseCasePage() {
                   Estado del Sistema
                 </h3>
                 
-                <FormField
-                  control={form.control}
-                  name="is_active"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado del Producto</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            onClick={() => field.onChange(true)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                              field.value ? 'bg-green-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            <Play className="w-4 h-4" />
-                            Activo
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => field.onChange(false)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                              !field.value ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            <Square className="w-4 h-4" />
-                            Obsoleto
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        Indica si el sistema está actualmente en uso o marcado como obsoleto.
-                      </FormDescription>
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="is_poc"
