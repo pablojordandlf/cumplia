@@ -174,7 +174,7 @@ export async function fetchUserOrganization(maxRetries = 3, retryDelay = 500) {
       // PASO 2: Obtener datos de la organización por separado
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .select('id, name, plan_name, seats_total, seats_used, max_users')
+        .select('id, name, plan_name, seats_total, seats_used')
         .eq('id', memberData.organization_id)
         .single();
 
@@ -192,7 +192,7 @@ export async function fetchUserOrganization(maxRetries = 3, retryDelay = 500) {
             plan_name: orgData.plan_name || 'free',
             seats_total: orgData.seats_total || 1,
             seats_used: orgData.seats_used || 0,
-            max_users: orgData.max_users || orgData.seats_total || 1,
+            max_users: orgData.seats_total || 1,
           }
         },
         error: null
