@@ -64,10 +64,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Verify risk belongs to this system
     const { data: existingRisk, error: riskError } = await supabase
-      .from('ai_system_risks')
+      .from('use_case_risks')
       .select('*')
       .eq('id', riskId)
-      .eq('ai_system_id', aiSystemId)
+      .eq('use_case_id', aiSystemId)
       .single();
 
     if (riskError || !existingRisk) {
@@ -142,7 +142,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const { data: updatedRisk, error: updateError } = await supabase
-      .from('ai_system_risks')
+      .from('use_case_risks')
       .update(updateData)
       .eq('id', riskId)
       .select(`
@@ -227,10 +227,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Delete the risk
     const { error: deleteError } = await supabase
-      .from('ai_system_risks')
+      .from('use_case_risks')
       .delete()
       .eq('id', riskId)
-      .eq('ai_system_id', aiSystemId);
+      .eq('use_case_id', aiSystemId);
 
     if (deleteError) {
       console.error('Error deleting risk:', deleteError);

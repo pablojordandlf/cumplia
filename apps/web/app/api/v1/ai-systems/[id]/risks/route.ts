@@ -54,12 +54,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Get risks with catalog data
     const { data: risks, error } = await supabase
-      .from('ai_system_risks')
+      .from('use_case_risks')
       .select(`
         *,
         catalog_risk:catalog_risk_id(*)
       `)
-      .eq('ai_system_id', aiSystemId)
+      .eq('use_case_id', aiSystemId)
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -171,9 +171,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (action === 'clear') {
       // Clear all existing risks for this system
       const { error: deleteError } = await supabase
-        .from('ai_system_risks')
+        .from('use_case_risks')
         .delete()
-        .eq('ai_system_id', aiSystemId);
+        .eq('use_case_id', aiSystemId);
 
       if (deleteError) {
         console.error('Error clearing risks:', deleteError);
@@ -214,9 +214,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       // Check for existing risks to avoid duplicates
       const { data: existingSystemRisks, error: existingError } = await supabase
-        .from('ai_system_risks')
+        .from('use_case_risks')
         .select('catalog_risk_id')
-        .eq('ai_system_id', aiSystemId)
+        .eq('use_case_id', aiSystemId)
         .in('catalog_risk_id', validCatalogIds);
 
       if (existingError) {
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       // Create new risks - by default they don't apply
       const newRisks = newCatalogIds.map(catalogRiskId => ({
-        ai_system_id: aiSystemId,
+        use_case_id: aiSystemId,
         catalog_risk_id: catalogRiskId,
         template_id: null,
         status: 'not_applicable',
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }));
 
       const { data: createdRisks, error: createError } = await supabase
-        .from('ai_system_risks')
+        .from('use_case_risks')
         .insert(newRisks)
         .select(`
           *,
@@ -297,13 +297,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Clear existing risks first
     await supabase
-      .from('ai_system_risks')
+      .from('use_case_risks')
       .delete()
-      .eq('ai_system_id', aiSystemId);
+      .eq('use_case_id', aiSystemId);
 
     // Create new risks from template - by default they don't apply
     const newRisks = templateItems.map(item => ({
-      ai_system_id: aiSystemId,
+      use_case_id: aiSystemId,
       catalog_risk_id: item.catalog_risk_id,
       template_id: template_id,
       status: 'not_applicable',
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }));
 
     const { data: createdRisks, error: createError } = await supabase
-      .from('ai_system_risks')
+      .from('use_case_risks')
       .insert(newRisks)
       .select(`
         *,

@@ -66,7 +66,7 @@ export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
 export interface AISystemRisk {
   id: string;
-  ai_system_id: string;
+  use_case_id: string;
   catalog_risk_id: string;
   template_id: string | null;
 
