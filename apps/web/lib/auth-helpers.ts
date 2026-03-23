@@ -32,11 +32,18 @@ export function useAuthReady(maxWaitMs = 5000): AuthState {
     let timeoutId: NodeJS.Timeout;
     let intervalId: NodeJS.Timeout;
     let startTime = Date.now();
+    let isResolved = false;
 
     const checkAuth = async () => {
+      // Evitar ejecuciones innecesarias si ya se resolvió
+      if (isResolved) return;
+
       const { data: { user }, error } = await supabase.auth.getUser();
       
       if (error) {
+        isResolved = true;
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
         setState({
           user: null,
           isLoading: false,
@@ -47,6 +54,9 @@ export function useAuthReady(maxWaitMs = 5000): AuthState {
       }
 
       if (user) {
+        isResolved = true;
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
         setState({
           user,
           isLoading: false,
@@ -60,6 +70,9 @@ export function useAuthReady(maxWaitMs = 5000): AuthState {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
+        isResolved = true;
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
         setState({
           user: session.user,
           isLoading: false,
@@ -71,6 +84,8 @@ export function useAuthReady(maxWaitMs = 5000): AuthState {
 
       // Verificar tiempo máximo de espera
       if (Date.now() - startTime > maxWaitMs) {
+        isResolved = true;
+        clearInterval(intervalId);
         setState({
           user: null,
           isLoading: false,
@@ -88,17 +103,21 @@ export function useAuthReady(maxWaitMs = 5000): AuthState {
 
     // Timeout de seguridad
     timeoutId = setTimeout(() => {
-      clearInterval(intervalId);
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        isReady: true,
-      }));
+      if (!isResolved) {
+        isResolved = true;
+        clearInterval(intervalId);
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          isReady: true,
+        }));
+      }
     }, maxWaitMs);
 
     // También escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
+      if (session?.user && !isResolved) {
+        isResolved = true;
         clearInterval(intervalId);
         clearTimeout(timeoutId);
         setState({

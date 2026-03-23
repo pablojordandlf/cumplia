@@ -108,7 +108,7 @@ export default function SettingsPage() {
         setIsLoading(true);
         setError(null);
         
-        if (authError || !user) {
+        if (authError) {
           setError('Debes iniciar sesión para acceder a la configuración.');
           setIsLoading(false);
           return;
@@ -138,7 +138,7 @@ export default function SettingsPage() {
     }
 
     fetchOrganization();
-  }, [isAuthReady, user, authError]);
+  }, [isAuthReady, user?.id, authError]);
 
   async function handleRetry() {
     setIsLoading(true);
