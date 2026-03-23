@@ -129,7 +129,7 @@ export default function MembersPage() {
       // PASO 2: Obtener datos de la organización por separado
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .select('id, plan_name, max_users, seats_total')
+        .select('id, plan_name, seats_total, seats_used')
         .eq('id', memberData.organization_id)
         .single();
 
@@ -228,7 +228,7 @@ export default function MembersPage() {
     if (!confirm('¿Estás seguro de que quieres eliminar a este miembro?')) return;
 
     try {
-      const response = await fetch(`/api/v1/organizations/${organizationId}/members?memberId=${memberId}`, {
+      const response = await fetch(`/api/v1/organizations/${organizationId}/members?userId=${memberId}`, {
         method: 'DELETE',
       });
 
@@ -486,4 +486,6 @@ export default function MembersPage() {
       />
     </div>
   );
+}
+
 }
