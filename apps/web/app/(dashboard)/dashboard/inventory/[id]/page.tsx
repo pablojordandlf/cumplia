@@ -415,9 +415,7 @@ export default function UseCaseDetailPage() {
           {/* Tab: Obligaciones */}
           <TabsContent value="obligations">
             <TransparencyObligations 
-              aiSystemId={useCase.id} 
-              aiActLevel={useCase.ai_act_level}
-              isReadOnly={isViewer}
+              useCase={useCase}
             />
           </TabsContent>
 
