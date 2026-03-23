@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RiskBadge } from '@/components/risk-badge';
 import { TransparencyObligations } from '@/components/transparency-obligations';
+import { AIActChecklistTab } from '@/components/ai-act-checklist-tab';
+import { SystemHistoryTab } from '@/components/system-history-tab';
 import { 
   ArrowLeft, 
   Pencil, 
@@ -27,7 +29,9 @@ import {
   HelpCircle,
   ShieldAlert,
   Brain,
-  Eye
+  Eye,
+  ClipboardCheck,
+  History
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { RiskManagementTab } from '@/components/risks/risk-management-tab';
@@ -57,6 +61,7 @@ interface UseCase {
   classification_data: any;
   created_by: string;
   custom_fields: CustomField[];
+  current_version_id?: string | null;
 }
 
 interface Version {
@@ -291,10 +296,12 @@ export default function UseCaseDetailPage() {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-flex">
-            <TabsTrigger value="general">Información General</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5">
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="checklist">Checklist IA Act</TabsTrigger>
             <TabsTrigger value="obligations">Obligaciones</TabsTrigger>
-            <TabsTrigger value="risks">Gestión de Riesgos</TabsTrigger>
+            <TabsTrigger value="risks">Riesgos</TabsTrigger>
+            <TabsTrigger value="history">Historial</TabsTrigger>
           </TabsList>
 
           {/* Tab: Información General */}
@@ -386,30 +393,11 @@ export default function UseCaseDetailPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Classification Data */}
-            {useCase.classification_data && Object.keys(useCase.classification_data).length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="w-5 h-5" />
-                    Datos de Clasificación
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {Object.entries(useCase.classification_data).map(([key, value]: [string, any]) => (
-                      <div key={key} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
-                        <span className="text-sm text-gray-600 capitalize">{key.replace(/_/g, ' ')}</span>
-                        <span className="text-sm font-medium text-gray-900">
-                          {typeof value === 'boolean' ? (value ? 'Sí' : 'No') : String(value)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+          {/* Tab: Checklist IA Act */}
+          <TabsContent value="checklist">
+            <AIActChecklistTab classificationData={useCase.classification_data} />
           </TabsContent>
 
           {/* Tab: Obligaciones */}
@@ -425,6 +413,14 @@ export default function UseCaseDetailPage() {
               aiSystemId={useCase.id} 
               aiActLevel={useCase.ai_act_level}
               isReadOnly={isViewer}
+            />
+          </TabsContent>
+
+          {/* Tab: Historial */}
+          <TabsContent value="history">
+            <SystemHistoryTab 
+              useCaseId={useCase.id}
+              currentVersionId={useCase.current_version_id}
             />
           </TabsContent>
         </Tabs>

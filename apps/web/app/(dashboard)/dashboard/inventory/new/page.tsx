@@ -346,6 +346,19 @@ export default function NewUseCasePage() {
         </div>
       </div>
 
+      {/* Sección de inspiración - Casos de uso sugeridos - AHORA ANTES DEL PASO 1 */}
+      <UseCaseSuggestions 
+        onSelectCase={(useCase) => {
+          form.setValue('name', useCase.name);
+          form.setValue('description', useCase.description);
+          form.setValue('sector', useCase.sector as any);
+          toast({
+            title: 'Caso precargado',
+            description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.`,
+          });
+        }}
+      />
+
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -603,19 +616,6 @@ export default function NewUseCasePage() {
                   )}
                 </div>
               </div>
-
-              {/* Sección de inspiración - Casos de uso sugeridos */}
-              <UseCaseSuggestions 
-                onSelectCase={(useCase) => {
-                  form.setValue('name', useCase.name);
-                  form.setValue('description', useCase.description);
-                  form.setValue('sector', useCase.sector as any);
-                  toast({
-                    title: 'Caso precargado',
-                    description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.`,
-                  });
-                }}
-              />
 
               <FormField
                 control={form.control}
