@@ -5,21 +5,21 @@
 -- 1. Update plans table with current B2B pricing
 -- ============================================
 
--- First, deactivate old plans
-UPDATE plans SET is_active = false WHERE name IN ('free', 'pro', 'agency');
+-- Delete old obsolete plans (free, pro, agency) if they exist
+DELETE FROM plans WHERE name IN ('free', 'pro', 'agency');
 
 -- Insert new B2B plans (or update if they exist)
-INSERT INTO plans (name, display_name, price_monthly, limits, is_active)
+-- Note: Using only columns that exist in the plans table
+INSERT INTO plans (name, display_name, price_monthly, limits)
 VALUES 
-    ('starter', 'Starter', 0, '{"max_users": 1, "max_ai_systems": 1, "max_documents": 5}', true),
-    ('professional', 'Professional', 99, '{"max_users": 3, "max_ai_systems": 15, "max_documents": -1}', true),
-    ('business', 'Business', 299, '{"max_users": 10, "max_ai_systems": -1, "max_documents": -1}', true),
-    ('enterprise', 'Enterprise', NULL, '{"max_users": -1, "max_ai_systems": -1, "max_documents": -1}', true)
+    ('starter', 'Starter', 0, '{"max_users": 1, "max_ai_systems": 1, "max_documents": 5}'),
+    ('professional', 'Professional', 99, '{"max_users": 3, "max_ai_systems": 15, "max_documents": -1}'),
+    ('business', 'Business', 299, '{"max_users": 10, "max_ai_systems": -1, "max_documents": -1}'),
+    ('enterprise', 'Enterprise', NULL, '{"max_users": -1, "max_ai_systems": -1, "max_documents": -1}')
 ON CONFLICT (name) DO UPDATE SET
     display_name = EXCLUDED.display_name,
     price_monthly = EXCLUDED.price_monthly,
-    limits = EXCLUDED.limits,
-    is_active = EXCLUDED.is_active;
+    limits = EXCLUDED.limits;
 
 -- ============================================
 -- 2. Fix organizations with NULL seats_total
