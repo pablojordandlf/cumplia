@@ -23,10 +23,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Verify user owns this AI system
+    // Verify user has editor access to this AI system through organization membership
     const { data: system, error: systemError } = await supabase
       .from('use_cases')
-      .select('id, user_id')
+      .select('id, organization_id')
       .eq('id', aiSystemId)
       .single();
 
@@ -37,7 +37,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    if (system.user_id !== user.id) {
+    // Check organization membership with editor permissions
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', system.organization_id)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+
+    if (membershipError || !membership) {
+      return NextResponse.json(
+        { error: 'Not authorized to view this system' },
+        { status: 403 }
+      );
+    }
+
+    // Only editors, admins, and owners can modify risks
+    const allowedRoles = ['owner', 'admin', 'editor'];
+    if (!allowedRoles.includes(membership.role)) {
       return NextResponse.json(
         { error: 'Not authorized to modify this system' },
         { status: 403 }
@@ -168,10 +186,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Verify user owns this AI system
+    // Verify user has admin access to this AI system through organization membership
     const { data: system, error: systemError } = await supabase
       .from('use_cases')
-      .select('id, user_id')
+      .select('id, organization_id')
       .eq('id', aiSystemId)
       .single();
 
@@ -182,9 +200,27 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    if (system.user_id !== user.id) {
+    // Check organization membership with admin permissions
+    const { data: membership, error: membershipError } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', system.organization_id)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+
+    if (membershipError || !membership) {
       return NextResponse.json(
-        { error: 'Not authorized to modify this system' },
+        { error: 'Not authorized to view this system' },
+        { status: 403 }
+      );
+    }
+
+    // Only admins and owners can delete risks
+    const allowedRoles = ['owner', 'admin'];
+    if (!allowedRoles.includes(membership.role)) {
+      return NextResponse.json(
+        { error: 'Not authorized to delete risks' },
         { status: 403 }
       );
     }
