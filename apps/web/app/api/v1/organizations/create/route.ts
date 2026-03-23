@@ -63,9 +63,7 @@ export async function POST(request: Request) {
         name: name.trim(),
         slug: generateSlug(name.trim()),
         owner_id: user.id,
-        plan: plan,
-        seats_total: getMaxUsers(plan),
-        seats_used: 1,
+        plan_name: plan,
         settings: {
           size: size || null,
           industry: industry || null,
@@ -92,9 +90,9 @@ export async function POST(request: Request) {
         organization_id: organization.id,
         user_id: user.id,
         email: user.email || '',
+        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
         role: 'owner',
         status: 'active',
-        invited_by: user.id,
       });
 
     if (memberError) {
