@@ -255,6 +255,12 @@ export async function POST(
       throw error;
     }
 
+    // Increment seats_used count
+    await supabase
+      .from('organizations')
+      .update({ seats_used: (org?.seats_used || 0) + 1 })
+      .eq('id', id);
+
     // TODO: Send invite email with inviteToken
     // await sendInviteEmail(email, name, inviteToken, organizationName);
 
@@ -328,6 +334,20 @@ export async function DELETE(
           { success: false, error: error.message },
           { status: 500 }
         );
+      }
+
+      // Decrement seats_used count
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('seats_used')
+        .eq('id', id)
+        .single();
+
+      if (org && org.seats_used > 0) {
+        await supabase
+          .from('organizations')
+          .update({ seats_used: org.seats_used - 1 })
+          .eq('id', id);
       }
 
       return NextResponse.json({ success: true, message: 'Invitation canceled' });

@@ -64,6 +64,8 @@ export async function POST(request: Request) {
         slug: generateSlug(name.trim()),
         owner_id: user.id,
         plan_name: plan,
+        seats_total: getMaxUsers(plan),
+        seats_used: 1, // Owner already occupies 1 seat
         settings: {
           size: size || null,
           industry: industry || null,
