@@ -116,7 +116,6 @@ export default function NewUseCasePage() {
       description: '',
       sector: undefined,
       ai_act_role: undefined,
-      is_active: true,
       is_poc: false,
     },
   });
