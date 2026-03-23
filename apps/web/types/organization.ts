@@ -1,5 +1,8 @@
 export type MemberRole = 'owner' | 'admin' | 'editor' | 'viewer';
-export type MemberStatus = 'active' | 'pending' | 'invited';
+
+// Aligned with database member_status ENUM: ('active', 'invited', 'suspended', 'removed')
+export type MemberStatus = 'active' | 'invited' | 'suspended' | 'removed';
+
 export type OrganizationPlan = 'starter' | 'professional' | 'business' | 'enterprise';
 
 export interface Organization {
@@ -17,17 +20,30 @@ export interface Organization {
   currentUserRole?: MemberRole;
 }
 
+// Updated Member interface - removed invitation fields (moved to pending_invitations table)
 export interface Member {
   id: string;
   organizationId: string;
-  userId?: string | null;
+  userId: string;
   email: string;
   name?: string;
   role: MemberRole;
   status: MemberStatus;
-  invitedBy?: string;
-  inviteToken?: string;
-  inviteExpiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// New PendingInvitation interface - matches pending_invitations table schema
+export interface PendingInvitation {
+  id: string;
+  organizationId: string;
+  invitedBy: string;
+  email: string;
+  name?: string;
+  role: MemberRole;
+  inviteToken: string;
+  inviteExpiresAt: string;
+  status: 'pending' | 'accepted' | 'expired' | 'cancelled';
   createdAt: string;
   updatedAt: string;
 }
@@ -48,10 +64,44 @@ export interface OrganizationUsage {
 export interface InvitePayload {
   email: string;
   role: MemberRole;
+  name?: string;
 }
 
 export interface UpdateRolePayload {
   role: MemberRole;
+}
+
+// Role-based permissions
+export const ROLE_PERMISSIONS: Record<MemberRole, string[]> = {
+  owner: ['*'], // All permissions
+  admin: ['*'], // All permissions except delete organization
+  editor: [
+    'ai_systems:read',
+    'ai_systems:create',
+    'ai_systems:update',
+    'ai_systems:delete',
+    'risks:read',
+    'risks:analyze',
+    'obligations:read',
+    'obligations:manage',
+    'evidences:read',
+    'evidences:create',
+    'members:read',
+  ],
+  viewer: [
+    'ai_systems:read',
+    'risks:read',
+    'obligations:read',
+    'evidences:read',
+    'reports:read',
+  ],
+};
+
+// Helper function to check if a role has a specific permission
+export function hasPermission(role: MemberRole, permission: string): boolean {
+  const permissions = ROLE_PERMISSIONS[role];
+  if (permissions.includes('*')) return true;
+  return permissions.includes(permission);
 }
 
 // Plan limits configuration

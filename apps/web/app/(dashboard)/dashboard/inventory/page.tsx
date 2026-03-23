@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/risk-badge';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { hasPermission, MemberRole } from '@/lib/permissions';
 
 const OBLIGATIONS_BY_LEVEL: Record<string, number> = {
   prohibited: 2,
@@ -62,10 +63,12 @@ export default function InventoryPage() {
   const [obligationsCounts, setObligationsCounts] = useState<Record<string, ObligationsCount>>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userRole, setUserRole] = useState<MemberRole | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
+    fetchUserRole();
     fetchUseCases();
   }, []);
 
@@ -77,6 +80,26 @@ export default function InventoryPage() {
     );
     setFilteredUseCases(results);
   }, [searchTerm, useCases]);
+
+  const fetchUserRole = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (membership) {
+        setUserRole(membership.role as MemberRole);
+      }
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+    }
+  };
 
   const fetchUseCases = async () => {
     try {
@@ -95,7 +118,6 @@ export default function InventoryPage() {
       }
 
       // Filter by user_id (personal use cases) OR organization_id (B2B use cases)
-      // This ensures backward compatibility with existing data
       const { data: membership } = await supabase
         .from('organization_members')
         .select('organization_id')
@@ -112,10 +134,8 @@ export default function InventoryPage() {
         .is('deleted_at', null);
 
       if (organizationId) {
-        // In B2B mode: show use_cases from this organization OR personally owned
         query = query.or(`organization_id.eq.${organizationId},user_id.eq.${session.user.id}`);
       } else {
-        // Personal mode: only show user's own use cases
         query = query.eq('user_id', session.user.id);
       }
 
@@ -172,6 +192,16 @@ export default function InventoryPage() {
   };
 
   const handleDelete = async (id: string) => {
+    // Extra security: check permission before allowing delete
+    if (!userRole || !hasPermission(userRole, 'ai_systems:delete')) {
+      toast({
+        title: 'Sin permisos',
+        description: 'No tienes permisos para eliminar sistemas de IA.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!confirm('¿Estás seguro de que deseas eliminar este sistema de IA?')) return;
     
     try {
@@ -196,6 +226,10 @@ export default function InventoryPage() {
       });
     }
   };
+
+  const canCreate = userRole ? hasPermission(userRole, 'ai_systems:create') : false;
+  const canDelete = userRole ? hasPermission(userRole, 'ai_systems:delete') : false;
+  const isViewer = userRole === 'viewer';
 
   const renderObligationsCell = (useCase: UseCase) => {
     const count = obligationsCounts[useCase.id];
@@ -252,9 +286,16 @@ export default function InventoryPage() {
                 <Eye className="h-4 w-4" />
               </Link>
             </Button>
-            <Button variant="outline" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(useCase.id)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {canDelete && (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="text-red-600 hover:text-red-700 hover:bg-red-50" 
+                onClick={() => handleDelete(useCase.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         );
       default:
@@ -275,24 +316,43 @@ export default function InventoryPage() {
             </Link>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Inventario de Sistemas de IA</h1>
-          <p className="text-gray-600 mt-1 text-sm sm:text-base">Lista y gestiona tus sistemas de IA</p>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
+            {isViewer 
+              ? 'Visualiza los sistemas de IA de tu organización'
+              : 'Lista y gestiona tus sistemas de IA'
+            }
+          </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/dashboard/admin">
-            <Button variant="outline" size="sm" className="sm:size-default">
-              <Settings2 className="mr-0 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Administrar</span>
-            </Button>
-          </Link>
-          <Link href="/dashboard/inventory/new">
-            <Button size="sm" className="sm:size-default">
-              <Plus className="mr-0 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Añadir Sistema de IA</span>
-              <span className="sm:hidden">Añadir</span>
-            </Button>
-          </Link>
+          {!isViewer && (
+            <Link href="/dashboard/admin">
+              <Button variant="outline" size="sm" className="sm:size-default">
+                <Settings2 className="mr-0 sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Administrar</span>
+              </Button>
+            </Link>
+          )}
+          {canCreate && (
+            <Link href="/dashboard/inventory/new">
+              <Button size="sm" className="sm:size-default">
+                <Plus className="mr-0 sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Añadir Sistema de IA</span>
+                <span className="sm:hidden">Añadir</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
+
+      {/* Viewer notice */}
+      {isViewer && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Modo Visualizador:</strong> Solo puedes ver información. 
+            Contacta al administrador si necesitas permisos para crear o editar sistemas de IA.
+          </p>
+        </div>
+      )}
 
       <Card>
         <CardHeader>

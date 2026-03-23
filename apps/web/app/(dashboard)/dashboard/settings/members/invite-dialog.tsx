@@ -20,8 +20,6 @@ import {
 import { MemberRole } from '@/types/organization';
 import { toast } from 'sonner';
 import { Mail, UserPlus, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { useAuthReady } from '@/lib/auth-helpers';
 
 interface InviteDialogProps {
   open: boolean;
@@ -33,11 +31,12 @@ interface InviteDialogProps {
 
 export function InviteDialog({ open, onClose, onSuccess, organizationId, currentUserRole }: InviteDialogProps) {
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [role, setRole] = useState<MemberRole>('viewer');
   const [loading, setLoading] = useState(false);
-  const [maxUsers, setMaxUsers] = useState<number | null>(null);
-  const [currentUsers, setCurrentUsers] = useState<number>(0);
-  const [currentViewers, setCurrentViewers] = useState<number>(0);
+  const [maxSeats, setMaxSeats] = useState<number | null>(null);
+  const [currentMembers, setCurrentMembers] = useState<number>(0);
+  const [pendingInvitations, setPendingInvitations] = useState<number>(0);
   const [usageLoading, setUsageLoading] = useState(true);
 
   useEffect(() => {
@@ -52,45 +51,21 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
     try {
       setUsageLoading(true);
       
-      // Obtener datos de la organización incluyendo plan y límites
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .select('seats_total, plan_name, subscriptions(plans:plan_id(max_users, seats_limit))')
-        .eq('id', organizationId)
-        .single();
-
-      const org = orgData as any;
-      
-      if (orgError) {
-        console.error('Error fetching org data:', orgError);
-        // Fallback: buscar max_users en tabla plans
-        const planName = org?.plan_name || 'free';
-        const { data: planData } = await supabase
-          .from('plans')
-          .select('limits')
-          .eq('name', planName)
-          .single();
-        
-        const limits = planData?.limits as any;
-        setMaxUsers(limits?.users || limits?.max_users || org?.seats_total || 1);
-      } else {
-        // Intentar obtener max_users de varias fuentes
-        const limits = org?.subscriptions?.[0]?.plans as any;
-        const seatsTotal = org?.seats_total;
-        const planLimits = limits?.max_users || limits?.seats_limit;
-        
-        setMaxUsers(planLimits || seatsTotal || 1);
+      // Fetch organization limits
+      const orgRes = await fetch(`/api/v1/organizations/${organizationId}`);
+      if (orgRes.ok) {
+        const orgData = await orgRes.json();
+        setMaxSeats(orgData.data?.seatsTotal || 1);
       }
 
-      // Contar usuarios actuales
-      const { count, error: countError } = await supabase
-        .from('organization_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId)
-        .eq('status', 'active');
-      
-      if (!countError) {
-        setCurrentUsers(count || 0);
+      // Count current active members
+      const membersRes = await fetch(`/api/v1/organizations/${organizationId}/members`);
+      if (membersRes.ok) {
+        const membersData = await membersRes.json();
+        const activeCount = membersData.data?.filter((m: any) => m.type === 'member').length || 0;
+        const pendingCount = membersData.data?.filter((m: any) => m.type === 'invitation').length || 0;
+        setCurrentMembers(activeCount);
+        setPendingInvitations(pendingCount);
       }
     } catch (error) {
       console.error('Error fetching usage data:', error);
@@ -104,28 +79,31 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
 
     if (!email || !organizationId) return;
 
+    const totalOccupied = currentMembers + pendingInvitations;
+
     // Check if at limit
-    if (maxUsers && currentUsers >= maxUsers && maxUsers !== -1) {
-      toast.error(`Has alcanzado el límite de ${maxUsers} usuarios para tu plan. Actualiza tu plan para invitar más miembros.`);
+    if (maxSeats && totalOccupied >= maxSeats && maxSeats !== -1) {
+      toast.error(`Has alcanzado el límite de ${maxSeats} usuarios. Cancela invitaciones pendientes o actualiza tu plan.`);
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/v1/organizations/${organizationId}/members/invite`, {
+      const response = await fetch(`/api/v1/organizations/${organizationId}/members`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, role }),
+        body: JSON.stringify({ email, role, name }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al enviar invitación');
+        throw new Error(error.error || 'Error al enviar invitación');
       }
 
       toast.success('Invitación enviada correctamente');
       setEmail('');
+      setName('');
       setRole('viewer');
       onSuccess();
       onClose();
@@ -142,6 +120,9 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
     if (!currentUserRole) return false;
     return roleHierarchy[currentUserRole] >= roleHierarchy[roleToAssign];
   };
+
+  const totalOccupied = currentMembers + pendingInvitations;
+  const isAtLimit = maxSeats !== null && maxSeats !== -1 && totalOccupied >= maxSeats;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -168,15 +149,24 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="name">Nombre (opcional)</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Juan Pérez"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="role">Rol</Label>
             <Select value={role} onValueChange={(v) => setRole(v as MemberRole)} disabled={loading}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona un rol" />
               </SelectTrigger>
               <SelectContent>
-                {currentUserRole === 'owner' && (
-                  <SelectItem value="owner">Propietario</SelectItem>
-                )}
                 {canAssignRole('admin') && (
                   <SelectItem value="admin">Administrador</SelectItem>
                 )}
@@ -187,29 +177,29 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
               </SelectContent>
             </Select>
             <p className="text-sm text-gray-500">
-              {role === 'owner' && 'Control total de la organización'}
               {role === 'admin' && 'Puede gestionar miembros y configuración de la organización'}
               {role === 'editor' && 'Puede crear y editar sistemas de IA'}
-              {role === 'viewer' && 'Solo puede ver información, no editar'}
+              {role === 'viewer' && 'Solo puede ver información, no editar ni crear'}
             </p>
           </div>
 
-          {!usageLoading && maxUsers !== null && (
+          {!usageLoading && maxSeats !== null && (
             <div className={`p-3 rounded-lg text-sm ${
-              currentUsers >= maxUsers && maxUsers !== -1 
+              isAtLimit
                 ? 'bg-red-50 text-red-700' 
                 : 'bg-blue-50 text-blue-700'
             }`}>
               <div className="flex items-center gap-2">
-                <span className="text-lg">{currentUsers >= maxUsers && maxUsers !== -1 ? '⚠️' : '💡'}</span>
+                <span className="text-lg">{isAtLimit ? '⚠️' : '💡'}</span>
                 <span>
-                  {maxUsers === -1 
-                    ? `Usuarios: ${currentUsers} / Ilimitado`
-                    : `Usuarios: ${currentUsers} / ${maxUsers}`
+                  {maxSeats === -1 
+                    ? `Miembros: ${currentMembers} / Ilimitado`
+                    : `Miembros: ${totalOccupied} / ${maxSeats}`
                   }
+                  {pendingInvitations > 0 && ` (${pendingInvitations} invitaciones pendientes)`}
                 </span>
               </div>
-              {currentUsers >= maxUsers && maxUsers !== -1 && (
+              {isAtLimit && (
                 <span className="block mt-1 font-medium">
                   Has alcanzado el límite de usuarios.
                 </span>
@@ -223,7 +213,7 @@ export function InviteDialog({ open, onClose, onSuccess, organizationId, current
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || !email || (maxUsers !== null && maxUsers !== -1 && currentUsers >= maxUsers)}
+              disabled={loading || !email || isAtLimit}
             >
               {loading ? (
                 <>
