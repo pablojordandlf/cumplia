@@ -91,7 +91,6 @@ const useCaseFormSchema = z.object({
   description: z.string().optional(),
   sector: z.enum(sectors),
   ai_act_role: z.enum(['provider', 'deployer', 'distributor', 'importer']),
-  is_active: z.boolean(),
   is_poc: z.boolean(),
 });
 
@@ -274,7 +273,7 @@ export default function NewUseCasePage() {
           ai_act_role: values.ai_act_role,
           status: 'draft',
           ai_act_level: 'unclassified',
-          is_poc: values.is_poc,
+          is_poc: values.is_poc || false,
           custom_fields: customFields.length > 0 ? customFields : [],
         },
       ]).select('id').single();

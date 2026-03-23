@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Lightbulb, ChevronDown, ChevronUp, Sparkles, Building2, ArrowRight } from 'lucide-react';
+import { Lightbulb, ChevronDown, ChevronUp, ArrowRight, Building2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 
@@ -62,8 +61,7 @@ const sectorLabels: Record<string, string> = {
 export function UseCaseSuggestions({ onSelectCase }: UseCaseSuggestionsProps) {
   const [catalog, setCatalog] = useState<UseCaseCatalog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAll, setShowAll] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     loadCatalog();
@@ -83,27 +81,16 @@ export function UseCaseSuggestions({ onSelectCase }: UseCaseSuggestionsProps) {
       setCatalog(data || []);
     } catch (error: any) {
       console.error('Error loading catalog:', error);
-      // Silently fail - don't show error toast to user, just log it
-      // The examples are optional enhancement, not critical functionality
       setCatalog([]);
     } finally {
       setLoading(false);
     }
   }
 
-  const displayedCases = showAll ? catalog : catalog.slice(0, 4);
-
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-amber-200 rounded w-1/3"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-24 bg-amber-100 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 animate-pulse">
+        <div className="h-4 bg-amber-200 rounded w-1/3"></div>
       </div>
     );
   }
@@ -112,90 +99,77 @@ export function UseCaseSuggestions({ onSelectCase }: UseCaseSuggestionsProps) {
     return null;
   }
 
+  const displayedCases = isExpanded ? catalog : catalog.slice(0, 4);
+
   return (
-    <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 border border-amber-200 rounded-xl p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-amber-100 rounded-lg">
-          <Lightbulb className="w-5 h-5 text-amber-600" />
-        </div>
-        <div>
-          <h3 className="font-semibold text-amber-900">¿Necesitas inspiración?</h3>
-          <p className="text-sm text-amber-700">
-            Selecciona un sistema de IA típico para empezar rápidamente
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {displayedCases.map((useCase) => (
-          <button
-            key={useCase.id}
-            onClick={() => {
-              setSelectedId(useCase.id);
-              onSelectCase(useCase);
-            }}
-            className={`text-left p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md group ${
-              selectedId === useCase.id
-                ? 'border-amber-500 bg-amber-100'
-                : 'border-amber-200 bg-white hover:border-amber-300'
-            }`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-gray-900 truncate group-hover:text-amber-700 transition-colors">
-                  {useCase.name}
-                </h4>
-                <p className="text-sm text-gray-500 line-clamp-2 mt-1">
-                  {useCase.description}
-                </p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
-            </div>
-            <div className="flex items-center gap-2 mt-3">
-              <Badge 
-                variant="outline" 
-                className={`text-xs ${riskLevelColors[useCase.ai_act_level] || riskLevelColors.unclassified}`}
-              >
-                {riskLevelLabels[useCase.ai_act_level] || 'Sin clasificar'}
-              </Badge>
-              <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                <Building2 className="w-3 h-3" />
-                {sectorLabels[useCase.sector] || useCase.sector}
-              </Badge>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {catalog.length > 4 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowAll(!showAll)}
-          className="mt-4 w-full text-amber-700 hover:text-amber-800 hover:bg-amber-100"
-        >
-          {showAll ? (
-            <>
-              <ChevronUp className="w-4 h-4 mr-2" />
-              Ver menos
-            </>
-          ) : (
-            <>
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Ver más ({catalog.length - 4} casos adicionales)
-            </>
-          )}
-        </Button>
-      )}
-
-      <div className="mt-4 pt-4 border-t border-amber-200">
-        <div className="flex items-center gap-2 text-sm text-amber-700">
-          <Sparkles className="w-4 h-4" />
-          <span>
-            <strong>Consejo:</strong> CumplIA calculará automáticamente el nivel de riesgo después de completar el cuestionario de clasificación.
+    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg overflow-hidden">
+      {/* Header - Clickable banner */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-amber-100/50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Lightbulb className="w-4 h-4 text-amber-600" />
+          <span className="font-medium text-amber-900 text-sm">¿Necesitas inspiración?</span>
+          <span className="text-amber-700 text-xs hidden sm:inline">
+            Haz clic para ver {catalog.length} ejemplos de sistemas de IA
           </span>
         </div>
-      </div>
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 text-amber-600" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-amber-600" />
+        )}
+      </button>
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <div className="border-t border-amber-200 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {displayedCases.map((useCase) => (
+              <button
+                key={useCase.id}
+                onClick={() => {
+                  onSelectCase(useCase);
+                  toast({
+                    title: 'Caso precargado',
+                    description: `"${useCase.name}" cargado. Puedes modificarlo antes de guardar.`,
+                  });
+                }}
+                className="text-left p-3 rounded-md border border-amber-200 bg-white hover:border-amber-400 hover:shadow-sm transition-all group"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="font-medium text-gray-900 text-sm truncate group-hover:text-amber-700">
+                    {useCase.name}
+                  </h4>
+                  <ArrowRight className="w-3 h-3 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                </div>
+                <p className="text-xs text-gray-500 line-clamp-1 mt-1">
+                  {useCase.description}
+                </p>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-[10px] px-1 py-0 ${riskLevelColors[useCase.ai_act_level] || riskLevelColors.unclassified}`}
+                  >
+                    {riskLevelLabels[useCase.ai_act_level] || 'Sin clasificar'}
+                  </Badge>
+                  <Badge variant="secondary" className="text-[10px] px-1 py-0 flex items-center gap-0.5">
+                    <Building2 className="w-2.5 h-2.5" />
+                    {sectorLabels[useCase.sector] || useCase.sector}
+                  </Badge>
+                </div>
+              </button>
+            ))}
+          </div>
+          
+          {catalog.length > 6 && (
+            <p className="text-xs text-amber-600 mt-2 text-center">
+              Mostrando {Math.min(displayedCases.length, catalog.length)} de {catalog.length} ejemplos
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

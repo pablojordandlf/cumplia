@@ -12,10 +12,11 @@ interface LimitResult {
   isLoading: boolean;
 }
 
-const PLAN_LIMITS: Record<string, number> = {
+// Default fallback limits if plans table is not accessible
+const DEFAULT_LIMITS: Record<string, number> = {
   starter: 1,
-  professional: 15,
-  business: -1, // unlimited
+  professional: 5,
+  business: 15,
   enterprise: -1, // unlimited
 };
 
@@ -45,17 +46,17 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
           .eq('status', 'active')
           .single();
 
+        let planName = 'starter';
+
         if (membership?.organization_id) {
-          // B2B: Get organization plan separately
+          // B2B: Get organization plan
           const { data: orgData } = await supabase
             .from('organizations')
             .select('plan')
             .eq('id', membership.organization_id)
             .single();
           
-          const orgPlan = orgData?.plan || 'starter';
-          const planLimit = PLAN_LIMITS[orgPlan] || 1;
-          setLimit(planLimit);
+          planName = orgData?.plan || 'starter';
 
           // Count use cases for this organization
           const { count } = await supabase
@@ -74,9 +75,7 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
             .eq('status', 'active')
             .single();
 
-          const plan = subscription?.plan_type || 'starter';
-          const planLimit = PLAN_LIMITS[plan] || 1;
-          setLimit(planLimit);
+          planName = subscription?.plan_type || 'starter';
 
           // Count user's use cases
           const { count } = await supabase
@@ -87,6 +86,22 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
 
           setUsed(count || 0);
         }
+
+        // Fetch plan limits from plans table
+        const { data: planData } = await supabase
+          .from('plans')
+          .select('limits')
+          .eq('name', planName)
+          .single();
+
+        // Extract max_ai_systems from plans.limits JSONB
+        const planLimits = planData?.limits as { max_ai_systems?: number } | null;
+        const maxSystems = planLimits?.max_ai_systems;
+        
+        // Use database value if available, otherwise fallback to defaults
+        const planLimit = maxSystems !== undefined ? maxSystems : (DEFAULT_LIMITS[planName] || 1);
+        setLimit(planLimit);
+
       } catch (error) {
         console.error('Error fetching limit data:', error);
         // Default to starter plan on error
