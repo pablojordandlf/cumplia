@@ -29,8 +29,11 @@ BEGIN
     END IF;
 END $$;
 
--- Create or replace function to get applicable template IDs for a use_case
-CREATE OR REPLACE FUNCTION get_applicable_template_ids(p_use_case_id uuid)
+-- Drop existing function if exists (to handle parameter name changes)
+DROP FUNCTION IF EXISTS get_applicable_template_ids(uuid);
+
+-- Create function to get applicable template IDs for a use_case
+CREATE FUNCTION get_applicable_template_ids(p_use_case_id uuid)
 RETURNS uuid[] AS $$
 DECLARE
     v_ai_act_level text;
