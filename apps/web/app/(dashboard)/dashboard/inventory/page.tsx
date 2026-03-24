@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Eye, Search, ArrowLeft, Trash2, Settings2, FileCheck } from 'lucide-react';
+import { Plus, Eye, Search, ArrowLeft, Trash2, Settings2, FileCheck, Bot } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { RiskBadge } from '@/components/risk-badge';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -246,18 +247,20 @@ export default function InventoryPage() {
     const isComplete = completed === total;
 
     return (
-      <Link href={`/dashboard/inventory/${useCase.id}`} className="flex items-center gap-2 group">
-        <div className="flex items-center gap-1.5">
+      <Link href={`/dashboard/inventory/${useCase.id}`} className="flex items-center gap-3 group min-w-[140px]">
+        <div className="flex items-center gap-1.5 shrink-0">
           <span className={`text-sm font-semibold ${isComplete ? 'text-green-600' : 'text-blue-600'}`}>
             {completed}
           </span>
           <span className="text-gray-400 text-sm">/</span>
           <span className="text-gray-500 text-sm">{total}</span>
         </div>
-        <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-          <div className={`h-full transition-all duration-300 ${isComplete ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${percentage}%` }} />
-        </div>
-        {isComplete && <FileCheck className="w-4 h-4 text-green-500" />}
+        <Progress 
+          value={percentage}
+          indicatorVariant={isComplete ? 'success' : percentage >= 50 ? 'gradient' : 'blue'}
+          className="w-20 flex-1"
+        />
+        {isComplete && <FileCheck className="w-4 h-4 text-green-500 shrink-0" />}
       </Link>
     );
   };
@@ -371,8 +374,32 @@ export default function InventoryPage() {
         </CardHeader>
         <CardContent>
           {filteredUseCases.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              {searchTerm ? 'No se encontraron sistemas de IA que coincidan con la búsqueda.' : 'No hay sistemas de IA registrados.'}
+            <div className="text-center py-12 text-gray-500">
+              {searchTerm ? (
+                <>
+                  <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium">No se encontraron resultados</p>
+                  <p className="text-sm mt-1">Intenta con otros términos de búsqueda</p>
+                </>
+              ) : (
+                <>
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center">
+                    <Bot className="w-10 h-10 text-blue-500" />
+                  </div>
+                  <p className="text-lg font-medium">No hay sistemas de IA registrados</p>
+                  <p className="text-sm mt-1 max-w-md mx-auto">
+                    Comienza añadiendo tu primer sistema de IA para evaluar su cumplimiento con el AI Act
+                  </p>
+                  {canCreate && (
+                    <Link href="/dashboard/inventory/new">
+                      <Button className="mt-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Añadir primer sistema
+                      </Button>
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">

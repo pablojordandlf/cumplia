@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,8 @@ import {
   Sparkles as SparklesIcon,
   Ban,
   MinusCircle,
-  Settings2
+  Settings2,
+  FileCheck
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -335,89 +337,101 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-blue-600">Sistemas Totales</p>
-                <p className="text-2xl font-bold text-blue-900">{stats.totalSystems}</p>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-blue-600">Sistemas Totales</p>
+                  <p className="text-2xl font-bold text-blue-900">{stats.totalSystems}</p>
+                </div>
+                <div className="p-2 bg-blue-200 rounded-full">
+                  <BarChart3 className="w-5 h-5 text-blue-700" />
+                </div>
               </div>
-              <div className="p-2 bg-blue-200 rounded-full">
-                <BarChart3 className="w-5 h-5 text-blue-700" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-red-600">Prohibido</p>
-                <p className="text-2xl font-bold text-red-900">{stats.prohibitedCount}</p>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-red-600">Prohibido</p>
+                  <p className="text-2xl font-bold text-red-900">{stats.prohibitedCount}</p>
+                </div>
+                <div className="p-2 bg-red-200 rounded-full">
+                  <Ban className="w-5 h-5 text-red-700" />
+                </div>
               </div>
-              <div className="p-2 bg-red-200 rounded-full">
-                <Ban className="w-5 h-5 text-red-700" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-orange-600">Alto Riesgo</p>
-                <p className="text-2xl font-bold text-orange-900">{stats.highRiskCount}</p>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-orange-600">Alto Riesgo</p>
+                  <p className="text-2xl font-bold text-orange-900">{stats.highRiskCount}</p>
+                </div>
+                <div className="p-2 bg-orange-200 rounded-full">
+                  <AlertTriangle className="w-5 h-5 text-orange-700" />
+                </div>
               </div>
-              <div className="p-2 bg-orange-200 rounded-full">
-                <AlertTriangle className="w-5 h-5 text-orange-700" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-yellow-600">Riesgo Limitado</p>
-                <p className="text-2xl font-bold text-yellow-900">{stats.limitedRiskCount}</p>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-yellow-600">Riesgo Limitado</p>
+                  <p className="text-2xl font-bold text-yellow-900">{stats.limitedRiskCount}</p>
+                </div>
+                <div className="p-2 bg-yellow-200 rounded-full">
+                  <Info className="w-5 h-5 text-yellow-700" />
+                </div>
               </div>
-              <div className="p-2 bg-yellow-200 rounded-full">
-                <Info className="w-5 h-5 text-yellow-700" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-green-600">Riesgo Mínimo</p>
-                <p className="text-2xl font-bold text-green-900">{stats.minimalRiskCount}</p>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-green-600">Riesgo Mínimo</p>
+                  <p className="text-2xl font-bold text-green-900">{stats.minimalRiskCount}</p>
+                </div>
+                <div className="p-2 bg-green-200 rounded-full">
+                  <MinusCircle className="w-5 h-5 text-green-700" />
+                </div>
               </div>
-              <div className="p-2 bg-green-200 rounded-full">
-                <MinusCircle className="w-5 h-5 text-green-700" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">Por Clasificar</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.unclassifiedCount}</p>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-600">Por Clasificar</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.unclassifiedCount}</p>
+                </div>
+                <div className="p-2 bg-gray-200 rounded-full">
+                  <Clock className="w-5 h-5 text-gray-700" />
+                </div>
               </div>
-              <div className="p-2 bg-gray-200 rounded-full">
-                <Clock className="w-5 h-5 text-gray-700" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -481,19 +495,19 @@ export default function DashboardPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 sm:gap-0">
+                          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 sm:gap-1 min-w-[100px]">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-gray-700">
                                 {system.completed_obligations}/{system.total_obligations}
                               </span>
+                              {progress === 100 && <FileCheck className="w-4 h-4 text-green-500" />}
                               <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
                             </div>
-                            <div className="w-20 sm:w-24 h-1.5 bg-gray-200 rounded-full mt-0 sm:mt-1">
-                              <div 
-                                className="h-full bg-blue-500 rounded-full transition-all"
-                                style={{ width: `${progress}%` }}
-                              />
-                            </div>
+                            <Progress 
+                              value={progress} 
+                              indicatorVariant={progress === 100 ? 'success' : progress >= 50 ? 'gradient' : 'blue'}
+                              className="w-24 sm:w-28"
+                            />
                           </div>
                         </div>
                       </Link>
@@ -505,50 +519,54 @@ export default function DashboardPage() {
           </Card>
 
           {/* Guía AI Act */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link href="/dashboard/guia">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white">
-                    <BookOpen className="w-6 h-6" />
+          <motion.div whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }}>
+            <Card className="hover:shadow-xl transition-all cursor-pointer border-l-4 border-l-blue-500">
+              <Link href="/dashboard/guia">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white shadow-lg">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">Guía AI Act</h3>
+                      <p className="text-sm text-gray-500">
+                        Niveles de riesgo, clasificación de sistemas y obligaciones regulatorias
+                      </p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">Guía AI Act</h3>
-                    <p className="text-sm text-gray-500">
-                      Niveles de riesgo, clasificación de sistemas y obligaciones regulatorias
-                    </p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </CardContent>
-            </Link>
-          </Card>
+                </CardContent>
+              </Link>
+            </Card>
+          </motion.div>
 
           {/* Templates */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link href="/dashboard/admin">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white">
-                    <BookOpen className="w-6 h-6" />
+          <motion.div whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }}>
+            <Card className="hover:shadow-xl transition-all cursor-pointer border-l-4 border-l-purple-500">
+              <Link href="/dashboard/admin">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white shadow-lg">
+                      <Settings2 className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">Templates</h3>
+                      <p className="text-sm text-gray-500">
+                        Plantillas de riesgos predefinidas y personalizables para tu evaluación de IA
+                      </p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">Templates</h3>
-                    <p className="text-sm text-gray-500">
-                      Plantillas de riesgos predefinidas y personalizables para tu evaluación de IA
-                    </p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-gray-400" />
-                </div>
-              </CardContent>
-            </Link>
-          </Card>
+                </CardContent>
+              </Link>
+            </Card>
+          </motion.div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Compliance Status */}
-          <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+          <Card className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
                 <Zap className="w-5 h-5" />
@@ -556,9 +574,24 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center">
-                <div className="text-5xl font-bold">{completionRate}%</div>
+              <div className="text-center mb-4">
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  className="text-5xl font-bold"
+                >
+                  {completionRate}%
+                </motion.div>
                 <p className="text-blue-100 mt-2">Progreso general</p>
+              </div>
+              <div className="mb-4">
+                <Progress 
+                  value={completionRate} 
+                  indicatorVariant={completionRate === 100 ? 'success' : completionRate >= 50 ? 'gradient' : 'blue'}
+                  trackVariant="blue"
+                  className="h-3 bg-blue-500/30"
+                />
               </div>
               <div className="mt-6 space-y-3">
                 <div className="flex justify-between text-sm">
@@ -576,7 +609,7 @@ export default function DashboardPage() {
               </div>
               <div className="mt-6 pt-6 border-t border-blue-500">
                 <Link href="/dashboard/inventory">
-                  <Button variant="secondary" className="w-full">
+                  <Button variant="secondary" className="w-full hover:bg-white transition-colors">
                     Ver inventario
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
