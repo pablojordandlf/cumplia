@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface UseCase {
   id: string;
   ai_act_level: string;
+  organization_id?: string;
   classification_data?: {
     isHumanInteraction?: string;
     generatesSyntheticContent?: string;
@@ -212,6 +213,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
           .insert({
             use_case_id: useCase.id,
             user_id: session.user.id,
+            organization_id: useCase.organization_id,
             obligation_key: obligation.key,
             obligation_title: obligation.title,
             is_completed: checked,
@@ -272,6 +274,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
           .insert({
             use_case_id: useCase.id,
             user_id: session.user.id,
+            organization_id: useCase.organization_id,
             obligation_key: obligationKey,
             obligation_title: obligation?.title || '',
             is_completed: false,
