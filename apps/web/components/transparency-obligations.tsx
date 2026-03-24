@@ -121,9 +121,43 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
   const [evidenceDescription, setEvidenceDescription] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [activeDialogObligation, setActiveDialogObligation] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
   const { toast } = useToast();
+
+  // Obtener organization_id del usuario autenticado
+  useEffect(() => {
+    const fetchOrganizationId = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        // Primero intentar obtener de user_metadata
+        const userOrgId = session.user.user_metadata?.organization_id;
+        if (userOrgId) {
+          setOrganizationId(userOrgId);
+          return;
+        }
+
+        // Si no está en metadata, buscar en memberships
+        const { data: membership, error } = await supabase
+          .from('organization_memberships')
+          .select('organization_id')
+          .eq('user_id', session.user.id)
+          .eq('status', 'active')
+          .single();
+
+        if (membership) {
+          setOrganizationId(membership.organization_id);
+        }
+      } catch (error) {
+        console.error('Error fetching organization_id:', error);
+      }
+    };
+
+    fetchOrganizationId();
+  }, [supabase]);
 
   const level = useCase.ai_act_level || 'unclassified';
   const levelInfo = LEVEL_INFO[level] || LEVEL_INFO.unclassified;
@@ -190,6 +224,11 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         return;
       }
 
+      if (!organizationId) {
+        toast({ title: 'Error', description: 'No se pudo determinar la organización', variant: 'destructive' });
+        return;
+      }
+
       const existing = obligationsStatus[obligation.key];
 
       if (existing) {
@@ -213,7 +252,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
           .insert({
             use_case_id: useCase.id,
             user_id: session.user.id,
-            organization_id: useCase.organization_id,
+            organization_id: organizationId,
             obligation_key: obligation.key,
             obligation_title: obligation.title,
             is_completed: checked,
@@ -266,6 +305,11 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         return;
       }
 
+      if (!organizationId) {
+        toast({ title: 'Error', description: 'No se pudo determinar la organización', variant: 'destructive' });
+        return;
+      }
+
       let obligationId = obligationsStatus[obligationKey]?.id;
       if (!obligationId) {
         const obligation = obligations.find(o => o.key === obligationKey);
@@ -274,7 +318,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
           .insert({
             use_case_id: useCase.id,
             user_id: session.user.id,
-            organization_id: useCase.organization_id,
+            organization_id: organizationId,
             obligation_key: obligationKey,
             obligation_title: obligation?.title || '',
             is_completed: false,
@@ -299,6 +343,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         .insert({
           obligation_id: obligationId,
           use_case_id: useCase.id,
+          organization_id: organizationId,
           user_id: session.user.id,
           file_name: selectedFile.name,
           file_type: selectedFile.type,
