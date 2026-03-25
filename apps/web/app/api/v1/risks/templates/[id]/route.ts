@@ -123,7 +123,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       const { error: updateError } = await supabase
         .from('risk_templates')
         .update(systemUpdateData)
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (updateError) {
         console.error('Error updating system template:', updateError);
@@ -181,7 +182,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const { error: updateError } = await supabase
           .from('risk_templates')
           .update(updateData)
-          .eq('id', id);
+          .eq('id', id)
+          .select();
 
         if (updateError) {
           console.error('Error updating template:', updateError);

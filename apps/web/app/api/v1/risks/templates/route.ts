@@ -44,8 +44,9 @@ export async function GET(request: NextRequest) {
       .order('name');
 
     // Filter by AI Act level if provided
+    // Check if ai_act_level matches OR if applies_to_levels contains the level
     if (aiActLevel) {
-      query = query.eq('ai_act_level', aiActLevel);
+      query = query.or(`ai_act_level.eq.${aiActLevel},applies_to_levels.cs.{${aiActLevel}}`);
     }
 
     // Filter out system templates if not requested

@@ -9,8 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, AlertTriangle, Shield, Info, CheckCircle2, Ban, Brain, Bot, Sparkles } from 'lucide-react';
+import { Loader2, Search, Shield, Info, CheckCircle2, Ban } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskCatalog } from '@/types/risk-management';
@@ -27,24 +26,15 @@ const AI_ACT_LEVELS = [
   { value: 'prohibited', label: 'Prohibido', icon: Ban },
 ];
 
-const RISK_LEVEL_LABELS: Record<string, string> = {
-  high_risk: 'Alto Riesgo',
-  limited_risk: 'Riesgo Limitado',
-  minimal_risk: 'Riesgo Mínimo',
-  prohibited: 'Prohibido',
-};
-
 export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTemplateDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [aiActLevel, setAiActLevel] = useState('');
   const [appliesToLevels, setAppliesToLevels] = useState<string[]>([]);
   const [catalogRisks, setCatalogRisks] = useState<RiskCatalog[]>([]);
   const [selectedRisks, setSelectedRisks] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [activeSection, setActiveSection] = useState<'basic' | 'risks' | 'applicability'>('basic');
   
   const { createTemplate } = useRiskTemplates({ autoFetch: false });
   const { toast } = useToast();
@@ -54,13 +44,6 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       fetchCatalogRisks();
     }
   }, [open]);
-
-  // Update appliesToLevels when aiActLevel changes
-  useEffect(() => {
-    if (aiActLevel) {
-      setAppliesToLevels([aiActLevel]);
-    }
-  }, [aiActLevel]);
 
   const fetchCatalogRisks = async () => {
     setLoadingCatalog(true);
@@ -123,10 +106,10 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       return;
     }
 
-    if (!aiActLevel) {
+    if (appliesToLevels.length === 0) {
       toast({
-        title: 'Nivel AI Act requerido',
-        description: 'Por favor selecciona un nivel de riesgo',
+        title: 'Aplicabilidad requerida',
+        description: 'Por favor selecciona al menos un nivel de riesgo',
         variant: 'destructive',
       });
       return;
@@ -143,12 +126,17 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
 
     setSubmitting(true);
     
+    // Use first selected level as the ai_act_level for the template
+    const primaryLevel = appliesToLevels[0];
+
     const result = await createTemplate({
       name: name.trim(),
       description: description.trim() || undefined,
-      ai_act_level: aiActLevel,
+      ai_act_level: primaryLevel,
       risk_ids: Array.from(selectedRisks),
       applies_to_levels: appliesToLevels,
+      excluded_systems: [],
+      included_systems: [],
     });
 
     setSubmitting(false);
@@ -157,11 +145,9 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       // Reset form
       setName('');
       setDescription('');
-      setAiActLevel('');
       setAppliesToLevels([]);
       setSelectedRisks(new Set());
       setSearchQuery('');
-      setActiveSection('basic');
       onOpenChange(false);
     }
   };
@@ -171,11 +157,9 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       // Reset form
       setName('');
       setDescription('');
-      setAiActLevel('');
       setAppliesToLevels([]);
       setSelectedRisks(new Set());
       setSearchQuery('');
-      setActiveSection('basic');
       onOpenChange(false);
     }
   };
@@ -194,7 +178,7 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
           {/* Basic Info */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre * </Label>
+              <Label htmlFor="name">Nombre <span className="text-red-500">*</span></Label>
               <Input
                 id="name"
                 value={name}
@@ -205,7 +189,7 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descripción </Label>
+              <Label htmlFor="description">Descripción</Label>
               <Textarea
                 id="description"
                 value={description}
@@ -214,34 +198,14 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
                 rows={2}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label>Nivel AI Act Principal * </Label>
-              <Select value={aiActLevel} onValueChange={setAiActLevel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona el nivel principal" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AI_ACT_LEVELS.map((level) => (
-                    <SelectItem key={level.value} value={level.value}>
-                      <div className="flex items-center gap-2">
-                        <level.icon className="w-4 h-4" />
-                        {level.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-gray-500">
-                El nivel principal determina la categoría de la plantilla
-              </p>
-            </div>
           </div>
 
-          {/* Applicability Section */}
+          {/* Applicability Section - Now Required and Only Field for Risk Levels */}
           <div className="space-y-4 border-t pt-4">
             <div className="flex items-center justify-between">
-              <Label>Aplicabilidad </Label>
+              <Label>
+                Aplicabilidad <span className="text-red-500">*</span>
+              </Label>
               {appliesToLevels.length > 0 && (
                 <Badge variant="secondary">{appliesToLevels.length} nivel(es)</Badge>
               )}
@@ -276,12 +240,15 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
                 );
               })}
             </div>
+            {appliesToLevels.length === 0 && (
+              <p className="text-sm text-red-500">Debes seleccionar al menos un nivel de riesgo</p>
+            )}
           </div>
 
           {/* Risk Selection */}
           <div className="space-y-4 border-t pt-4">
             <div className="flex items-center justify-between">
-              <Label>Seleccionar Riesgos * </Label>
+              <Label>Seleccionar Riesgos <span className="text-red-500">*</span></Label>
               <Badge variant="secondary">{selectedRisks.size} seleccionados</Badge>
             </div>
 
@@ -352,7 +319,7 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={submitting || selectedRisks.size === 0}
+            disabled={submitting || selectedRisks.size === 0 || appliesToLevels.length === 0 || !name.trim()}
           >
             {submitting ? (
               <>
