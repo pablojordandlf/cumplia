@@ -486,10 +486,11 @@ export default function UseCaseDetailPage() {
                       ai_act_level: useCase.ai_act_level,
                       custom_fields: useCase.custom_fields || [],
                     }}
-                    applicableTemplates={templates.filter(t => 
-                      t.applies_to === 'global' || 
-                      (useCase.ai_act_level && t.applies_to.includes(useCase.ai_act_level.toLowerCase()))
-                    )}
+                    applicableTemplates={templates.filter(t => {
+                      const appliesTo = t.applies_to_levels || [t.applies_to || 'global'];
+                      return appliesTo.includes('global') || 
+                        (useCase.ai_act_level && appliesTo.includes(useCase.ai_act_level.toLowerCase() as any));
+                    })}
                     onSave={handleSaveCustomFields}
                     readOnly={!canEdit}
                   />

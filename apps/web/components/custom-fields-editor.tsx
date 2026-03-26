@@ -54,10 +54,10 @@ export function CustomFieldsEditor({
 
   // Get all field keys from applicable templates
   const templateFields = applicableTemplates
-    .flatMap(template => template.field_definitions)
+    .flatMap(template => template.field_definitions || [])
     .reduce((acc, field) => {
       if (!acc.find(f => f.key === field.key)) {
-        acc.push({ key: field.key, label: field.label, type: field.type });
+        acc.push({ key: field.key, label: field.label || field.key, type: field.type || 'text' });
       }
       return acc;
     }, [] as Array<{ key: string; label: string; type: string }>);

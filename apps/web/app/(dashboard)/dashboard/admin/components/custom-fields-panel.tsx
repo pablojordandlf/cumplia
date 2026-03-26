@@ -125,7 +125,9 @@ export function CustomFieldsPanel() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {templates.map((template) => {
-            const colors = APPLIES_TO_COLORS[template.applies_to] || APPLIES_TO_COLORS.global;
+            const appliesTo = template.applies_to_levels || [template.applies_to || 'global'];
+            const primaryLevel = appliesTo[0];
+            const colors = APPLIES_TO_COLORS[primaryLevel] || APPLIES_TO_COLORS.global;
             
             return (
               <Card key={template.id} className="group">
@@ -144,9 +146,22 @@ export function CustomFieldsPanel() {
                         )}
                       </div>
                     </div>
-                    <Badge variant="outline" className={`${colors.bg} ${colors.text} ${colors.border}`}>
-                      {colors.label}
-                    </Badge>
+                  </div>
+                  
+                  {/* Display all applicable levels as badges */}
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {appliesTo.map((level) => {
+                      const levelColors = APPLIES_TO_COLORS[level] || APPLIES_TO_COLORS.global;
+                      return (
+                        <Badge 
+                          key={level} 
+                          variant="outline" 
+                          className={`${levelColors.bg} ${levelColors.text} ${levelColors.border}`}
+                        >
+                          {levelColors.label}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </CardHeader>
                 
