@@ -9,10 +9,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Search, Shield, Info, CheckCircle2, Ban } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Search, Shield, Info, CheckCircle2, Ban, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
-import { RiskCatalog } from '@/types/risk-management';
+import { RiskCatalog, RiskTemplateWithItems } from '@/types/risk-management';
 
 interface CreateRiskTemplateDialogProps {
   open: boolean;
@@ -35,15 +42,19 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [baseTemplate, setBaseTemplate] = useState<string | null>(null);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [existingTemplates, setExistingTemplates] = useState<RiskTemplateWithItems[]>([]);
   
-  const { createTemplate } = useRiskTemplates({ autoFetch: false });
+  const { createTemplate, templates } = useRiskTemplates({ includeSystem: false });
   const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
       fetchCatalogRisks();
+      setExistingTemplates(templates);
     }
-  }, [open]);
+  }, [open, templates]);
 
   const fetchCatalogRisks = async () => {
     setLoadingCatalog(true);
@@ -85,6 +96,23 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       }
       return [...prev, level];
     });
+  };
+
+  const handleLoadBaseTemplate = (templateId: string) => {
+    const selectedTemplate = existingTemplates.find(t => t.id === templateId);
+    if (selectedTemplate) {
+      // Pre-fill form from existing template
+      setName(`${selectedTemplate.name} (copia)`);
+      setDescription(selectedTemplate.description || '');
+      setAppliesToLevels(selectedTemplate.applies_to_levels || [selectedTemplate.ai_act_level]);
+      const riskIds = new Set(selectedTemplate.items?.map(item => item.catalog_risk_id) || []);
+      setSelectedRisks(riskIds);
+      setBaseTemplate(templateId);
+      toast({
+        title: 'Plantilla cargada',
+        description: `Se han cargado los riesgos y configuración de "${selectedTemplate.name}". Modifica según sea necesario.`,
+      });
+    }
   };
 
   const filteredRisks = catalogRisks.filter(risk => {
@@ -160,6 +188,7 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       setAppliesToLevels([]);
       setSelectedRisks(new Set());
       setSearchQuery('');
+      setBaseTemplate(null);
       onOpenChange(false);
     }
   };
@@ -177,6 +206,37 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
         <div className="flex-1 overflow-y-auto space-y-6 py-4">
           {/* Basic Info */}
           <div className="space-y-4">
+            {/* Load from existing template */}
+            <div className="space-y-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <Label htmlFor="base-template">
+                <div className="flex items-center gap-2 mb-2">
+                  <Copy className="w-4 h-4" />
+                  <span>Crear basándose en una plantilla existente (opcional)</span>
+                </div>
+              </Label>
+              <p className="text-sm text-gray-600 mb-3">
+                Selecciona una plantilla para cargar automáticamente sus riesgos y configuración. Luego podrás modificarla.
+              </p>
+              <Select value={baseTemplate || ''} onValueChange={handleLoadBaseTemplate}>
+                <SelectTrigger id="base-template">
+                  <SelectValue placeholder="Selecciona una plantilla..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {existingTemplates.length === 0 ? (
+                    <SelectItem value="none" disabled>
+                      No hay plantillas disponibles
+                    </SelectItem>
+                  ) : (
+                    existingTemplates.map(template => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name} ({template.items?.length || 0} riesgos)
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="name">Nombre <span className="text-red-500">*</span></Label>
               <Input
