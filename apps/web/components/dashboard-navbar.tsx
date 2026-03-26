@@ -2,7 +2,7 @@
 
 import { GlobalSearch } from '@/components/global-search';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { UserMenu } from '@/components/auth/UserMenu';
+import UserMenu from '@/components/auth/UserMenu';
 import { usePathname } from 'next/navigation';
 
 const pathTitles: Record<string, string> = {
