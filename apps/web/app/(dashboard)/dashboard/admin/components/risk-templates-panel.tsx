@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Edit, Trash2, FileWarning, Shield, Info, CheckCircle2, Ban, Settings, Target, XCircle, PlusCircle, Power } from 'lucide-react';
+import { Plus, Edit, Trash2, FileWarning, Shield, Info, CheckCircle2, Ban, Settings, Target, XCircle, PlusCircle, Power, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskTemplateWithItems } from '@/types/risk-management';
@@ -50,10 +50,11 @@ const RISK_LEVEL_LABELS: Record<string, string> = {
 };
 
 export function RiskTemplatesPanel() {
-  const { templates, loading, deleteTemplate, toggleTemplateActive } = useRiskTemplates({ includeSystem: true });
+  const { templates, loading, deleteTemplate, toggleTemplateActive, duplicateTemplate } = useRiskTemplates({ includeSystem: true });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<RiskTemplateWithItems | null>(null);
   const [templateToEdit, setTemplateToEdit] = useState<RiskTemplateWithItems | null>(null);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleDelete = async () => {
@@ -82,6 +83,27 @@ export function RiskTemplatesPanel() {
         title: template.is_active ? 'Plantilla desactivada' : 'Plantilla activada',
         description: `La plantilla "${template.name}" ha sido ${template.is_active ? 'desactivada' : 'activada'}.`,
       });
+    }
+  };
+
+  const handleDuplicate = async (template: RiskTemplateWithItems) => {
+    setDuplicating(template.id);
+    try {
+      const newTemplate = await duplicateTemplate(template.id);
+      if (newTemplate) {
+        toast({
+          title: 'Plantilla duplicada',
+          description: `La plantilla "${template.name}" ha sido duplicada como "${newTemplate.name}".`,
+        });
+      } else {
+        toast({
+          title: 'Error al duplicar',
+          description: 'No se pudo duplicar la plantilla. Verifica que seas el propietario.',
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setDuplicating(null);
     }
   };
 
@@ -224,14 +246,10 @@ export function RiskTemplatesPanel() {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => {
-                      toast({
-                        title: 'Próximamente',
-                        description: 'La edición de plantillas estará disponible pronto',
-                      });
-                    }}
+                    disabled={duplicating === template.id}
+                    onClick={() => handleDuplicate(template)}
                   >
-                    <Edit className="w-4 h-4" />
+                    <Copy className="w-4 h-4" />
                   </Button>
                 )}
               </div>
