@@ -11,6 +11,8 @@ import { RiskBadge } from '@/components/risk-badge';
 import { TransparencyObligations } from '@/components/transparency-obligations';
 import { AIActChecklistTab } from '@/components/ai-act-checklist-tab';
 import { SystemHistoryTab } from '@/components/system-history-tab';
+import { CustomFieldsEditor } from '@/components/custom-fields-editor';
+import { useCustomFieldTemplates } from '@/hooks/use-custom-field-templates';
 import { 
   ArrowLeft, 
   Pencil, 
@@ -133,6 +135,8 @@ export default function UseCaseDetailPage() {
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [isPoCEditing, setIsPoCEditing] = useState(false);
   
+  const { templates } = useCustomFieldTemplates();
+  
   useEffect(() => {
     loadData();
     fetchUserRole();
@@ -217,6 +221,27 @@ export default function UseCaseDetailPage() {
     } finally {
       setUpdating(false);
     }
+  }
+
+  async function handleSaveCustomFields(fields: CustomField[]) {
+    if (!userRole || !hasPermission(userRole, 'ai_systems:update')) {
+      throw new Error('No tienes permisos para editar este sistema.');
+    }
+
+    const response = await fetch(`/api/use-cases/${useCaseId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ custom_fields: fields }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update');
+    }
+
+    const { useCase: updatedUseCase } = await response.json();
+    setUseCase(updatedUseCase);
+    setCustomFields(fields);
   }
 
   async function deleteUseCase() {
@@ -453,19 +478,21 @@ export default function UseCaseDetailPage() {
                   </div>
                 </div>
 
-                {/* Custom Fields */}
-                {customFields.length > 0 && (
-                  <div className="border-t pt-4 mt-4">
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Campos Personalizados</label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {customFields.map((field) => (
-                        <div key={field.id} className="bg-gray-50 p-3 rounded-lg">
-                          <span className="text-sm font-medium text-gray-700">{field.key}</span>
-                          <p className="text-gray-600 text-sm">{field.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {/* Custom Fields Editor */}
+                {useCase && (
+                  <CustomFieldsEditor
+                    useCase={{
+                      id: useCase.id,
+                      ai_act_level: useCase.ai_act_level,
+                      custom_fields: useCase.custom_fields || [],
+                    }}
+                    applicableTemplates={templates.filter(t => 
+                      t.applies_to === 'global' || 
+                      (useCase.ai_act_level && t.applies_to.includes(useCase.ai_act_level.toLowerCase()))
+                    )}
+                    onSave={handleSaveCustomFields}
+                    readOnly={!canEdit}
+                  />
                 )}
               </CardContent>
             </Card>
