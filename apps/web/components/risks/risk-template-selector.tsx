@@ -74,13 +74,28 @@ export function RiskTemplateSelector({
       if (!response.ok) throw new Error('Failed to fetch templates');
       
       const data = await response.json();
-      const systemTemplates = data.templates?.filter((t: RiskTemplate) => t.is_system) || [];
-      setTemplates(systemTemplates);
+      // Include both system and custom templates that are active
+      const allTemplates = data.templates?.filter((t: RiskTemplate) => 
+        t.is_active !== false
+      ) || [];
+      
+      // Sort: system templates first, then custom templates by name
+      const sortedTemplates = allTemplates.sort((a: RiskTemplate, b: RiskTemplate) => {
+        if (a.is_system !== b.is_system) {
+          return b.is_system ? 1 : -1; // System templates first
+        }
+        return (a.name || '').localeCompare(b.name || '');
+      });
+      
+      setTemplates(sortedTemplates);
       
       // Auto-select the default template
-      const defaultTemplate = systemTemplates.find((t: RiskTemplate) => t.is_default);
+      const defaultTemplate = sortedTemplates.find((t: RiskTemplate) => t.is_default);
       if (defaultTemplate) {
         setSelectedTemplateId(defaultTemplate.id);
+      } else if (sortedTemplates.length > 0) {
+        // If no default, select the first (preferred: system template)
+        setSelectedTemplateId(sortedTemplates[0].id);
       }
     } catch (error) {
       console.error('Error fetching templates:', error);
@@ -189,6 +204,16 @@ export function RiskTemplateSelector({
                       {template.is_default && (
                         <Badge variant="secondary" className="text-xs">
                           Recomendado
+                        </Badge>
+                      )}
+                      {template.is_system && (
+                        <Badge variant="outline" className="text-xs">
+                          Sistema
+                        </Badge>
+                      )}
+                      {!template.is_system && (
+                        <Badge variant="outline" className="text-xs bg-blue-50">
+                          Personalizado
                         </Badge>
                       )}
                     </div>
