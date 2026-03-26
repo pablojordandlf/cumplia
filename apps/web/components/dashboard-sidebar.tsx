@@ -6,7 +6,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -151,21 +151,21 @@ export function DashboardSidebar() {
           <span className="text-lg font-bold">CumplIA</span>
         </Link>
         
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerTrigger asChild>
             <Button variant="ghost" size="icon" className="h-10 w-10">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Abrir menú</span>
             </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-[280px]">
+          </DrawerTrigger>
+          <DrawerContent side="left" className="p-0 w-3/4 sm:max-w-sm">
             <SidebarContent 
               pathname={pathname} 
               onNavigate={handleNavigate}
               isMobile={true}
             />
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
       </div>
 
       {/* Desktop Sidebar */}

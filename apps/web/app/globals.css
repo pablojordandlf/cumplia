@@ -59,7 +59,32 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  
+  /* Mobile-first responsive utilities */
+  @media (max-width: 768px) {
+    body {
+      @apply text-base;
+    }
+  }
+}
+
+/* Smooth transitions for dark mode */
+@layer utilities {
+  .transition-theme {
+    @apply transition-colors duration-200;
+  }
+  
+  /* Prevent layout shift on mobile */
+  html {
+    overflow-y: scroll;
   }
 }
