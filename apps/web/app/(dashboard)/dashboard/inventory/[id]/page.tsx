@@ -131,6 +131,7 @@ export default function UseCaseDetailPage() {
   const [updating, setUpdating] = useState(false);
   const [userRole, setUserRole] = useState<MemberRole | null>(null);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [isPoCEditing, setIsPoCEditing] = useState(false);
   
   useEffect(() => {
     loadData();
@@ -185,6 +186,36 @@ export default function UseCaseDetailPage() {
       toast({ title: 'Error', description: error.message || 'No se pudo cargar el sistema de IA', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function updateIsPoc(newValue: boolean) {
+    if (!userRole || !hasPermission(userRole, 'ai_systems:update')) {
+      toast({ title: 'Sin permisos', description: 'No tienes permisos para editar este sistema.', variant: 'destructive' });
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const response = await fetch(`/api/use-cases/${useCaseId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_poc: newValue }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update');
+      }
+
+      const { useCase: updatedUseCase } = await response.json();
+      setUseCase(updatedUseCase);
+      setIsPoCEditing(false);
+      toast({ title: 'Actualizado', description: `Estado cambiado a ${newValue ? 'PoC' : 'Producción'}` });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -354,18 +385,63 @@ export default function UseCaseDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700">Estado</label>
-                    <div className="flex items-center gap-2 mt-1">
-                      {useCase.is_poc ? (
-                        <>
-                          <FlaskConical className="w-4 h-4 text-blue-600" />
-                          <span className="text-gray-600">Prueba de Concepto (PoC)</span>
+                    <div className="flex items-center gap-2 mt-1 group">
+                      {canEdit && !isPoCEditing ? (
+                        <button
+                          onClick={() => setIsPoCEditing(true)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                          disabled={updating}
+                        >
+                          {useCase.is_poc ? (
+                            <>
+                              <FlaskConical className="w-4 h-4 text-blue-600" />
+                              <span className="text-gray-600">Prueba de Concepto (PoC)</span>
+                            </>
+                          ) : (
+                            <>
+                              <Package className="w-4 h-4 text-gray-600" />
+                              <span className="text-gray-600">En Producción</span>
+                            </>
+                          )}
+                          <Pencil className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ) : canEdit && isPoCEditing ? (
+                        <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-lg">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={useCase.is_poc}
+                              onChange={(e) => updateIsPoc(e.target.checked)}
+                              disabled={updating}
+                              className="w-4 h-4"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {useCase.is_poc ? 'Prueba de Concepto (PoC)' : 'En Producción'}
+                            </span>
+                          </label>
                           <PoCTooltip />
-                        </>
+                          <button
+                            onClick={() => setIsPoCEditing(false)}
+                            className="ml-2 text-xs text-gray-500 hover:text-gray-700"
+                          >
+                            Cerrar
+                          </button>
+                        </div>
                       ) : (
-                        <>
-                          <Package className="w-4 h-4 text-gray-600" />
-                          <span className="text-gray-600">En Producción</span>
-                        </>
+                        <div className="flex items-center gap-2">
+                          {useCase.is_poc ? (
+                            <>
+                              <FlaskConical className="w-4 h-4 text-blue-600" />
+                              <span className="text-gray-600">Prueba de Concepto (PoC)</span>
+                              <PoCTooltip />
+                            </>
+                          ) : (
+                            <>
+                              <Package className="w-4 h-4 text-gray-600" />
+                              <span className="text-gray-600">En Producción</span>
+                            </>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

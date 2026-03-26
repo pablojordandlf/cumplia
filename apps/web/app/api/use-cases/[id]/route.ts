@@ -88,13 +88,15 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name, description, sector, status } = body;
+    const { name, description, sector, status, is_poc, custom_fields } = body;
 
     const updateData: Record<string, any> = {};
     if (name !== undefined) updateData.name = name.trim();
     if (description !== undefined) updateData.description = description?.trim() || null;
     if (sector !== undefined) updateData.sector = sector?.trim() || null;
     if (status !== undefined) updateData.status = status;
+    if (is_poc !== undefined) updateData.is_poc = is_poc;
+    if (custom_fields !== undefined) updateData.custom_fields = custom_fields;
 
     const { data: useCase, error } = await supabase
       .from('use_cases')
