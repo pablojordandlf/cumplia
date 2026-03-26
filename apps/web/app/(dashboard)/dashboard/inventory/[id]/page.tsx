@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { RiskBadge } from '@/components/risk-badge';
 import { TransparencyObligations } from '@/components/transparency-obligations';
 import { AIActChecklistTab } from '@/components/ai-act-checklist-tab';
@@ -31,7 +38,8 @@ import {
   Brain,
   Eye,
   ClipboardCheck,
-  History
+  History,
+  MoreVertical
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { RiskManagementTab } from '@/components/risks/risk-management-tab';
@@ -260,39 +268,45 @@ export default function UseCaseDetailPage() {
               <p className="text-gray-600 text-sm">{useCase.sector} • Creado el {format(new Date(useCase.created_at), 'dd/MM/yyyy', { locale: es })}</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-2">
             <Link href={`/dashboard/inventory/${useCaseId}/classify`}>
-              <Button variant="outline" size="sm" className="sm:size-default">
-                <Shield className="w-4 h-4 mr-0 sm:mr-2" />
-                <span className="hidden sm:inline">{useCase.ai_act_level === 'unclassified' ? 'Clasificar' : 'Reclasificar'}</span>
+              <Button>
+                <Shield className="w-4 h-4 mr-2" />
+                {useCase.ai_act_level === 'unclassified' ? 'Clasificar' : 'Reclasificar'}
               </Button>
             </Link>
-            {canEdit && (
-              <Link href={`/dashboard/inventory/${useCaseId}/edit`}>
-                <Button variant="outline" size="sm" className="sm:size-default">
-                  <Pencil className="w-4 h-4 mr-0 sm:mr-2" />
-                  <span className="hidden sm:inline">Editar</span>
-                </Button>
-              </Link>
-            )}
-            {canDelete && (
-              <Button variant="destructive" size="sm" className="sm:size-default" onClick={deleteUseCase}>
-                <Trash2 className="w-4 h-4 mr-0 sm:mr-2" />
-                <span className="hidden sm:inline">Eliminar</span>
-              </Button>
+            {(canEdit || canDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canEdit && (
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/inventory/${useCaseId}/edit`}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Editar
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
+                    <>
+                      {canEdit && <DropdownMenuSeparator />}
+                      <DropdownMenuItem onClick={deleteUseCase} className="text-red-600">
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
 
-        {/* Viewer Notice */}
-        {isViewer && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Modo Visualizador:</strong> Solo puedes ver información de este sistema de IA. 
-              Contacta al administrador si necesitas permisos para editar o clasificar.
-            </p>
-          </div>
-        )}
+
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="general" className="space-y-6">

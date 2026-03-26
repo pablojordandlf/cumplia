@@ -310,14 +310,6 @@ export default function InventoryPage() {
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 px-0 sm:px-4">
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                <span className="hidden sm:inline">Volver al Dashboard</span>
-              </Button>
-            </Link>
-          </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Inventario de Sistemas de IA</h1>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">
             {isViewer 
@@ -326,36 +318,17 @@ export default function InventoryPage() {
             }
           </p>
         </div>
-        <div className="flex gap-2">
-          {!isViewer && (
-            <Link href="/dashboard/admin">
-              <Button variant="outline" size="sm" className="sm:size-default">
-                <Settings2 className="mr-0 sm:mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Administrar</span>
-              </Button>
-            </Link>
-          )}
-          {canCreate && (
-            <Link href="/dashboard/inventory/new">
-              <Button size="sm" className="sm:size-default">
-                <Plus className="mr-0 sm:mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Añadir Sistema de IA</span>
-                <span className="sm:hidden">Añadir</span>
-              </Button>
-            </Link>
-          )}
-        </div>
+        {canCreate && (
+          <Link href="/dashboard/inventory/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Añadir Sistema
+            </Button>
+          </Link>
+        )}
       </div>
 
-      {/* Viewer notice */}
-      {isViewer && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>Modo Visualizador:</strong> Solo puedes ver información. 
-            Contacta al administrador si necesitas permisos para crear o editar sistemas de IA.
-          </p>
-        </div>
-      )}
+
 
       <Card>
         <CardHeader>
@@ -383,8 +356,8 @@ export default function InventoryPage() {
                 </>
               ) : (
                 <>
-                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center">
-                    <Bot className="w-10 h-10 text-blue-500" />
+                  <div className="w-20 h-20 mx-auto mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Bot className="w-10 h-10 text-blue-600" />
                   </div>
                   <p className="text-lg font-medium">No hay sistemas de IA registrados</p>
                   <p className="text-sm mt-1 max-w-md mx-auto">
@@ -392,7 +365,7 @@ export default function InventoryPage() {
                   </p>
                   {canCreate && (
                     <Link href="/dashboard/inventory/new">
-                      <Button className="mt-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+                      <Button className="mt-6">
                         <Plus className="w-4 h-4 mr-2" />
                         Añadir primer sistema
                       </Button>

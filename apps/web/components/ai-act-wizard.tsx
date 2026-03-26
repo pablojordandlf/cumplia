@@ -467,7 +467,7 @@ export function AiActWizard({ useCaseId, onComplete, onCancel, initialAnswers, r
                 'bg-blue-600 hover:bg-blue-700'
               )}
             >
-              {isSubmitting ? 'Guardando...' : 'Guardar clasificación'}
+              {isSubmitting ? 'Saving your assessment...' : 'Complete Assessment'}
             </Button>
           </div>
         </CardContent>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Edit, Trash2, FileWarning, Shield, Info, CheckCircle2, Ban, Settings, Target, XCircle, PlusCircle, Power, Copy } from 'lucide-react';
+import { Plus, Trash2, FileWarning, Shield, Info, CheckCircle2, Ban, Settings, Target, XCircle, PlusCircle, Power, Copy, MoreVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskTemplateWithItems } from '@/types/risk-management';
@@ -22,11 +22,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const RISK_LEVEL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   prohibited: Ban,
@@ -110,6 +111,9 @@ export function RiskTemplatesPanel() {
   // Separate system and user templates
   const systemTemplates = templates.filter(t => t.is_system);
   const userTemplates = templates.filter(t => !t.is_system);
+  
+  // Track which tab is expanded
+  const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
 
   const renderTemplateCard = (template: RiskTemplateWithItems, isSystem: boolean) => {
     const colors = RISK_LEVEL_COLORS[template.ai_act_level] || RISK_LEVEL_COLORS.high_risk;
@@ -145,37 +149,51 @@ export function RiskTemplatesPanel() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {isSystem ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={template.is_active ? 'default' : 'outline'}
-                        size="sm"
-                        className={`gap-2 ${template.is_active ? 'bg-green-600 hover:bg-green-700' : 'text-gray-500'}`}
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setTemplateToEdit(template)}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Configurar
+                  </DropdownMenuItem>
+                  {isSystem && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
                         onClick={() => handleToggleActive(template)}
+                        className={template.is_active ? "text-red-600" : "text-green-600"}
                       >
-                        <Power className="w-4 h-4" />
-                        {template.is_active ? 'Activa' : 'Inactiva'}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{template.is_active ? 'Clic para desactivar' : 'Clic para activar'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setTemplateToDelete(template)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Eliminar
-                </Button>
-              )}
+                        <Power className="w-4 h-4 mr-2" />
+                        {template.is_active ? 'Desactivar' : 'Activar'}
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {!isSystem && (
+                    <>
+                      <DropdownMenuItem 
+                        onClick={() => handleDuplicate(template)}
+                        disabled={duplicating === template.id}
+                      >
+                        <Copy className="w-4 h-4 mr-2" />
+                        Duplicar
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => setTemplateToDelete(template)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>
@@ -206,7 +224,7 @@ export function RiskTemplatesPanel() {
 
               {/* Exceptions */}
               {(template.excluded_systems?.length > 0 || template.included_systems?.length > 0) && (
-                <div className="space-y-2 pt-2 border-t">
+                <div className="space-y-2 pt-2">
                   {template.excluded_systems?.length > 0 && (
                     <div className="flex items-center gap-2">
                       <XCircle className="w-4 h-4 text-red-500" />
@@ -219,7 +237,7 @@ export function RiskTemplatesPanel() {
                     <div className="flex items-center gap-2">
                       <PlusCircle className="w-4 h-4 text-green-500" />
                       <span className="text-sm text-gray-600">
-                        {template.included_systems.length} sistema(s) incluido(s) como excepción
+                        {template.included_systems.length} sistema(s) incluido(s)
                       </span>
                     </div>
                   )}
@@ -227,31 +245,11 @@ export function RiskTemplatesPanel() {
               )}
             </div>
 
-            {/* Risk Count and Actions */}
-            <div className="flex items-center justify-between pt-3 border-t">
+            {/* Risk Count */}
+            <div className="pt-3 border-t">
               <div className="text-sm text-gray-500">
                 <span className="font-medium">{riskCount}</span>{' '}
                 riesgos incluidos
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setTemplateToEdit(template)}
-                >
-                  <Settings className="w-4 h-4 mr-1" />
-                  Configurar
-                </Button>
-                {!isSystem && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    disabled={duplicating === template.id}
-                    onClick={() => handleDuplicate(template)}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                )}
               </div>
             </div>
           </div>
