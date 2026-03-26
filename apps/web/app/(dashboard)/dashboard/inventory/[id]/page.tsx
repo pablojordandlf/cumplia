@@ -380,6 +380,69 @@ export default function UseCaseDetailPage() {
               </CardContent>
             </Card>
 
+            {/* PoC Status Card - NOW PROMINENT */}
+            <Card className={useCase.is_poc ? 'border-l-4 border-l-blue-500 bg-blue-50' : 'border-l-4 border-l-green-500 bg-green-50'}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    {useCase.is_poc ? (
+                      <>
+                        <FlaskConical className="w-6 h-6 text-blue-600" />
+                        <div>
+                          <h3 className="font-semibold text-gray-900">Prueba de Concepto (PoC)</h3>
+                          <p className="text-sm text-gray-600">Este sistema se encuentra en fase experimental</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Package className="w-6 h-6 text-green-600" />
+                        <div>
+                          <h3 className="font-semibold text-gray-900">En Producción</h3>
+                          <p className="text-sm text-gray-600">Este sistema está implementado en producción</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {canEdit && (
+                    <button
+                      onClick={() => setIsPoCEditing(!isPoCEditing)}
+                      className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                      title="Cambiar estado"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* PoC Editor Inline */}
+                {isPoCEditing && canEdit && (
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={useCase.is_poc}
+                          onChange={(e) => updateIsPoc(e.target.checked)}
+                          disabled={updating}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          {useCase.is_poc ? '✓ Marcar como Producción' : '✓ Marcar como PoC'}
+                        </span>
+                      </label>
+                      <PoCTooltip />
+                      <button
+                        onClick={() => setIsPoCEditing(false)}
+                        className="ml-auto text-xs text-gray-500 hover:text-gray-700 font-medium"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Basic Information */}
             <Card>
               <CardHeader>
@@ -407,75 +470,11 @@ export default function UseCaseDetailPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Estado</label>
-                    <div className="flex items-center gap-2 mt-1 group">
-                      {canEdit && !isPoCEditing ? (
-                        <button
-                          onClick={() => setIsPoCEditing(true)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                          disabled={updating}
-                        >
-                          {useCase.is_poc ? (
-                            <>
-                              <FlaskConical className="w-4 h-4 text-blue-600" />
-                              <span className="text-gray-600">Prueba de Concepto (PoC)</span>
-                            </>
-                          ) : (
-                            <>
-                              <Package className="w-4 h-4 text-gray-600" />
-                              <span className="text-gray-600">En Producción</span>
-                            </>
-                          )}
-                          <Pencil className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </button>
-                      ) : canEdit && isPoCEditing ? (
-                        <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-lg">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={useCase.is_poc}
-                              onChange={(e) => updateIsPoc(e.target.checked)}
-                              disabled={updating}
-                              className="w-4 h-4"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {useCase.is_poc ? 'Prueba de Concepto (PoC)' : 'En Producción'}
-                            </span>
-                          </label>
-                          <PoCTooltip />
-                          <button
-                            onClick={() => setIsPoCEditing(false)}
-                            className="ml-2 text-xs text-gray-500 hover:text-gray-700"
-                          >
-                            Cerrar
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          {useCase.is_poc ? (
-                            <>
-                              <FlaskConical className="w-4 h-4 text-blue-600" />
-                              <span className="text-gray-600">Prueba de Concepto (PoC)</span>
-                              <PoCTooltip />
-                            </>
-                          ) : (
-                            <>
-                              <Package className="w-4 h-4 text-gray-600" />
-                              <span className="text-gray-600">En Producción</span>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Última actualización</label>
-                    <p className="text-gray-600 mt-1">
-                      {format(new Date(useCase.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}
-                    </p>
-                  </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Última actualización</label>
+                  <p className="text-gray-600 mt-1">
+                    {format(new Date(useCase.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                  </p>
                 </div>
 
                 {/* Custom Fields Editor */}
