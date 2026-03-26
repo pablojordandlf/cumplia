@@ -10,6 +10,15 @@ export async function POST(
     const { id } = await params;
     const supabase = await createClient();
 
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     // Fetch the template to duplicate
     const { data: template, error: fetchError } = await supabase
       .from('risk_templates')
@@ -32,92 +41,30 @@ export async function POST(
       );
     }
 
-    // Get all risk items from the original template
-    const { data: items, error: itemsError } = await supabase
-      .from('risk_template_items')
-      .select('*')
-      .eq('template_id', id);
+    // Call the duplicate_template function which handles RLS properly
+    const { data, error: duplicateError } = await supabase.rpc('duplicate_template', {
+      p_template_id: id,
+      p_user_id: user.id,
+    });
 
-    if (itemsError) {
-      console.error('Error fetching template items:', itemsError);
+    if (duplicateError) {
+      console.error('Error duplicating template via RPC:', duplicateError);
       return NextResponse.json(
-        { error: 'Failed to fetch template items' },
+        { error: duplicateError.message || 'Failed to duplicate template' },
         { status: 500 }
       );
     }
 
-    // Create the duplicated template with "Copy of" prefix
-    const newTemplateName = `Copy of ${template.name}`;
-    
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-    
-    const { data: newTemplate, error: createError } = await supabase
-      .from('risk_templates')
-      .insert({
-        name: newTemplateName,
-        description: template.description ? `Copy: ${template.description}` : null,
-        ai_act_level: template.ai_act_level,
-        is_system: false,
-        is_default: false,
-        is_active: true,
-        applies_to_levels: template.applies_to_levels || [],
-        excluded_systems: template.excluded_systems || [],
-        included_systems: template.included_systems || [],
-        organization_id: template.organization_id,
-        created_by: user.id,
-      })
-      .select()
-      .single();
-
-    if (createError || !newTemplate) {
-      console.error('Error creating duplicate template:', createError);
-      return NextResponse.json(
-        { error: 'Failed to create duplicate template' },
-        { status: 500 }
-      );
-    }
-
-    // Duplicate all risk items
-    if (items && items.length > 0) {
-      const newItems = items.map(item => ({
-        template_id: newTemplate.id,
-        risk_id: item.risk_id,
-      }));
-
-      const { error: itemsCreateError } = await supabase
-        .from('risk_template_items')
-        .insert(newItems);
-
-      if (itemsCreateError) {
-        console.error('Error creating duplicate items:', itemsCreateError);
-        // Clean up the created template if items fail
-        await supabase
-          .from('risk_templates')
-          .delete()
-          .eq('id', newTemplate.id);
-
-        return NextResponse.json(
-          { error: 'Failed to duplicate template items' },
-          { status: 500 }
-        );
-      }
-    }
+    const newTemplateId = data;
 
     // Fetch the new template with items
     const { data: newTemplateWithItems, error: fetchNewError } = await supabase
       .from('risk_templates')
       .select(`
         *,
-        items:risk_template_items(id, risk_id)
+        items:risk_template_items(id, catalog_risk_id)
       `)
-      .eq('id', newTemplate.id)
+      .eq('id', newTemplateId)
       .single();
 
     if (fetchNewError) {
@@ -131,7 +78,7 @@ export async function POST(
     return NextResponse.json(
       {
         template: newTemplateWithItems,
-        message: `Template duplicated successfully as "${newTemplateName}"`
+        message: `Template duplicated successfully as "${newTemplateWithItems.name}"`
       },
       { status: 201 }
     );
