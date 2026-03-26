@@ -1,12 +1,6 @@
 // app/api/v1/risks/templates/[id]/duplicate/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase';
-
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
   request: NextRequest,
@@ -14,6 +8,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
+    const supabase = await createClient();
 
     // Fetch the template to duplicate
     const { data: template, error: fetchError } = await supabase
@@ -53,6 +48,16 @@ export async function POST(
 
     // Create the duplicated template with "Copy of" prefix
     const newTemplateName = `Copy of ${template.name}`;
+    
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
     const { data: newTemplate, error: createError } = await supabase
       .from('risk_templates')
       .insert({
@@ -66,7 +71,7 @@ export async function POST(
         excluded_systems: template.excluded_systems || [],
         included_systems: template.included_systems || [],
         organization_id: template.organization_id,
-        created_by: (await supabase.auth.getUser()).data.user?.id,
+        created_by: user.id,
       })
       .select()
       .single();
