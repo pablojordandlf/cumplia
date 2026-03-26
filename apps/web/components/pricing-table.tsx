@@ -91,7 +91,6 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
             ) : (
               <Button
                 className={plan.recommended ? '' : 'bg-purple-600 hover:bg-purple-700'}
-                onClick={() => console.log(`Upgrade to ${plan.name}`)}
                 disabled={plan.id === 'agency' && currentPlan !== 'agency'} // Disable 'Agency' upgrade if not already agency but allow button to show
               >
                 {plan.id === 'agency' && currentPlan !== 'agency' ? 'Contact Us' : 'Get Started'}

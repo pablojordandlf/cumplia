@@ -167,8 +167,6 @@ export default function ProfilePage() {
         console.error('Error fetching membership:', memberError);
         toast.error('Error RLS al cargar tu rol: ' + memberError.message);
       } else if (memberData) {
-        console.log('Membership loaded (basic):', memberData);
-        
         // Ahora obtener la info de la organización por separado
         const { data: orgData } = await supabase
           .from('organizations')
@@ -269,7 +267,6 @@ export default function ProfilePage() {
   }
 
   const role = membership?.role || 'viewer';
-  console.log('Role from membership:', membership?.role, '| Final role used:', role);
   const roleInfo = roleConfig[role];
   const RoleIcon = roleInfo.icon;
 
