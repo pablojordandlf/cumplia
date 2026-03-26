@@ -11,6 +11,8 @@ import { RiskBadge } from '@/components/risk-badge';
 import { TransparencyObligations } from '@/components/transparency-obligations';
 import { AIActChecklistTab } from '@/components/ai-act-checklist-tab';
 import { SystemHistoryTab } from '@/components/system-history-tab';
+import { CustomFieldsEditor } from '@/components/custom-fields-editor';
+import { useCustomFieldTemplates } from '@/hooks/use-custom-field-templates';
 import { 
   ArrowLeft, 
   Pencil, 
@@ -131,6 +133,9 @@ export default function UseCaseDetailPage() {
   const [updating, setUpdating] = useState(false);
   const [userRole, setUserRole] = useState<MemberRole | null>(null);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [isPoCEditing, setIsPoCEditing] = useState(false);
+  
+  const { templates } = useCustomFieldTemplates();
   
   useEffect(() => {
     loadData();
@@ -186,6 +191,57 @@ export default function UseCaseDetailPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function updateIsPoc(newValue: boolean) {
+    if (!userRole || !hasPermission(userRole, 'ai_systems:update')) {
+      toast({ title: 'Sin permisos', description: 'No tienes permisos para editar este sistema.', variant: 'destructive' });
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const response = await fetch(`/api/use-cases/${useCaseId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_poc: newValue }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update');
+      }
+
+      const { useCase: updatedUseCase } = await response.json();
+      setUseCase(updatedUseCase);
+      setIsPoCEditing(false);
+      toast({ title: 'Actualizado', description: `Estado cambiado a ${newValue ? 'PoC' : 'Producción'}` });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function handleSaveCustomFields(fields: CustomField[]) {
+    if (!userRole || !hasPermission(userRole, 'ai_systems:update')) {
+      throw new Error('No tienes permisos para editar este sistema.');
+    }
+
+    const response = await fetch(`/api/use-cases/${useCaseId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ custom_fields: fields }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update');
+    }
+
+    const { useCase: updatedUseCase } = await response.json();
+    setUseCase(updatedUseCase);
+    setCustomFields(fields);
   }
 
   async function deleteUseCase() {
@@ -324,6 +380,69 @@ export default function UseCaseDetailPage() {
               </CardContent>
             </Card>
 
+            {/* PoC Status Card - NOW PROMINENT */}
+            <Card className={useCase.is_poc ? 'border-l-4 border-l-blue-500 bg-blue-50' : 'border-l-4 border-l-green-500 bg-green-50'}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    {useCase.is_poc ? (
+                      <>
+                        <FlaskConical className="w-6 h-6 text-blue-600" />
+                        <div>
+                          <h3 className="font-semibold text-gray-900">Prueba de Concepto (PoC)</h3>
+                          <p className="text-sm text-gray-600">Este sistema se encuentra en fase experimental</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Package className="w-6 h-6 text-green-600" />
+                        <div>
+                          <h3 className="font-semibold text-gray-900">En Producción</h3>
+                          <p className="text-sm text-gray-600">Este sistema está implementado en producción</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {canEdit && (
+                    <button
+                      onClick={() => setIsPoCEditing(!isPoCEditing)}
+                      className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                      title="Cambiar estado"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* PoC Editor Inline */}
+                {isPoCEditing && canEdit && (
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={useCase.is_poc}
+                          onChange={(e) => updateIsPoc(e.target.checked)}
+                          disabled={updating}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          {useCase.is_poc ? '✓ Marcar como Producción' : '✓ Marcar como PoC'}
+                        </span>
+                      </label>
+                      <PoCTooltip />
+                      <button
+                        onClick={() => setIsPoCEditing(false)}
+                        className="ml-auto text-xs text-gray-500 hover:text-gray-700 font-medium"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Basic Information */}
             <Card>
               <CardHeader>
@@ -351,45 +470,29 @@ export default function UseCaseDetailPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Estado</label>
-                    <div className="flex items-center gap-2 mt-1">
-                      {useCase.is_poc ? (
-                        <>
-                          <FlaskConical className="w-4 h-4 text-blue-600" />
-                          <span className="text-gray-600">Prueba de Concepto (PoC)</span>
-                          <PoCTooltip />
-                        </>
-                      ) : (
-                        <>
-                          <Package className="w-4 h-4 text-gray-600" />
-                          <span className="text-gray-600">En Producción</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Última actualización</label>
-                    <p className="text-gray-600 mt-1">
-                      {format(new Date(useCase.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}
-                    </p>
-                  </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Última actualización</label>
+                  <p className="text-gray-600 mt-1">
+                    {format(new Date(useCase.updated_at), 'dd/MM/yyyy HH:mm', { locale: es })}
+                  </p>
                 </div>
 
-                {/* Custom Fields */}
-                {customFields.length > 0 && (
-                  <div className="border-t pt-4 mt-4">
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Campos Personalizados</label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {customFields.map((field) => (
-                        <div key={field.id} className="bg-gray-50 p-3 rounded-lg">
-                          <span className="text-sm font-medium text-gray-700">{field.key}</span>
-                          <p className="text-gray-600 text-sm">{field.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {/* Custom Fields Editor */}
+                {useCase && (
+                  <CustomFieldsEditor
+                    useCase={{
+                      id: useCase.id,
+                      ai_act_level: useCase.ai_act_level,
+                      custom_fields: useCase.custom_fields || [],
+                    }}
+                    applicableTemplates={templates.filter(t => {
+                      const appliesTo = t.applies_to_levels || [t.applies_to || 'global'];
+                      return appliesTo.includes('global') || 
+                        (useCase.ai_act_level && appliesTo.includes(useCase.ai_act_level.toLowerCase() as any));
+                    })}
+                    onSave={handleSaveCustomFields}
+                    readOnly={!canEdit}
+                  />
                 )}
               </CardContent>
             </Card>

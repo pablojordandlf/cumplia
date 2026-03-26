@@ -32,6 +32,7 @@ interface UseRiskTemplatesReturn {
     excluded_systems?: string[];
     included_systems?: string[];
   }) => Promise<boolean>;
+  duplicateTemplate: (id: string) => Promise<RiskTemplate | null>;
 }
 
 export function useRiskTemplates({
@@ -154,8 +155,13 @@ export function useRiskTemplates({
   }, []);
 
   const toggleTemplateActive = useCallback(async (id: string, isActive: boolean): Promise<boolean> => {
-    setLoading(true);
     setError(null);
+    
+    // Optimistic update - update UI immediately
+    const originalTemplates = templates;
+    setTemplates(prev => prev.map(t => 
+      t.id === id ? { ...t, is_active: isActive } : t
+    ));
     
     try {
       const response = await fetch(`/api/v1/risks/templates/${id}`, {
@@ -169,25 +175,34 @@ export function useRiskTemplates({
         throw new Error(errorData.error || 'Failed to update template');
       }
 
-      setTemplates(prev => prev.map(t => 
-        t.id === id ? { ...t, is_active: isActive } : t
-      ));
       return true;
     } catch (err) {
+      // Revert on error
+      setTemplates(originalTemplates);
       setError(err instanceof Error ? err.message : 'Unknown error');
       return false;
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  }, [templates]);
 
   const updateApplicability = useCallback(async (id: string, data: {
     applies_to_levels?: string[];
     excluded_systems?: string[];
     included_systems?: string[];
   }): Promise<boolean> => {
-    setLoading(true);
     setError(null);
+    
+    // Optimistic update - update UI immediately
+    const originalTemplates = templates;
+    setTemplates(prev => prev.map(t => 
+      t.id === id 
+        ? { 
+            ...t, 
+            applies_to_levels: data.applies_to_levels !== undefined ? data.applies_to_levels : t.applies_to_levels,
+            excluded_systems: data.excluded_systems !== undefined ? data.excluded_systems : t.excluded_systems,
+            included_systems: data.included_systems !== undefined ? data.included_systems : t.included_systems,
+          }
+        : t
+    ));
     
     try {
       const response = await fetch(`/api/v1/risks/templates/${id}`, {
@@ -201,11 +216,38 @@ export function useRiskTemplates({
         throw new Error(errorData.error || 'Failed to update applicability');
       }
 
-      await fetchTemplates(); // Refresh list
+      // After successful update, refresh to ensure consistency
+      await fetchTemplates();
       return true;
     } catch (err) {
+      // Revert on error
+      setTemplates(originalTemplates);
       setError(err instanceof Error ? err.message : 'Unknown error');
       return false;
+    }
+  }, [templates, fetchTemplates]);
+
+  const duplicateTemplate = useCallback(async (id: string): Promise<RiskTemplate | null> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/v1/risks/templates/${id}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to duplicate template');
+      }
+
+      const data = await response.json();
+      await fetchTemplates(); // Refresh list
+      return data.template;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      return null;
     } finally {
       setLoading(false);
     }
@@ -226,6 +268,7 @@ export function useRiskTemplates({
     updateTemplate,
     deleteTemplate,
     toggleTemplateActive,
-    updateApplicability
+    updateApplicability,
+    duplicateTemplate
   };
 }

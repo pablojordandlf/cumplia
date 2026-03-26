@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, Text, AlignLeft, Link, Mail, Hash, FormInput } from 'lucide-react';
+import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, Text, AlignLeft, Link, Mail, Hash, FormInput, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useCustomFieldTemplates } from '@/hooks/use-custom-field-templates';
 import { CustomFieldTemplate, CustomFieldDefinition } from '@/types/custom-fields';
@@ -29,14 +30,10 @@ const FIELD_TYPES = [
 
 const APPLIES_TO_OPTIONS = [
   { value: 'global', label: 'Todos los niveles' },
+  { value: 'prohibited', label: 'Prohibido' },
   { value: 'high_risk', label: 'Alto Riesgo' },
   { value: 'limited_risk', label: 'Riesgo Limitado' },
   { value: 'minimal_risk', label: 'Riesgo Mínimo' },
-  { value: 'prohibited', label: 'Prohibido' },
-  { value: 'gpai_model', label: 'GPAI Model' },
-  { value: 'gpai_system', label: 'GPAI System' },
-  { value: 'gpai_sr', label: 'GPAI-SR' },
-  { value: 'unclassified', label: 'Por Clasificar' },
 ];
 
 // Generate a safe key from label
@@ -57,7 +54,7 @@ export function CreateCustomFieldDialog({
 }: CreateCustomFieldDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [appliesTo, setAppliesTo] = useState('');
+  const [appliesTo, setAppliesTo] = useState<string[]>([]);
   const [fields, setFields] = useState<CustomFieldDefinition[]>([]);
   const [newFieldLabel, setNewFieldLabel] = useState('');
   const [newFieldType, setNewFieldType] = useState('text');
@@ -71,13 +68,13 @@ export function CreateCustomFieldDialog({
     if (open && templateToEdit) {
       setName(templateToEdit.name);
       setDescription(templateToEdit.description || '');
-      setAppliesTo(templateToEdit.applies_to);
+      setAppliesTo(templateToEdit.applies_to_levels || [templateToEdit.applies_to || 'global']);
       setFields(templateToEdit.field_definitions);
     } else if (open) {
       // Reset form
       setName('');
       setDescription('');
-      setAppliesTo('');
+      setAppliesTo(['global']);
       setFields([]);
       setNewFieldLabel('');
       setNewFieldType('text');
@@ -144,10 +141,10 @@ export function CreateCustomFieldDialog({
       return;
     }
 
-    if (!appliesTo) {
+    if (!appliesTo || appliesTo.length === 0) {
       toast({
         title: 'Nivel requerido',
-        description: 'Por favor selecciona a qué nivel de riesgo aplica',
+        description: 'Por favor selecciona al menos un nivel de riesgo',
         variant: 'destructive',
       });
       return;
@@ -169,14 +166,14 @@ export function CreateCustomFieldDialog({
       success = await updateTemplate(templateToEdit.id, {
         name: name.trim(),
         description: description.trim() || undefined,
-        applies_to: appliesTo as any,
+        applies_to_levels: appliesTo as any,
         field_definitions: fields,
       });
     } else {
       const result = await createTemplate({
         name: name.trim(),
         description: description.trim() || undefined,
-        applies_to: appliesTo as any,
+        applies_to_levels: appliesTo as any,
         field_definitions: fields,
       });
       success = !!result;
@@ -232,20 +229,62 @@ export function CreateCustomFieldDialog({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Aplica a * </Label>
-              <Select value={appliesTo} onValueChange={setAppliesTo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona el nivel de riesgo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {APPLIES_TO_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+            <div className="space-y-3">
+              <div>
+                <Label>Aplica a * </Label>
+                <p className="text-xs text-gray-500 mt-1">Selecciona uno o más niveles de riesgo</p>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
+                {appliesTo.includes('global') && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded flex gap-2">
+                    <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium">Si seleccionas "Todos", se deseleccionarán los demás</p>
+                    </div>
+                  </div>
+                )}
+                
+                {APPLIES_TO_OPTIONS.map((option) => (
+                  <div key={option.value} className="flex items-center gap-3">
+                    <Checkbox
+                      id={`applies-to-${option.value}`}
+                      checked={appliesTo.includes(option.value)}
+                      onCheckedChange={(checked) => {
+                        if (option.value === 'global') {
+                          // If selecting "global", deselect others
+                          setAppliesTo(checked ? ['global'] : []);
+                        } else {
+                          // Remove "global" if selecting specific levels
+                          let newValues = appliesTo.filter(v => v !== 'global');
+                          if (checked) {
+                            newValues = [...newValues, option.value];
+                          } else {
+                            newValues = newValues.filter(v => v !== option.value);
+                          }
+                          setAppliesTo(newValues);
+                        }
+                      }}
+                    />
+                    <Label
+                      htmlFor={`applies-to-${option.value}`}
+                      className="font-normal cursor-pointer flex-1"
+                    >
                       {option.label}
-                    </SelectItem>
+                    </Label>
+                  </div>
+                ))}
+              </div>
+              
+              {appliesTo.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {appliesTo.map((level) => (
+                    <Badge key={level} variant="secondary">
+                      {APPLIES_TO_OPTIONS.find(o => o.value === level)?.label}
+                    </Badge>
                   ))}
-                </SelectContent>
-              </Select>
+                </div>
+              )}
             </div>
           </div>
 
