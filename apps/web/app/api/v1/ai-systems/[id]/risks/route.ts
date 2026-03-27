@@ -154,6 +154,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Check organization membership with editor permissions
     let hasEditAccess = false;
     
+    // First try: check organization membership
     const { data: membership, error: membershipError } = await supabase
       .from('organization_members')
       .select('role')
@@ -169,21 +170,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         hasEditAccess = true;
       }
     } else {
-      // Fallback: check if user owns the system directly
-      const { data: ownerCheck } = await supabase
+      // Fallback 1: check if user owns the system directly (personal systems)
+      const { data: ownerCheck, error: ownerError } = await supabase
         .from('use_cases')
         .select('user_id')
         .eq('id', aiSystemId)
         .eq('user_id', user.id)
         .single();
       
-      if (ownerCheck) {
+      if (!ownerError && ownerCheck) {
         hasEditAccess = true;
       }
     }
 
     if (!hasEditAccess) {
-      console.error(`Edit access denied for user ${user.id} to system ${aiSystemId}`);
+      console.error(`Edit access denied for user ${user.id} to system ${aiSystemId}`, {
+        membershipError: membershipError?.message,
+        organizationId: system.organization_id
+      });
       return NextResponse.json(
         { error: 'Not authorized to modify this system' },
         { status: 403 }
@@ -328,11 +332,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Clear existing risks first
-    await supabase
+    // Clear existing risks first (ignore errors if none exist)
+    const { error: clearError } = await supabase
       .from('use_case_risks')
       .delete()
       .eq('use_case_id', aiSystemId);
+    
+    if (clearError && clearError.code !== 'PGRST116') {
+      // PGRST116 is "No rows found to delete", which is fine
+      console.warn('Warning clearing existing risks:', clearError);
+    }
 
     // Create new risks from template - by default they don't apply
     const newRisks = templateItems.map(item => ({
@@ -359,9 +368,21 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       `);
 
     if (createError) {
-      console.error('Error creating risks from template:', createError);
+      console.error('Error creating risks from template:', {
+        error: createError,
+        templateId: template_id,
+        systemId: aiSystemId,
+        riskCount: newRisks.length,
+        userId: user.id,
+        errorCode: createError.code,
+        errorMessage: createError.message
+      });
       return NextResponse.json(
-        { error: 'Failed to create risks from template' },
+        { 
+          error: 'Failed to create risks from template',
+          details: createError.message,
+          code: createError.code
+        },
         { status: 500 }
       );
     }

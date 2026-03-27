@@ -205,23 +205,25 @@ export function PendingObligationsWidget() {
               <div className="flex gap-2 pb-4 border-b border-white/10 overflow-x-auto">
                 <button
                   onClick={() => setFilterRisk(null)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     filterRisk === null
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-600 text-white shadow-md'
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
-                  Todos
+                  Todos ({obligations.length})
                 </button>
                 {['prohibited', 'high_risk', 'limited_risk', 'minimal_risk'].map(level => {
                   const count = obligations.filter(o => o.ai_act_level === level).length;
+                  if (count === 0) return null;
+                  
                   return (
                     <button
                       key={level}
                       onClick={() => setFilterRisk(level)}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                         filterRisk === level
-                          ? `${RISK_COLORS[level].badge} cursor-pointer`
+                          ? `${RISK_COLORS[level].badge} cursor-pointer shadow-md`
                           : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                       }`}
                     >
@@ -231,6 +233,21 @@ export function PendingObligationsWidget() {
                 })}
               </div>
 
+              {/* Show message if filter returns no results */}
+              {filterRisk && filteredObligations.length === 0 && (
+                <div className="text-center py-8 mb-6">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                    No hay sistemas con nivel de riesgo "{RISK_COLORS[filterRisk].text}"
+                  </p>
+                  <button
+                    onClick={() => setFilterRisk(null)}
+                    className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline"
+                  >
+                    Ver todos los sistemas
+                  </button>
+                </div>
+              )}
+
               {/* List of pending obligations */}
               <motion.div
                 className="space-y-3 max-h-96 overflow-y-auto pr-2"
@@ -238,7 +255,7 @@ export function PendingObligationsWidget() {
                 initial="hidden"
                 animate="visible"
               >
-                {filteredObligations.map((item) => (
+                {filteredObligations.length > 0 ? filteredObligations.map((item) => (
                   <motion.div key={item.system_id} variants={itemVariants}>
                     <Link href={`/dashboard/inventory/${item.system_id}`}>
                       <div className="p-4 rounded-lg border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all cursor-pointer group bg-white/5 backdrop-blur-sm">
@@ -299,7 +316,12 @@ export function PendingObligationsWidget() {
                       </div>
                     </Link>
                   </motion.div>
-                ))}
+                )) : (
+                  <div className="text-center py-8">
+                    <ListTodo className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-2 opacity-50 mx-auto" />
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">No hay sistemas para mostrar</p>
+                  </div>
+                )}
               </motion.div>
             </>
           )}

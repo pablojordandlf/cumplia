@@ -143,9 +143,19 @@ export function RiskTemplateSelector({
       });
     } catch (error) {
       console.error('Error applying template:', error);
+      const errorMessage = error instanceof Error ? error.message : 'No se pudo aplicar la plantilla';
+      
+      // Provide more helpful error messages
+      let displayMessage = errorMessage;
+      if (errorMessage.includes('Not authorized')) {
+        displayMessage = 'No tienes permisos para modificar este sistema. Contacta al administrador.';
+      } else if (errorMessage.includes('Failed to create')) {
+        displayMessage = 'Error al crear los riesgos. Por favor intenta de nuevo.';
+      }
+      
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'No se pudo aplicar la plantilla',
+        description: displayMessage,
         variant: 'destructive'
       });
     } finally {

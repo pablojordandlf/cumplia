@@ -68,7 +68,16 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
                 color: '#fff',
                 padding: '12px',
               }}
-              formatter={(value: any) => [value, 'Sistemas']}
+              formatter={(value: any, name: any, props: any) => {
+                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                return [
+                  <span key="tooltip" className="text-sm">
+                    <strong>{value}</strong> sistemas ({percentage}%)
+                  </span>,
+                  ''
+                ];
+              }}
+              labelStyle={{ color: '#fff', fontSize: '12px' }}
               cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
             />
             <Bar
