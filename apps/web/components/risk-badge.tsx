@@ -10,27 +10,27 @@ interface RiskBadgeProps {
 const riskConfig = {
   prohibited: {
     label: 'Prohibido',
-    color: 'bg-red-100 text-red-800 border-red-200 hover:bg-red-100',
+    color: 'bg-[#F4E4D7] text-[#C92A2A] border-[#C92A2A]/20 hover:bg-[#F4E4D7]/80',
     icon: AlertCircle,
   },
   high_risk: {
     label: 'Alto Riesgo',
-    color: 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100',
+    color: 'bg-[#FFE8D1] text-[#D97706] border-[#D97706]/20 hover:bg-[#FFE8D1]/80',
     icon: AlertTriangle,
   },
   limited_risk: {
     label: 'Riesgo Limitado',
-    color: 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100',
+    color: 'bg-[#FFF8DC] text-[#B8860B] border-[#B8860B]/20 hover:bg-[#FFF8DC]/80',
     icon: Shield,
   },
   minimal_risk: {
     label: 'Riesgo Mínimo',
-    color: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100',
+    color: 'bg-[#E8F5E3] text-[#27A844] border-[#27A844]/20 hover:bg-[#E8F5E3]/80',
     icon: CheckCircle2,
   },
   unclassified: {
     label: 'Sin Clasificar',
-    color: 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100',
+    color: 'bg-[#E8ECEB] text-[#707070] border-[#707070]/20 hover:bg-[#E8ECEB]/80',
     icon: Clock,
   },
 };
