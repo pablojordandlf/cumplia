@@ -93,9 +93,9 @@ export default function UserMenu() {
           <Users className="mr-2 h-4 w-4" />
           <span>Gestionar Equipo</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/dashboard/settings')} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => router.push('/dashboard/settings/organization')} className="cursor-pointer">
           <CreditCard className="mr-2 h-4 w-4" />
-          <span>Membresía</span>
+          <span>Plan y Membresía</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
