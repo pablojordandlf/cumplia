@@ -13,43 +13,18 @@ import {
   Package,
   Zap,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAuthReady } from '@/lib/auth-helpers';
 
 interface SearchResult {
   id: string;
   title: string;
   description?: string;
-  category: 'use-case' | 'template' | 'inventory' | 'control';
+  category: 'inventory' | 'use-case';
   url?: string;
 }
-
-// Mock data - en production, esto vendría de una API
-const MOCK_RESULTS: SearchResult[] = [
-  {
-    id: '1',
-    title: 'Sistema de recomendación personalizada',
-    category: 'use-case',
-    description: 'Recomendaciones de productos basadas en IA',
-  },
-  {
-    id: '2',
-    title: 'Risk Template - High Risk',
-    category: 'template',
-    description: 'Plantilla para sistemas de alto riesgo',
-  },
-  {
-    id: '3',
-    title: 'Camera System Inventory',
-    category: 'inventory',
-    description: 'Inventario de sistemas de visión por IA',
-  },
-  {
-    id: '4',
-    title: 'Documented Governance Process',
-    category: 'control',
-    description: 'Control de procesos de gobernanza documentados',
-  },
-];
 
 const CATEGORY_INFO = {
   'use-case': {
@@ -57,27 +32,21 @@ const CATEGORY_INFO = {
     icon: Zap,
     color: 'text-blue-600',
   },
-  'template': {
-    label: 'Plantilla de riesgo',
-    icon: AlertTriangle,
-    color: 'text-orange-600',
-  },
   'inventory': {
-    label: 'Inventario',
+    label: 'Sistema de IA',
     icon: Package,
     color: 'text-green-600',
-  },
-  'control': {
-    label: 'Control',
-    icon: FileText,
-    color: 'text-purple-600',
   },
 };
 
 export function GlobalSearch() {
   const [open, setOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState('');
+  const [results, setResults] = React.useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { user, isReady } = useAuthReady();
 
+  // Keyboard shortcut
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -90,30 +59,67 @@ export function GlobalSearch() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  const filteredResults = React.useMemo(() => {
-    if (!searchValue) return MOCK_RESULTS;
-    
-    return MOCK_RESULTS.filter((result) =>
-      result.title.toLowerCase().includes(searchValue.toLowerCase()) ||
-      (result.description?.toLowerCase().includes(searchValue.toLowerCase()) ?? false)
-    );
-  }, [searchValue]);
+  // Fetch inventory items when dialog opens or search value changes
+  React.useEffect(() => {
+    if (!open || !isReady || !user) {
+      setResults([]);
+      return;
+    }
+
+    const fetchSearchResults = async () => {
+      setIsLoading(true);
+      try {
+        // Get user's organization
+        const { data: memberData, error: memberError } = await supabase
+          .from('organization_members')
+          .select('organization_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+
+        if (memberError || !memberData) {
+          setResults([]);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch inventory items for this organization
+        let query = supabase
+          .from('use_cases')
+          .select('id, name, description')
+          .eq('organization_id', memberData.organization_id)
+          .limit(10);
+
+        if (searchValue.trim()) {
+          query = query.or(`name.ilike.%${searchValue}%,description.ilike.%${searchValue}%`);
+        }
+
+        const { data: inventoryData } = await query;
+
+        const formattedResults: SearchResult[] = (inventoryData || []).map((item: any) => ({
+          id: item.id,
+          title: item.name,
+          description: item.description || 'Sistema de IA',
+          category: 'inventory',
+        }));
+
+        setResults(formattedResults);
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+        setResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSearchResults, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [open, searchValue, isReady, user]);
 
   const handleSelect = (result: SearchResult) => {
-    // Navigate based on category
-    switch (result.category) {
-      case 'use-case':
-        window.location.href = `/dashboard/use-cases/${result.id}`;
-        break;
-      case 'template':
-        window.location.href = `/dashboard/admin?tab=risk-templates`;
-        break;
-      case 'inventory':
-        window.location.href = `/dashboard/inventory/${result.id}`;
-        break;
-      case 'control':
-        window.location.href = `/dashboard/controls/${result.id}`;
-        break;
+    // Navigate to inventory item
+    if (result.category === 'inventory') {
+      window.location.href = `/dashboard/inventory/${result.id}`;
     }
     setOpen(false);
   };
@@ -146,7 +152,12 @@ export function GlobalSearch() {
             </div>
             
             <Command.List className="max-h-[300px] overflow-y-auto">
-              {filteredResults.length === 0 ? (
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-8 text-sm text-muted-foreground">
+                  <Loader2 className="w-6 h-6 mb-2 animate-spin" />
+                  <p>Buscando sistemas...</p>
+                </div>
+              ) : results.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-sm text-muted-foreground">
                   <Search className="w-6 h-6 mb-2 opacity-50" />
                   <p>No se encontraron resultados</p>
@@ -154,7 +165,7 @@ export function GlobalSearch() {
                 </div>
               ) : (
                 <>
-                  {filteredResults.map((result) => {
+                  {results.map((result) => {
                     const categoryInfo = CATEGORY_INFO[result.category];
                     const IconComponent = categoryInfo.icon;
                     

@@ -14,9 +14,10 @@ interface LimitResult {
 
 // Default fallback limits if plans table is not accessible
 const DEFAULT_LIMITS: Record<string, number> = {
-  starter: 1,
-  professional: 5,
-  business: 15,
+  free: 1,
+  starter: 5,
+  professional: 15,
+  business: 30,
   enterprise: -1, // unlimited
 };
 
@@ -52,11 +53,11 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
           // B2B: Get organization plan
           const { data: orgData } = await supabase
             .from('organizations')
-            .select('plan')
+            .select('plan_name')
             .eq('id', membership.organization_id)
             .single();
           
-          planName = orgData?.plan || 'starter';
+          planName = orgData?.plan_name || 'free';
 
           // Count use cases for this organization
           const { count } = await supabase
@@ -75,7 +76,7 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
             .eq('status', 'active')
             .single();
 
-          planName = subscription?.plan_type || 'starter';
+          planName = subscription?.plan_type || 'free';
 
           // Count user's use cases
           const { count } = await supabase
@@ -104,7 +105,7 @@ export function useLimit(resource: 'useCases' | 'ai_systems'): LimitResult {
 
       } catch (error) {
         console.error('Error fetching limit data:', error);
-        // Default to starter plan on error
+        // Default to free plan on error
         setLimit(1);
         setUsed(0);
       } finally {
