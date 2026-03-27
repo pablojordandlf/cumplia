@@ -24,21 +24,21 @@ const RISK_CONFIG = {
     label: 'Alto Riesgo',
     badge: '🔴',
     color: 'from-red-600 to-red-500',
-    barColor: 'bg-red-600 dark:bg-red-500',
+    barColor: 'bg-red-600',
     required: true,
   },
   limited_risk: {
     label: 'Riesgo Limitado',
     badge: '🟡',
     color: 'from-yellow-600 to-yellow-500',
-    barColor: 'bg-yellow-600 dark:bg-yellow-500',
+    barColor: 'bg-yellow-600',
     required: false,
   },
   minimal_risk: {
     label: 'Riesgo Mínimo',
     badge: '🟢',
     color: 'from-green-600 to-green-500',
-    barColor: 'bg-green-600 dark:bg-green-500',
+    barColor: 'bg-green-600',
     required: false,
   },
 };
@@ -150,7 +150,7 @@ export function RiskAnalysisStatusCard() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="h-64 rounded-2xl bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm border border-white/10 animate-pulse"
+        className="h-64 rounded-2xl bg-gray-100/60 backdrop-blur-sm border border-gray-300/60 animate-pulse"
       />
     );
   }
@@ -186,8 +186,8 @@ export function RiskAnalysisStatusCard() {
       initial="hidden"
       animate="visible"
     >
-      <Card className="glass rounded-2xl bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/15 hover:border-blue-400/50 transition-all duration-300 overflow-hidden">
-        <CardHeader className="pb-4 border-b border-white/10">
+      <Card className="glass rounded-2xl bg-white/75 border-gray-300/70 backdrop-blur-md transition-all duration-300 overflow-hidden hover:shadow-lg">
+        <CardHeader className="pb-4 border-b border-gray-200/70">
           <motion.div
             className="flex items-center justify-between"
             initial={{ opacity: 0, y: -10 }}
@@ -195,23 +195,23 @@ export function RiskAnalysisStatusCard() {
             transition={{ delay: 0.1 }}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
-                <Target className="w-5 h-5 text-blue-400" />
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 border border-blue-300/70">
+                <Target className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-xl font-bold text-white">
+                <CardTitle className="text-xl font-bold text-gray-900">
                   Progreso de Gestión de Riesgos
                 </CardTitle>
-                <CardDescription className="text-xs mt-1 text-white/70">
+                <CardDescription className="text-xs mt-1 text-gray-700">
                   Estado de completitud de análisis por nivel de riesgo
                 </CardDescription>
               </div>
             </div>
             <motion.div
               whileHover={{ scale: 1.1, rotate: 10 }}
-              className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex-shrink-0"
+              className="p-2.5 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 border border-green-300/70 flex-shrink-0"
             >
-              <CheckCircle2 className="w-5 h-5 text-green-400" />
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
             </motion.div>
           </motion.div>
         </CardHeader>
@@ -222,13 +222,13 @@ export function RiskAnalysisStatusCard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
-            className="p-4 rounded-xl bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30"
+            className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300/60"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold text-white">
+              <span className="text-sm font-bold text-gray-900">
                 Progreso General
               </span>
-              <span className="text-sm font-bold text-blue-300">
+              <span className="text-sm font-bold text-blue-700">
                 {totalCompleted}/{totalSystems} completados
               </span>
             </div>
@@ -249,39 +249,39 @@ export function RiskAnalysisStatusCard() {
                     key={section.key}
                     custom={idx}
                     variants={sectionVariants}
-                    className="p-4 rounded-xl bg-slate-700/40 border border-white/15 hover:border-white/30 transition-all hover:bg-slate-700/60"
+                    className="p-4 rounded-xl bg-gray-50/80 border border-gray-300/70 hover:border-gray-400/80 transition-all hover:bg-gray-100/80 hover:shadow-md"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3 flex-1">
                         <span className="text-lg">{section.badge}</span>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-white">
+                            <span className="font-bold text-gray-900">
                               {section.label}
                             </span>
                             {section.required && (
-                              <Badge variant="destructive" className="text-xs">
+                              <Badge variant="destructive" className="text-xs bg-red-600 text-white">
                                 Obligatorio
                               </Badge>
                             )}
                             {!section.required && (
-                              <Badge variant="outline" className="text-xs bg-white/10 border-white/30 text-white/80">
+                              <Badge variant="outline" className="text-xs bg-gray-100 border-gray-400 text-gray-700">
                                 Opcional
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-white/70 mt-0.5">
+                          <p className="text-xs text-gray-700 mt-0.5">
                             {section.completed} de {section.total} sistema{section.total !== 1 ? 's' : ''} completado{section.completed !== 1 ? 's' : ''}
                           </p>
                         </div>
                       </div>
-                      <span className="text-lg font-bold text-white min-w-12 text-right">
+                      <span className="text-lg font-bold text-gray-900 min-w-12 text-right">
                         {percentage}%
                       </span>
                     </div>
 
                     {/* Progress Bar with Color */}
-                    <div className="relative h-2.5 rounded-full bg-white/10 border border-white/5 overflow-hidden">
+                    <div className="relative h-2.5 rounded-full bg-gray-300/40 border border-gray-400/40 overflow-hidden">
                       <motion.div
                         className={`h-full rounded-full ${section.barColor} transition-all`}
                         initial={{ width: 0 }}
@@ -296,10 +296,10 @@ export function RiskAnalysisStatusCard() {
                         initial={{ opacity: 0, y: -5 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="mt-3 p-2 rounded-lg bg-red-50/50 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 flex items-start gap-2"
+                        className="mt-3 p-2 rounded-lg bg-red-50 border border-red-300/60 flex items-start gap-2"
                       >
-                        <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-red-700 dark:text-red-300">
+                        <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-red-700">
                           Completa los análisis para cumplir normativa
                         </p>
                       </motion.div>
@@ -308,8 +308,8 @@ export function RiskAnalysisStatusCard() {
                 );
               })
             ) : (
-              <div className="p-8 text-center rounded-lg bg-white/5 border border-white/10">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="p-8 text-center rounded-lg bg-gray-100/60 border border-gray-300/60">
+                <p className="text-sm text-gray-600">
                   Sin sistemas clasificados para mostrar
                 </p>
               </div>
@@ -322,14 +322,14 @@ export function RiskAnalysisStatusCard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="p-3 rounded-lg bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 flex items-start gap-3"
+              className="p-3 rounded-lg bg-orange-50 border border-orange-300/60 flex items-start gap-3"
             >
-              <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-orange-900 dark:text-orange-200">
+                <p className="text-sm font-medium text-orange-900">
                   {stats.systemsWithoutAnalysis} sistema{stats.systemsWithoutAnalysis !== 1 ? 's' : ''} sin análisis
                 </p>
-                <p className="text-xs text-orange-700 dark:text-orange-300 mt-0.5">
+                <p className="text-xs text-orange-800 mt-0.5">
                   Completa los análisis pendientes en tu inventario
                 </p>
               </div>
@@ -345,7 +345,7 @@ export function RiskAnalysisStatusCard() {
           >
             <Link
               href="/dashboard/inventory"
-              className="group inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors px-4 py-2 rounded-lg hover:bg-blue-500/10"
+              className="group inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors px-4 py-2 rounded-lg hover:bg-blue-100/60"
             >
               <Target className="w-4 h-4" />
               Ver Inventario y Gestionar Análisis

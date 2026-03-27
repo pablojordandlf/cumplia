@@ -186,16 +186,16 @@ export function PendingObligationsWidget() {
         <div className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <Clock className="w-5 h-5 text-white/50 animate-spin" />
-              <span className="ml-2 text-white/70">Cargando...</span>
+              <Clock className="w-5 h-5 text-gray-400 animate-spin" />
+              <span className="ml-2 text-gray-600">Cargando...</span>
             </div>
           ) : filteredObligations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CheckCircle2 className="w-12 h-12 text-green-400 mb-3 opacity-70" />
-              <p className="text-white font-bold">
+              <CheckCircle2 className="w-12 h-12 text-green-600 mb-3 opacity-70" />
+              <p className="text-gray-900 font-bold">
                 {filterRisk ? `No hay sistemas con nivel ${filterRisk}` : 'No hay sistemas registrados'}
               </p>
-              <p className="text-sm text-white/60 mt-1">
+              <p className="text-sm text-gray-600 mt-1">
                 Crea tu primer sistema de IA para comenzar a rastrear obligaciones
               </p>
             </div>
@@ -258,31 +258,31 @@ export function PendingObligationsWidget() {
                 {filteredObligations.length > 0 ? filteredObligations.map((item) => (
                   <motion.div key={item.system_id} variants={itemVariants}>
                     <Link href={`/dashboard/inventory/${item.system_id}`}>
-                      <div className="p-4 rounded-xl border border-white/20 hover:border-blue-400/60 hover:bg-slate-700/40 transition-all cursor-pointer group bg-slate-700/30 backdrop-blur-sm shadow-lg hover:shadow-xl">
+                      <div className="p-4 rounded-xl border border-gray-300/80 hover:border-blue-500/90 hover:bg-blue-50/80 transition-all cursor-pointer group bg-white/85 backdrop-blur-md shadow-sm hover:shadow-md">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h4 className="font-bold text-white group-hover:text-blue-300 transition-colors">
+                            <h4 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                               {item.system_name}
                             </h4>
-                            <p className="text-xs text-white/60 mt-1">
+                            <p className="text-xs text-gray-600 mt-1">
                               {item.completed_obligations} de {item.total_obligations} obligaciones completadas
                             </p>
                           </div>
                           <Badge className={`${
-                            item.ai_act_level === 'prohibited' ? 'bg-red-600/80 text-white border border-red-400/30' :
-                            item.ai_act_level === 'high_risk' ? 'bg-orange-600/80 text-white border border-orange-400/30' :
-                            item.ai_act_level === 'limited_risk' ? 'bg-yellow-600/80 text-white border border-yellow-400/30' :
-                            item.ai_act_level === 'minimal_risk' ? 'bg-green-600/80 text-white border border-green-400/30' :
-                            'bg-gray-600/80 text-white border border-gray-400/30'
+                            item.ai_act_level === 'prohibited' ? 'bg-red-100 text-red-800 border border-red-300/60' :
+                            item.ai_act_level === 'high_risk' ? 'bg-orange-100 text-orange-800 border border-orange-300/60' :
+                            item.ai_act_level === 'limited_risk' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300/60' :
+                            item.ai_act_level === 'minimal_risk' ? 'bg-green-100 text-green-800 border border-green-300/60' :
+                            'bg-gray-200 text-gray-800 border border-gray-400/60'
                           }`}>
                             {RISK_COLORS[item.ai_act_level].text}
                           </Badge>
                         </div>
 
                         {/* Progress bar */}
-                        <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden mb-3 border border-white/5">
+                        <div className="w-full h-2.5 bg-gray-300/40 rounded-full overflow-hidden mb-3 border border-gray-400/40">
                           <motion.div
-                            className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50"
+                            className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-md"
                             initial={{ width: 0 }}
                             animate={{ width: `${item.risk_management_progress}%` }}
                             transition={{ duration: 0.5 }}
@@ -293,18 +293,18 @@ export function PendingObligationsWidget() {
                         <div className="space-y-1">
                           {item.pending_obligations.length > 0 ? (
                             <>
-                              <p className="text-xs font-semibold text-white/80 mb-2">
+                              <p className="text-xs font-semibold text-gray-700 mb-2">
                                 Tareas pendientes ({item.pending_obligations.length}):
                               </p>
                               <div className="space-y-1">
                                 {item.pending_obligations.slice(0, 3).map(obl => (
-                                  <div key={obl.key} className="flex items-start gap-2 text-xs text-white/70">
-                                    <span className="text-white/40 mt-0.5">•</span>
+                                  <div key={obl.key} className="flex items-start gap-2 text-xs text-gray-600">
+                                    <span className="text-gray-400 mt-0.5">•</span>
                                     <span>{obl.title}</span>
                                   </div>
                                 ))}
                                 {item.pending_obligations.length > 3 && (
-                                  <p className="text-xs text-blue-300 font-semibold mt-2">
+                                  <p className="text-xs text-blue-600 font-semibold mt-2">
                                     +{item.pending_obligations.length - 3} más...
                                   </p>
                                 )}
@@ -312,8 +312,8 @@ export function PendingObligationsWidget() {
                             </>
                           ) : (
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-green-400" />
-                              <p className="text-xs font-semibold text-green-300">
+                              <CheckCircle2 className="w-4 h-4 text-green-600" />
+                              <p className="text-xs font-semibold text-green-700">
                                 ✓ Todas las obligaciones completadas
                               </p>
                             </div>
@@ -324,8 +324,8 @@ export function PendingObligationsWidget() {
                   </motion.div>
                 )) : (
                   <div className="text-center py-8">
-                    <ListTodo className="w-8 h-8 text-white/30 mb-2 opacity-50 mx-auto" />
-                    <p className="text-white/60 text-sm">No hay sistemas para mostrar</p>
+                    <ListTodo className="w-8 h-8 text-gray-400 mb-2 opacity-60 mx-auto" />
+                    <p className="text-gray-600 text-sm">No hay sistemas para mostrar</p>
                   </div>
                 )}
               </motion.div>

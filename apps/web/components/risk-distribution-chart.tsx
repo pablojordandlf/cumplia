@@ -17,11 +17,11 @@ interface RiskDistributionChartProps {
 }
 
 const RISK_CONFIG = {
-  prohibited: { label: 'Prohibido', color: '#dc2626', light: '#fee2e2', icon: '🔴', gradient: 'from-red-600 to-red-500', rgb: 'rgb(220, 38, 38)' },
-  high_risk: { label: 'Alto Riesgo', color: '#ea580c', light: '#ffedd5', icon: '🟠', gradient: 'from-orange-600 to-orange-500', rgb: 'rgb(234, 88, 12)' },
-  limited_risk: { label: 'Limitado', color: '#ca8a04', light: '#fef3c7', icon: '🟡', gradient: 'from-yellow-600 to-yellow-500', rgb: 'rgb(202, 138, 4)' },
-  minimal_risk: { label: 'Mínimo', color: '#16a34a', light: '#dcfce7', icon: '🟢', gradient: 'from-green-600 to-green-500', rgb: 'rgb(22, 163, 74)' },
-  unclassified: { label: 'Por Clasificar', color: '#6b7280', light: '#f3f4f6', icon: '⚪', gradient: 'from-gray-600 to-gray-500', rgb: 'rgb(107, 114, 128)' },
+  prohibited: { label: 'Prohibido', color: '#C92A2A', light: '#FFE8E8', icon: '🔴', gradient: 'from-[#C92A2A] to-[#E74C3C]', rgb: 'rgb(201, 42, 42)' },
+  high_risk: { label: 'Alto Riesgo', color: '#D97706', light: '#FFF4E6', icon: '🟠', gradient: 'from-[#D97706] to-[#F59E0B]', rgb: 'rgb(217, 119, 6)' },
+  limited_risk: { label: 'Limitado', color: '#B8860B', light: '#FFF8E8', icon: '🟡', gradient: 'from-[#B8860B] to-[#D4AF37]', rgb: 'rgb(184, 134, 11)' },
+  minimal_risk: { label: 'Mínimo', color: '#27A844', light: '#E8F5EA', icon: '🟢', gradient: 'from-[#27A844] to-[#52C77A]', rgb: 'rgb(39, 168, 68)' },
+  unclassified: { label: 'Por Clasificar', color: '#707070', light: '#F5F5F5', icon: '⚪', gradient: 'from-[#707070] to-[#999999]', rgb: 'rgb(112, 112, 112)' },
 };
 
 interface CustomTooltipProps {
@@ -39,15 +39,15 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      className="bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-xl p-4 shadow-2xl"
+      className="bg-white/90 backdrop-blur-md border border-gray-300/60 rounded-xl p-4 shadow-lg"
     >
-      <p className="text-white font-bold text-sm mb-2">{data.name}</p>
+      <p className="text-gray-900 font-bold text-sm mb-2">{data.name}</p>
       <div className="space-y-1">
-        <p className="text-white/90 text-sm">
+        <p className="text-gray-800 text-sm">
           <span className="font-semibold text-lg">{data.value}</span>
-          <span className="text-white/60 ml-2">sistemas</span>
+          <span className="text-gray-600 ml-2">sistemas</span>
         </p>
-        <div className="w-32 h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="w-32 h-2 bg-gray-400/40 rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{
@@ -56,6 +56,10 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
             }}
           />
         </div>
+        <p className="text-xs text-gray-600">
+          <span className="font-medium">{Math.round((data.value / (data.maxValue || 10)) * 100)}%</span>
+          <span className="ml-1">del total</span>
+        </p>
       </div>
     </motion.div>
   );
@@ -81,7 +85,7 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full h-96 p-8 rounded-2xl bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-slate-950/50 backdrop-blur-xl border border-white/15 shadow-2xl"
+        className="w-full h-96 p-8 rounded-2xl bg-white/60 backdrop-blur-sm border border-gray-200/80 shadow-md"
       >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -107,21 +111,21 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
                 <feDropShadow dx="0" dy="4" stdDeviation="3" floodOpacity="0.3" />
               </filter>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.08)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, 0.08)" vertical={false} />
             <XAxis
               dataKey="name"
-              stroke="rgba(255, 255, 255, 0.5)"
+              stroke="rgba(0, 0, 0, 0.3)"
               style={{ fontSize: '13px', fontWeight: '500' }}
-              tick={{ fill: 'rgba(255, 255, 255, 0.7)' }}
-              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+              tick={{ fill: 'rgba(0, 0, 0, 0.6)' }}
+              axisLine={{ stroke: 'rgba(0, 0, 0, 0.1)' }}
             />
             <YAxis
-              stroke="rgba(255, 255, 255, 0.5)"
+              stroke="rgba(0, 0, 0, 0.3)"
               style={{ fontSize: '13px' }}
-              tick={{ fill: 'rgba(255, 255, 255, 0.7)' }}
-              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+              tick={{ fill: 'rgba(0, 0, 0, 0.6)' }}
+              axisLine={{ stroke: 'rgba(0, 0, 0, 0.1)' }}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.08)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} />
             <Bar
               dataKey="value"
               onClick={(data: any) => {
@@ -169,8 +173,8 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
               transition={{ delay: idx * 0.08 }}
               className={`p-5 rounded-xl border-2 transition-all duration-300 backdrop-blur-md group ${
                 isSelected
-                  ? `bg-gradient-to-br ${riskConfig.gradient} border-white/40 shadow-2xl shadow-${item.fill}/30 ring-2 ring-white/20`
-                  : `border-white/20 bg-slate-800/60 hover:border-white/40 hover:bg-slate-800/80 ${!isHighlighted ? 'opacity-40' : ''}`
+                  ? `bg-gradient-to-br ${riskConfig.gradient} border-gray-600 shadow-md text-white ring-2 ring-gray-400/30`
+                  : `border-gray-300/60 bg-gray-50/70 hover:border-gray-400/80 hover:bg-gray-100/70 ${!isHighlighted ? 'opacity-40' : ''}`
               }`}
             >
               <div className="flex items-center justify-between mb-3">
@@ -186,17 +190,17 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
                 )}
               </div>
               <p className={`text-xs font-bold mb-2 transition-colors uppercase tracking-wider ${
-                isSelected ? 'text-white' : 'text-white/70'
+                isSelected ? 'text-white' : 'text-gray-700'
               }`}>
                 {item.name}
               </p>
               <div className="space-y-2">
                 <p className={`text-3xl font-black transition-colors ${
-                  isSelected ? 'text-white' : 'text-white/90'
+                  isSelected ? 'text-white' : 'text-gray-900'
                 }`}>
                   {item.value}
                 </p>
-                <div className={`w-full h-1.5 rounded-full overflow-hidden ${isSelected ? 'bg-white/30' : 'bg-white/10'}`}>
+                <div className={`w-full h-1.5 rounded-full overflow-hidden ${isSelected ? 'bg-white/40' : 'bg-gray-300/40'}`}>
                   <motion.div
                     className={`h-full bg-gradient-to-r ${riskConfig.gradient}`}
                     initial={{ width: 0 }}
@@ -205,7 +209,7 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
                   />
                 </div>
                 <p className={`text-xs font-semibold transition-colors ${
-                  isSelected ? 'text-white/90' : 'text-white/60'
+                  isSelected ? 'text-white/90' : 'text-gray-600'
                 }`}>
                   {percentage}% del total
                 </p>
