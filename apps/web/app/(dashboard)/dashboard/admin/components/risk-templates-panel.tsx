@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-<<<<<<< HEAD
 import { Plus, Trash2, FileWarning, Shield, Info, CheckCircle2, Ban, Settings, Target, XCircle, PlusCircle, Power, Copy, MoreVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
@@ -90,20 +89,22 @@ export function RiskTemplatesPanel() {
 
   const handleDuplicate = async (template: RiskTemplateWithItems) => {
     setDuplicating(template.id);
-    const success = await duplicateTemplate(template.id);
-    setDuplicating(null);
-    
-    if (success) {
-      toast({
-        title: 'Plantilla duplicada',
-        description: `Se ha creado una copia de "${template.name}".`,
-      });
-    } else {
-      toast({
-        title: 'Error al duplicar',
-        description: 'No se pudo duplicar la plantilla. Verifica que seas el propietario.',
-        variant: 'destructive',
-      });
+    try {
+      const newTemplate = await duplicateTemplate(template.id);
+      if (newTemplate) {
+        toast({
+          title: 'Plantilla duplicada',
+          description: `La plantilla "${template.name}" ha sido duplicada como "${newTemplate.name}".`,
+        });
+      } else {
+        toast({
+          title: 'Error al duplicar',
+          description: 'No se pudo duplicar la plantilla. Verifica que seas el propietario.',
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setDuplicating(null);
     }
   };
 
