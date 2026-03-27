@@ -73,7 +73,65 @@ export default function RegisterForm() {
       return;
     }
 
-    console.log('🟡 Starting signup process...');
+    console.log('🟡 Starting registration process...', {
+      hasInvitation: !!invitationContext,
+      email,
+    });
+
+    // === If invitation exists, use special endpoint ===
+    if (invitationContext) {
+      console.log('🟡 Using invitation-based registration endpoint...');
+      try {
+        const response = await fetch('/api/v1/auth/register-with-invitation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            invitationToken: invitationContext.token,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          // Handle specific errors
+          if (response.status === 422) {
+            setError('Este email ya está registrado');
+          } else {
+            setError(result.error || 'Error en el registro');
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('🟢 ✅ Registration with invitation successful:', result.data);
+
+        // Clean up sessionStorage
+        sessionStorage.removeItem('invitation_token');
+        sessionStorage.removeItem('invitation_email');
+        sessionStorage.removeItem('invitation_org_id');
+        sessionStorage.removeItem('invitation_org_name');
+        sessionStorage.removeItem('invitation_role');
+
+        setSuccess(true);
+        setIsLoading(false);
+
+        // Redirect to dashboard after short delay
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
+        return;
+      } catch (err: any) {
+        console.error('🔴 Registration with invitation failed:', err);
+        setError(err.message || 'Error en el registro');
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // === Regular signup (no invitation) ===
+    console.log('🟡 Using regular registration endpoint...');
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -91,83 +149,11 @@ export default function RegisterForm() {
       );
       setIsLoading(false);
     } else {
-      console.log('🟢 Signup successful, user created');
-      
-      // If invitation exists, complete it after signup
-      if (invitationContext) {
-        console.log('🟡 Completing invitation acceptance...');
-        try {
-          // Get the newly created user
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          if (user) {
-            console.log('🟡 New user ID:', user.id);
-            
-            // Complete invitation acceptance
-            await completeInvitationAcceptance(user.id);
-            
-            console.log('🟢 Invitation completed, cleaning up sessionStorage');
-            // Clean up sessionStorage
-            sessionStorage.removeItem('invitation_token');
-            sessionStorage.removeItem('invitation_email');
-            sessionStorage.removeItem('invitation_org_id');
-            sessionStorage.removeItem('invitation_org_name');
-            sessionStorage.removeItem('invitation_role');
-            
-            setSuccess(true);
-            setIsLoading(false);
-            
-            // Redirect to dashboard instead of onboarding
-            setTimeout(() => {
-              router.push('/dashboard');
-            }, 1500);
-            return;
-          }
-        } catch (inviteErr) {
-          console.error('🟠 Warning: Could not complete invitation, but signup succeeded:', inviteErr);
-          // Still show success even if invitation completion fails
-        }
-      }
-      
+      console.log('🟢 Signup successful');
       setSuccess(true);
       setIsLoading(false);
     }
   };
-
-  // Complete invitation acceptance after signup via backend endpoint
-  async function completeInvitationAcceptance(userId: string) {
-    if (!invitationContext) return;
-
-    try {
-      const { token, email } = invitationContext;
-
-      console.log('🟡 Step 1: Calling backend to accept invitation...');
-      
-      // Call backend endpoint to accept invitation
-      const response = await fetch('/api/v1/invitations/accept', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inviteToken: token,
-          email: email,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to accept invitation');
-      }
-
-      console.log('🟢 Step 2: Invitation accepted via backend');
-      console.log('🟢 ✅ Invitation acceptance completed successfully');
-    } catch (err) {
-      console.error('🔴 Error completing invitation:', err);
-      throw err;
-    }
-  }
 
   // Login con Google OAuth
   const handleGoogleLogin = async () => {
