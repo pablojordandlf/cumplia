@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Building2, Loader2 } from 'lucide-react';
 import { SSODomainCheckResult } from '@/types/sso';
@@ -16,6 +16,10 @@ import { SSODomainCheckResult } from '@/types/sso';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 export default function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +27,6 @@ export default function LoginForm() {
   const [ssoResult, setSsoResult] = useState<SSODomainCheckResult | null>(null);
   const [isCheckingDomain, setIsCheckingDomain] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ email?: string } | null>(null);
-  const router = useRouter();
 
   // Check if user is already logged in
   useEffect(() => {
@@ -121,19 +124,29 @@ export default function LoginForm() {
     setIsLoading(true);
     setError(null);
 
+    console.log('🟡 Login: Attempt sign in with email/password...');
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (signInError) {
+      console.error('🔴 Login: Sign in error:', signInError);
       setError(signInError.message === 'Invalid login credentials' 
         ? 'Email o contraseña incorrectos'
         : signInError.message
       );
       setIsLoading(false);
     } else {
-      router.push('/dashboard');
+      console.log('🟢 Login: Sign in successful');
+      // If there's a redirect URL from query params (e.g., from accept-invite), use it
+      if (redirectUrl) {
+        console.log(`🟡 Login: Redirecting to ${redirectUrl}`);
+        router.push(decodeURIComponent(redirectUrl));
+      } else {
+        console.log('🟡 Login: Redirecting to /dashboard');
+        router.push('/dashboard');
+      }
       router.refresh();
     }
   };
