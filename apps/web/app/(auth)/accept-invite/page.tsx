@@ -35,19 +35,11 @@ export default function AcceptInvitePage() {
     try {
       // 🟡 Step 1: Validate token and get organization info (PUBLIC - no auth required)
       console.log('🟡 Step 1: Validating invitation token...');
+      
+      // First query: Get invitation by token (simple fields only)
       const { data: invitation, error: inviteError } = await supabase
         .from('pending_invitations')
-        .select(`
-          id,
-          email,
-          organization_id,
-          role,
-          invite_expires_at,
-          invite_token,
-          organization_id (
-            organizations(name)
-          )
-        `)
+        .select('id, email, organization_id, role, invite_expires_at, invite_token')
         .eq('invite_token', token)
         .single();
 
@@ -58,12 +50,18 @@ export default function AcceptInvitePage() {
         return;
       }
 
+      console.log('🟢 Step 1b: Invitation found, fetching organization...');
+
       // Get organization name from separate query
-      const { data: org } = await supabase
+      const { data: org, error: orgError } = await supabase
         .from('organizations')
         .select('name')
         .eq('id', invitation.organization_id)
         .single();
+
+      if (orgError) {
+        console.warn('⚠️  Could not fetch organization name:', orgError);
+      }
 
       console.log('🟢 Step 2: Invitation found for org:', org?.name);
       setOrganizationName(org?.name || 'Unknown Organization');
