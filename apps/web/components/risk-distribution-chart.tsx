@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface RiskDistributionChartProps {
   data: {
@@ -17,16 +16,14 @@ interface RiskDistributionChartProps {
 }
 
 const RISK_CONFIG = {
-  prohibited: { label: 'Prohibido', color: '#ef4444', light: '#fee2e2', icon: '🔴' },
-  high_risk: { label: 'Alto Riesgo', color: '#f97316', light: '#ffedd5', icon: '🟠' },
-  limited_risk: { label: 'Limitado', color: '#eab308', light: '#fef3c7', icon: '🟡' },
-  minimal_risk: { label: 'Mínimo', color: '#22c55e', light: '#dcfce7', icon: '🟢' },
-  unclassified: { label: 'Por Clasificar', color: '#6b7280', light: '#f3f4f6', icon: '⚪' },
+  prohibited: { label: 'Prohibido', color: '#dc2626', light: '#fee2e2', icon: '🔴', gradient: 'from-red-600 to-red-500' },
+  high_risk: { label: 'Alto Riesgo', color: '#ea580c', light: '#ffedd5', icon: '🟠', gradient: 'from-orange-600 to-orange-500' },
+  limited_risk: { label: 'Limitado', color: '#ca8a04', light: '#fef3c7', icon: '🟡', gradient: 'from-yellow-600 to-yellow-500' },
+  minimal_risk: { label: 'Mínimo', color: '#16a34a', light: '#dcfce7', icon: '🟢', gradient: 'from-green-600 to-green-500' },
+  unclassified: { label: 'Por Clasificar', color: '#6b7280', light: '#f3f4f6', icon: '⚪', gradient: 'from-gray-600 to-gray-500' },
 };
 
 export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }: RiskDistributionChartProps) {
-  const [chartType, setChartType] = useState<'bar' | 'donut'>('bar');
-
   const chartData = [
     { name: 'Prohibido', value: data.prohibited, fill: RISK_CONFIG.prohibited.color, risk: 'prohibited' },
     { name: 'Alto Riesgo', value: data.high_risk, fill: RISK_CONFIG.high_risk.color, risk: 'high_risk' },
@@ -37,187 +34,121 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
 
   const total = Object.values(data).reduce((a, b) => a + b, 0);
 
-  const donutData = chartData.map((item, index) => ({
-    ...item,
-    angle: (item.value / total) * 360,
-  }));
-
-  // Calculate pie slices
-  let currentAngle = 0;
-  const slices = donutData.map((item) => {
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + item.angle;
-    currentAngle = endAngle;
-
-    const startRad = (startAngle * Math.PI) / 180;
-    const endRad = (endAngle * Math.PI) / 180;
-
-    const innerRadius = 40;
-    const outerRadius = 70;
-
-    const x1 = 100 + outerRadius * Math.cos(startRad);
-    const y1 = 100 + outerRadius * Math.sin(startRad);
-    const x2 = 100 + outerRadius * Math.cos(endRad);
-    const y2 = 100 + outerRadius * Math.sin(endRad);
-
-    const xi1 = 100 + innerRadius * Math.cos(startRad);
-    const yi1 = 100 + innerRadius * Math.sin(startRad);
-    const xi2 = 100 + innerRadius * Math.cos(endRad);
-    const yi2 = 100 + innerRadius * Math.sin(endRad);
-
-    const largeArc = item.angle > 180 ? 1 : 0;
-
-    const pathData = [
-      `M ${x1} ${y1}`,
-      `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x2} ${y2}`,
-      `L ${xi2} ${yi2}`,
-      `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${xi1} ${yi1}`,
-      'Z',
-    ].join(' ');
-
-    return {
-      ...item,
-      path: pathData,
-      x1,
-      y1,
-    };
-  });
-
   return (
-    <div className="space-y-4">
-      {/* Chart Type Toggle */}
-      <div className="flex gap-2 justify-end">
-        <button
-          onClick={() => setChartType('bar')}
-          className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-            chartType === 'bar'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300'
-          }`}
-        >
-          Gráfico de barras
-        </button>
-        <button
-          onClick={() => setChartType('donut')}
-          className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-            chartType === 'donut'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300'
-          }`}
-        >
-          Gráfico de dona
-        </button>
-      </div>
-
-      {/* Bar Chart */}
-      {chartType === 'bar' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="w-full h-64"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
-              <XAxis dataKey="name" stroke="currentColor" opacity={0.5} />
-              <YAxis stroke="currentColor" opacity={0.5} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'rgba(15, 15, 9, 0.95)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Bar
-                dataKey="value"
-                onClick={(data: any) => {
-                  onRiskFilterChange?.(data.risk);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.fill}
-                    opacity={selectedRisk === null || selectedRisk === entry.risk ? 1 : 0.3}
-                    style={{ cursor: 'pointer' }}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
-      )}
-
-      {/* Donut Chart */}
-      {chartType === 'donut' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex justify-center"
-        >
-          <svg width={200} height={200} viewBox="0 0 200 200">
-            {slices.map((slice, index) => (
-              <motion.g
-                key={index}
-                onClick={() => onRiskFilterChange?.(slice.risk)}
-                style={{ cursor: 'pointer' }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <path
-                  d={slice.path}
-                  fill={slice.fill}
-                  stroke="white"
-                  strokeWidth={2}
-                  opacity={selectedRisk === null || selectedRisk === slice.risk ? 1 : 0.3}
-                  style={{ transition: 'opacity 0.3s' }}
+    <div className="space-y-6">
+      {/* Modern Bar Chart with Gradient */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full h-80 p-4 rounded-xl bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm border border-white/10"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+            <defs>
+              {chartData.map((item, idx) => (
+                <linearGradient key={`grad-${idx}`} id={`gradient-${item.risk}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={item.fill} stopOpacity={0.9} />
+                  <stop offset="100%" stopColor={item.fill} stopOpacity={0.4} />
+                </linearGradient>
+              ))}
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+            <XAxis 
+              dataKey="name" 
+              stroke="rgba(255, 255, 255, 0.3)" 
+              style={{ fontSize: '12px' }}
+            />
+            <YAxis stroke="rgba(255, 255, 255, 0.3)" style={{ fontSize: '12px' }} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(15, 15, 9, 0.98)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
+                color: '#fff',
+                padding: '12px',
+              }}
+              formatter={(value: any) => [value, 'Sistemas']}
+              cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+            />
+            <Bar
+              dataKey="value"
+              onClick={(data: any) => {
+                onRiskFilterChange?.(data.risk);
+              }}
+              style={{ cursor: 'pointer' }}
+              radius={[12, 12, 0, 0]}
+            >
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={`url(#gradient-${entry.risk})`}
+                  opacity={selectedRisk === null || selectedRisk === entry.risk ? 1 : 0.2}
+                  style={{ cursor: 'pointer', transition: 'opacity 0.3s' }}
                 />
-                <text
-                  x={slice.x1 - 10}
-                  y={slice.y1}
-                  fill="white"
-                  fontSize={12}
-                  fontWeight="bold"
-                  textAnchor="middle"
-                  opacity={selectedRisk === null || selectedRisk === slice.risk ? 1 : 0.3}
-                >
-                  {slice.value}
-                </text>
-              </motion.g>
-            ))}
-          </svg>
-        </motion.div>
-      )}
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </motion.div>
 
-      {/* Legend and Stats */}
+      {/* Interactive Risk Level Cards - Premium Design */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {chartData.map((item) => {
+        {chartData.map((item, idx) => {
           const riskConfig = RISK_CONFIG[item.risk as keyof typeof RISK_CONFIG];
+          const percentage = total > 0 ? Math.round((item.value / total) * 100) : 0;
+          const isSelected = selectedRisk === item.risk;
+          const isHighlighted = selectedRisk === null || isSelected;
+
           return (
             <motion.button
               key={item.risk}
               onClick={() => onRiskFilterChange?.(selectedRisk === item.risk ? null : item.risk)}
-              whileHover={{ scale: 1.02 }}
-              style={{
-                backgroundColor: selectedRisk === item.risk ? riskConfig.light : 'transparent',
-                borderColor: selectedRisk === item.risk ? riskConfig.color : undefined,
-              }}
-              className={`p-3 rounded-lg border-2 transition-all ${
-                selectedRisk === item.risk
-                  ? ''
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-900'
+              whileHover={{ scale: 1.05, translateY: -2 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className={`p-4 rounded-xl border-2 transition-all duration-300 backdrop-blur-sm ${
+                isSelected
+                  ? `bg-gradient-to-br ${riskConfig.gradient} border-white/30 shadow-lg shadow-${item.fill}/20`
+                  : `border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10 ${!isHighlighted ? 'opacity-30' : ''}`
               }`}
             >
-              <div className="flex items-center gap-1 mb-1">
-                <span>{riskConfig.icon}</span>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{item.name}</span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">{riskConfig.icon}</span>
+                {isSelected && (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                    className="w-3 h-3 rounded-full bg-white/70"
+                  />
+                )}
               </div>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{item.value}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {total > 0 ? Math.round((item.value / total) * 100) : 0}%
+              <p className={`text-xs font-semibold mb-1 transition-colors ${
+                isSelected ? 'text-white' : 'text-gray-400'
+              }`}>
+                {item.name}
+              </p>
+              <p className={`text-2xl font-bold transition-colors ${
+                isSelected ? 'text-white' : 'text-gray-100'
+              }`}>
+                {item.value}
+              </p>
+              <div className="flex items-center justify-between mt-2">
+                <div className={`w-full h-1.5 rounded-full bg-white/10 overflow-hidden`}>
+                  <motion.div
+                    className={`h-full bg-gradient-to-r ${riskConfig.gradient}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                  />
+                </div>
+              </div>
+              <p className={`text-xs font-medium mt-1 transition-colors ${
+                isSelected ? 'text-white/80' : 'text-gray-400'
+              }`}>
+                {percentage}%
               </p>
             </motion.button>
           );

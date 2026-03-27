@@ -26,10 +26,12 @@ import {
   Flame,
   Target,
   Eye,
+  List,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PendingObligationsWidget } from '@/components/pending-obligations-widget';
 import { RiskDistributionChart } from '@/components/risk-distribution-chart';
+import { RiskManagementSection } from '@/components/risk-management-section';
 
 interface DashboardStats {
   totalSystems: number;
@@ -41,12 +43,6 @@ interface DashboardStats {
   completedObligations: number;
   totalApplicableObligations: number;
   recentSystems: RecentSystem[];
-  riskManagementStats: {
-    systemsWithoutTemplate: number;
-    systemsWithTemplate: number;
-    totalRiskFactors: number;
-    mitigatedRiskFactors: number;
-  };
 }
 
 interface RecentSystem {
@@ -76,12 +72,6 @@ export default function DashboardPage() {
     completedObligations: 0,
     totalApplicableObligations: 0,
     recentSystems: [],
-    riskManagementStats: {
-      systemsWithoutTemplate: 0,
-      systemsWithTemplate: 0,
-      totalRiskFactors: 0,
-      mitigatedRiskFactors: 0,
-    },
   });
   const [loading, setLoading] = useState(true);
   const [selectedRisk, setSelectedRisk] = useState<string | null>(null);
@@ -174,16 +164,6 @@ export default function DashboardPage() {
         })
       );
 
-      // Calculate risk management statistics
-      // This would require additional data from a risk factors table
-      // For now, we'll use placeholder calculations
-      const riskManagementStats = {
-        systemsWithoutTemplate: Math.floor((systems?.length || 0) * 0.3),
-        systemsWithTemplate: Math.floor((systems?.length || 0) * 0.7),
-        totalRiskFactors: Math.floor(((systems?.length || 0) * 7)), // Average risk factors per system
-        mitigatedRiskFactors: Math.floor(completedObligations * 1.5), // Estimated from completed obligations
-      };
-
       setStats({
         totalSystems: systems?.length || 0,
         highRiskCount,
@@ -194,7 +174,6 @@ export default function DashboardPage() {
         completedObligations,
         totalApplicableObligations,
         recentSystems,
-        riskManagementStats,
       });
     } catch (error) {
       console.error('Error:', error);
@@ -252,67 +231,35 @@ export default function DashboardPage() {
     >
       {/* Background gradient effect */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200/20 dark:bg-blue-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-200/20 dark:bg-cyan-600/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 dark:bg-blue-600/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600/10 dark:bg-cyan-600/5 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto px-6 space-y-8 max-w-7xl">
-        {/* Header - Only button, title hidden */}
+        {/* Header - Buttons Row */}
         <motion.div
-          className="flex flex-col md:flex-row md:items-center md:justify-end gap-6 mb-4"
+          className="flex flex-col sm:flex-row gap-3 justify-end"
           variants={itemVariants}
         >
+          <Link href="/dashboard/inventory">
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto border-white/20 hover:bg-white/5"
+            >
+              <List className="w-4 h-4 mr-2" />
+              Ver Inventario
+            </Button>
+          </Link>
           <Link href="/dashboard/inventory/new">
-            <Button className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all text-lg py-6">
+            <Button className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all text-base py-6">
               <Plus className="w-5 h-5 mr-2" />
               Nuevo Sistema
             </Button>
           </Link>
         </motion.div>
 
-        {/* RISK MANAGEMENT PROGRESS - HERO METRIC */}
-        <motion.div variants={itemVariants}>
-          <div className="glass rounded-2xl p-8 border border-white/20 bg-gradient-to-r from-blue-50/50 dark:from-blue-950/20 to-cyan-50/50 dark:to-cyan-950/20">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
-                  <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                  Gestión de Riesgos
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Progreso de mitigación de factores de riesgo</p>
-              </div>
-              <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                En línea
-              </Badge>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2">Sistemas sin plantilla</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.riskManagementStats.systemsWithoutTemplate}</p>
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">Pendientes de inicio</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2">Sistemas con plantilla</p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.riskManagementStats.systemsWithTemplate}</p>
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1">En progreso</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2">Factores de riesgo</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.riskManagementStats.totalRiskFactors}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Total identificados</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2">Factores mitigados</p>
-                <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">{stats.riskManagementStats.mitigatedRiskFactors}</p>
-                <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">{stats.riskManagementStats.totalRiskFactors > 0 ? Math.round((stats.riskManagementStats.mitigatedRiskFactors / stats.riskManagementStats.totalRiskFactors) * 100) : 0}% completados</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* THREE METRIC CARDS - TOP ROW */}
+        {/* THREE METRIC CARDS - HERO ROW */}
         <motion.div
           variants={itemVariants}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
@@ -329,9 +276,9 @@ export default function DashboardPage() {
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Total de Sistemas</h3>
-              <p className="text-4xl font-bold text-gray-900 dark:text-white">{stats.totalSystems}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+2 esta semana</p>
+              <h3 className="text-gray-400 text-sm font-medium mb-1">Total de Sistemas</h3>
+              <p className="text-4xl font-bold text-gray-100">{stats.totalSystems}</p>
+              <p className="text-xs text-gray-500 mt-2">Sistemas IA registrados</p>
             </motion.div>
           </Link>
 
@@ -346,10 +293,10 @@ export default function DashboardPage() {
               </div>
               <Flame className="w-5 h-5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Cumplimiento</h3>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">Cumplimiento</h3>
             <div className="flex items-baseline gap-2">
-              <p className="text-4xl font-bold text-gray-900 dark:text-white">{completionRate}%</p>
-              <span className="text-sm text-green-600 dark:text-green-400">↑ 12%</span>
+              <p className="text-4xl font-bold text-gray-100">{completionRate}%</p>
+              <span className="text-sm text-green-400">↑ Progreso</span>
             </div>
             <Progress value={completionRate} className="mt-3 h-2" />
           </motion.div>
@@ -365,21 +312,21 @@ export default function DashboardPage() {
               </div>
               <Eye className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Riesgo Alto</h3>
-            <p className="text-4xl font-bold text-gray-900 dark:text-white">{stats.highRiskCount}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Requieren atención</p>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">Riesgo Alto</h3>
+            <p className="text-4xl font-bold text-gray-100">{stats.highRiskCount}</p>
+            <p className="text-xs text-gray-500 mt-2">Requieren revisión urgente</p>
           </motion.div>
         </motion.div>
 
-        {/* MAIN CONTENT - Risk Classification + Recent Systems */}
+        {/* CLASSIFICATION + RECENT SYSTEMS ROW */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT: Risk Breakdown (2/3 width) */}
+          {/* LEFT: Risk Classification (2/3) */}
           <motion.div variants={itemVariants} className="lg:col-span-2">
             <div className="glass rounded-2xl p-8 border border-white/20">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                  Clasificación de Riesgo
+                <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
+                  <Target className="w-6 h-6 text-blue-400" />
+                  Clasificación de Riesgos
                 </h2>
                 <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
                   {stats.totalSystems} sistemas
@@ -400,14 +347,14 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          {/* RIGHT: Recent Systems (1/3 width) */}
+          {/* RIGHT: Recent Systems (1/3) */}
           <motion.div variants={itemVariants}>
             <div className="glass rounded-2xl p-6 border border-white/20 h-full overflow-hidden flex flex-col">
               <div className="flex items-center gap-2 mb-4">
-                <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Últimas Novedades</h3>
+                <Clock className="w-5 h-5 text-blue-400" />
+                <h3 className="text-lg font-bold text-gray-100">Últimas Novedades</h3>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Últimos sistemas cargados</p>
+              <p className="text-xs text-gray-500 mb-4">Últimos sistemas cargados</p>
               
               <div className="space-y-3 flex-1 overflow-y-auto scrollbar-thin">
                 {stats.recentSystems.length > 0 ? (
@@ -417,14 +364,14 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.05 }}
-                        className="p-3 rounded-lg bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 border border-white/20 dark:border-white/10 cursor-pointer transition-all group"
+                        className="p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 cursor-pointer transition-all group"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <p className="font-medium text-sm text-gray-100 truncate group-hover:text-blue-400 transition-colors">
                               {system.name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-xs text-gray-500 mt-1">
                               {new Date(system.created_at).toLocaleDateString('es-ES')}
                             </p>
                           </div>
@@ -441,8 +388,8 @@ export default function DashboardPage() {
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Plus className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-2 opacity-50" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400">No hay sistemas registrados</p>
+                    <Plus className="w-8 h-8 text-gray-600 mb-2 opacity-50" />
+                    <p className="text-sm text-gray-500">No hay sistemas registrados</p>
                   </div>
                 )}
               </div>
@@ -450,20 +397,25 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* BOTTOM: Pending Obligations Widget */}
+        {/* PENDING OBLIGATIONS SECTION */}
         <motion.div variants={itemVariants}>
           <PendingObligationsWidget />
         </motion.div>
 
-        {/* Tip Card */}
+        {/* RISK MANAGEMENT SECTION - MOVED HERE */}
         <motion.div variants={itemVariants}>
-          <div className="glass rounded-2xl p-6 border border-white/20 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-600/10 dark:to-cyan-600/10">
+          <RiskManagementSection />
+        </motion.div>
+
+        {/* Compliance Tip Card */}
+        <motion.div variants={itemVariants}>
+          <div className="glass rounded-2xl p-6 border border-white/20 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
             <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-gray-900 dark:text-white mb-1">💡 Consejo de Cumplimiento</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  Mantén todos tus sistemas clasificados y completa las obligaciones antes de desplegar en producción. CumplIA te alertará sobre cambios en la normativa.
+                <p className="font-semibold text-gray-100 mb-1">💡 Consejo de Cumplimiento</p>
+                <p className="text-sm text-gray-300">
+                  Mantén todos tus sistemas clasificados y completa las obligaciones antes de desplegar en producción. CumplIA te alertará automáticamente sobre cambios en la normativa.
                 </p>
               </div>
             </div>
