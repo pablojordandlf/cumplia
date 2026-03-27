@@ -82,7 +82,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           placeholder="Buscar casos de uso..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="flex-1 min-h-[44px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          className="flex-1 min-h-[44px] px-3 py-2 text-sm border border-[#E8ECEB] rounded-md focus:ring-2 focus:ring-[#E09E50]"
         />
         <Button
           variant="outline"
@@ -90,7 +90,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
           className={cn(
             "h-11 w-11 shrink-0",
-            mobileFiltersOpen && "bg-gray-100"
+            mobileFiltersOpen && "bg-[#E8ECEB]"
           )}
         >
           {mobileFiltersOpen ? (
@@ -103,7 +103,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
       {/* Mobile Filters Panel */}
       {mobileFiltersOpen && (
-        <div className="sm:hidden bg-white rounded-lg border border-gray-200 p-3 space-y-3">
+        <div className="sm:hidden bg-white rounded-lg border border-[#E8ECEB] p-3 space-y-3">
           <div className="grid grid-cols-1 gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -167,7 +167,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 onClearFilters();
                 setMobileFiltersOpen(false);
               }}
-              className="w-full text-sm text-gray-500 hover:text-gray-700"
+              className="w-full text-sm text-[#7a8a92] hover:text-[#E09E50]"
             >
               Limpiar filtros
             </Button>
@@ -176,18 +176,18 @@ const FilterBar: React.FC<FilterBarProps> = ({
       )}
 
       {/* Desktop Filter Bar */}
-      <div className="hidden sm:flex flex-wrap gap-3 items-center p-4 bg-white rounded-lg shadow-sm">
+      <div className="hidden sm:flex flex-wrap gap-3 items-center p-4 bg-white rounded-lg shadow-sm border border-[#E8ECEB]">
         <Input
           type="text"
           placeholder="Buscar casos de uso..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+          className="flex-1 min-w-[200px] px-4 py-2 border border-[#E8ECEB] rounded-md focus:ring-2 focus:ring-[#E09E50]"
         />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="px-3 py-2 border border-gray-300 rounded-md text-sm min-w-[120px] justify-between">
+            <Button variant="outline" className="px-3 py-2 border border-[#E8ECEB] rounded-md text-sm min-w-[120px] justify-between">
               {riskLevels.find(rl => rl.value === riskLevelFilter)?.label || 'Nivel de Riesgo'}
             </Button>
           </DropdownMenuTrigger>
@@ -202,7 +202,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="px-3 py-2 border border-gray-300 rounded-md text-sm min-w-[120px] justify-between">
+            <Button variant="outline" className="px-3 py-2 border border-[#E8ECEB] rounded-md text-sm min-w-[120px] justify-between">
               {sectors.find(s => s.value === sectorFilter)?.label || 'Sector'}
             </Button>
           </DropdownMenuTrigger>
@@ -217,7 +217,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="px-3 py-2 border border-gray-300 rounded-md text-sm min-w-[120px] justify-between">
+            <Button variant="outline" className="px-3 py-2 border border-[#E8ECEB] rounded-md text-sm min-w-[120px] justify-between">
               {statuses.find(s => s.value === statusFilter)?.label || 'Estado'}
             </Button>
           </DropdownMenuTrigger>
@@ -234,7 +234,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           <Button
             variant="ghost"
             onClick={onClearFilters}
-            className="text-sm text-gray-500 hover:text-gray-700 underline ml-auto"
+            className="text-sm text-[#7a8a92] hover:text-[#E09E50] underline ml-auto"
           >
             Limpiar filtros
           </Button>

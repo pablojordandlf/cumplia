@@ -24,7 +24,7 @@ export function RiskSummaryCard({
   totalApplicableObligations,
 }: RiskSummaryCardProps) {
   return (
-    <Card className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl">
+    <Card className="bg-gradient-to-br from-[#E09E50] to-[#D9885F] text-white shadow-xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
           <Zap className="w-5 h-5" />
@@ -42,7 +42,7 @@ export function RiskSummaryCard({
           >
             {completionRate}%
           </motion.div>
-          <p className="text-blue-100 text-sm">Obligaciones cumplidas</p>
+          <p className="text-[#E09E50]/80 text-sm">Obligaciones cumplidas</p>
         </div>
 
         {/* Progress Bar */}
@@ -57,22 +57,22 @@ export function RiskSummaryCard({
                   : 'blue'
             }
             trackVariant="blue"
-            className="h-3 bg-blue-500/30"
+            className="h-3 bg-[#E09E50]/40"
           />
         </div>
 
         {/* Details (hidden by default, shown on click via expandable) */}
-        <div className="pt-4 border-t border-blue-500 space-y-2 text-sm">
+        <div className="pt-4 border-t border-[#E09E50]/40 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-blue-100">Completadas</span>
+            <span className="text-[#E09E50]/80">Completadas</span>
             <span className="font-semibold">{completedObligations}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-blue-100">Total</span>
+            <span className="text-[#E09E50]/80">Total</span>
             <span className="font-semibold">{totalApplicableObligations}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-blue-100">Pendientes</span>
+            <span className="text-[#E09E50]/80">Pendientes</span>
             <span className="font-semibold">
               {totalApplicableObligations - completedObligations}
             </span>
@@ -80,9 +80,9 @@ export function RiskSummaryCard({
         </div>
 
         {/* CTA */}
-        <div className="mt-6 pt-6 border-t border-blue-500">
+        <div className="mt-6 pt-6 border-t border-[#E09E50]/40">
           <Link href="/dashboard/inventory">
-            <Button variant="secondary" className="w-full hover:bg-white transition-colors">
+            <Button variant="secondary" className="w-full bg-white hover:bg-[#E8ECEB] text-[#E09E50] transition-colors">
               Ver inventario
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
