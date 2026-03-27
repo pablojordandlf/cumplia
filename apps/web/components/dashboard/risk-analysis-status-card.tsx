@@ -32,14 +32,43 @@ export function RiskAnalysisStatusCard() {
   const fetchRiskAnalysisStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/dashboard/risk-analysis-stats');
+      
+      // Fetch risks broken down by level
+      const response = await fetch('/api/v1/use-cases/stats/risks-by-level');
       
       if (!response.ok) {
         throw new Error('Failed to fetch risk analysis stats');
       }
 
-      const data = await response.json();
-      setStats(data);
+      const risksByLevel = await response.json();
+      
+      // Initialize all levels
+      let highRiskTotal = 0, highRiskCompleted = 0;
+      let limitedRiskTotal = 0, limitedRiskCompleted = 0;
+      let minimalRiskTotal = 0, minimalRiskCompleted = 0;
+      
+      // Map response data to stats
+      risksByLevel.forEach((item: any) => {
+        if (item.level === 'prohibited' || item.level === 'high_risk') {
+          highRiskTotal += item.total_risks;
+          highRiskCompleted += item.completed_risks;
+        } else if (item.level === 'limited_risk') {
+          limitedRiskTotal += item.total_risks;
+          limitedRiskCompleted += item.completed_risks;
+        } else if (item.level === 'minimal_risk') {
+          minimalRiskTotal += item.total_risks;
+          minimalRiskCompleted += item.completed_risks;
+        }
+      });
+      
+      setStats({
+        total_high_risk: highRiskTotal,
+        completed_high_risk: highRiskCompleted,
+        total_limited_risk: limitedRiskTotal,
+        completed_limited_risk: limitedRiskCompleted,
+        total_minimal_risk: minimalRiskTotal,
+        completed_minimal_risk: minimalRiskCompleted,
+      });
     } catch (error) {
       console.error('Error fetching risk analysis stats:', error);
     } finally {

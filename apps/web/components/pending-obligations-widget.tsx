@@ -8,17 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, ListTodo } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-interface PendingObligation {
+interface SystemRiskStatus {
   system_id: string;
   system_name: string;
   ai_act_level: string;
-  pending_obligations: {
-    key: string;
-    title: string;
-  }[];
-  total_obligations: number;
-  completed_obligations: number;
-  risk_management_progress: number;
+  total_risks: number;
+  completed_risks: number;  // accepted + mitigated
+  progress_percentage: number;
 }
 
 const PRIORITY_ORDER: Record<string, number> = {
@@ -72,18 +68,52 @@ const RISK_COLORS: Record<string, { badge: string; icon: string; text: string; b
 };
 
 export function PendingObligationsWidget() {
-  const [obligations, setObligations] = useState<PendingObligation[]>([]);
+  const [systems, setSystems] = useState<SystemRiskStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterRisk, setFilterRisk] = useState<string | null>(null);
   const supabase = createClient();
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchPendingObligations();
+    fetchSystemRiskStatus();
   }, []);
 
-  async function fetchPendingObligations() {
+  async function fetchSystemRiskStatus() {
     try {
+      setLoading(true);
+      
+      // Try API first
+      try {
+        const response = await fetch('/api/v1/use-cases/stats/risk-progress');
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Convert API response to our format
+          const systemsData: SystemRiskStatus[] = data.map((item: any) => ({
+            system_id: item.use_case_id,
+            system_name: item.use_case_name,
+            ai_act_level: item.ai_act_level,
+            total_risks: item.total_risks,
+            completed_risks: item.completed_risks,
+            progress_percentage: item.progress_percentage,
+          }));
+          
+          // Sort by priority
+          systemsData.sort((a, b) => {
+            const priorityA = PRIORITY_ORDER[a.ai_act_level] || 999;
+            const priorityB = PRIORITY_ORDER[b.ai_act_level] || 999;
+            return priorityA - priorityB;
+          });
+          
+          setSystems(systemsData);
+          return;
+        }
+      } catch (apiError) {
+        console.warn('API fetch failed, falling back to Supabase:', apiError);
+      }
+      
+      // Fallback: fetch from Supabase
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
@@ -109,56 +139,50 @@ export function PendingObligationsWidget() {
         systemsQuery = systemsQuery.eq('user_id', session.user.id);
       }
 
-      const { data: systems } = await systemsQuery.order('created_at', { ascending: false });
+      const { data: systemsData } = await systemsQuery.order('created_at', { ascending: false });
 
-      if (!systems || systems.length === 0) {
-        setObligations([]);
-        setLoading(false);
+      if (!systemsData || systemsData.length === 0) {
+        setSystems([]);
         return;
       }
 
-      // For each system, fetch its obligations
-      const pendingList: PendingObligation[] = [];
+      // For each system, fetch its risk status
+      const systemsList: SystemRiskStatus[] = [];
 
-      for (const system of systems) {
-        const { data: obligationsData } = await supabase
-          .from('use_case_obligations')
-          .select('obligation_key, obligation_title, is_completed')
-          .eq('use_case_id', system.id);
+      for (const system of systemsData) {
+        const { data: risks } = await supabase
+          .from('ai_system_risks')
+          .select('status')
+          .eq('ai_system_id', system.id)
+          .in('status', ['accepted', 'mitigated', 'assessed', 'identified']);
 
-        const total = getObligationsCountForLevel(system.ai_act_level);
-        const completed = obligationsData?.filter(o => o.is_completed).length || 0;
-        const pending = obligationsData?.filter(o => !o.is_completed) || [];
+        const totalRisks = risks?.length || 0;
+        const completedRisks = risks?.filter(r => r.status === 'accepted' || r.status === 'mitigated').length || 0;
+        const progress = totalRisks > 0 ? Math.round((completedRisks / totalRisks) * 100) : 0;
 
-        // Show ALL systems with their obligation status (both pending and completed)
-        // This way users can see progress even if all obligations are completed
-        pendingList.push({
+        systemsList.push({
           system_id: system.id,
           system_name: system.name,
           ai_act_level: system.ai_act_level || 'unclassified',
-          pending_obligations: pending.map(p => ({
-            key: p.obligation_key,
-            title: p.obligation_title,
-          })),
-          total_obligations: total,
-          completed_obligations: completed,
-          risk_management_progress: total > 0 ? Math.round((completed / total) * 100) : 0,
+          total_risks: totalRisks,
+          completed_risks: completedRisks,
+          progress_percentage: progress,
         });
       }
 
-      // Sort by priority (prohibited first, then high_risk, etc.)
-      pendingList.sort((a, b) => {
+      // Sort by priority
+      systemsList.sort((a, b) => {
         const priorityA = PRIORITY_ORDER[a.ai_act_level] || 999;
         const priorityB = PRIORITY_ORDER[b.ai_act_level] || 999;
         return priorityA - priorityB;
       });
 
-      setObligations(pendingList);
+      setSystems(systemsList);
     } catch (error) {
       console.error('Error:', error);
       toast({
         title: 'Error',
-        description: 'No se pudieron cargar las obligaciones pendientes',
+        description: 'No se pudieron cargar los estados de riesgos',
         variant: 'destructive',
       });
     } finally {
@@ -166,20 +190,9 @@ export function PendingObligationsWidget() {
     }
   }
 
-  function getObligationsCountForLevel(level: string): number {
-    const counts: Record<string, number> = {
-      prohibited: 2,
-      high_risk: 8,
-      limited_risk: 4,
-      minimal_risk: 2,
-      unclassified: 1,
-    };
-    return counts[level] || 1;
-  }
-
-  const filteredObligations = filterRisk
-    ? obligations.filter(o => o.ai_act_level === filterRisk)
-    : obligations;
+  const filteredSystems = filterRisk
+    ? systems.filter(s => s.ai_act_level === filterRisk)
+    : systems;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -200,174 +213,150 @@ export function PendingObligationsWidget() {
     },
   };
 
-  return (
-    <div className="glass rounded-2xl border border-[#E8ECEB]/30 bg-white/10 backdrop-blur-xl">
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-[#2D3E4E] flex items-center gap-2">
-              <ListTodo className="w-6 h-6 text-[#E09E50]" />
-              Obligaciones Pendientes
-            </h2>
-            <p className="text-sm text-[#7a8a92] mt-1">
-              Acciones requeridas para mantener el cumplimiento normativo
-            </p>
-          </div>
-          <span className="px-3 py-1 rounded-full bg-[#E09E50]/20 border border-[#E09E50]/50 text-[#E09E50] text-sm font-semibold">
-            {filteredObligations.length} sistema{filteredObligations.length !== 1 ? 's' : ''}
-          </span>
-        </div>
+  const riskLevels = Object.keys(RISK_COLORS).filter(level => 
+    systems.some(s => s.ai_act_level === level)
+  );
 
+  if (loading) {
+    return (
+      <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-6">
         <div className="space-y-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Clock className="w-5 h-5 text-gray-400 animate-spin" />
-              <span className="ml-2 text-gray-600">Cargando...</span>
-            </div>
-          ) : filteredObligations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CheckCircle2 className="w-12 h-12 text-green-600 mb-3 opacity-70" />
-              <p className="text-gray-900 font-bold">
-                {filterRisk ? `No hay sistemas con nivel ${filterRisk}` : 'No hay sistemas registrados'}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Crea tu primer sistema de IA para comenzar a rastrear obligaciones
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* Quick filter by risk level */}
-              <div className="flex gap-2 pb-4 border-b border-[#E8ECEB]/30 overflow-x-auto">
-                <button
-                  onClick={() => setFilterRisk(null)}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
-                    filterRisk === null
-                      ? 'bg-[#E09E50] text-white shadow-lg'
-                      : 'bg-[#E8ECEB]/40 text-[#2D3E4E]/70 hover:bg-[#E8ECEB]/60 hover:text-[#2D3E4E]'
-                  }`}
-                >
-                  Todos ({obligations.length})
-                </button>
-                {['prohibited', 'high_risk', 'limited_risk', 'minimal_risk'].map(level => {
-                  const count = obligations.filter(o => o.ai_act_level === level).length;
-                  if (count === 0) return null;
-                  
-                  const riskColor = RISK_COLORS[level];
-                  return (
-                    <button
-                      key={level}
-                      onClick={() => setFilterRisk(level)}
-                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
-                        filterRisk === level
-                          ? `${riskColor.bg} text-white shadow-lg`
-                          : 'bg-[#E8ECEB]/40 text-[#2D3E4E]/70 hover:bg-[#E8ECEB]/60 hover:text-[#2D3E4E]'
-                      }`}
-                    >
-                      {riskColor.icon} {count}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Show message if filter returns no results */}
-              {filterRisk && filteredObligations.length === 0 && (
-                <div className="text-center py-8 mb-6">
-                  <p className="text-white/70 text-sm mb-2">
-                    No hay sistemas con nivel de riesgo "{RISK_COLORS[filterRisk].text}"
-                  </p>
-                  <button
-                    onClick={() => setFilterRisk(null)}
-                    className="text-blue-300 text-sm font-semibold hover:text-blue-200 transition-colors"
-                  >
-                    Ver todos los sistemas
-                  </button>
-                </div>
-              )}
-
-              {/* List of pending obligations */}
-              <motion.div
-                className="space-y-3 max-h-96 overflow-y-auto pr-2"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {filteredObligations.length > 0 ? filteredObligations.map((item) => {
-                  const riskColor = RISK_COLORS[item.ai_act_level];
-                  return (
-                    <motion.div key={item.system_id} variants={itemVariants}>
-                      <Link href={`/dashboard/inventory/${item.system_id}`}>
-                        <div className={`p-4 rounded-xl border transition-all cursor-pointer group backdrop-blur-md shadow-sm hover:shadow-md ${
-                          riskColor.bgLight
-                        } hover:border-[#2D3E4E]/40 border-[#2D3E4E]/20`}>
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <h4 className={`font-bold group-hover:${riskColor.color} transition-colors text-[#2D3E4E]`}>
-                                {item.system_name}
-                              </h4>
-                              <p className="text-xs text-[#7a8a92] mt-1">
-                                {item.completed_obligations} de {item.total_obligations} obligaciones completadas
-                              </p>
-                            </div>
-                            <Badge className={riskColor.badge}>
-                              {riskColor.text}
-                            </Badge>
-                          </div>
-
-                          {/* Progress bar */}
-                          <div className="w-full h-2.5 bg-[#E8ECEB] rounded-full overflow-hidden mb-3 border border-[#E8ECEB]/60">
-                            <motion.div
-                              className={`h-full shadow-md ${riskColor.bg}`}
-                              initial={{ width: 0 }}
-                              animate={{ width: `${item.risk_management_progress}%` }}
-                              transition={{ duration: 0.5 }}
-                            />
-                          </div>
-
-                          {/* Pending obligations list or completion status */}
-                          <div className="space-y-1">
-                            {item.pending_obligations.length > 0 ? (
-                              <>
-                                <p className="text-xs font-semibold text-[#2D3E4E] mb-2">
-                                  Tareas pendientes ({item.pending_obligations.length}):
-                                </p>
-                                <div className="space-y-1">
-                                  {item.pending_obligations.slice(0, 3).map(obl => (
-                                    <div key={obl.key} className="flex items-start gap-2 text-xs text-[#7a8a92]">
-                                      <span className="text-[#7a8a92]/60 mt-0.5">•</span>
-                                      <span>{obl.title}</span>
-                                    </div>
-                                  ))}
-                                  {item.pending_obligations.length > 3 && (
-                                    <p className="text-xs font-semibold mt-2" style={{ color: RISK_COLORS[item.ai_act_level].color.replace('text-', '') }}>
-                                      +{item.pending_obligations.length - 3} más...
-                                    </p>
-                                  )}
-                                </div>
-                              </>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-[#27A844]" />
-                                <p className="text-xs font-semibold text-[#27A844]">
-                                  ✓ Todas las obligaciones completadas
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  );
-                }) : (
-                  <div className="text-center py-8">
-                    <ListTodo className="w-8 h-8 text-[#7a8a92]/40 mb-2 opacity-60 mx-auto" />
-                    <p className="text-[#7a8a92] text-sm">No hay sistemas para mostrar</p>
-                  </div>
-                )}
-              </motion.div>
-            </>
-          )}
+          <div className="h-8 w-40 animate-pulse rounded bg-[#2a2a2a]" />
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-6 animate-pulse rounded bg-[#2a2a2a]" />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-4"
+    >
+      <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ListTodo className="h-5 w-5 text-[#888888]" />
+            <h3 className="text-sm font-semibold text-white">Obligaciones Pendientes</h3>
+          </div>
+          <span className="text-xs text-[#888888]">{filteredSystems.length} sistemas</span>
+        </div>
+
+        {/* Risk Level Filter */}
+        {riskLevels.length > 0 && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <motion.button
+              onClick={() => setFilterRisk(null)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                filterRisk === null
+                  ? 'bg-white text-black'
+                  : 'bg-[#2a2a2a] text-[#888888] hover:bg-[#333333]'
+              }`}
+            >
+              Todos
+            </motion.button>
+            {riskLevels.map(level => {
+              const colors = RISK_COLORS[level];
+              return (
+                <motion.button
+                  key={level}
+                  onClick={() => setFilterRisk(level)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                    filterRisk === level
+                      ? `${colors.bg} text-white`
+                      : `${colors.bgLight} ${colors.color} hover:opacity-80`
+                  }`}
+                >
+                  {colors.text}
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Systems List */}
+        {filteredSystems.length > 0 ? (
+          <motion.div
+            className="space-y-3"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {filteredSystems.map(system => {
+              const colors = RISK_COLORS[system.ai_act_level];
+              const isCompleted = system.completed_risks === system.total_risks;
+
+              return (
+                <motion.div
+                  key={system.system_id}
+                  variants={itemVariants}
+                  className="group rounded-lg border border-[#2a2a2a] bg-[#0a0a0a] p-4 transition-all hover:border-[#3a3a3a]"
+                >
+                  <Link href={`/dashboard/inventory/${system.system_id}`}>
+                    <div className="space-y-3 cursor-pointer">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span>{colors.icon}</span>
+                            <h4 className="font-medium text-white group-hover:text-gray-200 transition-colors truncate">
+                              {system.system_name}
+                            </h4>
+                          </div>
+                          <Badge className={`mt-2 ${colors.badge}`}>
+                            {colors.text}
+                          </Badge>
+                        </div>
+                        <div className="text-right">
+                          {isCompleted ? (
+                            <CheckCircle2 className="h-5 w-5 text-[#27A844]" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-[#D97706]" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-[#888888]">Evaluación de Riesgos</span>
+                          <span className={`font-medium ${colors.color}`}>
+                            {system.completed_risks}/{system.total_risks}
+                          </span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-[#2a2a2a] overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${system.progress_percentage}%` }}
+                            transition={{ duration: 0.5 }}
+                            className={`h-full ${colors.bg} rounded-full`}
+                          />
+                        </div>
+                        <div className="text-right text-xs text-[#888888]">
+                          {system.progress_percentage}% completado
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        ) : (
+          <div className="text-center py-8 text-[#888888]">
+            <p className="text-sm">No hay sistemas en esta categoría</p>
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }
