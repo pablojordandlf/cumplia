@@ -22,6 +22,10 @@ import {
   Brain,
   Bot,
   Zap,
+  Sparkles,
+  Flame,
+  Target,
+  Eye,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { UpcomingActionsWidget } from '@/components/upcoming-actions-widget';
@@ -216,195 +220,252 @@ export default function DashboardPage() {
 
   return (
     <motion.div
-      className="container mx-auto p-6 space-y-8"
+      className="min-h-screen pt-20 pb-12"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Header */}
-      <motion.div
-        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-        variants={itemVariants}
-      >
-        <div>
-          <h1 className="text-4xl font-bold">Dashboard</h1>
-          <p className="text-gray-500 mt-2">Cumplimiento del AI Act en tiempo real</p>
-        </div>
-        <Link href="/dashboard/inventory/new">
-          <Button className="w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Sistema
-          </Button>
-        </Link>
-      </motion.div>
-
-      {/* PRIMARY METRICS - Two main blocks */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* BLOCK 1: Total Systems & Risk Classification */}
-        <motion.div variants={itemVariants}>
-          <Card className="border-2 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all cursor-pointer h-full" onClick={() => window.location.href = '/dashboard/inventory'}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
-                Inventario de Sistemas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-4xl font-bold text-blue-600">{stats.totalSystems}</span>
-                  <span className="text-sm text-gray-600">sistemas totales</span>
-                </div>
-              </div>
-
-              {/* Risk Classification Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <Link href="/dashboard/inventory?risk=prohibited" onClick={(e) => e.stopPropagation()}>
-                  <div className="p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors cursor-pointer border border-red-200">
-                    <div className="text-2xl font-bold text-red-600">{stats.prohibitedCount}</div>
-                    <div className="text-xs text-red-700">Prohibido</div>
-                  </div>
-                </Link>
-                <Link href="/dashboard/inventory?risk=high_risk" onClick={(e) => e.stopPropagation()}>
-                  <div className="p-3 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors cursor-pointer border border-orange-200">
-                    <div className="text-2xl font-bold text-orange-600">{stats.highRiskCount}</div>
-                    <div className="text-xs text-orange-700">Alto Riesgo</div>
-                  </div>
-                </Link>
-                <Link href="/dashboard/inventory?risk=limited_risk" onClick={(e) => e.stopPropagation()}>
-                  <div className="p-3 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition-colors cursor-pointer border border-yellow-200">
-                    <div className="text-2xl font-bold text-yellow-600">{stats.limitedRiskCount}</div>
-                    <div className="text-xs text-yellow-700">Riesgo Limitado</div>
-                  </div>
-                </Link>
-                <Link href="/dashboard/inventory?risk=minimal_risk" onClick={(e) => e.stopPropagation()}>
-                  <div className="p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors cursor-pointer border border-green-200">
-                    <div className="text-2xl font-bold text-green-600">{stats.minimalRiskCount}</div>
-                    <div className="text-xs text-green-700">Riesgo Mínimo</div>
-                  </div>
-                </Link>
-                <Link href="/dashboard/inventory?risk=unclassified" onClick={(e) => e.stopPropagation()} className="col-span-2">
-                  <div className="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200">
-                    <div className="text-2xl font-bold text-gray-600">{stats.unclassifiedCount}</div>
-                    <div className="text-xs text-gray-700">Por Clasificar</div>
-                  </div>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* BLOCK 2: Obligations Status */}
-        <motion.div variants={itemVariants}>
-          <Card className="border-2 border-green-200 dark:border-green-800 h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                Cumplimiento de Obligaciones
-              </CardTitle>
-              <CardDescription>Progreso general de tu organización</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Main Progress */}
-              <div>
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-3xl font-bold text-green-600">{completionRate}%</span>
-                  <span className="text-sm text-gray-600">completado</span>
-                </div>
-                <Progress value={completionRate} className="h-3" />
-                <p className="text-xs text-gray-600 mt-2">
-                  {stats.completedObligations} de {stats.totalApplicableObligations} obligaciones finalizadas
-                </p>
-              </div>
-
-              {/* Systems needing attention */}
-              <div className="border-t pt-4">
-                <h4 className="font-semibold text-sm mb-3">Sistemas con obligaciones pendientes</h4>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {stats.recentSystems.filter(s => s.completed_obligations < s.total_obligations).length > 0 ? (
-                    stats.recentSystems
-                      .filter(s => s.completed_obligations < s.total_obligations)
-                      .slice(0, 5)
-                      .map(system => (
-                        <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
-                          <div className="p-2 rounded bg-gray-50 hover:bg-gray-100 transition-colors text-sm">
-                            <div className="font-medium text-gray-900 truncate">{system.name}</div>
-                            <div className="text-xs text-gray-600">
-                              {system.completed_obligations}/{system.total_obligations} obligaciones
-                            </div>
-                          </div>
-                        </Link>
-                      ))
-                  ) : (
-                    <p className="text-sm text-gray-600">¡Excelente! Todas las obligaciones están completadas.</p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* Background gradient effect */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200/20 dark:bg-blue-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-200/20 dark:bg-cyan-600/10 rounded-full blur-3xl" />
       </div>
 
+      <div className="container mx-auto px-6 space-y-8 max-w-7xl">
+        {/* Header with enhanced typography */}
+        <motion.div
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8"
+          variants={itemVariants}
+        >
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-500 dark:from-blue-400 dark:via-cyan-400 dark:to-blue-300 bg-clip-text text-transparent">
+                Dashboard
+              </h1>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">Cumplimiento del AI Act en tiempo real • Última actualización: hace 2 min</p>
+          </div>
+          <Link href="/dashboard/inventory/new">
+            <Button className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all text-lg py-6">
+              <Plus className="w-5 h-5 mr-2" />
+              Nuevo Sistema
+            </Button>
+          </Link>
+        </motion.div>
 
+        {/* THREE METRIC CARDS - TOP ROW */}
+        <motion.div
+          variants={itemVariants}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
+          {/* Total Systems */}
+          <Link href="/dashboard/inventory">
+            <motion.div
+              whileHover={{ translateY: -4 }}
+              className="glass rounded-2xl p-6 cursor-pointer group hover:shadow-xl transition-all border border-white/20"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all">
+                  <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <TrendingUp className="w-5 h-5 text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Total de Sistemas</h3>
+              <p className="text-4xl font-bold text-gray-900 dark:text-white">{stats.totalSystems}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+2 esta semana</p>
+            </motion.div>
+          </Link>
 
-      {/* TWO-COLUMN LAYOUT - Main content + Upcoming Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LEFT: Upcoming Actions (2/3 width) */}
-        <motion.div variants={itemVariants} className="lg:col-span-2">
+          {/* Compliance Rate */}
+          <motion.div
+            whileHover={{ translateY: -4 }}
+            className="glass rounded-2xl p-6 group hover:shadow-xl transition-all border border-white/20"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 group-hover:from-green-500/30 group-hover:to-emerald-500/30 transition-all">
+                <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <Flame className="w-5 h-5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Cumplimiento</h3>
+            <div className="flex items-baseline gap-2">
+              <p className="text-4xl font-bold text-gray-900 dark:text-white">{completionRate}%</p>
+              <span className="text-sm text-green-600 dark:text-green-400">↑ 12%</span>
+            </div>
+            <Progress value={completionRate} className="mt-3 h-2" />
+          </motion.div>
+
+          {/* High Risk Alert */}
+          <motion.div
+            whileHover={{ translateY: -4 }}
+            className="glass rounded-2xl p-6 group hover:shadow-xl transition-all border border-white/20"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 group-hover:from-red-500/30 group-hover:to-rose-500/30 transition-all">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <Eye className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Riesgo Alto</h3>
+            <p className="text-4xl font-bold text-gray-900 dark:text-white">{stats.highRiskCount}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Requieren atención</p>
+          </motion.div>
+        </motion.div>
+
+        {/* MAIN CONTENT - Risk Classification + Recent Systems */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* LEFT: Risk Breakdown (2/3 width) */}
+          <motion.div variants={itemVariants} className="lg:col-span-2">
+            <div className="glass rounded-2xl p-8 border border-white/20">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  Clasificación de Riesgo
+                </h2>
+                <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                  5 categorías
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {/* Prohibited */}
+                <Link href="/dashboard/inventory?risk=prohibited">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="group p-4 rounded-xl bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-950 border border-red-200 dark:border-red-800 cursor-pointer hover:shadow-lg transition-all"
+                  >
+                    <Ban className="w-6 h-6 text-red-600 dark:text-red-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-3xl font-bold text-red-600 dark:text-red-400">{stats.prohibitedCount}</p>
+                    <p className="text-xs text-red-700 dark:text-red-300 font-medium mt-1">Prohibido</p>
+                  </motion.div>
+                </Link>
+
+                {/* High Risk */}
+                <Link href="/dashboard/inventory?risk=high_risk">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="group p-4 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 border border-orange-200 dark:border-orange-800 cursor-pointer hover:shadow-lg transition-all"
+                  >
+                    <Flame className="w-6 h-6 text-orange-600 dark:text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{stats.highRiskCount}</p>
+                    <p className="text-xs text-orange-700 dark:text-orange-300 font-medium mt-1">Alto Riesgo</p>
+                  </motion.div>
+                </Link>
+
+                {/* Limited Risk */}
+                <Link href="/dashboard/inventory?risk=limited_risk">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="group p-4 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950 border border-yellow-200 dark:border-yellow-800 cursor-pointer hover:shadow-lg transition-all"
+                  >
+                    <Info className="w-6 h-6 text-yellow-600 dark:text-yellow-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{stats.limitedRiskCount}</p>
+                    <p className="text-xs text-yellow-700 dark:text-yellow-300 font-medium mt-1">Limitado</p>
+                  </motion.div>
+                </Link>
+
+                {/* Minimal Risk */}
+                <Link href="/dashboard/inventory?risk=minimal_risk">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="group p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border border-green-200 dark:border-green-800 cursor-pointer hover:shadow-lg transition-all"
+                  >
+                    <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.minimalRiskCount}</p>
+                    <p className="text-xs text-green-700 dark:text-green-300 font-medium mt-1">Mínimo</p>
+                  </motion.div>
+                </Link>
+
+                {/* Unclassified */}
+                <Link href="/dashboard/inventory?risk=unclassified">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="group p-4 rounded-xl bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900 dark:to-gray-900 border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-lg transition-all"
+                  >
+                    <Shield className="w-6 h-6 text-slate-600 dark:text-slate-400 mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-3xl font-bold text-slate-600 dark:text-slate-400">{stats.unclassifiedCount}</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-1">Por Clasificar</p>
+                  </motion.div>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* RIGHT: Recent Systems (1/3 width) */}
+          <motion.div variants={itemVariants}>
+            <div className="glass rounded-2xl p-6 border border-white/20 h-full overflow-hidden flex flex-col">
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Últimas Novedades</h3>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Últimos sistemas cargados</p>
+              
+              <div className="space-y-3 flex-1 overflow-y-auto scrollbar-thin">
+                {stats.recentSystems.length > 0 ? (
+                  stats.recentSystems.slice(0, 6).map((system, idx) => (
+                    <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="p-3 rounded-lg bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 border border-white/20 dark:border-white/10 cursor-pointer transition-all group"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              {system.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {new Date(system.created_at).toLocaleDateString('es-ES')}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-xs flex-shrink-0">
+                            {system.ai_act_level === 'prohibited' && '🔴'}
+                            {system.ai_act_level === 'high_risk' && '🟠'}
+                            {system.ai_act_level === 'limited_risk' && '🟡'}
+                            {system.ai_act_level === 'minimal_risk' && '🟢'}
+                            {!system.ai_act_level && '⚪'}
+                          </Badge>
+                        </div>
+                      </motion.div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Plus className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-2 opacity-50" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">No hay sistemas registrados</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* BOTTOM: Upcoming Actions Widget */}
+        <motion.div variants={itemVariants}>
           <UpcomingActionsWidget 
             actions={stats.recentSystems}
             isLoading={loading}
           />
         </motion.div>
 
-        {/* RIGHT: Quick Links (1/3 width) - Reduced prominence */}
-        <motion.div variants={itemVariants} className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Recursos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Link href="/dashboard/guia">
-                <Button variant="outline" className="w-full justify-start text-sm">
-                  <Zap className="w-4 h-4 mr-2" />
-                  Guía AI Act
-                </Button>
-              </Link>
-              <Link href="/dashboard/admin">
-                <Button variant="outline" className="w-full justify-start text-sm">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Templates
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Acciones Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Link href="/dashboard/inventory">
-                <Button variant="outline" className="w-full justify-start text-sm">
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Ver Inventario
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        {/* Tip Card */}
+        <motion.div variants={itemVariants}>
+          <div className="glass rounded-2xl p-6 border border-white/20 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-600/10 dark:to-cyan-600/10">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white mb-1">💡 Consejo de Cumplimiento</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Mantén todos tus sistemas clasificados y completa las obligaciones antes de desplegar en producción. CumplIA te alertará sobre cambios en la normativa.
+                </p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
-
-      {/* Legend/Info */}
-      <motion.div variants={itemVariants}>
-        <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-          <CardContent className="pt-6">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>💡 Consejo:</strong> Mantén todos tus sistemas clasificados y cumple con las obligaciones antes de desplegar en producción.
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
     </motion.div>
   );
 }

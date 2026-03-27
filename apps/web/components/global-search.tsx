@@ -69,31 +69,35 @@ export function GlobalSearch() {
     const fetchSearchResults = async () => {
       setIsLoading(true);
       try {
-        // Get user's organization
-        const { data: memberData, error: memberError } = await supabase
+        // Try to get user's organization first
+        const { data: memberData } = await supabase
           .from('organization_members')
           .select('organization_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .single();
 
-        if (memberError || !memberData) {
-          setResults([]);
-          setIsLoading(false);
-          return;
-        }
-
-        // Fetch inventory items for this organization
+        // Build a flexible query: org systems OR personal systems
         let query = supabase
           .from('use_cases')
           .select('id, name, description')
-          .eq('organization_id', memberData.organization_id)
-          .limit(10);
+          .is('deleted_at', null);
+
+        // If user is in org, fetch org + personal systems
+        // If not, fetch only personal systems
+        if (memberData?.organization_id) {
+          query = query.or(
+            `and(organization_id.eq.${memberData.organization_id}),and(user_id.eq.${user.id})`
+          );
+        } else {
+          query = query.eq('user_id', user.id);
+        }
 
         if (searchValue.trim()) {
           query = query.or(`name.ilike.%${searchValue}%,description.ilike.%${searchValue}%`);
         }
 
+        query = query.limit(10);
         const { data: inventoryData } = await query;
 
         const formattedResults: SearchResult[] = (inventoryData || []).map((item: any) => ({
