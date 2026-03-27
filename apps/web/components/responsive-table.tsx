@@ -42,16 +42,16 @@ export function ResponsiveTable({
   return (
     <>
       {/* Desktop Table */}
-      <div className="hidden md:block border rounded-lg overflow-hidden">
+      <div className="hidden md:block border border-[#E8ECEB] rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 dark:bg-slate-800 border-b">
+            <thead className="bg-[#E8ECEB]/30 border-b border-[#E8ECEB]">
               <tr>
                 {expandable && <th className="w-10 px-4 py-3"></th>}
                 {columns.map((col) => (
                   <th
                     key={col.accessor}
-                    className={`px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider ${
+                    className={`px-4 py-3 text-left text-xs font-semibold text-[#7a8a92] uppercase tracking-wider ${
                       col.width || 'flex-1'
                     }`}
                   >
@@ -66,13 +66,13 @@ export function ResponsiveTable({
                 return (
                   <tr
                     key={rowId}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                    className="hover:bg-[#E8ECEB]/20 transition-colors"
                   >
                     {expandable && (
                       <td className="px-4 py-3">
                         <button
                           onClick={() => toggleRow(rowId)}
-                          className="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                          className="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-[#E8ECEB]/40 transition-colors"
                           aria-label="Expandir fila"
                         >
                           <ChevronDown
@@ -105,17 +105,17 @@ export function ResponsiveTable({
           return (
             <div
               key={rowId}
-              className="border rounded-lg overflow-hidden bg-white dark:bg-slate-900"
+              className="border border-[#E8ECEB] rounded-lg overflow-hidden bg-white"
             >
               {/* Card Header - Expandable */}
               <button
                 onClick={() => toggleRow(rowId)}
-                className="w-full flex items-start justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left"
+                className="w-full flex items-start justify-between p-4 hover:bg-[#E8ECEB]/20 transition-colors text-left"
               >
                 <div className="flex-1 min-w-0">
                   {columns.slice(0, 2).map((col) => (
                     <div key={col.accessor} className="mb-1">
-                      <div className="text-xs font-semibold text-muted-foreground uppercase">
+                      <div className="text-xs font-semibold text-[#7a8a92] uppercase">
                         {col.header}
                       </div>
                       <div className="text-sm font-medium truncate">
@@ -128,7 +128,7 @@ export function ResponsiveTable({
                 </div>
                 {expandable && (
                   <ChevronDown
-                    className={`w-5 h-5 text-muted-foreground flex-shrink-0 ml-2 transition-transform ${
+                    className={`w-5 h-5 text-[#7a8a92] flex-shrink-0 ml-2 transition-transform ${
                       expandedRows.has(rowId) ? 'rotate-180' : ''
                     }`}
                   />
@@ -137,14 +137,14 @@ export function ResponsiveTable({
 
               {/* Expanded Content */}
               {expandable && expandedRows.has(rowId) && (
-                <div className="px-4 py-3 border-t bg-slate-50 dark:bg-slate-800/50">
+                <div className="px-4 py-3 border-t border-[#E8ECEB] bg-[#E8ECEB]/10">
                   {renderExpandedContent ? (
                     renderExpandedContent(row)
                   ) : (
                     <div className="grid grid-cols-1 gap-3">
                       {columns.slice(2).map((col) => (
                         <div key={col.accessor}>
-                          <div className="text-xs font-semibold text-muted-foreground uppercase">
+                          <div className="text-xs font-semibold text-[#7a8a92] uppercase">
                             {col.header}
                           </div>
                           <div className="text-sm">

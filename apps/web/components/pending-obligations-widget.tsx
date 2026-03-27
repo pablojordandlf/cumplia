@@ -166,19 +166,19 @@ export function PendingObligationsWidget() {
   };
 
   return (
-    <div className="glass rounded-2xl border border-white/20 bg-slate-900/60 backdrop-blur-xl">
+    <div className="glass rounded-2xl border border-[#E8ECEB]/30 bg-white/10 backdrop-blur-xl">
       <div className="p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              <ListTodo className="w-6 h-6 text-blue-400" />
+            <h2 className="text-2xl font-bold text-[#2D3E4E] flex items-center gap-2">
+              <ListTodo className="w-6 h-6 text-[#E09E50]" />
               Obligaciones Pendientes
             </h2>
-            <p className="text-sm text-white/70 mt-1">
+            <p className="text-sm text-[#7a8a92] mt-1">
               Acciones requeridas para mantener el cumplimiento normativo
             </p>
           </div>
-          <span className="px-3 py-1 rounded-full bg-blue-600/30 border border-blue-500/50 text-blue-200 text-sm font-semibold">
+          <span className="px-3 py-1 rounded-full bg-[#E09E50]/20 border border-[#E09E50]/50 text-[#E09E50] text-sm font-semibold">
             {filteredObligations.length} sistema{filteredObligations.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -207,8 +207,8 @@ export function PendingObligationsWidget() {
                   onClick={() => setFilterRisk(null)}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
                     filterRisk === null
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-slate-700/70 text-white/80 hover:bg-slate-700 hover:text-white'
+                      ? 'bg-[#E09E50] text-white shadow-lg'
+                      : 'bg-[#E8ECEB]/40 text-[#2D3E4E]/70 hover:bg-[#E8ECEB]/60 hover:text-[#2D3E4E]'
                   }`}
                 >
                   Todos ({obligations.length})
@@ -223,8 +223,8 @@ export function PendingObligationsWidget() {
                       onClick={() => setFilterRisk(level)}
                       className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
                         filterRisk === level
-                          ? `bg-gradient-to-r ${level === 'prohibited' ? 'from-red-600 to-red-500' : level === 'high_risk' ? 'from-orange-600 to-orange-500' : level === 'limited_risk' ? 'from-yellow-600 to-yellow-500' : 'from-green-600 to-green-500'} text-white shadow-lg`
-                          : 'bg-slate-700/70 text-white/80 hover:bg-slate-700 hover:text-white'
+                          ? `bg-gradient-to-r ${level === 'prohibited' ? 'from-[#C92A2A] to-[#B52525]' : level === 'high_risk' ? 'from-[#D97706] to-[#C86200]' : level === 'limited_risk' ? 'from-[#B8860B] to-[#A87A00]' : 'from-[#27A844] to-[#219639]'} text-white shadow-lg`
+                          : 'bg-[#E8ECEB]/40 text-[#2D3E4E]/70 hover:bg-[#E8ECEB]/60 hover:text-[#2D3E4E]'
                       }`}
                     >
                       {RISK_COLORS[level].icon} {count}
