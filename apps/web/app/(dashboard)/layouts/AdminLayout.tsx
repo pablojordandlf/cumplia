@@ -18,12 +18,14 @@ interface AdminLayoutProps {
  */
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="flex min-h-screen">
-      <DashboardSidebar />
+    <div className="flex flex-col min-h-screen">
       <DashboardNavbar />
-      <main className="flex-1 bg-slate-50 dark:bg-slate-900 pt-16 lg:pt-16 lg:pl-64 pb-16 lg:pb-0 min-h-screen">
-        {children}
-      </main>
+      <div className="flex flex-1">
+        <DashboardSidebar />
+        <main className="flex-1 bg-slate-50 dark:bg-slate-900 pt-16 lg:pt-0 lg:pl-64 pb-16 lg:pb-0 min-h-screen">
+          {children}
+        </main>
+      </div>
       <MobileBottomNav />
     </div>
   );

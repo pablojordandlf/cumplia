@@ -13,7 +13,7 @@ interface ViewerLayoutProps {
  */
 export function ViewerLayout({ children }: ViewerLayoutProps) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <DashboardNavbar />
       {/* No sidebar for viewer role */}
       <main className="flex-1 bg-slate-50 dark:bg-slate-900 pt-16 pb-0 min-h-screen">
