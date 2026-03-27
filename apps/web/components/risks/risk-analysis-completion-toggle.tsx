@@ -83,7 +83,7 @@ export function RiskAnalysisCompletionToggle({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="border-l-4 border-l-blue-500">
+      <Card className="border-l-4 border-l-[#E09E50]">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>

@@ -143,11 +143,11 @@ export function RiskProgressIndicator({
             </div>
 
             {/* Assessed */}
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50">
-              <ShieldAlert className="h-4 w-4 text-blue-600" />
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#FFE8D1]">
+              <ShieldAlert className="h-4 w-4 text-[#E09E50]" />
               <div>
                 <p className="text-xs text-muted-foreground">Evaluados</p>
-                <p className="text-lg font-semibold text-blue-700">{assessed}</p>
+                <p className="text-lg font-semibold text-[#D9885F]">{assessed}</p>
               </div>
             </div>
 
@@ -203,7 +203,7 @@ export function RiskProgressIndicator({
                   </div>
                 </div>
                 {loading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#E09E50] border-t-transparent" />
                 )}
               </button>
 

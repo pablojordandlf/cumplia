@@ -221,7 +221,7 @@ export function RiskDetailCard({
 
         {/* Read-only notice */}
         {isReadOnly && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+          <div className="p-3 bg-[#FFE8D1] border border-[#E09E50]/20 rounded-lg text-sm text-[#E09E50]">
             <span className="font-medium">Modo Visualizador:</span> Solo puedes ver la información del riesgo. 
             Contacta a un administrador para realizar modificaciones.
           </div>

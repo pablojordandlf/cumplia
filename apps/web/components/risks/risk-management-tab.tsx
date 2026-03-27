@@ -218,13 +218,13 @@ export function RiskManagementTab({
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="rounded-full bg-blue-100 p-4 mb-4">
-                <Eye className="h-8 w-8 text-blue-600" />
+              <div className="rounded-full bg-[#FFE8D1] p-4 mb-4">
+                <Eye className="h-8 w-8 text-[#E09E50]" />
               </div>
               <h3 className="text-lg font-semibold text-blue-900 mb-2">
                 Sin Riesgos Registrados
               </h3>
-              <p className="text-blue-700 max-w-md">
+              <p className="text-[#D9885F] max-w-md">
                 Este sistema de IA aún no tiene riesgos registrados. 
                 Contacta a un administrador para iniciar la gestión de riesgos.
               </p>

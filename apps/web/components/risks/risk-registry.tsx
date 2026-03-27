@@ -136,7 +136,7 @@ export function RiskRegistry({
   const getStatusIcon = (status: RiskStatus) => {
     switch (status) {
       case 'mitigated': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'assessed': return <Shield className="h-4 w-4 text-blue-600" />;
+      case 'assessed': return <Shield className="h-4 w-4 text-[#E09E50]" />;
       case 'accepted': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
       case 'not_applicable': return <Lock className="h-4 w-4 text-gray-400" />;
       default: return <AlertTriangle className="h-4 w-4 text-gray-600" />;
@@ -147,7 +147,7 @@ export function RiskRegistry({
     <div className="space-y-4">
       {/* Read-only notice */}
       {isReadOnly && (
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+        <div className="p-3 bg-[#FFE8D1] border border-[#E09E50]/20 rounded-lg text-sm text-[#E09E50]">
           <span className="font-medium">Modo Visualizador:</span> Solo puedes ver los riesgos. 
           Contacta a un administrador para realizar evaluaciones o modificaciones.
         </div>
