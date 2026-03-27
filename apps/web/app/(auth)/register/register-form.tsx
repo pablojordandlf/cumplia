@@ -134,62 +134,34 @@ export default function RegisterForm() {
     }
   };
 
-  // Complete invitation acceptance after signup
+  // Complete invitation acceptance after signup via backend endpoint
   async function completeInvitationAcceptance(userId: string) {
     if (!invitationContext) return;
 
     try {
-      const { token, orgName } = invitationContext;
+      const { token, email } = invitationContext;
 
-      console.log('🟡 Step 1: Fetching invitation details...');
+      console.log('🟡 Step 1: Calling backend to accept invitation...');
       
-      // Fetch invitation to get org_id and role
-      const { data: invitation, error: fetchError } = await supabase
-        .from('pending_invitations')
-        .select('id, organization_id, role')
-        .eq('invite_token', token)
-        .single();
+      // Call backend endpoint to accept invitation
+      const response = await fetch('/api/v1/invitations/accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inviteToken: token,
+          email: email,
+        }),
+      });
 
-      if (fetchError || !invitation) {
-        throw new Error(`Invitation not found: ${fetchError?.message}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to accept invitation');
       }
 
-      console.log('🟡 Step 2: Invitation fetched, org_id:', invitation.organization_id);
-
-      // Add user to organization_members
-      console.log('🟡 Step 3: Adding user to organization...');
-      const { error: memberError } = await supabase
-        .from('organization_members')
-        .insert({
-          organization_id: invitation.organization_id,
-          user_id: userId,
-          role: invitation.role || 'member',
-          status: 'active'
-        });
-
-      if (memberError && !memberError.message.includes('duplicate')) {
-        console.warn('🟠 Warning: Failed to add member:', memberError);
-        // Continue anyway
-      } else {
-        console.log('🟢 Step 4: User added to organization');
-      }
-
-      // Update pending_invitations status to accepted
-      console.log('🟡 Step 5: Marking invitation as accepted...');
-      const { error: updateError } = await supabase
-        .from('pending_invitations')
-        .update({
-          status: 'accepted',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', invitation.id);
-
-      if (updateError) {
-        console.warn('🟠 Warning: Failed to update invitation status:', updateError);
-      } else {
-        console.log('🟢 Step 6: Invitation marked as accepted');
-      }
-
+      console.log('🟢 Step 2: Invitation accepted via backend');
       console.log('🟢 ✅ Invitation acceptance completed successfully');
     } catch (err) {
       console.error('🔴 Error completing invitation:', err);
