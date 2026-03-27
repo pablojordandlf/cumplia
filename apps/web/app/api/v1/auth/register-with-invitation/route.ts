@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     console.log('🟡 [REGISTER_WITH_INVITATION] Step 1: Validating invitation...');
 
     // === Step 1: Validate invitation using public client (no auth required) ===
-    const supabasePublic = createServerClient();
+    const supabasePublic = await createServerClient();
     
     const { data: invitation, error: inviteError } = await supabasePublic
       .from('pending_invitations')
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     // 2. Get immediate response with user data (client-side signUp doesn't return user)
     // 3. Detect if email already exists (status 422)
     
-    const supabaseAdmin = createServerClient();
+    const supabaseAdmin = await createServerClient();
     
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
