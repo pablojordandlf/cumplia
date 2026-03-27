@@ -44,7 +44,9 @@ export default function AcceptInvitePage() {
           role,
           invite_expires_at,
           invite_token,
-          organizations (name)
+          organization_id (
+            organizations(name)
+          )
         `)
         .eq('invite_token', token)
         .single();
@@ -56,8 +58,15 @@ export default function AcceptInvitePage() {
         return;
       }
 
-      console.log('🟢 Step 2: Invitation found for org:', invitation.organizations?.name);
-      setOrganizationName(invitation.organizations?.name || 'Unknown Organization');
+      // Get organization name from separate query
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('name')
+        .eq('id', invitation.organization_id)
+        .single();
+
+      console.log('🟢 Step 2: Invitation found for org:', org?.name);
+      setOrganizationName(org?.name || 'Unknown Organization');
 
       // 🟡 Step 3: Check expiration
       const expiryDate = new Date(invitation.invite_expires_at);
@@ -80,7 +89,7 @@ export default function AcceptInvitePage() {
       console.log('🟡 Step 4: Checking authentication status...');
       const { data: { session } } = await supabase.auth.getSession();
 
-      if (session?.user) {
+      if (session?.user && token) {
         // User is authenticated - accept invite immediately
         console.log('🟡 Step 5: User authenticated, accepting invitation...');
         await acceptInvitation(invitation.id, session.user.id, token);
@@ -90,7 +99,7 @@ export default function AcceptInvitePage() {
         setTimeout(() => {
           router.push('/dashboard');
         }, 2000);
-      } else {
+      } else if (token) {
         // User not authenticated - store context and redirect to register
         console.log('🟡 Step 5: User not authenticated, redirecting to signup...');
 
