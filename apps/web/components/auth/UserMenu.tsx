@@ -55,9 +55,9 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
-          <Avatar className="h-9 w-9 bg-blue-500 text-white">
-            <AvatarFallback className="bg-blue-600 text-white font-semibold">
+        <Button variant="ghost" className="relative h-9 w-9 rounded-full hover:bg-[#E8ECEB] dark:hover:bg-[#3D4E5E]">
+          <Avatar className="h-9 w-9 bg-[#E09E50] text-white">
+            <AvatarFallback className="bg-[#E09E50] text-white font-semibold">
               {getInitials()}
             </AvatarFallback>
           </Avatar>
