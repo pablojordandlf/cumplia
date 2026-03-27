@@ -9,29 +9,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  Plus, 
-  ArrowRight,
   BarChart3,
   TrendingUp,
-  Ban,
-  Info,
-  Brain,
-  Bot,
-  Zap,
-  Sparkles,
-  Flame,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Plus,
+  List,
   Target,
   Eye,
-  List,
+  Flame,
+  Sparkles,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PendingObligationsWidget } from '@/components/pending-obligations-widget';
 import { RiskDistributionChart } from '@/components/risk-distribution-chart';
-import { RiskManagementSection } from '@/components/risk-management-section';
+import { RiskAnalysisStatusCard } from '@/components/risk-analysis-status-card';
 
 interface DashboardStats {
   totalSystems: number;
@@ -53,13 +46,6 @@ interface RecentSystem {
   completed_obligations: number;
   total_obligations: number;
 }
-
-const RISK_COLORS: Record<string, { bg: string; text: string; border: string; icon: any }> = {
-  prohibited: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', icon: Ban },
-  high_risk: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', icon: AlertTriangle },
-  limited_risk: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', icon: Info },
-  minimal_risk: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', icon: CheckCircle2 },
-};
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -237,22 +223,22 @@ export default function DashboardPage() {
       </div>
 
       <div className="container mx-auto px-6 space-y-8 max-w-7xl">
-        {/* Header - Buttons Row */}
+        {/* Header - Buttons Row - UNIFORM SIZES */}
         <motion.div
           className="flex flex-col sm:flex-row gap-3 justify-end"
           variants={itemVariants}
         >
-          <Link href="/dashboard/inventory">
+          <Link href="/dashboard/inventory" className="flex-1 sm:flex-none">
             <Button 
               variant="outline" 
-              className="w-full sm:w-auto border-white/20 hover:bg-white/5"
+              className="w-full px-6 py-6 text-base border-white/20 hover:bg-white/5 text-gray-900 dark:text-gray-100"
             >
-              <List className="w-4 h-4 mr-2" />
+              <List className="w-5 h-5 mr-2" />
               Ver Inventario
             </Button>
           </Link>
-          <Link href="/dashboard/inventory/new">
-            <Button className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all text-base py-6">
+          <Link href="/dashboard/inventory/new" className="flex-1 sm:flex-none">
+            <Button className="w-full px-6 py-6 text-base bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all">
               <Plus className="w-5 h-5 mr-2" />
               Nuevo Sistema
             </Button>
@@ -330,7 +316,7 @@ export default function DashboardPage() {
                   <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   Clasificación de Riesgos
                 </h2>
-                <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 border-0">
                   {stats.totalSystems} sistemas
                 </Badge>
               </div>
@@ -356,7 +342,7 @@ export default function DashboardPage() {
                 <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Últimas Novedades</h3>
               </div>
-              <p className="text-xs text-gray-700 dark:text-gray-500 mb-4">Últimos sistemas cargados</p>
+              <p className="text-xs text-gray-600 dark:text-gray-500 mb-4">Últimos sistemas cargados</p>
               
               <div className="space-y-3 flex-1 overflow-y-auto scrollbar-thin">
                 {stats.recentSystems.length > 0 ? (
@@ -373,11 +359,11 @@ export default function DashboardPage() {
                             <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                               {system.name}
                             </p>
-                            <p className="text-xs text-gray-700 dark:text-gray-500 mt-1">
+                            <p className="text-xs text-gray-600 dark:text-gray-500 mt-1">
                               {new Date(system.created_at).toLocaleDateString('es-ES')}
                             </p>
                           </div>
-                          <Badge variant="outline" className="text-xs flex-shrink-0">
+                          <Badge variant="outline" className="text-xs flex-shrink-0 bg-gray-100/10 border-gray-400/20">
                             {system.ai_act_level === 'prohibited' && '🔴'}
                             {system.ai_act_level === 'high_risk' && '🟠'}
                             {system.ai_act_level === 'limited_risk' && '🟡'}
@@ -391,7 +377,7 @@ export default function DashboardPage() {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <Plus className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-2 opacity-50" />
-                    <p className="text-sm text-gray-700 dark:text-gray-500">No hay sistemas registrados</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-500">No hay sistemas registrados</p>
                   </div>
                 )}
               </div>
@@ -399,14 +385,14 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* PENDING OBLIGATIONS SECTION */}
+        {/* OBLIGATIONS SECTION */}
         <motion.div variants={itemVariants}>
           <PendingObligationsWidget />
         </motion.div>
 
-        {/* RISK MANAGEMENT SECTION - MOVED HERE */}
+        {/* RISK ANALYSIS STATUS CARD - NEW */}
         <motion.div variants={itemVariants}>
-          <RiskManagementSection />
+          <RiskAnalysisStatusCard />
         </motion.div>
 
         {/* Compliance Tip Card */}
@@ -416,7 +402,7 @@ export default function DashboardPage() {
               <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">💡 Consejo de Cumplimiento</p>
-                <p className="text-sm text-gray-800 dark:text-gray-300">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
                   Mantén todos tus sistemas clasificados y completa las obligaciones antes de desplegar en producción. CumplIA te alertará automáticamente sobre cambios en la normativa.
                 </p>
               </div>

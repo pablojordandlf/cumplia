@@ -36,12 +36,12 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
 
   return (
     <div className="space-y-6">
-      {/* Modern Bar Chart with Gradient */}
+      {/* Modern Bar Chart with Enhanced Gradient & Styling */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full h-80 p-4 rounded-xl bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm border border-white/10"
+        className="w-full h-80 p-6 rounded-2xl bg-gradient-to-br from-gradient-primary/30 via-white/5 to-transparent backdrop-blur-sm border border-white/15 shadow-xl"
       >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
@@ -86,14 +86,15 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
                 onRiskFilterChange?.(data.risk);
               }}
               style={{ cursor: 'pointer' }}
-              radius={[12, 12, 0, 0]}
+              radius={[16, 16, 0, 0]}
+              animationDuration={600}
             >
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={`url(#gradient-${entry.risk})`}
-                  opacity={selectedRisk === null || selectedRisk === entry.risk ? 1 : 0.2}
-                  style={{ cursor: 'pointer', transition: 'opacity 0.3s' }}
+                  opacity={selectedRisk === null || selectedRisk === entry.risk ? 1 : 0.15}
+                  style={{ cursor: 'pointer', transition: 'opacity 0.4s ease' }}
                 />
               ))}
             </Bar>
