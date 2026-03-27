@@ -95,21 +95,20 @@ export function PendingObligationsWidget() {
         const completed = obligationsData?.filter(o => o.is_completed).length || 0;
         const pending = obligationsData?.filter(o => !o.is_completed) || [];
 
-        // Only show systems with pending obligations
-        if (pending.length > 0) {
-          pendingList.push({
-            system_id: system.id,
-            system_name: system.name,
-            ai_act_level: system.ai_act_level || 'unclassified',
-            pending_obligations: pending.map(p => ({
-              key: p.obligation_key,
-              title: p.obligation_title,
-            })),
-            total_obligations: total,
-            completed_obligations: completed,
-            risk_management_progress: total > 0 ? Math.round((completed / total) * 100) : 0,
-          });
-        }
+        // Show ALL systems with their obligation status (both pending and completed)
+        // This way users can see progress even if all obligations are completed
+        pendingList.push({
+          system_id: system.id,
+          system_name: system.name,
+          ai_act_level: system.ai_act_level || 'unclassified',
+          pending_obligations: pending.map(p => ({
+            key: p.obligation_key,
+            title: p.obligation_title,
+          })),
+          total_obligations: total,
+          completed_obligations: completed,
+          risk_management_progress: total > 0 ? Math.round((completed / total) * 100) : 0,
+        });
       }
 
       // Sort by priority (prohibited first, then high_risk, etc.)
@@ -194,10 +193,10 @@ export function PendingObligationsWidget() {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-500 mb-3 opacity-50" />
               <p className="text-gray-900 dark:text-gray-300 font-medium">
-                {filterRisk ? `No hay obligaciones pendientes con nivel ${filterRisk}` : '¡Todas las obligaciones completadas!'}
+                {filterRisk ? `No hay sistemas con nivel ${filterRisk}` : 'No hay sistemas registrados'}
               </p>
               <p className="text-sm text-gray-700 dark:text-gray-500 mt-1">
-                Buen trabajo manteniendo el cumplimiento
+                Crea tu primer sistema de IA para comenzar a rastrear obligaciones
               </p>
             </div>
           ) : (
@@ -267,24 +266,35 @@ export function PendingObligationsWidget() {
                           />
                         </div>
 
-                        {/* Pending obligations list */}
+                        {/* Pending obligations list or completion status */}
                         <div className="space-y-1">
-                          <p className="text-xs font-medium text-gray-700 dark:text-gray-500 mb-2">
-                            Tareas pendientes ({item.pending_obligations.length}):
-                          </p>
-                          <div className="space-y-1">
-                            {item.pending_obligations.slice(0, 3).map(obl => (
-                              <div key={obl.key} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-400">
-                                <span className="text-gray-400 dark:text-gray-600 mt-0.5">•</span>
-                                <span>{obl.title}</span>
-                              </div>
-                            ))}
-                            {item.pending_obligations.length > 3 && (
-                              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2">
-                                +{item.pending_obligations.length - 3} más...
+                          {item.pending_obligations.length > 0 ? (
+                            <>
+                              <p className="text-xs font-medium text-gray-700 dark:text-gray-500 mb-2">
+                                Tareas pendientes ({item.pending_obligations.length}):
                               </p>
-                            )}
-                          </div>
+                              <div className="space-y-1">
+                                {item.pending_obligations.slice(0, 3).map(obl => (
+                                  <div key={obl.key} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-400">
+                                    <span className="text-gray-400 dark:text-gray-600 mt-0.5">•</span>
+                                    <span>{obl.title}</span>
+                                  </div>
+                                ))}
+                                {item.pending_obligations.length > 3 && (
+                                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2">
+                                    +{item.pending_obligations.length - 3} más...
+                                  </p>
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-500" />
+                              <p className="text-xs font-medium text-green-700 dark:text-green-400">
+                                ✓ Todas las obligaciones completadas
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Link>
