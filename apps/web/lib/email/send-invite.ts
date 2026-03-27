@@ -23,8 +23,8 @@ export async function sendInviteEmail({
   appUrl,
 }: SendInviteEmailParams) {
   try {
-    // Build invite link
-    const inviteLink = `${appUrl}/accept-invite?token=${inviteToken}`;
+    // Build invite link with properly encoded token
+    const inviteLink = `${appUrl}/accept-invite?token=${encodeURIComponent(inviteToken)}`;
 
     // Generate HTML from template
     const html = InviteEmailTemplate({
