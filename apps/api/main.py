@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import health, auth, use_cases, catalog, documents
+from routers import health, auth, use_cases, catalog, documents, templates
 
 app = FastAPI(
     title="CumplIA API",
@@ -24,6 +24,7 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(use_cases.router, prefix="/api/v1")
 app.include_router(catalog.router, prefix="/api/v1")
 app.include_router(documents.router, prefix="/api/v1")
+app.include_router(templates.router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
