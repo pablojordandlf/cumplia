@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Eye, Search, ArrowLeft, Trash2, Settings2, FileCheck, Bot, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
 import {
   Table,
   TableBody,
@@ -321,16 +320,10 @@ export default function InventoryPage() {
         </div>
         <div className="flex gap-2">
           <Link href="/dashboard/admin">
-            <motion.button
-              whileHover={{ scale: 1.05, translateY: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#E09E50]/20 to-amber-400/20 hover:from-[#E09E50]/30 hover:to-amber-400/30 border border-[#E09E50]/40 hover:border-[#E09E50]/60 transition-all duration-300 group flex items-center gap-2"
-            >
-              <div className="p-1.5 rounded-md bg-gradient-to-br from-[#E09E50] to-amber-500 group-hover:shadow-lg group-hover:shadow-[#E09E50]/30 transition-all">
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Templates</span>
-            </motion.button>
+            <Button variant="outline">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Templates
+            </Button>
           </Link>
           {canCreate && (
             <Link href="/dashboard/inventory/new">

@@ -377,24 +377,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {/* Admin Templates Button - Enhanced Visual */}
-              <Link href="/dashboard/admin" className="w-full mt-auto">
-                <motion.button
-                  whileHover={{ scale: 1.02, translateY: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-[#E09E50]/20 to-amber-400/20 hover:from-[#E09E50]/30 hover:to-amber-400/30 border border-[#E09E50]/40 hover:border-[#E09E50]/60 transition-all duration-300 group"
-                >
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-[#E09E50] to-amber-500 group-hover:shadow-lg group-hover:shadow-[#E09E50]/30 transition-all">
-                      <Sparkles className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">Editar Templates</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Gestiona plantillas</p>
-                    </div>
-                  </div>
-                </motion.button>
-              </Link>
+
             </div>
           </motion.div>
         </div>

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/lib/supabase';
 import { useAuthReady } from '@/lib/auth-helpers';
-import { User, Settings, Users, LogOut, CreditCard } from 'lucide-react';
+import { User, Settings, Users, LogOut, CreditCard, Sparkles } from 'lucide-react';
 
 export default function UserMenu() {
   const router = useRouter();
@@ -84,6 +84,10 @@ export default function UserMenu() {
         <DropdownMenuItem onClick={() => router.push('/dashboard/settings')} className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
           <span>Configuración</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push('/dashboard/admin')} className="cursor-pointer">
+          <Sparkles className="mr-2 h-4 w-4" />
+          <span>Editar Templates</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
