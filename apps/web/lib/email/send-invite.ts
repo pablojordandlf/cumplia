@@ -36,8 +36,10 @@ export async function sendInviteEmail({
     });
 
     // Send email via Resend
+    // Using onboarding@resend.dev for development (free tier without domain verification)
+    // TODO: Change to 'invitaciones@cumplia.app' when custom domain is verified
     const response = await resend.emails.send({
-      from: 'CumplIA <invitaciones@cumplia.app>',
+      from: 'onboarding@resend.dev',
       to: email,
       subject: `Te invitan a unirte a ${organizationName} en CumplIA`,
       html,
