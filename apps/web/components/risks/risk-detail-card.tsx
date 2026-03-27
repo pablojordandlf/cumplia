@@ -195,12 +195,12 @@ export function RiskDetailCard({
       case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-[#E8ECEB] text-gray-800';
     }
   };
 
   const getRiskScoreColor = (score: number | null) => {
-    if (!score) return 'text-gray-500';
+    if (!score) return 'text-[#7a8a92]';
     if (score >= 8) return 'text-red-600';
     if (score >= 5) return 'text-orange-600';
     if (score >= 3) return 'text-yellow-600';
@@ -393,7 +393,7 @@ export function RiskDetailCard({
                     }))}
                     rows={3}
                     disabled={isReadOnly}
-                    className={isReadOnly ? "bg-gray-100" : ""}
+                    className={isReadOnly ? "bg-[#E8ECEB]" : ""}
                   />
                 </div>
 
@@ -412,7 +412,7 @@ export function RiskDetailCard({
                         responsible_person: e.target.value 
                       }))}
                       disabled={isReadOnly}
-                      className={isReadOnly ? "bg-gray-100" : ""}
+                      className={isReadOnly ? "bg-[#E8ECEB]" : ""}
                     />
                   </div>
 
@@ -430,7 +430,7 @@ export function RiskDetailCard({
                         due_date: e.target.value 
                       }))}
                       disabled={isReadOnly}
-                      className={isReadOnly ? "bg-gray-100" : ""}
+                      className={isReadOnly ? "bg-[#E8ECEB]" : ""}
                     />
                   </div>
                 </div>
@@ -455,7 +455,7 @@ export function RiskDetailCard({
                   }))}
                   rows={3}
                   disabled={isReadOnly}
-                  className={isReadOnly ? "bg-gray-100" : ""}
+                  className={isReadOnly ? "bg-[#E8ECEB]" : ""}
                 />
               </CardContent>
             </Card>

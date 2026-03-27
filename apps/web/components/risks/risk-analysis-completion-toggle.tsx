@@ -91,7 +91,7 @@ export function RiskAnalysisCompletionToggle({
                 {localCompleted ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                 ) : (
-                  <Clock className="w-5 h-5 text-gray-400" />
+                  <Clock className="w-5 h-5 text-[#7a8a92]" />
                 )}
                 Estado del Análisis de Riesgos
               </CardTitle>
@@ -115,7 +115,7 @@ export function RiskAnalysisCompletionToggle({
               Requisitos para marcar como completado:
             </h4>
             <div className="space-y-2">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-[#E8ECEB] dark:bg-gray-900/50">
                 <Checkbox
                   checked={hasRisksApplied}
                   disabled
@@ -125,7 +125,7 @@ export function RiskAnalysisCompletionToggle({
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Plantilla de riesgos aplicada
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">
+                  <p className="text-xs text-[#7a8a92] dark:text-[#7a8a92] mt-0.5">
                     {hasRisksApplied
                       ? 'Plantilla aplicada correctamente'
                       : 'Ve a la sección de Riesgos y aplica una plantilla'}
@@ -133,7 +133,7 @@ export function RiskAnalysisCompletionToggle({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-[#E8ECEB] dark:bg-gray-900/50">
                 <Checkbox
                   checked={hasApplicableFactors}
                   disabled
@@ -143,7 +143,7 @@ export function RiskAnalysisCompletionToggle({
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Al menos un factor marcado como aplicable
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">
+                  <p className="text-xs text-[#7a8a92] dark:text-[#7a8a92] mt-0.5">
                     {hasApplicableFactors
                       ? 'Tienes factores aplicables registrados'
                       : 'Marca al menos un factor de riesgo como "Aplicable"'}
@@ -192,7 +192,7 @@ export function RiskAnalysisCompletionToggle({
           </Button>
 
           {/* Info */}
-          <p className="text-xs text-gray-600 dark:text-gray-500 text-center">
+          <p className="text-xs text-[#7a8a92] dark:text-[#7a8a92] text-center">
             Este estado se refleja en el dashboard principal en tiempo real.
           </p>
         </CardContent>

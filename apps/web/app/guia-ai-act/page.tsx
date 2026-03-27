@@ -91,7 +91,7 @@ function HeroSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
           <nav aria-label="Breadcrumb" className="mb-6">
-            <ol className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+            <ol className="flex items-center justify-center space-x-2 text-sm text-[#7a8a92]">
               <li><Link href="/" className="hover:text-blue-600">Inicio</Link></li>
               <li>/</li>
               <li className="text-gray-900 font-medium">Guía AI Act</li>
@@ -104,7 +104,7 @@ function HeroSection() {
               Todo sobre el Reglamento de IA de la UE
             </span>
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto px-2 sm:px-0">
+          <p className="text-base sm:text-lg lg:text-xl text-[#7a8a92] mb-6 sm:mb-8 max-w-3xl mx-auto px-2 sm:px-0">
             El <strong>Reglamento de Inteligencia Artificial de la UE (AI Act)</strong> es la primera 
             normativa integral del mundo sobre sistemas de IA. Descubre todo lo que tu empresa 
             necesita saber para cumplir con esta regulación histórica y evitar sanciones millonarias.
@@ -138,7 +138,7 @@ function WhatIsAIActSection() {
             ¿Qué es el AI Act y por qué es Crucial para tu Empresa?
           </h2>
           
-          <div className="prose prose-lg max-w-none text-gray-600 space-y-4">
+          <div className="prose prose-lg max-w-none text-[#7a8a92] space-y-4">
             <p>
               El <strong>AI Act (Reglamento de Inteligencia Artificial de la Unión Europea)</strong> es 
               la primera normativa integral del mundo diseñada para regular el desarrollo, implementación 
@@ -262,14 +262,14 @@ function RiskClassificationSection() {
   ];
 
   return (
-    <section className="py-12 sm:py-20 bg-gray-50">
+    <section className="py-12 sm:py-20 bg-[#E8ECEB]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
             Clasificación de Riesgos del AI Act
           </h2>
           
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-[#7a8a92] mb-8">
             El <strong>Reglamento de IA UE</strong> establece un sistema de clasificación basado en el 
             nivel de riesgo que un sistema de IA puede suponer para los derechos fundamentales, la 
             seguridad y la libertad de elección de las personas. Comprender esta clasificación es 
@@ -291,7 +291,7 @@ function RiskClassificationSection() {
                   <p className="text-gray-700">{risk.description}</p>
                   <div>
                     <p className="font-medium text-gray-900 mb-2">Ejemplos:</p>
-                    <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                    <ul className="list-disc pl-5 space-y-1 text-sm text-[#7a8a92]">
                       {risk.examples.map((example, idx) => (
                         <li key={idx}>{example}</li>
                       ))}
@@ -350,7 +350,7 @@ function TimelineSection() {
             Calendario del AI Act: Fechas Clave
           </h2>
           
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-[#7a8a92] mb-8">
             El <strong>AI Act se aplica progresivamente</strong> para dar tiempo a las empresas 
             a adaptarse. Conoce las fechas críticas para planificar tu estrategia de cumplimiento.
           </p>
@@ -361,7 +361,7 @@ function TimelineSection() {
                 <div className="flex flex-col items-center">
                   <div className={`w-4 h-4 rounded-full ${milestone.completed ? 'bg-green-500' : 'bg-blue-600'}`} />
                   {index < milestones.length - 1 && (
-                    <div className="w-0.5 h-full bg-gray-200 mt-2" />
+                    <div className="w-0.5 h-full bg-[#E8ECEB]/60 mt-2" />
                   )}
                 </div>
                 <div className="flex-1 pb-6">
@@ -376,7 +376,7 @@ function TimelineSection() {
                     )}
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900">{milestone.title}</h3>
-                  <p className="text-gray-600 mt-1">{milestone.description}</p>
+                  <p className="text-[#7a8a92] mt-1">{milestone.description}</p>
                 </div>
               </div>
             ))}
@@ -397,7 +397,7 @@ function PenaltiesSection() {
             Sanciones del AI Act: El Coste del Incumplimiento
           </h2>
           
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-[#7a8a92] mb-8">
             El <strong>incumplimiento del AI Act</strong> puede resultar en sanciones económicas 
             severas. Las multas se calculan en función del tipo de infracción y el volumen de 
             negocio de la empresa.
@@ -413,8 +413,8 @@ function PenaltiesSection() {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-red-600 mb-2">35 millones €</p>
-                <p className="text-gray-600">o el <strong>7% de la facturación global anual</strong> del año anterior (el valor más alto).</p>
-                <p className="text-sm text-gray-500 mt-4">
+                <p className="text-[#7a8a92]">o el <strong>7% de la facturación global anual</strong> del año anterior (el valor más alto).</p>
+                <p className="text-sm text-[#7a8a92] mt-4">
                   Aplicables al uso de sistemas de IA prohibidos o incumplimiento de requisitos para modelos de alto impacto.
                 </p>
               </CardContent>
@@ -429,8 +429,8 @@ function PenaltiesSection() {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-orange-600 mb-2">15 millones €</p>
-                <p className="text-gray-600">o el <strong>3% de la facturación global anual</strong> del año anterior (el valor más alto).</p>
-                <p className="text-sm text-gray-500 mt-4">
+                <p className="text-[#7a8a92]">o el <strong>3% de la facturación global anual</strong> del año anterior (el valor más alto).</p>
+                <p className="text-sm text-[#7a8a92] mt-4">
                   Aplicables al incumplimiento de obligaciones para sistemas de alto riesgo o deficiencias en la evaluación de impacto.
                 </p>
               </CardContent>
@@ -441,7 +441,7 @@ function PenaltiesSection() {
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               Impacto más allá de las multas
             </h3>
-            <ul className="space-y-3 text-gray-600">
+            <ul className="space-y-3 text-[#7a8a92]">
               <li className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <span><strong>Daño reputacional:</strong> Pérdida de confianza de clientes, inversores y partners.</span>
@@ -478,7 +478,7 @@ function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg w-full sm:w-auto">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-[#E8ECEB] px-8 py-6 text-lg w-full sm:w-auto">
                 <CheckCircle className="mr-2 h-5 w-5" />
                 Registrarse Gratis
               </Button>
@@ -534,14 +534,14 @@ function FAQSection() {
 
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <Card key={index} className="border border-gray-200">
+              <Card key={index} className="border border-[#E8ECEB]">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold text-gray-900">
                     {faq.question}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <p className="text-gray-600">{faq.answer}</p>
+                  <p className="text-[#7a8a92]">{faq.answer}</p>
                 </CardContent>
               </Card>
             ))}
@@ -555,7 +555,7 @@ function FAQSection() {
 // Related Content Section
 function RelatedContentSection() {
   return (
-    <section className="py-12 sm:py-20 bg-gray-50">
+    <section className="py-12 sm:py-20 bg-[#E8ECEB]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
@@ -570,7 +570,7 @@ function RelatedContentSection() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     ¿Qué es el AI Act? Guía para principiantes
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-[#7a8a92] text-sm">
                     Introducción completa al Reglamento de Inteligencia Artificial de la UE para empresas.
                   </p>
                 </CardContent>
@@ -584,7 +584,7 @@ function RelatedContentSection() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Sanciones del AI Act: Cuánto puedes pagar
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-[#7a8a92] text-sm">
                     Análisis detallado de las multas y penalizaciones por incumplimiento del AI Act.
                   </p>
                 </CardContent>
@@ -598,7 +598,7 @@ function RelatedContentSection() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Checklist de Cumplimiento AI Act
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-[#7a8a92] text-sm">
                     Lista de verificación descargable para evaluar el cumplimiento de tu empresa.
                   </p>
                 </CardContent>
@@ -612,7 +612,7 @@ function RelatedContentSection() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Planes y Precios de CumplIA
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-[#7a8a92] text-sm">
                     Descubre nuestras soluciones para facilitar el cumplimiento del AI Act.
                   </p>
                 </CardContent>

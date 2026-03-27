@@ -63,7 +63,7 @@ export function RiskAnalysisToggleSimple({
   };
 
   return (
-    <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
+    <div className="flex items-center gap-3 p-4 rounded-lg bg-[#E8ECEB] dark:bg-gray-900/50 border border-[#E8ECEB] dark:border-gray-800">
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
           <label className="text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer flex items-center gap-2">
@@ -79,7 +79,7 @@ export function RiskAnalysisToggleSimple({
             )}
           </label>
         </div>
-        <p className="text-xs text-gray-600 dark:text-gray-400">
+        <p className="text-xs text-[#7a8a92] dark:text-[#7a8a92]">
           {isDisabled
             ? '⚠️ Requiere plantilla aplicada y ≥1 factor marcado como aplicable'
             : isHighRisk

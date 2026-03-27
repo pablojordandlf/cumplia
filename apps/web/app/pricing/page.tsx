@@ -101,14 +101,14 @@ export default function PricingPage() {
               <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0 sm:mt-1" />
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">¿Qué es un Sistema de IA?</h3>
-                <p className="text-gray-600 text-sm mb-3">
+                <p className="text-[#7a8a92] text-sm mb-3">
                   Según el AI Act, un <strong>sistema de IA</strong> es cualquier aplicación basada en inteligencia artificial 
                   que tu empresa desarrolle, despliegue o utilice. Cada sistema debe evaluarse y documentarse individualmente.
                 </p>
                 <div className="flex flex-col sm:flex-row flex-wrap gap-2">
-                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-gray-600 border text-center">1 chatbot = 1 sistema</span>
-                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-gray-600 border text-center">1 motor de recomendación = 1 sistema</span>
-                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-gray-600 border text-center">1 herramienta de análisis CV = 1 sistema</span>
+                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-[#7a8a92] border text-center">1 chatbot = 1 sistema</span>
+                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-[#7a8a92] border text-center">1 motor de recomendación = 1 sistema</span>
+                  <span className="text-xs bg-white px-3 py-1.5 rounded-full text-[#7a8a92] border text-center">1 herramienta de análisis CV = 1 sistema</span>
                 </div>
               </div>
             </div>
@@ -228,9 +228,9 @@ export default function PricingPage() {
               </div>
               <div className="text-center md:text-right">
                 <div className="text-3xl font-bold">Custom</div>
-                <p className="text-sm text-gray-400 mb-4">Precio según necesidades</p>
+                <p className="text-sm text-[#7a8a92] mb-4">Precio según necesidades</p>
                 <Link href="mailto:sales@cumplia.com">
-                  <Button className="bg-white text-gray-900 hover:bg-gray-100">
+                  <Button className="bg-white text-gray-900 hover:bg-[#E8ECEB]">
                     Contactar Ventas
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

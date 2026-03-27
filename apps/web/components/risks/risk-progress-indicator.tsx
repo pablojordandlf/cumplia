@@ -134,8 +134,8 @@ export function RiskProgressIndicator({
           {/* Status Breakdown */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
             {/* Identified */}
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-50">
-              <AlertCircle className="h-4 w-4 text-gray-500" />
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#E8ECEB]">
+              <AlertCircle className="h-4 w-4 text-[#7a8a92]" />
               <div>
                 <p className="text-xs text-muted-foreground">Identificados</p>
                 <p className="text-lg font-semibold text-gray-700">{identified}</p>
@@ -195,7 +195,7 @@ export function RiskProgressIndicator({
                     <p className="font-semibold text-sm text-gray-900 dark:text-white">
                       {localCompleted ? '✅ Análisis de Riesgos Completado' : '📝 Marcar Análisis como Completado'}
                     </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <p className="text-xs text-[#7a8a92] dark:text-[#7a8a92]">
                       {isHighRisk
                         ? '🔴 Obligatorio para sistemas de Riesgo Alto'
                         : '✓ Análisis completado cuando termines la evaluación'}

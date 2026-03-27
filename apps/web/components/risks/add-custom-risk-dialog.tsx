@@ -148,7 +148,7 @@ export function AddCustomRiskDialog({
 
         <div className="flex-1 overflow-y-auto space-y-4 py-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#7a8a92]" />
             <Input
               placeholder="Buscar por nombre, código o dominio..."
               value={searchQuery}
@@ -158,10 +158,10 @@ export function AddCustomRiskDialog({
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-[#7a8a92]">
               {selectedRisks.size} seleccionados
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-[#7a8a92]">
               {catalogRisks.length} riesgos disponibles
             </span>
           </div>
@@ -174,7 +174,7 @@ export function AddCustomRiskDialog({
             <ScrollArea className="h-[400px] border rounded-md">
               <div className="p-4 space-y-2">
                 {filteredRisks.length === 0 ? (
-                  <p className="text-center text-gray-500 py-4">
+                  <p className="text-center text-[#7a8a92] py-4">
                     {catalogRisks.length === 0 
                       ? 'No hay riesgos disponibles para añadir'
                       : 'No se encontraron riesgos con ese criterio'
@@ -184,7 +184,7 @@ export function AddCustomRiskDialog({
                   filteredRisks.map((risk) => (
                     <div
                       key={risk.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-[#E8ECEB] cursor-pointer transition-colors"
                       onClick={() => toggleRisk(risk.id)}
                     >
                       <Checkbox
@@ -206,9 +206,9 @@ export function AddCustomRiskDialog({
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{risk.name}</p>
+                        <p className="text-sm text-[#7a8a92] mt-1">{risk.name}</p>
                         {risk.domain && (
-                          <p className="text-xs text-gray-400 mt-1">{risk.domain}</p>
+                          <p className="text-xs text-[#7a8a92] mt-1">{risk.domain}</p>
                         )}
                       </div>
                     </div>
