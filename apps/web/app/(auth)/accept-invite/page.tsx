@@ -34,17 +34,33 @@ export default function AcceptInvitePage() {
   async function handleInvitation() {
     try {
       // 🟡 Step 1: Validate token and get organization info (PUBLIC - no auth required)
-      console.log('🟡 Step 1: Validating invitation token...');
+      console.log('🟡 Step 1: Validating invitation token:', token?.substring(0, 8) + '...');
+      console.log('🟡 Using Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...');
       
       // First query: Get invitation by token (simple fields only)
-      const { data: invitation, error: inviteError } = await supabase
+      console.log('🟡 Executing query: select id, email, organization_id, role, invite_expires_at, invite_token where invite_token =', token);
+      const { data: invitation, error: inviteError, status: inviteStatus } = await supabase
         .from('pending_invitations')
-        .select('id, email, organization_id, role, invite_expires_at, invite_token')
+        .select('id,email,organization_id,role,invite_expires_at,invite_token')
         .eq('invite_token', token)
         .single();
 
-      if (inviteError || !invitation) {
-        console.error('🔴 Token lookup failed:', inviteError);
+      console.log('🟡 Query response - Status:', inviteStatus, '- Error:', inviteError, '- Data:', invitation ? 'Found' : 'Not found');
+
+      if (inviteError) {
+        console.error('🔴 Token lookup failed - Error Details:', {
+          message: inviteError.message,
+          code: inviteError.code,
+          details: inviteError.details,
+          hint: inviteError.hint,
+        });
+        setStatus('error');
+        setError(`Token lookup failed: ${inviteError.message || 'Invalid or expired invitation link'}`);
+        return;
+      }
+
+      if (!invitation) {
+        console.error('🔴 Token lookup returned no data');
         setStatus('error');
         setError('Invalid or expired invitation link');
         return;
