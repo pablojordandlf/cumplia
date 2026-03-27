@@ -171,11 +171,11 @@ export function PendingObligationsWidget() {
       <div className="p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <ListTodo className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               Obligaciones Pendientes
             </h2>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-700 dark:text-gray-400 mt-1">
               Acciones requeridas para mantener el cumplimiento normativo
             </p>
           </div>
@@ -187,16 +187,16 @@ export function PendingObligationsWidget() {
         <div className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <Clock className="w-5 h-5 text-gray-400 animate-spin" />
-              <span className="ml-2 text-gray-500">Cargando...</span>
+              <Clock className="w-5 h-5 text-gray-500 dark:text-gray-400 animate-spin" />
+              <span className="ml-2 text-gray-700 dark:text-gray-500">Cargando...</span>
             </div>
           ) : filteredObligations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CheckCircle2 className="w-12 h-12 text-green-500 mb-3 opacity-50" />
-              <p className="text-gray-300 font-medium">
+              <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-500 mb-3 opacity-50" />
+              <p className="text-gray-900 dark:text-gray-300 font-medium">
                 {filterRisk ? `No hay obligaciones pendientes con nivel ${filterRisk}` : '¡Todas las obligaciones completadas!'}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-700 dark:text-gray-500 mt-1">
                 Buen trabajo manteniendo el cumplimiento
               </p>
             </div>
@@ -209,7 +209,7 @@ export function PendingObligationsWidget() {
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     filterRisk === null
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   Todos
@@ -223,7 +223,7 @@ export function PendingObligationsWidget() {
                       className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                         filterRisk === level
                           ? `${RISK_COLORS[level].badge} cursor-pointer`
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                       }`}
                     >
                       {RISK_COLORS[level].icon} {count}
@@ -245,10 +245,10 @@ export function PendingObligationsWidget() {
                       <div className="p-4 rounded-lg border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all cursor-pointer group bg-white/5 backdrop-blur-sm">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-100 group-hover:text-blue-400 transition-colors">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                               {item.system_name}
                             </h4>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-700 dark:text-gray-500 mt-1">
                               {item.completed_obligations} de {item.total_obligations} obligaciones completadas
                             </p>
                           </div>
@@ -258,7 +258,7 @@ export function PendingObligationsWidget() {
                         </div>
 
                         {/* Progress bar */}
-                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mb-3">
+                        <div className="w-full h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden mb-3">
                           <motion.div
                             className="h-full bg-gradient-to-r from-blue-500 to-cyan-500"
                             initial={{ width: 0 }}
@@ -269,18 +269,18 @@ export function PendingObligationsWidget() {
 
                         {/* Pending obligations list */}
                         <div className="space-y-1">
-                          <p className="text-xs font-medium text-gray-500 mb-2">
+                          <p className="text-xs font-medium text-gray-700 dark:text-gray-500 mb-2">
                             Tareas pendientes ({item.pending_obligations.length}):
                           </p>
                           <div className="space-y-1">
                             {item.pending_obligations.slice(0, 3).map(obl => (
-                              <div key={obl.key} className="flex items-start gap-2 text-xs text-gray-400">
-                                <span className="text-gray-600 mt-0.5">•</span>
+                              <div key={obl.key} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-400">
+                                <span className="text-gray-400 dark:text-gray-600 mt-0.5">•</span>
                                 <span>{obl.title}</span>
                               </div>
                             ))}
                             {item.pending_obligations.length > 3 && (
-                              <p className="text-xs text-blue-400 font-medium mt-2">
+                              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2">
                                 +{item.pending_obligations.length - 3} más...
                               </p>
                             )}

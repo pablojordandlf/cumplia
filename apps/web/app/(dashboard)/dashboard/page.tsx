@@ -276,9 +276,9 @@ export default function DashboardPage() {
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <h3 className="text-gray-400 text-sm font-medium mb-1">Total de Sistemas</h3>
-              <p className="text-4xl font-bold text-gray-100">{stats.totalSystems}</p>
-              <p className="text-xs text-gray-500 mt-2">Sistemas IA registrados</p>
+              <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Total de Sistemas</h3>
+              <p className="text-4xl font-bold text-gray-900 dark:text-gray-100">{stats.totalSystems}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-500 mt-2">Sistemas IA registrados</p>
             </motion.div>
           </Link>
 
@@ -293,10 +293,12 @@ export default function DashboardPage() {
               </div>
               <Flame className="w-5 h-5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">Cumplimiento</h3>
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Cumplimiento</h3>
             <div className="flex items-baseline gap-2">
-              <p className="text-4xl font-bold text-gray-100">{completionRate}%</p>
-              <span className="text-sm text-green-400">↑ Progreso</span>
+              <p className="text-4xl font-bold text-gray-900 dark:text-gray-100">{completionRate}%</p>
+              <span className={`text-sm font-medium ${completionRate > 50 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                {completionRate > 75 ? '↑ Excelente' : completionRate > 50 ? '→ Bueno' : '↓ Iniciar'}
+              </span>
             </div>
             <Progress value={completionRate} className="mt-3 h-2" />
           </motion.div>
@@ -312,9 +314,9 @@ export default function DashboardPage() {
               </div>
               <Eye className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">Riesgo Alto</h3>
-            <p className="text-4xl font-bold text-gray-100">{stats.highRiskCount}</p>
-            <p className="text-xs text-gray-500 mt-2">Requieren revisión urgente</p>
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Riesgo Alto</h3>
+            <p className="text-4xl font-bold text-gray-900 dark:text-gray-100">{stats.highRiskCount}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-500 mt-2">Requieren revisión urgente</p>
           </motion.div>
         </motion.div>
 
@@ -324,8 +326,8 @@ export default function DashboardPage() {
           <motion.div variants={itemVariants} className="lg:col-span-2">
             <div className="glass rounded-2xl p-8 border border-white/20">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
-                  <Target className="w-6 h-6 text-blue-400" />
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   Clasificación de Riesgos
                 </h2>
                 <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
@@ -351,10 +353,10 @@ export default function DashboardPage() {
           <motion.div variants={itemVariants}>
             <div className="glass rounded-2xl p-6 border border-white/20 h-full overflow-hidden flex flex-col">
               <div className="flex items-center gap-2 mb-4">
-                <Clock className="w-5 h-5 text-blue-400" />
-                <h3 className="text-lg font-bold text-gray-100">Últimas Novedades</h3>
+                <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Últimas Novedades</h3>
               </div>
-              <p className="text-xs text-gray-500 mb-4">Últimos sistemas cargados</p>
+              <p className="text-xs text-gray-700 dark:text-gray-500 mb-4">Últimos sistemas cargados</p>
               
               <div className="space-y-3 flex-1 overflow-y-auto scrollbar-thin">
                 {stats.recentSystems.length > 0 ? (
@@ -368,10 +370,10 @@ export default function DashboardPage() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-gray-100 truncate group-hover:text-blue-400 transition-colors">
+                            <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                               {system.name}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-700 dark:text-gray-500 mt-1">
                               {new Date(system.created_at).toLocaleDateString('es-ES')}
                             </p>
                           </div>
@@ -388,8 +390,8 @@ export default function DashboardPage() {
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Plus className="w-8 h-8 text-gray-600 mb-2 opacity-50" />
-                    <p className="text-sm text-gray-500">No hay sistemas registrados</p>
+                    <Plus className="w-8 h-8 text-gray-400 dark:text-gray-600 mb-2 opacity-50" />
+                    <p className="text-sm text-gray-700 dark:text-gray-500">No hay sistemas registrados</p>
                   </div>
                 )}
               </div>
@@ -411,10 +413,10 @@ export default function DashboardPage() {
         <motion.div variants={itemVariants}>
           <div className="glass rounded-2xl p-6 border border-white/20 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
             <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-gray-100 mb-1">💡 Consejo de Cumplimiento</p>
-                <p className="text-sm text-gray-300">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">💡 Consejo de Cumplimiento</p>
+                <p className="text-sm text-gray-800 dark:text-gray-300">
                   Mantén todos tus sistemas clasificados y completa las obligaciones antes de desplegar en producción. CumplIA te alertará automáticamente sobre cambios en la normativa.
                 </p>
               </div>
