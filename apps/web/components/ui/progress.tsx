@@ -12,11 +12,11 @@ const trackVariants = cva(
     variants: {
       trackVariant: {
         default: "bg-secondary",
-        blue: "bg-blue-100",
-        green: "bg-green-100",
-        orange: "bg-orange-100",
-        red: "bg-red-100",
-        purple: "bg-purple-100",
+        blue: "bg-[#E8ECEB]",
+        green: "bg-[#E8F5E3]",
+        orange: "bg-[#FFE8D1]",
+        red: "bg-[#F4E4D7]",
+        purple: "bg-[#D1F0ED]",
       },
     },
     defaultVariants: {
@@ -31,14 +31,14 @@ const indicatorVariants = cva(
     variants: {
       indicatorVariant: {
         default: "bg-primary",
-        blue: "bg-blue-500",
-        green: "bg-green-500",
-        orange: "bg-orange-500",
-        red: "bg-red-500",
-        purple: "bg-purple-500",
-        gradient: "bg-gradient-to-r from-blue-500 to-indigo-600",
-        success: "bg-gradient-to-r from-green-500 to-emerald-600",
-        warning: "bg-gradient-to-r from-orange-500 to-amber-600",
+        blue: "bg-[#E09E50]",
+        green: "bg-[#27A844]",
+        orange: "bg-[#D97706]",
+        red: "bg-[#C92A2A]",
+        purple: "bg-[#8CBDB9]",
+        gradient: "bg-gradient-to-r from-[#E09E50] to-[#D9885F]",
+        success: "bg-gradient-to-r from-[#27A844] to-[#219639]",
+        warning: "bg-gradient-to-r from-[#D97706] to-[#C86200]",
       },
     },
     defaultVariants: {

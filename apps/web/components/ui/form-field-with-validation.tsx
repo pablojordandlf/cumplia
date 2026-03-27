@@ -73,10 +73,10 @@ export const FormFieldWithValidation = React.forwardRef<
           <input
             ref={ref}
             className={cn(
-              'flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-all duration-200 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50',
+              'flex h-10 w-full rounded-md border border-[#E8ECEB] bg-transparent px-3 py-2 text-sm shadow-sm transition-all duration-200 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-[#7a8a92] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#E09E50] disabled:cursor-not-allowed disabled:opacity-50',
               {
-                'border-green-500 focus-visible:ring-green-500': isSuccess,
-                'border-red-500 focus-visible:ring-red-500': validationError,
+                'border-[#27A844] focus-visible:ring-[#27A844]': isSuccess,
+                'border-[#C92A2A] focus-visible:ring-[#C92A2A]': validationError,
                 'pr-10': isSuccess || isValidating,
               },
               className
@@ -89,7 +89,7 @@ export const FormFieldWithValidation = React.forwardRef<
           {/* Validation indicator */}
           {isValidating && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div className="size-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="size-4 border-2 border-[#E09E50] border-t-transparent rounded-full animate-spin" />
             </div>
           )}
 
@@ -101,7 +101,7 @@ export const FormFieldWithValidation = React.forwardRef<
 
           {validationError && !isSuccess && !isValidating && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <AlertCircle className="size-4 text-red-500" />
+              <AlertCircle className="size-4 text-[#C92A2A]" />
             </div>
           )}
         </div>
@@ -110,9 +110,9 @@ export const FormFieldWithValidation = React.forwardRef<
         {(successMessage || helperText || validationError) && (
           <p
             className={cn('text-xs mt-2', {
-              'text-green-600': isSuccess,
-              'text-red-600': validationError,
-              'text-muted-foreground': !isSuccess && !validationError,
+              'text-[#27A844]': isSuccess,
+              'text-[#C92A2A]': validationError,
+              'text-[#7a8a92]': !isSuccess && !validationError,
             })}
           >
             {isSuccess ? successMessage : validationError || helperText}
