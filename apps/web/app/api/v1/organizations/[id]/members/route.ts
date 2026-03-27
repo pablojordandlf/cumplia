@@ -280,6 +280,15 @@ export async function POST(
         .eq('id', user.id)
         .single();
 
+      // DEBUG: Log the exact token being sent
+      console.log('[INVITE_DEBUG] Sending invitation email:', {
+        email,
+        inviteToken: inviteToken,
+        organizationName: orgData?.name,
+        savedTokenInDB: invitation?.invite_token,
+        tokensMatch: inviteToken === invitation?.invite_token,
+      });
+
       await sendInviteEmail({
         email,
         name: name || undefined,
