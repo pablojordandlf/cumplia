@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   // TODO: Implement POST /api/v1/agency/clients - Create client (requires agency plan)
   const body = await request.json();
-  console.log('Creating client:', body);
   return NextResponse.json({ message: 'Create client endpoint' }, { status: 200 });
 }
 

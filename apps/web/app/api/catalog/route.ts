@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
 
     // Fallback: if no data in DB, return example use cases
     if (!catalog || catalog.length === 0) {
-      console.log('No data in catalog, returning fallback examples');
       const fallbackExamples = [
         {
           id: 'example-1',
