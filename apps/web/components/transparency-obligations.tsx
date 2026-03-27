@@ -460,9 +460,10 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
               return (
                 <div
                   key={obligation.key}
-                  className={`p-3 rounded-lg border transition-all duration-200 ${
-                    isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
+                  className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer hover:shadow-md ${
+                    isCompleted ? 'bg-green-50 border-green-200 hover:border-green-300' : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
+                  onClick={() => toggleObligation(obligation, !isCompleted)}
                 >
                   <div className="flex items-start gap-3">
                     <Checkbox
@@ -470,7 +471,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                       checked={isCompleted}
                       onCheckedChange={(checked) => toggleObligation(obligation, checked as boolean)}
                       disabled={isLoading}
-                      className="mt-1"
+                      className="mt-1 pointer-events-none"
                     />
                     <div className="flex-1">
                       <label

@@ -464,13 +464,14 @@ function PricingSection() {
       name: 'Starter',
       price: '0€',
       period: '/mes',
-      description: 'Para empresas que quieren evaluar un único sistema',
+      description: 'Valida tu primer sistema de IA y conoce la plataforma',
       features: [
-        '1 sistema de IA',
+        '1 Sistema de IA',
         '1 usuario',
-        'Clasificación de riesgo',
-        'Guía básica de cumplimiento',
-        'Soporte por email'
+        'Clasificación AI Act',
+        'Obligaciones básicas',
+        'Checklist de cumplimiento',
+        'Sin generación de documentos'
       ],
       cta: 'Empezar Gratis',
       href: '/register',
@@ -481,15 +482,15 @@ function PricingSection() {
       price: '99€',
       originalPrice: '149',
       period: '/mes',
-      description: 'Para equipos con varios sistemas de IA',
+      description: 'Ideal para PYMEs y consultoras con varios sistemas de IA',
       features: [
-        '5 sistemas de IA',
-        '3 usuarios',
-        'FRIA automatizada',
-        'Gestión de riesgos',
+        'Hasta 15 Sistemas de IA',
+        'Hasta 3 usuarios',
+        'FRIA completa (Art. 27)',
+        'Gestión completa de riesgos',
         'Registro de evidencias',
-        'Exportación de documentos',
-        'Soporte prioritario'
+        'Exportación PDF/DOCX',
+        'Soporte email prioritario'
       ],
       cta: 'Elige Professional',
       href: '/register?plan=professional',
@@ -501,18 +502,19 @@ function PricingSection() {
     },
     {
       name: 'Business',
-      price: '299€',
+      price: '249€',
       originalPrice: '349',
       period: '/mes',
-      description: 'Para organizaciones con múltiples departamentos',
+      description: 'Para empresas con múltiples departamentos y necesidades avanzadas',
       features: [
-        '15 sistemas de IA',
-        '10 usuarios',
-        'Asistente de IA',
-        'Gestión avanzada de riesgos',
+        'Sistemas de IA ilimitados',
+        'Hasta 10 usuarios',
+        'Asistente IA',
+        'Gestión de Riesgos avanzada',
+        'Registro de evidencias',
         'Plantillas personalizadas',
-        'Múltiples departamentos',
-        'Soporte dedicado'
+        'Gestión multi-departamento',
+        'Soporte prioritario'
       ],
       cta: 'Elige Business',
       href: '/contact?plan=business',
@@ -526,7 +528,7 @@ function PricingSection() {
       name: 'Enterprise',
       price: 'Custom',
       period: '',
-      description: 'Para grandes organizaciones con necesidades específicas',
+      description: 'Soluciones personalizadas para grandes organizaciones',
       features: [
         'Sistemas de IA ilimitados',
         'Usuarios ilimitados',
@@ -548,10 +550,10 @@ function PricingSection() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">Pricing</p>
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Planes para Empresas
+            Planes para cada etapa
           </h2>
           <p className="text-lg text-slate-400">
-            Precios transparentes basados en el número de sistemas de IA que gestionas
+            Desde pruebas gratuitas hasta soluciones empresariales. Cumple con el AI Act sin comprometer tu presupuesto.
           </p>
         </div>
 

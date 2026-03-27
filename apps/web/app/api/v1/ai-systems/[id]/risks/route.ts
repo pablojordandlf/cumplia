@@ -36,16 +36,35 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Check organization membership
+    // Check organization membership - first check exact membership
+    let hasAccess = false;
+    
     const { data: membership, error: membershipError } = await supabase
       .from('organization_members')
-      .select('id')
+      .select('id, user_id')
       .eq('organization_id', system.organization_id)
       .eq('user_id', user.id)
       .eq('status', 'active')
       .single();
 
-    if (membershipError || !membership) {
+    if (!membershipError && membership) {
+      hasAccess = true;
+    } else {
+      // Fallback: check if user owns the system directly (for personal systems)
+      const { data: ownerCheck } = await supabase
+        .from('use_cases')
+        .select('user_id')
+        .eq('id', aiSystemId)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (ownerCheck) {
+        hasAccess = true;
+      }
+    }
+
+    if (!hasAccess) {
+      console.error(`Access denied for user ${user.id} to system ${aiSystemId}`);
       return NextResponse.json(
         { error: 'Not authorized to view this system' },
         { status: 403 }
@@ -133,6 +152,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Check organization membership with editor permissions
+    let hasEditAccess = false;
+    
     const { data: membership, error: membershipError } = await supabase
       .from('organization_members')
       .select('role')
@@ -141,16 +162,28 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .eq('status', 'active')
       .single();
 
-    if (membershipError || !membership) {
-      return NextResponse.json(
-        { error: 'Not authorized to view this system' },
-        { status: 403 }
-      );
+    if (!membershipError && membership) {
+      // Check if user has editor permissions
+      const allowedRoles = ['owner', 'admin', 'editor'];
+      if (allowedRoles.includes(membership.role)) {
+        hasEditAccess = true;
+      }
+    } else {
+      // Fallback: check if user owns the system directly
+      const { data: ownerCheck } = await supabase
+        .from('use_cases')
+        .select('user_id')
+        .eq('id', aiSystemId)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (ownerCheck) {
+        hasEditAccess = true;
+      }
     }
 
-    // Only editors, admins, and owners can modify risks
-    const allowedRoles = ['owner', 'admin', 'editor'];
-    if (!allowedRoles.includes(membership.role)) {
+    if (!hasEditAccess) {
+      console.error(`Edit access denied for user ${user.id} to system ${aiSystemId}`);
       return NextResponse.json(
         { error: 'Not authorized to modify this system' },
         { status: 403 }

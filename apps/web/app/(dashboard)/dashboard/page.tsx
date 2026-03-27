@@ -238,78 +238,114 @@ export default function DashboardPage() {
         </Link>
       </motion.div>
 
-      {/* PRIMARY METRICS - Large prominent display */}
-      <motion.div variants={itemVariants}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Total Systems */}
-          <Card className="border-2 border-blue-200 dark:border-blue-800">
-            <CardContent className="pt-6">
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-blue-600">{stats.totalSystems}</span>
-                <span className="text-sm text-gray-600">sistemas</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">Total de sistemas de IA</p>
-            </CardContent>
-          </Card>
-
-          {/* Compliance Rate */}
-          <Card className="border-2 border-green-200 dark:border-green-800">
-            <CardContent className="pt-6">
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-green-600">{completionRate}%</span>
-                <span className="text-sm text-gray-600">completado</span>
-              </div>
-              <Progress value={completionRate} className="mt-4" />
-              <p className="text-xs text-gray-600 mt-2">
-                {stats.completedObligations} de {stats.totalApplicableObligations} obligaciones
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* High Risk Alert */}
-          <Card className={`border-2 ${stats.highRiskCount > 0 ? 'border-red-200 dark:border-red-800' : 'border-gray-200'}`}>
-            <CardContent className="pt-6">
-              <div className="flex items-baseline gap-2">
-                <span className={`text-4xl font-bold ${stats.highRiskCount > 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                  {stats.highRiskCount}
-                </span>
-                <span className="text-sm text-gray-600">alto riesgo</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">Requieren atención inmediata</p>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
-
-      {/* RISK BREAKDOWN - Detailed Classification */}
-      <motion.div variants={itemVariants}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Clasificación por Riesgo (AI Act)
-            </CardTitle>
-            <CardDescription>Distribución de sistemas según categoría de riesgo</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {[
-                { label: 'Prohibido', value: stats.prohibitedCount, color: 'bg-red-500', textColor: 'text-red-600' },
-                { label: 'Alto Riesgo', value: stats.highRiskCount, color: 'bg-orange-500', textColor: 'text-orange-600' },
-                { label: 'Riesgo Limitado', value: stats.limitedRiskCount, color: 'bg-yellow-500', textColor: 'text-yellow-600' },
-                { label: 'Riesgo Mínimo', value: stats.minimalRiskCount, color: 'bg-green-500', textColor: 'text-green-600' },
-                { label: 'Por Clasificar', value: stats.unclassifiedCount, color: 'bg-gray-500', textColor: 'text-gray-600' },
-              ].map((item) => (
-                <div key={item.label} className="text-center p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
-                  <div className={`text-3xl font-bold ${item.textColor} mb-1`}>{item.value}</div>
-                  <div className="text-sm text-gray-600">{item.label}</div>
-                  <div className={`h-1 ${item.color} rounded mt-2 w-full`}></div>
+      {/* PRIMARY METRICS - Two main blocks */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* BLOCK 1: Total Systems & Risk Classification */}
+        <motion.div variants={itemVariants}>
+          <Card className="border-2 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all cursor-pointer h-full" onClick={() => window.location.href = '/dashboard/inventory'}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                Inventario de Sistemas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-4xl font-bold text-blue-600">{stats.totalSystems}</span>
+                  <span className="text-sm text-gray-600">sistemas totales</span>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+              </div>
+
+              {/* Risk Classification Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <Link href="/dashboard/inventory?risk=prohibited" onClick={(e) => e.stopPropagation()}>
+                  <div className="p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors cursor-pointer border border-red-200">
+                    <div className="text-2xl font-bold text-red-600">{stats.prohibitedCount}</div>
+                    <div className="text-xs text-red-700">Prohibido</div>
+                  </div>
+                </Link>
+                <Link href="/dashboard/inventory?risk=high_risk" onClick={(e) => e.stopPropagation()}>
+                  <div className="p-3 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors cursor-pointer border border-orange-200">
+                    <div className="text-2xl font-bold text-orange-600">{stats.highRiskCount}</div>
+                    <div className="text-xs text-orange-700">Alto Riesgo</div>
+                  </div>
+                </Link>
+                <Link href="/dashboard/inventory?risk=limited_risk" onClick={(e) => e.stopPropagation()}>
+                  <div className="p-3 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition-colors cursor-pointer border border-yellow-200">
+                    <div className="text-2xl font-bold text-yellow-600">{stats.limitedRiskCount}</div>
+                    <div className="text-xs text-yellow-700">Riesgo Limitado</div>
+                  </div>
+                </Link>
+                <Link href="/dashboard/inventory?risk=minimal_risk" onClick={(e) => e.stopPropagation()}>
+                  <div className="p-3 rounded-lg bg-green-50 hover:bg-green-100 transition-colors cursor-pointer border border-green-200">
+                    <div className="text-2xl font-bold text-green-600">{stats.minimalRiskCount}</div>
+                    <div className="text-xs text-green-700">Riesgo Mínimo</div>
+                  </div>
+                </Link>
+                <Link href="/dashboard/inventory?risk=unclassified" onClick={(e) => e.stopPropagation()} className="col-span-2">
+                  <div className="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200">
+                    <div className="text-2xl font-bold text-gray-600">{stats.unclassifiedCount}</div>
+                    <div className="text-xs text-gray-700">Por Clasificar</div>
+                  </div>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* BLOCK 2: Obligations Status */}
+        <motion.div variants={itemVariants}>
+          <Card className="border-2 border-green-200 dark:border-green-800 h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                Cumplimiento de Obligaciones
+              </CardTitle>
+              <CardDescription>Progreso general de tu organización</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Main Progress */}
+              <div>
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-3xl font-bold text-green-600">{completionRate}%</span>
+                  <span className="text-sm text-gray-600">completado</span>
+                </div>
+                <Progress value={completionRate} className="h-3" />
+                <p className="text-xs text-gray-600 mt-2">
+                  {stats.completedObligations} de {stats.totalApplicableObligations} obligaciones finalizadas
+                </p>
+              </div>
+
+              {/* Systems needing attention */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold text-sm mb-3">Sistemas con obligaciones pendientes</h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {stats.recentSystems.filter(s => s.completed_obligations < s.total_obligations).length > 0 ? (
+                    stats.recentSystems
+                      .filter(s => s.completed_obligations < s.total_obligations)
+                      .slice(0, 5)
+                      .map(system => (
+                        <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
+                          <div className="p-2 rounded bg-gray-50 hover:bg-gray-100 transition-colors text-sm">
+                            <div className="font-medium text-gray-900 truncate">{system.name}</div>
+                            <div className="text-xs text-gray-600">
+                              {system.completed_obligations}/{system.total_obligations} obligaciones
+                            </div>
+                          </div>
+                        </Link>
+                      ))
+                  ) : (
+                    <p className="text-sm text-gray-600">¡Excelente! Todas las obligaciones están completadas.</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+
 
       {/* TWO-COLUMN LAYOUT - Main content + Upcoming Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
