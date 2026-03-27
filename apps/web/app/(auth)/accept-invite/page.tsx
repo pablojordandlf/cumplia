@@ -12,248 +12,260 @@ export default function AcceptInvitePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const email = searchParams.get('email');
   const supabase = createClient();
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'expired'>('loading');
+  const [status, setStatus] = useState<'validating' | 'authenticated' | 'unauthenticated' | 'error' | 'expired' | 'success'>('validating');
   const [organizationName, setOrganizationName] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
-      console.error('❌ No token provided');
+      console.error('🔴 No token provided');
       setStatus('error');
       setError('No se encontró el token de invitación');
       return;
     }
 
-    console.log(`🟡 Starting invitation acceptance process with token: ${token.substring(0, 8)}...`);
-    acceptInvitation();
+    console.log(`🟡 Starting invitation validation with token: ${token.substring(0, 8)}...`);
+    handleInvitation();
   }, [token]);
 
-  async function acceptInvitation() {
+  async function handleInvitation() {
     try {
-      // Step 1: Get current user session
-      console.log('🟡 Step 1: Obteniendo sesión...');
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        console.log('🟡 Step 1.1: Usuario NO logueado, redirigiendo a login...');
-        // Redirect to login with return URL - encode the token in the redirect
-        if (token) {
-          const encodedToken = encodeURIComponent(token);
-          router.push(`/login?redirect=${encodeURIComponent(`/accept-invite?token=${encodedToken}`)}`);
-        } else {
-          router.push('/login');
-        }
-        return;
-      }
-
-      console.log(`🟡 Step 2: Usuario logueado: ${session.user.id}`);
-      setUserId(session.user.id);
-
-      // Step 2: Find the invitation by token
-      // First, query without status filter for better debugging
-      console.log(`🟡 Step 3: Buscando invitación con token...`);
-      const { data: invitation, error: invError } = await supabase
+      // 🟡 Step 1: Validate token and get organization info (PUBLIC - no auth required)
+      console.log('🟡 Step 1: Validating invitation token...');
+      const { data: invitation, error: inviteError } = await supabase
         .from('pending_invitations')
-        .select('id, organization_id, email, role, invite_expires_at, status')
+        .select(`
+          id,
+          email,
+          organization_id,
+          role,
+          invite_expires_at,
+          invite_token,
+          organizations (name)
+        `)
         .eq('invite_token', token)
         .single();
 
-      if (invError) {
-        console.error('🔴 Error fetching invitation:', invError);
+      if (inviteError || !invitation) {
+        console.error('🔴 Token lookup failed:', inviteError);
         setStatus('error');
-        setError(`Error al buscar la invitación: ${invError.message}`);
+        setError('Invalid or expired invitation link');
         return;
       }
+
+      console.log('🟢 Step 2: Invitation found for org:', invitation.organizations?.name);
+      setOrganizationName(invitation.organizations?.name || 'Unknown Organization');
+
+      // 🟡 Step 3: Check expiration
+      const expiryDate = new Date(invitation.invite_expires_at);
+      if (new Date() > expiryDate) {
+        console.log('🟡 Step 3: Invitation expired');
+        setStatus('expired');
+        setError('Invitation has expired. Please request a new one.');
+        return;
+      }
+
+      // Validate email matches (if provided in URL)
+      if (email && email !== invitation.email) {
+        console.log('🟠 Email mismatch');
+        setStatus('error');
+        setError('Email does not match the invitation');
+        return;
+      }
+
+      // 🟡 Step 4: Check auth status
+      console.log('🟡 Step 4: Checking authentication status...');
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        // User is authenticated - accept invite immediately
+        console.log('🟡 Step 5: User authenticated, accepting invitation...');
+        await acceptInvitation(invitation.id, session.user.id, token);
+        setStatus('success');
+
+        // Redirect to dashboard after 2 seconds
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 2000);
+      } else {
+        // User not authenticated - store context and redirect to register
+        console.log('🟡 Step 5: User not authenticated, redirecting to signup...');
+
+        // Store invitation context in sessionStorage
+        sessionStorage.setItem('invitation_token', token);
+        sessionStorage.setItem('invitation_email', invitation.email);
+        sessionStorage.setItem('invitation_org_id', invitation.organization_id);
+        sessionStorage.setItem('invitation_org_name', organizationName);
+        sessionStorage.setItem('invitation_role', invitation.role || 'member');
+
+        // Redirect to register with invitation token
+        const registerUrl = `/register?invitation_token=${encodeURIComponent(token)}&email=${encodeURIComponent(invitation.email)}`;
+        console.log('🟡 Redirecting to:', registerUrl);
+        setStatus('unauthenticated');
+
+        // Redirect after a brief delay
+        setTimeout(() => {
+          router.push(registerUrl);
+        }, 1000);
+      }
+    } catch (err) {
+      console.error('🔴 Unexpected error:', err);
+      setStatus('error');
+      setError('An error occurred while processing your invitation');
+    }
+  }
+
+  async function acceptInvitation(invitationId: string, userId: string, token: string) {
+    console.log('🟡 Step 6: Accepting invitation in database...');
+
+    try {
+      // Get invitation details again to ensure we have org_id and role
+      const { data: invitation } = await supabase
+        .from('pending_invitations')
+        .select('organization_id, role')
+        .eq('id', invitationId)
+        .single();
 
       if (!invitation) {
-        console.error('🔴 Invitación no encontrada con este token');
-        setStatus('error');
-        setError('La invitación no se encontró. Verifica que el enlace sea correcto.');
-        return;
+        throw new Error('Invitation not found');
       }
 
-      console.log(`🟡 Step 4: Invitación encontrada. Status actual: ${invitation.status}`);
-
-      // Check if invitation is already accepted or has invalid status
-      if (invitation.status !== 'pending') {
-        console.log(`🟠 Invitación no está en estado pending, está en: ${invitation.status}`);
-        if (invitation.status === 'accepted') {
-          setStatus('success');
-          setError('Esta invitación ya fue aceptada. Ya eres miembro de la organización.');
-          return;
-        }
-        setStatus('error');
-        setError(`Invitación no válida (status: ${invitation.status})`);
-        return;
-      }
-
-      // Step 3: Check if invitation expired
-      console.log(`🟡 Step 5: Validando expiración...`);
-      const expiresAt = new Date(invitation.invite_expires_at);
-      if (new Date() > expiresAt) {
-        console.error('🔴 Invitación expirada');
-        setStatus('expired');
-        setError('Esta invitación ha expirado. Por favor, solicita una nueva.');
-        return;
-      }
-
-      // Step 4: Get organization name
-      console.log(`🟡 Step 6: Obteniendo datos de la organización...`);
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('name')
-        .eq('id', invitation.organization_id)
-        .single();
-
-      setOrganizationName(org?.name || 'Unknown Organization');
-      console.log(`🟡 Step 7: Organización: ${org?.name}`);
-
-      // Step 5: Check if user is already a member
-      console.log(`🟡 Step 8: Verificando membresía actual...`);
-      const { data: existingMember } = await supabase
-        .from('organization_members')
-        .select('id, status')
-        .eq('organization_id', invitation.organization_id)
-        .eq('user_id', session.user.id)
-        .single();
-
-      if (existingMember && existingMember.status === 'active') {
-        console.log(`🟠 El usuario ya es miembro activo`);
-        setStatus('success');
-        setError('Ya eres miembro de esta organización');
-        return;
-      }
-
-      // Step 6: Create member record (accept the invitation)
-      console.log(`🟡 Step 9: Creando registro de miembro...`);
-      const { error: memberError, data: newMember } = await supabase
+      // Add user to organization_members
+      console.log('🟡 Step 7: Adding user to organization...');
+      const { error: memberError } = await supabase
         .from('organization_members')
         .insert({
           organization_id: invitation.organization_id,
-          user_id: session.user.id,
-          email: session.user.email,
-          role: invitation.role,
-          status: 'active',
+          user_id: userId,
+          role: invitation.role || 'member',
+          status: 'active'
         })
         .select()
         .single();
 
       if (memberError) {
-        console.error('🔴 Error creating member record:', memberError);
-        setStatus('error');
-        setError(`Error al agregar como miembro: ${memberError.message}`);
-        return;
+        console.warn('🟠 Warning: Failed to add member:', memberError);
+        // Continue anyway - try to update status
+      } else {
+        console.log('🟢 Step 8: User successfully added to organization');
       }
 
-      console.log(`🟢 Miembro creado exitosamente: ${newMember.id}`);
-
-      // Step 7: Mark invitation as accepted
-      console.log(`🟡 Step 10: Actualizando estado de invitación a 'accepted'...`);
+      // Update pending_invitations status
+      console.log('🟡 Step 9: Updating invitation status...');
       const { error: updateError } = await supabase
         .from('pending_invitations')
-        .update({ 
+        .update({
           status: 'accepted',
-          updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .eq('id', invitation.id);
+        .eq('id', invitationId)
+        .eq('invite_token', token);
 
       if (updateError) {
-        console.error('🟠 Warning: Error updating invitation status:', updateError);
-        // Don't fail here - user was already added as member
+        console.warn('🟠 Warning: Failed to update invitation status:', updateError);
+        // Non-blocking - user was already added
       } else {
-        console.log(`🟢 Invitación marcada como aceptada`);
+        console.log('🟢 Step 10: Invitation marked as accepted');
       }
 
-      console.log(`🟢 ✅ ÉXITO: Invitación completamente aceptada`);
-      setStatus('success');
-    } catch (error: any) {
-      console.error('🔴 Error aceptando invitación:', error);
-      setStatus('error');
-      setError(error.message || 'Error inesperado al aceptar la invitación');
+      console.log('🟢 ✅ SUCCESS: Invitation completely accepted');
+    } catch (err) {
+      console.error('🔴 Error accepting invitation:', err);
+      throw err;
     }
   }
 
-  const handleContinue = () => {
-    console.log(`🟡 Redirigiendo a dashboard...`);
-    router.push('/dashboard');
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-[#2a2a2a] border-[#7a8a92]/30">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Aceptar Invitación</CardTitle>
-          <CardDescription>{organizationName && `${organizationName}`}</CardDescription>
+          <CardTitle className="text-2xl text-[#E8ECEB]">Accept Invitation</CardTitle>
+          <CardDescription className="text-[#7a8a92]">
+            {organizationName && `Joining ${organizationName}`}
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col items-center gap-6">
-          {status === 'loading' && (
+          {status === 'validating' && (
             <>
-              <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-              <p className="text-center text-gray-600">Procesando tu invitación...</p>
+              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
+              <p className="text-center text-[#E8ECEB]">Validating your invitation...</p>
+            </>
+          )}
+
+          {status === 'unauthenticated' && (
+            <>
+              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
+              <p className="text-center text-[#E8ECEB]">Redirecting to signup...</p>
+            </>
+          )}
+
+          {status === 'authenticated' && (
+            <>
+              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
+              <p className="text-center text-[#E8ECEB]">
+                Accepting your invitation to {organizationName}...
+              </p>
             </>
           )}
 
           {status === 'success' && (
             <>
-              <CheckCircle2 className="w-12 h-12 text-green-600" />
+              <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6 text-green-500" />
+              </div>
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">¡Bienvenido!</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  {error || 'Tu invitación ha sido aceptada correctamente. Ahora eres miembro de esta organización.'}
+                <p className="text-[#E8ECEB] font-semibold mb-2">Welcome!</p>
+                <p className="text-[#7a8a92] text-sm">
+                  You have successfully joined {organizationName}. Redirecting to your dashboard...
                 </p>
               </div>
-              <Button onClick={handleContinue} className="w-full">
-                Ir al Dashboard
-              </Button>
             </>
           )}
 
           {status === 'error' && (
             <>
-              <XCircle className="w-12 h-12 text-red-600" />
+              <XCircle className="w-12 h-12 text-[#C92A2A]" />
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">Error</h3>
-                <p className="text-sm text-gray-600 mb-4">{error}</p>
-                <p className="text-xs text-gray-500 mt-2">
-                  Si necesitas ayuda, copia el token y contacta al soporte:
-                </p>
-                <p className="text-xs text-gray-400 font-mono mt-1 break-all">
-                  {token}
+                <p className="text-[#E8ECEB] font-semibold mb-2">Invitation Error</p>
+                <p className="text-[#7a8a92] text-sm mb-4">{error}</p>
+                <p className="text-[#7a8a92] text-xs">
+                  Token: {token || 'missing'}
                 </p>
               </div>
-              <div className="flex gap-3 w-full">
-                <Button variant="outline" onClick={() => router.push('/dashboard')} className="flex-1">
-                  Dashboard
-                </Button>
-                <Button variant="outline" onClick={() => router.push('/')} className="flex-1">
-                  Inicio
-                </Button>
-              </div>
+              <Button
+                onClick={() => router.push('/login')}
+                className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]"
+              >
+                Go to Login
+              </Button>
             </>
           )}
 
           {status === 'expired' && (
             <>
-              <AlertCircle className="w-12 h-12 text-orange-600" />
+              <AlertCircle className="w-12 h-12 text-[#D97706]" />
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">Invitación Expirada</h3>
-                <p className="text-sm text-gray-600 mb-4">{error}</p>
+                <p className="text-[#E8ECEB] font-semibold mb-2">Invitation Expired</p>
+                <p className="text-[#7a8a92] text-sm">{error}</p>
               </div>
-              <Button onClick={() => router.push('/dashboard')} className="w-full">
-                Ir al Dashboard
+              <Button
+                onClick={() => router.push('/')}
+                className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]"
+              >
+                Go to Home
               </Button>
             </>
           )}
 
-          {status !== 'loading' && (
-            <p className="text-center text-xs text-gray-500 mt-4">
-              ¿Necesitas ayuda?{' '}
-              <Link href="/contact" className="text-blue-600 hover:underline">
-                Contacta con soporte
+          {status !== 'validating' && status !== 'unauthenticated' && (
+            <p className="text-center text-xs text-[#7a8a92] mt-4">
+              Need help?{' '}
+              <Link href="/contact" className="text-[#E09E50] hover:underline">
+                Contact support
               </Link>
             </p>
           )}

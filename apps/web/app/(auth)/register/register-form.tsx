@@ -1,26 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { AlertCircle } from 'lucide-react';
 
 // URL base para redirecciones
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 export default function RegisterForm() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [invitationContext, setInvitationContext] = useState<{
+    token: string;
+    email: string;
+    orgName: string;
+    role: string;
+  } | null>(null);
   const router = useRouter();
+
+  // Check for invitation context on mount
+  useEffect(() => {
+    const token = searchParams.get('invitation_token');
+    const emailParam = searchParams.get('email');
+    
+    if (token && emailParam) {
+      // Get org name from sessionStorage (set by accept-invite page)
+      const orgName = sessionStorage.getItem('invitation_org_name');
+      const role = sessionStorage.getItem('invitation_role');
+
+      setInvitationContext({
+        token,
+        email: emailParam,
+        orgName: orgName || 'Organization',
+        role: role || 'member'
+      });
+
+      // Pre-fill email
+      setEmail(emailParam);
+      console.log('🟡 Invitation context found:', { token: token.substring(0, 8) + '...', email: emailParam });
+    }
+  }, [searchParams]);
 
   // Registro con email/password
   const handleRegister = async (e: React.FormEvent) => {
@@ -41,6 +73,7 @@ export default function RegisterForm() {
       return;
     }
 
+    console.log('🟡 Starting signup process...');
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -58,10 +91,111 @@ export default function RegisterForm() {
       );
       setIsLoading(false);
     } else {
+      console.log('🟢 Signup successful, user created');
+      
+      // If invitation exists, complete it after signup
+      if (invitationContext) {
+        console.log('🟡 Completing invitation acceptance...');
+        try {
+          // Get the newly created user
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          if (user) {
+            console.log('🟡 New user ID:', user.id);
+            
+            // Complete invitation acceptance
+            await completeInvitationAcceptance(user.id);
+            
+            console.log('🟢 Invitation completed, cleaning up sessionStorage');
+            // Clean up sessionStorage
+            sessionStorage.removeItem('invitation_token');
+            sessionStorage.removeItem('invitation_email');
+            sessionStorage.removeItem('invitation_org_id');
+            sessionStorage.removeItem('invitation_org_name');
+            sessionStorage.removeItem('invitation_role');
+            
+            setSuccess(true);
+            setIsLoading(false);
+            
+            // Redirect to dashboard instead of onboarding
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 1500);
+            return;
+          }
+        } catch (inviteErr) {
+          console.error('🟠 Warning: Could not complete invitation, but signup succeeded:', inviteErr);
+          // Still show success even if invitation completion fails
+        }
+      }
+      
       setSuccess(true);
       setIsLoading(false);
     }
   };
+
+  // Complete invitation acceptance after signup
+  async function completeInvitationAcceptance(userId: string) {
+    if (!invitationContext) return;
+
+    try {
+      const { token, orgName } = invitationContext;
+
+      console.log('🟡 Step 1: Fetching invitation details...');
+      
+      // Fetch invitation to get org_id and role
+      const { data: invitation, error: fetchError } = await supabase
+        .from('pending_invitations')
+        .select('id, organization_id, role')
+        .eq('invite_token', token)
+        .single();
+
+      if (fetchError || !invitation) {
+        throw new Error(`Invitation not found: ${fetchError?.message}`);
+      }
+
+      console.log('🟡 Step 2: Invitation fetched, org_id:', invitation.organization_id);
+
+      // Add user to organization_members
+      console.log('🟡 Step 3: Adding user to organization...');
+      const { error: memberError } = await supabase
+        .from('organization_members')
+        .insert({
+          organization_id: invitation.organization_id,
+          user_id: userId,
+          role: invitation.role || 'member',
+          status: 'active'
+        });
+
+      if (memberError && !memberError.message.includes('duplicate')) {
+        console.warn('🟠 Warning: Failed to add member:', memberError);
+        // Continue anyway
+      } else {
+        console.log('🟢 Step 4: User added to organization');
+      }
+
+      // Update pending_invitations status to accepted
+      console.log('🟡 Step 5: Marking invitation as accepted...');
+      const { error: updateError } = await supabase
+        .from('pending_invitations')
+        .update({
+          status: 'accepted',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', invitation.id);
+
+      if (updateError) {
+        console.warn('🟠 Warning: Failed to update invitation status:', updateError);
+      } else {
+        console.log('🟢 Step 6: Invitation marked as accepted');
+      }
+
+      console.log('🟢 ✅ Invitation acceptance completed successfully');
+    } catch (err) {
+      console.error('🔴 Error completing invitation:', err);
+      throw err;
+    }
+  }
 
   // Login con Google OAuth
   const handleGoogleLogin = async () => {
@@ -87,37 +221,53 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <Card className="w-full max-w-sm sm:max-w-md">
+      <Card className="w-full max-w-sm sm:max-w-md bg-[#2a2a2a] border-[#7a8a92]/30">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center text-green-600">¡Registro Exitoso!</CardTitle>
-          <CardDescription className="text-center">
-            Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y haz click en el enlace para activar tu cuenta.
+          <CardTitle className="text-2xl text-center text-green-500">¡Registro Exitoso!</CardTitle>
+          <CardDescription className="text-center text-[#7a8a92]">
+            {invitationContext
+              ? `Felicitaciones! Te has unido a ${invitationContext.orgName}. Redirigiendo al dashboard...`
+              : 'Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y haz click en el enlace para activar tu cuenta.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <Button onClick={() => router.push('/login')} className="w-full">
-            Ir a Iniciar Sesión
-          </Button>
+          {!invitationContext && (
+            <Button onClick={() => router.push('/login')} className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]">
+              Ir a Iniciar Sesión
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-sm sm:max-w-md">
+    <Card className="w-full max-w-sm sm:max-w-md bg-[#2a2a2a] border-[#7a8a92]/30">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
-        <CardDescription className="text-center">
-          Regístrate para comenzar con CumplIA
+        <CardTitle className="text-2xl text-center text-[#E8ECEB]">Crear Cuenta</CardTitle>
+        <CardDescription className="text-center text-[#7a8a92]">
+          {invitationContext 
+            ? `Te unirás a ${invitationContext.orgName} como ${invitationContext.role}`
+            : 'Regístrate para comenzar con CumplIA'}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
+        {/* Invitation Banner */}
+        {invitationContext && (
+          <Alert className="bg-[#E09E50]/10 border-[#E09E50]/30">
+            <AlertCircle className="h-4 w-4 text-[#E09E50]" />
+            <AlertDescription className="text-[#E09E50] ml-2">
+              ✓ Has sido invitado a unirte a <strong>{invitationContext.orgName}</strong>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Google OAuth */}
         <Button 
           variant="outline" 
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full"
+          className="w-full bg-[#2a2a2a] border-[#7a8a92]/30 text-[#E8ECEB] hover:bg-[#3a3a3a]"
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
             <path
@@ -142,10 +292,10 @@ export default function RegisterForm() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
+            <Separator className="w-full bg-[#7a8a92]/30" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
+            <span className="bg-[#2a2a2a] px-2 text-[#7a8a92]">
               O con tu email
             </span>
           </div>
@@ -154,7 +304,7 @@ export default function RegisterForm() {
         {/* Email/Password Form */}
         <form onSubmit={handleRegister} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-[#E8ECEB]">Email</Label>
             <Input
               id="email"
               type="email"
@@ -162,11 +312,12 @@ export default function RegisterForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || !!invitationContext}
+              className="bg-[#1a1a1a] border-[#7a8a92]/30 text-[#E8ECEB]"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password" className="text-[#E8ECEB]">Contraseña</Label>
             <Input
               id="password"
               type="password"
@@ -175,10 +326,11 @@ export default function RegisterForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
+              className="bg-[#1a1a1a] border-[#7a8a92]/30 text-[#E8ECEB]"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+            <Label htmlFor="confirmPassword" className="text-[#E8ECEB]">Confirmar Contraseña</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -187,20 +339,26 @@ export default function RegisterForm() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
+              className="bg-[#1a1a1a] border-[#7a8a92]/30 text-[#E8ECEB]"
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a] font-semibold" disabled={isLoading}>
             {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </Button>
         </form>
 
         {error && (
-          <p className="text-center text-sm text-red-500">{error}</p>
+          <Alert className="bg-[#C92A2A]/10 border-[#C92A2A]/30">
+            <AlertCircle className="h-4 w-4 text-[#C92A2A]" />
+            <AlertDescription className="text-[#C92A2A] ml-2">
+              {error}
+            </AlertDescription>
+          </Alert>
         )}
 
-        <div className="text-center text-sm">
-          <span className="text-muted-foreground">¿Ya tienes cuenta? </span>
-          <Link href="/login" className="underline hover:text-primary">
+        <div className="text-center text-sm text-[#7a8a92]">
+          <span>¿Ya tienes cuenta? </span>
+          <Link href="/login" className="text-[#E09E50] hover:underline">
             Inicia sesión
           </Link>
         </div>

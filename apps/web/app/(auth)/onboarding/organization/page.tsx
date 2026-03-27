@@ -121,6 +121,17 @@ export default function OrganizationOnboardingPage() {
       }
       setUser(user);
 
+      // Check if user has invitation context (coming from accept-invite flow)
+      const hasInvitation = sessionStorage.getItem('invitation_token') !== null;
+      if (hasInvitation) {
+        console.log('🟡 User has invitation context, redirecting to accept-invite');
+        // User should go back to accept-invite page to complete the flow
+        const token = sessionStorage.getItem('invitation_token');
+        const email = sessionStorage.getItem('invitation_email');
+        router.push(`/accept-invite?token=${token}&email=${email}`);
+        return;
+      }
+
       // Check if user already has an organization
       const { data: membership, error } = await supabase
         .from('organization_members')
@@ -131,6 +142,7 @@ export default function OrganizationOnboardingPage() {
 
       if (membership) {
         // User already has an org, redirect to dashboard
+        console.log('🟡 User already has organization, redirecting to dashboard');
         router.push('/dashboard');
         return;
       }
