@@ -186,7 +186,7 @@ export function RiskAnalysisStatusCard() {
       initial="hidden"
       animate="visible"
     >
-      <Card className="glass rounded-2xl bg-gradient-to-br from-white/5 via-white/3 to-transparent backdrop-blur-sm border border-white/20 hover:border-blue-500/50 transition-all duration-300 overflow-hidden">
+      <Card className="glass rounded-2xl bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/15 hover:border-blue-400/50 transition-all duration-300 overflow-hidden">
         <CardHeader className="pb-4 border-b border-white/10">
           <motion.div
             className="flex items-center justify-between"
@@ -195,23 +195,23 @@ export function RiskAnalysisStatusCard() {
             transition={{ delay: 0.1 }}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/20">
-                <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
+                <Target className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                <CardTitle className="text-xl font-bold text-white">
                   Progreso de Gestión de Riesgos
                 </CardTitle>
-                <CardDescription className="text-xs mt-1 text-gray-600 dark:text-gray-400">
+                <CardDescription className="text-xs mt-1 text-white/70">
                   Estado de completitud de análisis por nivel de riesgo
                 </CardDescription>
               </div>
             </div>
             <motion.div
               whileHover={{ scale: 1.1, rotate: 10 }}
-              className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/20 flex-shrink-0"
+              className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 flex-shrink-0"
             >
-              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <CheckCircle2 className="w-5 h-5 text-green-400" />
             </motion.div>
           </motion.div>
         </CardHeader>
@@ -222,19 +222,19 @@ export function RiskAnalysisStatusCard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15 }}
-            className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20"
+            className="p-4 rounded-xl bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30"
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-white">
                 Progreso General
               </span>
-              <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+              <span className="text-sm font-bold text-blue-300">
                 {totalCompleted}/{totalSystems} completados
               </span>
             </div>
             <Progress
               value={totalSystems > 0 ? Math.round((totalCompleted / totalSystems) * 100) : 0}
-              className="h-2"
+              className="h-2.5"
             />
           </motion.div>
 
@@ -249,14 +249,14 @@ export function RiskAnalysisStatusCard() {
                     key={section.key}
                     custom={idx}
                     variants={sectionVariants}
-                    className="p-4 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all hover:bg-white/8"
+                    className="p-4 rounded-xl bg-slate-700/40 border border-white/15 hover:border-white/30 transition-all hover:bg-slate-700/60"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3 flex-1">
                         <span className="text-lg">{section.badge}</span>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <span className="font-bold text-white">
                               {section.label}
                             </span>
                             {section.required && (
@@ -265,23 +265,23 @@ export function RiskAnalysisStatusCard() {
                               </Badge>
                             )}
                             {!section.required && (
-                              <Badge variant="outline" className="text-xs bg-gray-100/10 border-gray-400/20">
+                              <Badge variant="outline" className="text-xs bg-white/10 border-white/30 text-white/80">
                                 Opcional
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                          <p className="text-xs text-white/70 mt-0.5">
                             {section.completed} de {section.total} sistema{section.total !== 1 ? 's' : ''} completado{section.completed !== 1 ? 's' : ''}
                           </p>
                         </div>
                       </div>
-                      <span className="text-lg font-bold text-gray-900 dark:text-white min-w-12 text-right">
+                      <span className="text-lg font-bold text-white min-w-12 text-right">
                         {percentage}%
                       </span>
                     </div>
 
                     {/* Progress Bar with Color */}
-                    <div className="relative h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div className="relative h-2.5 rounded-full bg-white/10 border border-white/5 overflow-hidden">
                       <motion.div
                         className={`h-full rounded-full ${section.barColor} transition-all`}
                         initial={{ width: 0 }}
