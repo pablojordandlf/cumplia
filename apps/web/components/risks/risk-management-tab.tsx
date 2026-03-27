@@ -30,7 +30,7 @@ import { RiskMatrix } from './risk-matrix';
 import { RiskTemplateSelector } from './risk-template-selector';
 import { RiskProgressIndicator } from './risk-progress-indicator';
 import { AddCustomRiskDialog } from './add-custom-risk-dialog';
-import { RiskAnalysisCompletionToggle } from './risk-analysis-completion-toggle';
+import { RiskAnalysisToggleSimple } from './risk-analysis-toggle-simple';
 
 interface RiskManagementTabProps {
   aiSystemId: string;
@@ -138,6 +138,18 @@ export function RiskManagementTab({
 
   return (
     <div className="space-y-6">
+      {/* Risk Analysis Toggle - Top */}
+      {risks.length > 0 && !isReadOnly && (
+        <RiskAnalysisToggleSimple
+          systemId={aiSystemId}
+          systemName={systemName}
+          aiActLevel={aiActLevel}
+          hasApplicableFactors={risks.some(r => r.applicable === true)}
+          isCompleted={analysisCompleted}
+          onCompletionChange={setAnalysisCompleted}
+        />
+      )}
+
       {/* Status Alert */}
       {status && (
         <Alert variant={status.required && status.completion_percentage < 100 ? 'destructive' : 'default'}>
@@ -263,19 +275,6 @@ export function RiskManagementTab({
             <RiskMatrix risks={risks} />
           </TabsContent>
         </Tabs>
-      )}
-
-      {/* Risk Analysis Completion Toggle */}
-      {risks.length > 0 && !isReadOnly && (
-        <RiskAnalysisCompletionToggle
-          systemId={aiSystemId}
-          systemName={systemName}
-          aiActLevel={aiActLevel}
-          hasRisksApplied={risks.length > 0}
-          hasApplicableFactors={risks.some(r => r.applicable === true)}
-          isCompleted={analysisCompleted}
-          onCompletionChange={setAnalysisCompleted}
-        />
       )}
 
       {/* Add Custom Risk Dialog */}
