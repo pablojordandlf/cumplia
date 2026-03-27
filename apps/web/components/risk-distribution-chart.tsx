@@ -154,8 +154,8 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
         </ResponsiveContainer>
       </motion.div>
 
-      {/* Statistics Row - High Contrast Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      {/* Statistics Row - Glass-morphism Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {chartData.map((item, idx) => {
           const riskConfig = RISK_CONFIG[item.risk as keyof typeof RISK_CONFIG];
           const percentage = total > 0 ? Math.round((item.value / total) * 100) : 0;
@@ -166,41 +166,54 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
             <motion.button
               key={item.risk}
               onClick={() => onRiskFilterChange?.(selectedRisk === item.risk ? null : item.risk)}
-              whileHover={{ scale: 1.06, translateY: -4 }}
-              whileTap={{ scale: 0.96 }}
-              initial={{ opacity: 0, y: 15 }}
+              whileHover={{ scale: 1.05, translateY: -2 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.08 }}
-              className={`p-5 rounded-xl border-2 transition-all duration-300 backdrop-blur-md group ${
+              transition={{ delay: idx * 0.06 }}
+              className={`relative p-4 rounded-2xl border transition-all duration-300 backdrop-blur-xl group overflow-hidden ${
                 isSelected
-                  ? `bg-gradient-to-br ${riskConfig.gradient} border-gray-600 shadow-md text-white ring-2 ring-gray-400/30`
-                  : `border-gray-300/60 bg-gray-50/70 hover:border-gray-400/80 hover:bg-gray-100/70 ${!isHighlighted ? 'opacity-40' : ''}`
+                  ? `bg-gradient-to-br ${riskConfig.gradient} border-white/40 shadow-xl text-white`
+                  : `glass border-white/20 hover:border-white/40 ${!isHighlighted ? 'opacity-40' : ''}`
               }`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className={`text-3xl transition-transform ${isSelected ? 'scale-110' : 'group-hover:scale-105'}`}>
-                  {riskConfig.icon}
-                </span>
-                {isSelected && (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                    className="w-2.5 h-2.5 rounded-full bg-white"
-                  />
-                )}
-              </div>
-              <p className={`text-xs font-bold mb-2 transition-colors uppercase tracking-wider ${
-                isSelected ? 'text-white' : 'text-gray-700'
-              }`}>
-                {item.name}
-              </p>
-              <div className="space-y-2">
-                <p className={`text-3xl font-black transition-colors ${
+              {/* Background glow effect */}
+              {isSelected && (
+                <motion.div
+                  className="absolute inset-0 rounded-2xl opacity-30"
+                  style={{ background: `radial-gradient(circle at top right, ${riskConfig.color}, transparent)` }}
+                  animate={{ opacity: [0.2, 0.4, 0.2] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                />
+              )}
+
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-2">
+                  <span className={`text-2xl transition-transform ${isSelected ? 'scale-110' : 'group-hover:scale-105'}`}>
+                    {riskConfig.icon}
+                  </span>
+                  {isSelected && (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                      className={`w-2 h-2 rounded-full ${isSelected ? 'bg-white' : 'bg-gray-400'}`}
+                    />
+                  )}
+                </div>
+                
+                <p className={`text-xs font-bold mb-2 transition-colors uppercase tracking-wider leading-tight ${
+                  isSelected ? 'text-white' : 'text-gray-600'
+                }`}>
+                  {item.name}
+                </p>
+
+                <p className={`text-2xl font-black mb-2 transition-colors ${
                   isSelected ? 'text-white' : 'text-gray-900'
                 }`}>
                   {item.value}
                 </p>
-                <div className={`w-full h-1.5 rounded-full overflow-hidden ${isSelected ? 'bg-white/40' : 'bg-gray-300/40'}`}>
+
+                <div className={`w-full h-1 rounded-full overflow-hidden ${isSelected ? 'bg-white/30' : 'bg-gray-200/40'}`}>
                   <motion.div
                     className={`h-full bg-gradient-to-r ${riskConfig.gradient}`}
                     initial={{ width: 0 }}
@@ -208,10 +221,11 @@ export function RiskDistributionChart({ data, onRiskFilterChange, selectedRisk }
                     transition={{ delay: 0.2, duration: 1, ease: 'easeOut' }}
                   />
                 </div>
-                <p className={`text-xs font-semibold transition-colors ${
-                  isSelected ? 'text-white/90' : 'text-gray-600'
+
+                <p className={`text-xs font-semibold mt-1 transition-colors ${
+                  isSelected ? 'text-white/80' : 'text-gray-500'
                 }`}>
-                  {percentage}% del total
+                  {percentage}%
                 </p>
               </div>
             </motion.button>

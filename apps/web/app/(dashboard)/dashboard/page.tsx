@@ -277,16 +277,11 @@ export default function DashboardPage() {
               <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 group-hover:from-green-500/30 group-hover:to-emerald-500/30 transition-all">
                 <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
-              <Flame className="w-5 h-5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Cumplimiento</h3>
-            <div className="flex items-baseline gap-2">
-              <p className="text-4xl font-bold text-gray-900 dark:text-gray-100">{completionRate}%</p>
-              <span className={`text-sm font-medium ${completionRate > 50 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
-                {completionRate > 75 ? '↑ Excelente' : completionRate > 50 ? '→ Bueno' : '↓ Iniciar'}
-              </span>
-            </div>
-            <Progress value={completionRate} className="mt-3 h-2" />
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-2">Cumplimiento</h3>
+            <p className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">{completionRate}%</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">de obligaciones cumplidas</p>
+            <Progress value={completionRate} className="mt-4 h-2" />
           </motion.div>
 
           {/* High Risk Alert */}
@@ -344,7 +339,7 @@ export default function DashboardPage() {
               </div>
               <p className="text-xs text-gray-600 dark:text-gray-500 mb-4">Últimos sistemas cargados</p>
               
-              <div className="space-y-3 flex-1 overflow-y-auto scrollbar-thin">
+              <div className="space-y-3 flex-1 overflow-y-auto scrollbar-thin mb-4">
                 {stats.recentSystems.length > 0 ? (
                   stats.recentSystems.slice(0, 6).map((system, idx) => (
                     <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
@@ -381,6 +376,17 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
+
+              {/* Admin Templates Button */}
+              <Link href="/dashboard/admin" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full px-6 py-6 text-base border-white/20 hover:bg-white/5 text-gray-900 dark:text-gray-100 justify-center"
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Editar Templates
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>

@@ -75,28 +75,20 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
   return (
     <div className={cn('space-y-3', className)}>
-      {/* Mobile Search + Filter Toggle */}
+      {/* Mobile Filter Toggle */}
       <div className="flex gap-2 sm:hidden">
-        <Input
-          type="text"
-          placeholder="Buscar casos de uso..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="flex-1 min-h-[44px] px-3 py-2 text-sm border border-[#E8ECEB] rounded-md focus:ring-2 focus:ring-[#E09E50]"
-        />
         <Button
           variant="outline"
-          size="icon"
           onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
           className={cn(
-            "h-11 w-11 shrink-0",
+            "flex-1 min-h-[44px]",
             mobileFiltersOpen && "bg-[#E8ECEB]"
           )}
         >
           {mobileFiltersOpen ? (
-            <X className="h-5 w-5" />
+            <><X className="h-5 w-5 mr-2" /> Cerrar Filtros</>
           ) : (
-            <SlidersHorizontal className="h-5 w-5" />
+            <><SlidersHorizontal className="h-5 w-5 mr-2" /> Filtros</>
           )}
         </Button>
       </div>
@@ -177,14 +169,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
       {/* Desktop Filter Bar */}
       <div className="hidden sm:flex flex-wrap gap-3 items-center p-4 bg-white rounded-lg shadow-sm border border-[#E8ECEB]">
-        <Input
-          type="text"
-          placeholder="Buscar casos de uso..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="flex-1 min-w-[200px] px-4 py-2 border border-[#E8ECEB] rounded-md focus:ring-2 focus:ring-[#E09E50]"
-        />
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="px-3 py-2 border border-[#E8ECEB] rounded-md text-sm min-w-[120px] justify-between">
