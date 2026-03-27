@@ -385,15 +385,18 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* OBLIGATIONS SECTION */}
-        <motion.div variants={itemVariants}>
-          <PendingObligationsWidget />
-        </motion.div>
+        {/* OBLIGATIONS + RISK PROGRESS - SIDE BY SIDE */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* LEFT: Pending Obligations */}
+          <motion.div variants={itemVariants}>
+            <PendingObligationsWidget />
+          </motion.div>
 
-        {/* RISK ANALYSIS STATUS CARD - NEW */}
-        <motion.div variants={itemVariants}>
-          <RiskAnalysisStatusCard />
-        </motion.div>
+          {/* RIGHT: Risk Progress */}
+          <motion.div variants={itemVariants}>
+            <RiskAnalysisStatusCard />
+          </motion.div>
+        </div>
 
         {/* Compliance Tip Card */}
         <motion.div variants={itemVariants}>
