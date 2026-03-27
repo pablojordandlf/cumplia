@@ -1,31 +1,93 @@
 // components/risks/risk-progress-indicator.tsx
 'use client';
 
+import { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   CheckCircle2, 
   AlertCircle, 
   ShieldAlert,
-  Target 
+  Target,
+  CheckCheck,
+  Lock
 } from 'lucide-react';
+import { useRiskAnalysis } from '@/hooks/use-risk-analysis';
+import { useToast } from '@/hooks/use-toast';
 
 interface RiskProgressIndicatorProps {
   total: number;
   assessed: number;
   mitigated: number;
   completionPercentage: number;
+  systemId?: string;
+  systemName?: string;
+  aiActLevel?: string;
+  hasApplicableFactors?: boolean;
+  isCompleted?: boolean;
+  onCompletionChange?: (completed: boolean) => void;
+  isReadOnly?: boolean;
 }
 
 export function RiskProgressIndicator({ 
   total, 
   assessed, 
   mitigated, 
-  completionPercentage 
+  completionPercentage,
+  systemId,
+  systemName,
+  aiActLevel,
+  hasApplicableFactors = true,
+  isCompleted = false,
+  onCompletionChange,
+  isReadOnly = false
 }: RiskProgressIndicatorProps) {
   const identified = total - assessed;
   const inProgress = assessed - mitigated;
+  const [loading, setLoading] = useState(false);
+  const [localCompleted, setLocalCompleted] = useState(isCompleted);
+  const { markRiskAnalysisAsCompleted, markRiskAnalysisAsIncomplete } = useRiskAnalysis();
+  const { toast } = useToast();
+
+  const isDisabled = !hasApplicableFactors || isReadOnly;
+  const isHighRisk = aiActLevel === 'high_risk';
+
+  const handleToggleCompletion = async () => {
+    if (!systemId || isDisabled || loading) return;
+
+    setLoading(true);
+    try {
+      const newState = !localCompleted;
+      if (newState) {
+        await markRiskAnalysisAsCompleted(systemId);
+        setLocalCompleted(true);
+        onCompletionChange?.(true);
+        toast({
+          title: '✅ Análisis Completado',
+          description: `Análisis de riesgos marcado como completado para ${systemName}`
+        });
+      } else {
+        await markRiskAnalysisAsIncomplete(systemId);
+        setLocalCompleted(false);
+        onCompletionChange?.(false);
+        toast({
+          title: '🔄 Análisis Reabierto',
+          description: `Análisis de riesgos marcado como incompleto para ${systemName}`
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling analysis completion:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar el estado del análisis',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (percentage: number) => {
     if (percentage >= 80) return 'text-green-600';
@@ -107,6 +169,64 @@ export function RiskProgressIndicator({
               </div>
             </div>
           </div>
+
+          {/* Completion Selector - only show if systemId provided */}
+          {systemId && (
+            <>
+              <div className="border-t pt-4 mt-4" />
+              
+              {/* Toggle Button - Similar to Applicable toggle in risk analysis */}
+              <button
+                onClick={handleToggleCompletion}
+                disabled={isDisabled || loading}
+                className={`w-full p-3 rounded-lg border-2 transition-all flex items-center justify-between ${
+                  localCompleted
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-600'
+                    : 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-600'
+                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}`}
+              >
+                <div className="flex items-center gap-3">
+                  {localCompleted ? (
+                    <CheckCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  )}
+                  <div className="text-left">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">
+                      {localCompleted ? '✅ Análisis de Riesgos Completado' : '📝 Marcar Análisis como Completado'}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {isHighRisk
+                        ? '🔴 Obligatorio para sistemas de Riesgo Alto'
+                        : '✓ Análisis completado cuando termines la evaluación'}
+                    </p>
+                  </div>
+                </div>
+                {loading && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent" />
+                )}
+              </button>
+
+              {/* Status Messages */}
+              {!hasApplicableFactors && (
+                <Alert variant="destructive" className="mt-3">
+                  <Lock className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    Requiere plantilla aplicada y ≥1 factor marcado como aplicable
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {isHighRisk && !localCompleted && (
+                <Alert className="mt-3 border-orange-300 bg-orange-50 dark:bg-orange-900/20">
+                  <AlertCircle className="h-4 w-4 text-orange-600" />
+                  <AlertDescription className="text-sm text-orange-800 dark:text-orange-200">
+                    ⚠️ Análisis obligatorio. No puedes desplegar este sistema sin completar el análisis de riesgos.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
