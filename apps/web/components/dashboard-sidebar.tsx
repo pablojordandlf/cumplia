@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { 
-  LayoutDashboard, 
-  FolderKanban, 
+import { fetchUserOrganization } from "@/lib/auth-helpers";
+import {
+  LayoutDashboard,
+  FolderKanban,
   Settings,
   GraduationCap,
   Settings2,
@@ -17,34 +18,77 @@ import {
   LogOut,
   Menu,
   X,
-  User
+  User,
+  AlertCircle,
+  BarChart3,
+  FileText,
+  Users,
+  Eye,
 } from "lucide-react";
 
-const navItems = [
+type UserRole = 'admin' | 'compliance_officer' | 'auditor' | 'viewer';
+
+interface NavItem {
+  title: string;
+  href: string;
+  icon: any;
+  roles?: UserRole[]; // If undefined, visible to all roles
+}
+
+// All available navigation items
+const allNavItems: NavItem[] = [
   {
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
+    title: "Riesgo",
+    href: "/dashboard/risk",
+    icon: AlertCircle,
+    roles: ['compliance_officer', 'auditor', 'admin'],
+  },
+  {
+    title: "Evaluaciones",
+    href: "/dashboard/assessments",
+    icon: BarChart3,
+    roles: ['compliance_officer', 'auditor', 'admin'],
+  },
+  {
+    title: "Reportes",
+    href: "/dashboard/reports",
+    icon: FileText,
+    roles: ['compliance_officer', 'auditor', 'admin'],
+  },
+  {
     title: "Sistemas de IA",
     href: "/dashboard/inventory",
     icon: FolderKanban,
+    roles: ['admin'],
   },
   {
     title: "Formación",
     href: "/dashboard/guia",
     icon: GraduationCap,
+    roles: ['admin'],
   },
   {
     title: "Templates",
     href: "/dashboard/admin",
     icon: Settings2,
+    roles: ['admin'],
+  },
+  {
+    title: "Usuarios",
+    href: "/dashboard/settings/users",
+    icon: Users,
+    roles: ['admin'],
   },
   {
     title: "Configuración",
     href: "/dashboard/settings",
     icon: Settings,
+    roles: ['admin'],
   },
 ];
 
@@ -59,12 +103,41 @@ function SidebarContent({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadUserRole = async () => {
+      try {
+        const { data, error } = await fetchUserOrganization();
+        if (!error && data) {
+          setUserRole((data.role as UserRole) || 'viewer');
+        } else {
+          setUserRole('viewer');
+        }
+      } catch {
+        setUserRole('viewer');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserRole();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   };
+
+  // Filter nav items based on user role
+  const filteredNavItems = allNavItems.filter((item) => {
+    // If no roles specified, show to everyone
+    if (!item.roles) return true;
+    // If roles specified, only show if user's role is in the list
+    return userRole && item.roles.includes(userRole);
+  });
 
   return (
     <div className={cn("flex flex-col h-full", isMobile ? "bg-white" : "bg-white border-r")}>
@@ -75,11 +148,25 @@ function SidebarContent({
           <span className="text-xl font-bold">CumplIA</span>
         </Link>
       </div>
+
+      {/* Role Badge (if not admin) */}
+      {userRole && userRole !== 'admin' && !isLoading && (
+        <div className="px-4 mb-4">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+            <Eye className="h-4 w-4 text-amber-600" />
+            <span className="text-xs font-medium text-amber-700">
+              {userRole === 'viewer' && 'Solo lectura'}
+              {userRole === 'auditor' && 'Auditor'}
+              {userRole === 'compliance_officer' && 'Cumplimiento'}
+            </span>
+          </div>
+        </div>
+      )}
       
       {/* Navigation */}
       <nav className="px-4 py-2 flex-1 overflow-y-auto">
         <ul className="space-y-1">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon;
             // Dashboard solo activo en ruta exacta, otros items activos en subrutas también
             const isActive = item.href === '/dashboard' 
@@ -182,9 +269,34 @@ export function DashboardSidebar() {
 // Mobile-only bottom navigation for quick access
 export function MobileBottomNav() {
   const pathname = usePathname();
-  
-  // Solo mostrar ítems principales en la barra inferior
-  const bottomNavItems = navItems.slice(0, 4);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+
+  useEffect(() => {
+    const loadUserRole = async () => {
+      try {
+        const { data, error } = await fetchUserOrganization();
+        if (!error && data) {
+          setUserRole((data.role as UserRole) || 'viewer');
+        } else {
+          setUserRole('viewer');
+        }
+      } catch {
+        setUserRole('viewer');
+      }
+    };
+
+    loadUserRole();
+  }, []);
+
+  // Filter and limit nav items for mobile bottom nav
+  const bottomNavItems = allNavItems
+    .filter((item) => {
+      // If no roles specified, show to everyone
+      if (!item.roles) return true;
+      // If roles specified, only show if user's role is in the list
+      return userRole && item.roles.includes(userRole);
+    })
+    .slice(0, 4);
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-40 safe-area-pb">

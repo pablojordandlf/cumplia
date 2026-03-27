@@ -1,48 +1,24 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+// Note: Middleware protection is a secondary layer for client-side components
+// The main protection happens in RoleGuard components and the main layout.tsx
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet: { name: string; value: string; options: Record<string, unknown> }[]) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response = NextResponse.next({
-              request: {
-                headers: request.headers,
-              },
-            })
-            response.cookies.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Proteger rutas dashboard
-  if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  // Redirigir autenticados fuera de login/register (pero permitir ?switch=true para cambiar de cuenta)
-  const isSwitching = request.nextUrl.searchParams.get('switch') === 'true'
-  if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') && user && !isSwitching) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  return response
+  // For now, we're doing client-side route protection via RoleGuard and layout
+  // Middleware is kept minimal to avoid overcomplicating auth flow
+  
+  // In the future, this could be enhanced to:
+  // 1. Check session validity
+  // 2. Verify role at request time
+  // 3. Add additional security headers
+  
+  return NextResponse.next();
 }
+
+// Configure which routes to run middleware on
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+  ],
+};

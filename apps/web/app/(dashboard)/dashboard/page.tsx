@@ -29,9 +29,12 @@ import {
   Ban,
   MinusCircle,
   Settings2,
-  FileCheck
+  FileCheck,
+  ChevronDown
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { RiskSummaryCard } from '@/components/risk-summary-card';
+import { UpcomingActionsWidget } from '@/components/upcoming-actions-widget';
 
 interface DashboardStats {
   totalSystems: number;
@@ -156,8 +159,6 @@ const RISK_LEVELS = [
   },
 ];
 
-
-
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
     totalSystems: 0,
@@ -174,6 +175,7 @@ export default function DashboardPage() {
     recentSystems: [],
   });
   const [loading, setLoading] = useState(true);
+  const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const supabase = createClient();
   const { toast } = useToast();
 
@@ -318,7 +320,9 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* Header */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      {/* HEADER - Minimal, focused */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -328,204 +332,33 @@ export default function DashboardPage() {
           <p className="text-gray-500 mt-1">Visión general de tu cumplimiento del AI Act</p>
         </div>
         <Link href="/dashboard/inventory/new">
-          <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+          <Button>
             <Plus className="w-4 h-4 mr-2" />
             Nuevo Sistema IA
           </Button>
         </Link>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-blue-600">Sistemas Totales</p>
-                  <p className="text-2xl font-bold text-blue-900">{stats.totalSystems}</p>
-                </div>
-                <div className="p-2 bg-blue-200 rounded-full">
-                  <BarChart3 className="w-5 h-5 text-blue-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-red-600">Prohibido</p>
-                  <p className="text-2xl font-bold text-red-900">{stats.prohibitedCount}</p>
-                </div>
-                <div className="p-2 bg-red-200 rounded-full">
-                  <Ban className="w-5 h-5 text-red-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-orange-600">Alto Riesgo</p>
-                  <p className="text-2xl font-bold text-orange-900">{stats.highRiskCount}</p>
-                </div>
-                <div className="p-2 bg-orange-200 rounded-full">
-                  <AlertTriangle className="w-5 h-5 text-orange-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-yellow-600">Riesgo Limitado</p>
-                  <p className="text-2xl font-bold text-yellow-900">{stats.limitedRiskCount}</p>
-                </div>
-                <div className="p-2 bg-yellow-200 rounded-full">
-                  <Info className="w-5 h-5 text-yellow-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-green-600">Riesgo Mínimo</p>
-                  <p className="text-2xl font-bold text-green-900">{stats.minimalRiskCount}</p>
-                </div>
-                <div className="p-2 bg-green-200 rounded-full">
-                  <MinusCircle className="w-5 h-5 text-green-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Por Clasificar</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.unclassifiedCount}</p>
-                </div>
-                <div className="p-2 bg-gray-200 rounded-full">
-                  <Clock className="w-5 h-5 text-gray-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      {/* PRIMARY GRID - Only 3 main elements (calm design) */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Systems */}
+        {/* LEFT: Upcoming Actions + Resources */}
         <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
-                    Sistemas Recientes
-                  </CardTitle>
-                  <CardDescription>Tus últimos sistemas de IA añadidos</CardDescription>
-                </div>
-                <Link href="/dashboard/inventory">
-                  <Button variant="ghost" size="sm">
-                    Ver todos
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {stats.recentSystems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Sparkles className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No tienes sistemas registrados</p>
-                  <Link href="/dashboard/inventory/new">
-                    <Button variant="outline" className="mt-4">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Añadir primer sistema
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {stats.recentSystems.map((system) => {
-                    const riskInfo = getRiskLevelInfo(system.ai_act_level);
-                    const Icon = riskInfo.icon;
-                    const progress = system.total_obligations > 0 
-                      ? Math.round((system.completed_obligations / system.total_obligations) * 100)
-                      : 0;
-
-                    return (
-                      <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer group">
-                          <div className={`p-2 rounded-lg ${riskInfo.bgColor} self-start sm:self-auto`}>
-                            <Icon className={`w-5 h-5 ${riskInfo.textColor}`} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-                              {system.name}
-                            </h4>
-                            <div className="flex flex-wrap items-center gap-2 mt-1">
-                              <Badge variant="outline" className={`${riskInfo.bgColor} ${riskInfo.textColor} border-0 text-xs`}>
-                                {riskInfo.name}
-                              </Badge>
-                              <span className="text-xs text-gray-500">
-                                {new Date(system.created_at).toLocaleDateString('es-ES')}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 sm:gap-1 min-w-[100px]">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-gray-700">
-                                {system.completed_obligations}/{system.total_obligations}
-                              </span>
-                              {progress === 100 && <FileCheck className="w-4 h-4 text-green-500" />}
-                              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                            </div>
-                            <Progress 
-                              value={progress} 
-                              indicatorVariant={progress === 100 ? 'success' : progress >= 50 ? 'gradient' : 'blue'}
-                              className="w-24 sm:w-28"
-                            />
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Upcoming Actions Widget - NEW, max 3 items */}
+          <UpcomingActionsWidget 
+            actions={stats.recentSystems} 
+            isLoading={loading}
+          />
 
           {/* Guía AI Act */}
           <motion.div whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }}>
-            <Card className="hover:shadow-xl transition-all cursor-pointer border-l-4 border-l-blue-500">
+            <Card className="hover:shadow-md transition-all cursor-pointer">
               <Link href="/dashboard/guia">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white shadow-lg">
-                      <BookOpen className="w-6 h-6" />
+                    <div className="p-3 bg-blue-100 rounded-lg">
+                      <BookOpen className="w-6 h-6 text-blue-600" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900">Guía AI Act</h3>
@@ -542,12 +375,12 @@ export default function DashboardPage() {
 
           {/* Templates */}
           <motion.div whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }}>
-            <Card className="hover:shadow-xl transition-all cursor-pointer border-l-4 border-l-purple-500">
+            <Card className="hover:shadow-md transition-all cursor-pointer">
               <Link href="/dashboard/admin">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white shadow-lg">
-                      <Settings2 className="w-6 h-6" />
+                    <div className="p-3 bg-purple-100 rounded-lg">
+                      <Settings2 className="w-6 h-6 text-purple-600" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900">Templates</h3>
@@ -563,62 +396,144 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* Sidebar */}
+        {/* RIGHT: Risk Summary Card (NEW, simplified to 1 KPI) */}
         <div className="space-y-6">
-          {/* Compliance Status */}
-          <Card className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Zap className="w-5 h-5" />
-                Estado de Cumplimiento
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center mb-4">
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                  className="text-5xl font-bold"
-                >
-                  {completionRate}%
-                </motion.div>
-                <p className="text-blue-100 mt-2">Progreso general</p>
-              </div>
-              <div className="mb-4">
-                <Progress 
-                  value={completionRate} 
-                  indicatorVariant={completionRate === 100 ? 'success' : completionRate >= 50 ? 'gradient' : 'blue'}
-                  trackVariant="blue"
-                  className="h-3 bg-blue-500/30"
-                />
-              </div>
-              <div className="mt-6 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-blue-100">Obligaciones cumplidas</span>
-                  <span className="font-semibold">{stats.completedObligations}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-blue-100">Obligaciones aplicables</span>
-                  <span className="font-semibold">{stats.totalApplicableObligations}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-blue-100">Obligaciones pendientes</span>
-                  <span className="font-semibold">{stats.totalApplicableObligations - stats.completedObligations}</span>
-                </div>
-              </div>
-              <div className="mt-6 pt-6 border-t border-blue-500">
-                <Link href="/dashboard/inventory">
-                  <Button variant="secondary" className="w-full hover:bg-white transition-colors">
-                    Ver inventario
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
+          <RiskSummaryCard
+            completionRate={completionRate}
+            completedObligations={stats.completedObligations}
+            totalApplicableObligations={stats.totalApplicableObligations}
+          />
         </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      {/* ADVANCED SECTION - Collapsible, hidden by default */}
+      {/* ═══════════════════════════════════════════════════════════════ */}
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{
+          opacity: advancedExpanded ? 1 : 0,
+          height: advancedExpanded ? 'auto' : 0,
+        }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden"
+      >
+        {advancedExpanded && (
+          <div className="space-y-6 pt-4">
+            {/* All 6 Risk Level Stats */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">Estadísticas Detalladas</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {/* Sistemas Totales */}
+                <Card className="border hover:shadow-md transition-all cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-blue-600">Sistemas Totales</p>
+                        <p className="text-2xl font-bold text-blue-900">{stats.totalSystems}</p>
+                      </div>
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <BarChart3 className="w-5 h-5 text-blue-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Prohibido */}
+                <Card className="border hover:shadow-md transition-all cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-red-600">Prohibido</p>
+                        <p className="text-2xl font-bold text-red-900">{stats.prohibitedCount}</p>
+                      </div>
+                      <div className="p-2 bg-red-100 rounded-lg">
+                        <Ban className="w-5 h-5 text-red-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Alto Riesgo */}
+                <Card className="border hover:shadow-md transition-all cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-orange-600">Alto Riesgo</p>
+                        <p className="text-2xl font-bold text-orange-900">{stats.highRiskCount}</p>
+                      </div>
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <AlertTriangle className="w-5 h-5 text-orange-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Riesgo Limitado */}
+                <Card className="border hover:shadow-md transition-all cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-yellow-600">Riesgo Limitado</p>
+                        <p className="text-2xl font-bold text-yellow-900">{stats.limitedRiskCount}</p>
+                      </div>
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <Info className="w-5 h-5 text-yellow-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Riesgo Mínimo */}
+                <Card className="border hover:shadow-md transition-all cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-green-600">Riesgo Mínimo</p>
+                        <p className="text-2xl font-bold text-green-900">{stats.minimalRiskCount}</p>
+                      </div>
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <MinusCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Por Clasificar */}
+                <Card className="border hover:shadow-md transition-all cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-gray-600">Por Clasificar</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.unclassifiedCount}</p>
+                      </div>
+                      <div className="p-2 bg-gray-100 rounded-lg">
+                        <Clock className="w-5 h-5 text-gray-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Advanced Toggle Button */}
+      <div className="flex justify-center">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setAdvancedExpanded(!advancedExpanded)}
+          className="gap-2"
+        >
+          <ChevronDown
+            className={`w-4 h-4 transition-transform ${
+              advancedExpanded ? 'rotate-180' : ''
+            }`}
+          />
+          {advancedExpanded ? 'Ocultar' : 'Mostrar'} Estadísticas Detalladas
+        </Button>
       </div>
     </div>
   );

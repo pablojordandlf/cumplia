@@ -21,12 +21,6 @@ export default function AdminPage() {
             <p className="text-gray-500 mt-1">Gestiona tus plantillas y configuraciones</p>
           </div>
         </div>
-        <Link href="/dashboard">
-          <Button variant="outline" className="gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Volver al Dashboard
-          </Button>
-        </Link>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
