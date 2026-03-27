@@ -43,6 +43,12 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // New 2026 Palette Colors
+        "cumplia-white": "#FFFFFF",
+        "cumplia-nearly-white": "#E8ECEB",
+        "cumplia-warm": "#E09E50",
+        "cumplia-teal": "#8CBDB9",
+        "cumplia-dark": "#2D3E4E",
       },
       borderRadius: {
         lg: "var(--radius)",
