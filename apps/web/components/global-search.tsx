@@ -30,12 +30,12 @@ const CATEGORY_INFO = {
   'use-case': {
     label: 'Caso de uso',
     icon: Zap,
-    color: 'text-blue-600',
+    color: 'text-[#8CBDB9]',
   },
   'inventory': {
     label: 'Sistema de IA',
     icon: Package,
-    color: 'text-green-600',
+    color: 'text-[#E09E50]',
   },
 };
 
@@ -133,11 +133,11 @@ export function GlobalSearch() {
       {/* Keyboard shortcut indicator - visible in navbar */}
       <button
         onClick={() => setOpen(true)}
-        className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+        className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-[#E8ECEB] dark:bg-[#2D3E4E] rounded-lg hover:bg-[#E8ECEB]/80 dark:hover:bg-[#3D4E5E] transition-colors"
       >
         <Search className="w-4 h-4" />
         <span className="hidden md:inline">Buscar...</span>
-        <kbd className="hidden sm:inline px-2 py-0.5 text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded">
+        <kbd className="hidden sm:inline px-2 py-0.5 text-xs bg-white dark:bg-[#2D3E4E] border border-[#E8ECEB] dark:border-[#3D4E5E] rounded">
           ⌘K
         </kbd>
       </button>
@@ -178,7 +178,7 @@ export function GlobalSearch() {
                         key={result.id}
                         value={result.id}
                         onSelect={() => handleSelect(result)}
-                        className="px-3 py-2.5 flex items-start gap-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="px-3 py-2.5 flex items-start gap-3 cursor-pointer hover:bg-[#E8ECEB] dark:hover:bg-[#3D4E5E] transition-colors"
                       >
                         <IconComponent className={`w-4 h-4 mt-0.5 flex-shrink-0 ${categoryInfo.color}`} />
                         <div className="flex-1 min-w-0">
@@ -205,15 +205,15 @@ export function GlobalSearch() {
 
           <div className="border-t px-3 py-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs">↑↓</kbd>
+              <kbd className="px-1.5 py-0.5 bg-[#E8ECEB] dark:bg-[#2D3E4E] border border-[#E8ECEB] dark:border-[#3D4E5E] rounded text-xs">↑↓</kbd>
               Navegar
             </span>
             <span className="inline-flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs">⏎</kbd>
+              <kbd className="px-1.5 py-0.5 bg-[#E8ECEB] dark:bg-[#2D3E4E] border border-[#E8ECEB] dark:border-[#3D4E5E] rounded text-xs">⏎</kbd>
               Seleccionar
             </span>
             <span className="inline-flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs">Esc</kbd>
+              <kbd className="px-1.5 py-0.5 bg-[#E8ECEB] dark:bg-[#2D3E4E] border border-[#E8ECEB] dark:border-[#3D4E5E] rounded text-xs">Esc</kbd>
               Cerrar
             </span>
           </div>
