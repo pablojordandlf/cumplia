@@ -30,19 +30,29 @@ import { RiskMatrix } from './risk-matrix';
 import { RiskTemplateSelector } from './risk-template-selector';
 import { RiskProgressIndicator } from './risk-progress-indicator';
 import { AddCustomRiskDialog } from './add-custom-risk-dialog';
+import { RiskAnalysisCompletionToggle } from './risk-analysis-completion-toggle';
 
 interface RiskManagementTabProps {
   aiSystemId: string;
   aiActLevel: string;
   isReadOnly?: boolean;
+  systemName?: string;
+  riskAnalysisCompleted?: boolean;
 }
 
-export function RiskManagementTab({ aiSystemId, aiActLevel, isReadOnly = false }: RiskManagementTabProps) {
+export function RiskManagementTab({ 
+  aiSystemId, 
+  aiActLevel, 
+  isReadOnly = false,
+  systemName = 'Sistema sin nombre',
+  riskAnalysisCompleted = false
+}: RiskManagementTabProps) {
   const [risks, setRisks] = useState<AISystemRisk[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<RiskManagementStatus | null>(null);
   const [activeTab, setActiveTab] = useState('registry');
   const [showAddRiskDialog, setShowAddRiskDialog] = useState(false);
+  const [analysisCompleted, setAnalysisCompleted] = useState(riskAnalysisCompleted);
   const { toast } = useToast();
 
   const config = AI_ACT_RISK_CONFIG[aiActLevel] || AI_ACT_RISK_CONFIG.unclassified;
@@ -253,6 +263,19 @@ export function RiskManagementTab({ aiSystemId, aiActLevel, isReadOnly = false }
             <RiskMatrix risks={risks} />
           </TabsContent>
         </Tabs>
+      )}
+
+      {/* Risk Analysis Completion Toggle */}
+      {risks.length > 0 && !isReadOnly && (
+        <RiskAnalysisCompletionToggle
+          systemId={aiSystemId}
+          systemName={systemName}
+          aiActLevel={aiActLevel}
+          hasRisksApplied={risks.length > 0}
+          hasApplicableFactors={risks.some(r => r.applicable === true)}
+          isCompleted={analysisCompleted}
+          onCompletionChange={setAnalysisCompleted}
+        />
       )}
 
       {/* Add Custom Risk Dialog */}

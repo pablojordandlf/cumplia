@@ -72,6 +72,7 @@ interface UseCase {
   created_by: string;
   custom_fields: CustomField[];
   current_version_id?: string | null;
+  risk_analysis_completed?: boolean;
 }
 
 interface Version {
@@ -530,6 +531,8 @@ export default function UseCaseDetailPage() {
               aiSystemId={useCase.id} 
               aiActLevel={useCase.ai_act_level}
               isReadOnly={isViewer}
+              systemName={useCase.name}
+              riskAnalysisCompleted={useCase.risk_analysis_completed || false}
             />
           </TabsContent>
 
