@@ -36,8 +36,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isReady || !user) {
-      setIsLoading(false);
+    if (!isReady) {
+      // Aún esperando autenticación
+      return;
+    }
+
+    if (!user) {
+      // No hay sesión, redirigir al login
+      router.push('/login');
       return;
     }
 
@@ -63,7 +69,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
 
     loadUserRole();
-  }, [isReady, user]);
+  }, [isReady, user, router]);
 
   if (isLoading || !userRole) {
     return (

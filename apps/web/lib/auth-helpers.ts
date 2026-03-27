@@ -29,109 +29,87 @@ export function useAuthReady(maxWaitMs = 5000): AuthState {
   });
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let intervalId: NodeJS.Timeout;
-    let startTime = Date.now();
     let isResolved = false;
-
-    const checkAuth = async () => {
-      // Evitar ejecuciones innecesarias si ya se resolvió
-      if (isResolved) return;
-
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error) {
+    const resolveAuth = (user: any | null, error: string | null = null) => {
+      if (!isResolved) {
         isResolved = true;
-        clearInterval(intervalId);
-        clearTimeout(timeoutId);
-        setState({
-          user: null,
-          isLoading: false,
-          isReady: true,
-          error: error.message,
-        });
-        return;
-      }
-
-      if (user) {
-        isResolved = true;
-        clearInterval(intervalId);
-        clearTimeout(timeoutId);
         setState({
           user,
           isLoading: false,
           isReady: true,
-          error: null,
-        });
-        return;
-      }
-
-      // Si no hay usuario, verificar si hay sesión
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        isResolved = true;
-        clearInterval(intervalId);
-        clearTimeout(timeoutId);
-        setState({
-          user: session.user,
-          isLoading: false,
-          isReady: true,
-          error: null,
-        });
-        return;
-      }
-
-      // Verificar tiempo máximo de espera
-      if (Date.now() - startTime > maxWaitMs) {
-        isResolved = true;
-        clearInterval(intervalId);
-        setState({
-          user: null,
-          isLoading: false,
-          isReady: true,
-          error: null, // No es un error, simplemente no hay sesión
+          error,
         });
       }
     };
 
-    // Verificar inmediatamente
-    checkAuth();
-
-    // Y cada 100ms hasta que esté listo o pase el tiempo máximo
-    intervalId = setInterval(checkAuth, 100);
-
-    // Timeout de seguridad
-    timeoutId = setTimeout(() => {
-      if (!isResolved) {
-        isResolved = true;
-        clearInterval(intervalId);
-        setState(prev => ({
-          ...prev,
-          isLoading: false,
-          isReady: true,
-        }));
+    // Verificar autenticación inmediatamente
+    const checkAuthImmediate = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (user) {
+        resolveAuth(user);
+        return;
       }
-    }, maxWaitMs);
+
+      if (error) {
+        // Verificar sesión si getUser falló
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          resolveAuth(session.user);
+          return;
+        }
+        resolveAuth(null, error.message);
+        return;
+      }
+
+      // Si no hay usuario, verificar sesión
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        resolveAuth(session.user);
+        return;
+      }
+
+      // Si llegamos aquí y no hay sesión, esperar un poco más
+      return false;
+    };
+
+    checkAuthImmediate().then((resolved) => {
+      if (resolved === false) {
+        // No resuelto inmediatamente, usar polling
+        const checkInterval = setInterval(async () => {
+          if (isResolved) {
+            clearInterval(checkInterval);
+            return;
+          }
+
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            clearInterval(checkInterval);
+            resolveAuth(session.user);
+          }
+        }, 100);
+
+        // Timeout de seguridad
+        const timeout = setTimeout(() => {
+          clearInterval(checkInterval);
+          resolveAuth(null);
+        }, maxWaitMs);
+
+        return () => {
+          clearInterval(checkInterval);
+          clearTimeout(timeout);
+        };
+      }
+    });
 
     // También escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user && !isResolved) {
-        isResolved = true;
-        clearInterval(intervalId);
-        clearTimeout(timeoutId);
-        setState({
-          user: session.user,
-          isLoading: false,
-          isReady: true,
-          error: null,
-        });
+      if (session?.user) {
+        resolveAuth(session.user);
       }
     });
 
     return () => {
-      clearInterval(intervalId);
-      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, [maxWaitMs]);
