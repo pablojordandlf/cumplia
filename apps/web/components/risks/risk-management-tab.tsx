@@ -30,7 +30,7 @@ import { RiskMatrix } from './risk-matrix';
 import { RiskTemplateSelector } from './risk-template-selector';
 import { RiskProgressIndicator } from './risk-progress-indicator';
 import { AddCustomRiskDialog } from './add-custom-risk-dialog';
-import { RiskAnalysisToggleSimple } from './risk-analysis-toggle-simple';
+import { RiskAnalysisProgressBlock } from './risk-analysis-progress-block';
 
 interface RiskManagementTabProps {
   aiSystemId: string;
@@ -138,15 +138,19 @@ export function RiskManagementTab({
 
   return (
     <div className="space-y-6">
-      {/* Risk Analysis Toggle - Top */}
-      {risks.length > 0 && !isReadOnly && (
-        <RiskAnalysisToggleSimple
+      {/* Risk Analysis Progress Block - Top */}
+      {risks.length > 0 && (
+        <RiskAnalysisProgressBlock
           systemId={aiSystemId}
           systemName={systemName}
           aiActLevel={aiActLevel}
           hasApplicableFactors={risks.some(r => r.applicable === true)}
+          totalRisks={risks.length}
+          assessedRisks={risks.filter(r => r.applicable === true).length}
+          mitigatedRisks={risks.filter(r => r.status === 'mitigated').length}
           isCompleted={analysisCompleted}
           onCompletionChange={setAnalysisCompleted}
+          isReadOnly={isReadOnly}
         />
       )}
 
