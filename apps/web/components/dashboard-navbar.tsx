@@ -1,6 +1,5 @@
 'use client';
 
-import { GlobalSearch } from '@/components/global-search';
 import { ThemeToggle } from '@/components/theme-toggle';
 import UserMenu from '@/components/auth/UserMenu';
 import { usePathname, useRouter } from 'next/navigation';
@@ -78,10 +77,8 @@ export function DashboardNavbar() {
         </span>
       </button>
 
-      {/* Right: Search, Theme, User Menu */}
+      {/* Right: Theme, User Menu */}
       <div className="flex items-center gap-3">
-        <GlobalSearch />
-        <div className="w-px h-6 bg-white/10 dark:bg-white/5" />
         <ThemeToggle />
         <div className="w-px h-6 bg-white/10 dark:bg-white/5" />
         <UserMenu />
