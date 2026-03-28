@@ -30,7 +30,7 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RegisterWithInvitationRequest {
@@ -108,7 +108,7 @@ export async function POST(
     }
 
     // Paso 1: Validar que la invitación es válida
-    const serverSupabase = await createServerClient();
+    const serverSupabase = await createClient();
     const validationResult = await serverSupabase.rpc('validate_invitation_token', {
       p_token: invitation_token,
     });

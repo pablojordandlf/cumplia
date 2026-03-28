@@ -21,7 +21,7 @@
  * }
  */
 
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface AcceptInvitationRequest {
@@ -43,7 +43,7 @@ export async function POST(
 ): Promise<NextResponse<AcceptInvitationResponse>> {
   try {
     // Obtener sesión
-    const supabase = await createServerClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: authError,
