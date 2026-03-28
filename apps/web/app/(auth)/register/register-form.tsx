@@ -88,7 +88,7 @@ export default function RegisterForm() {
           body: JSON.stringify({
             email,
             password,
-            invitationToken: invitationContext.token,
+            invitation_token: invitationContext.token,
           }),
         });
 
