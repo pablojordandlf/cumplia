@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(dashboard\\\\\\))",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(auth\\\\\\))",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(dashboard\\\\\\)/dashboard)",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(dashboard\\\\\\)/dashboard/inventory)",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(dashboard\\\\\\)/dashboard/settings)",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(dashboard\\\\\\)/dashboard/inventory/[id])",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(dashboard\\\\\\)/dashboard/admin)",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(auth\\\\\\)/onboarding)",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/api/v1/ai-systems/[id])",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(dashboard\\\\\\)/layouts)",
+      "Bash(ls /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\\\\\(legal\\\\\\))",
+      "Bash(xargs -I {} sh -c \"echo \"\"=== {} ===\"\" && cat \"\"{}\"\"\")",
+      "Bash(grep -r port /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web --include=*.js --include=*.ts --include=*.json)",
+      "Bash(grep -r \"3000\\\\|dev.*port\\\\|next.*port\" /c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web --include=*.json --include=*.ts --include=*.js)",
+      "Bash(for dir:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/api/v1/**)",
+      "Bash(done)",
+      "Bash(head -5 \"C:/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web/app/\\(dashboard\\)/dashboard/page.tsx\")",
+      "Read(//c/Users/pablo/Documents/GitHub/cumplia/.claire/worktrees/flamboyant-dhawan/apps/**)",
+      "Bash(grep -rn \"from ''''@/lib/subscription''''\" C:/Users/pablo/Documents/GitHub/cumplia/.claude/worktrees/flamboyant-dhawan/apps/web --include=*.tsx --include=*.ts)",
+      "Bash(rm -f sso/sso-button.tsx sso/sso-domain-checker.tsx sso/sso-provider-list.tsx sso/sso-provider-setup.tsx)",
+      "Bash(rmdir sso:*)",
+      "Bash(rm -f \"C:\\\\Users\\\\pablo\\\\Documents\\\\GitHub\\\\cumplia\\\\.claude\\\\worktrees\\\\flamboyant-dhawan/apps/web/app/api/v1/organizations/[id]/sso-providers/[providerId]/route.ts\")",
+      "Bash(rmdir \"C:\\\\Users\\\\pablo\\\\Documents\\\\GitHub\\\\cumplia\\\\.claude\\\\worktrees\\\\flamboyant-dhawan/apps/web/app/api/v1/organizations/[id]/sso-providers/[providerId]\")",
+      "Bash(rmdir \"C:\\\\Users\\\\pablo\\\\Documents\\\\GitHub\\\\cumplia\\\\.claude\\\\worktrees\\\\flamboyant-dhawan/apps/web/app/api/v1/organizations/[id]/sso-providers\")",
+      "Bash(head -30 \"C:\\\\Users\\\\pablo\\\\Documents\\\\GitHub\\\\cumplia\\\\.claude\\\\worktrees\\\\flamboyant-dhawan/apps/web/app/\\(auth\\)/login/login-form.tsx\")"
+    ]
+  }
+}
