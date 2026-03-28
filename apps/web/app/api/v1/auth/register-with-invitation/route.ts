@@ -1,4 +1,5 @@
 import { createClient as createServerClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
     // 2. Get immediate response with user data (client-side signUp doesn't return user)
     // 3. Detect if email already exists (status 422)
     
-    const supabaseAdmin = await createServerClient();
+    const supabaseAdmin = createAdminClient();
     
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,

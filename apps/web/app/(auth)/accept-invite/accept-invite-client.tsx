@@ -1,0 +1,258 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+
+type Status = 'validating' | 'authenticated' | 'unauthenticated' | 'error' | 'expired' | 'success';
+
+export default function AcceptInviteClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const emailParam = searchParams.get('email');
+  const supabase = createClient();
+
+  const [status, setStatus] = useState<Status>('validating');
+  const [organizationName, setOrganizationName] = useState<string>('');
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    if (!token) {
+      console.error('🔴 No token provided');
+      setStatus('error');
+      setError('No invitation token found in URL');
+      return;
+    }
+
+    console.log(`🟡 Starting invitation validation with token: ${token.substring(0, 8)}...`);
+    validateAndHandleInvitation();
+  }, [token]);
+
+  /**
+   * Validate invitation on server (best practice from PDF)
+   * Then decide: 
+   * - If user authenticated → accept invitation
+   * - If not authenticated → redirect to register
+   */
+  async function validateAndHandleInvitation() {
+    try {
+      console.log('🟡 Step 1: Server-side validation of invitation token...');
+
+      // Call server-side validation endpoint
+      const validationUrl = new URL('/api/v1/invitations/validate', window.location.origin);
+      validationUrl.searchParams.append('token', token!);
+      if (emailParam) {
+        validationUrl.searchParams.append('email', emailParam);
+      }
+
+      const validateResponse = await fetch(validationUrl.toString(), {
+        method: 'POST',
+      });
+
+      if (!validateResponse.ok) {
+        const errorData = await validateResponse.json();
+        console.error('🔴 Server validation failed:', errorData);
+
+        if (validateResponse.status === 404) {
+          setStatus('error');
+          setError('Invalid or expired invitation link');
+        } else if (errorData.error?.includes('expired')) {
+          setStatus('expired');
+          setError(errorData.error);
+        } else {
+          setStatus('error');
+          setError(errorData.error || 'Failed to validate invitation');
+        }
+        return;
+      }
+
+      const { valid, data: invitationData } = await validateResponse.json();
+
+      if (!valid || !invitationData) {
+        setStatus('error');
+        setError('Invalid invitation');
+        return;
+      }
+
+      console.log('🟢 Step 1b: Invitation is valid:', {
+        org: invitationData.organization_name,
+        role: invitationData.role,
+      });
+
+      setOrganizationName(invitationData.organization_name);
+
+      // 🟡 Step 2: Check authentication status
+      console.log('🟡 Step 2: Checking authentication status...');
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        // User is authenticated - accept invite immediately
+        console.log('🟡 Step 3: User authenticated, accepting invitation...');
+        await acceptInvitation(token!, invitationData.email);
+        setStatus('success');
+
+        // Redirect to dashboard after 2 seconds
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 2000);
+      } else {
+        // User not authenticated - store context and redirect to register
+        console.log('🟡 Step 3: User not authenticated, redirecting to signup...');
+
+        // Store invitation context in sessionStorage for register form
+        sessionStorage.setItem('invitation_token', token!);
+        sessionStorage.setItem('invitation_email', invitationData.email);
+        sessionStorage.setItem('invitation_org_id', invitationData.organization_id);
+        sessionStorage.setItem('invitation_org_name', invitationData.organization_name);
+        sessionStorage.setItem('invitation_role', invitationData.role);
+
+        // Redirect to register with invitation token
+        const registerUrl = `/register?invitation_token=${encodeURIComponent(token!)}&email=${encodeURIComponent(invitationData.email)}`;
+        console.log('🟡 Redirecting to register:', registerUrl);
+        setStatus('unauthenticated');
+
+        // Redirect after a brief delay
+        setTimeout(() => {
+          router.push(registerUrl);
+        }, 800);
+      }
+    } catch (err: any) {
+      console.error('🔴 Unexpected error:', err);
+      setStatus('error');
+      setError(err.message || 'An error occurred while processing your invitation');
+    }
+  }
+
+  /**
+   * For authenticated users: accept the invitation via backend
+   * This was already validated server-side, so we just need to update DB
+   */
+  async function acceptInvitation(invitationToken: string, invitationEmail: string) {
+    console.log('🟡 Step 4: Accepting invitation via backend...');
+
+    try {
+      const response = await fetch('/api/v1/invitations/accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inviteToken: invitationToken,
+          email: invitationEmail,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('🔴 Backend error:', result);
+        throw new Error(result.error || 'Failed to accept invitation');
+      }
+
+      console.log('🟢 Step 5: Backend accepted invitation successfully');
+      console.log('🟢 ✅ SUCCESS: Invitation completely accepted');
+    } catch (err: any) {
+      console.error('🔴 Error accepting invitation:', err);
+      setStatus('error');
+      setError(err.message || 'Failed to accept invitation');
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-[#2a2a2a] border-[#7a8a92]/30">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl text-[#E8ECEB]">Accept Invitation</CardTitle>
+          <CardDescription className="text-[#7a8a92]">
+            {organizationName && `Joining ${organizationName}`}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="flex flex-col items-center gap-6">
+          {status === 'validating' && (
+            <>
+              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
+              <p className="text-center text-[#E8ECEB]">Validating your invitation...</p>
+            </>
+          )}
+
+          {status === 'unauthenticated' && (
+            <>
+              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
+              <p className="text-center text-[#E8ECEB]">Redirecting to signup...</p>
+            </>
+          )}
+
+          {status === 'authenticated' && (
+            <>
+              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
+              <p className="text-center text-[#E8ECEB]">
+                Accepting your invitation to {organizationName}...
+              </p>
+            </>
+          )}
+
+          {status === 'success' && (
+            <>
+              <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6 text-green-500" />
+              </div>
+              <div className="text-center">
+                <p className="text-[#E8ECEB] font-semibold mb-2">Welcome!</p>
+                <p className="text-[#7a8a92] text-sm">
+                  You have successfully joined {organizationName}. Redirecting to your dashboard...
+                </p>
+              </div>
+            </>
+          )}
+
+          {status === 'error' && (
+            <>
+              <XCircle className="w-12 h-12 text-[#C92A2A]" />
+              <div className="text-center">
+                <p className="text-[#E8ECEB] font-semibold mb-2">Invitation Error</p>
+                <p className="text-[#7a8a92] text-sm mb-4">{error}</p>
+              </div>
+              <Button
+                onClick={() => router.push('/login')}
+                className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]"
+              >
+                Go to Login
+              </Button>
+            </>
+          )}
+
+          {status === 'expired' && (
+            <>
+              <AlertCircle className="w-12 h-12 text-[#D97706]" />
+              <div className="text-center">
+                <p className="text-[#E8ECEB] font-semibold mb-2">Invitation Expired</p>
+                <p className="text-[#7a8a92] text-sm">{error}</p>
+              </div>
+              <Button
+                onClick={() => router.push('/')}
+                className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]"
+              >
+                Go to Home
+              </Button>
+            </>
+          )}
+
+          {status !== 'validating' && status !== 'unauthenticated' && (
+            <p className="text-center text-xs text-[#7a8a92] mt-4">
+              Need help?{' '}
+              <Link href="/" className="text-[#E09E50] hover:underline">
+                Contact support
+              </Link>
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
