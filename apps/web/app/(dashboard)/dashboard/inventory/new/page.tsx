@@ -259,14 +259,23 @@ export default function NewUseCasePage() {
           description: 'Debes iniciar sesión para crear un sistema de IA.',
           variant: 'destructive',
         });
-        router.push('/auth/login'); // Adjust if your login path is different
+        router.push('/auth/login');
         return;
       }
+
+      // Resolve the user's organization so the system is visible to all org members
+      const { data: memberData } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .single();
 
       // Crear el sistema de IA como borrador - ai_act_level será calculado en el paso 2
       const { data: newUseCase, error } = await supabase.from('use_cases').insert([
         {
           user_id: session.user.id,
+          organization_id: memberData?.organization_id ?? null,
           name: values.name,
           description: values.description,
           sector: values.sector,
