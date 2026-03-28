@@ -142,7 +142,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
 
         // Si no está en metadata, buscar en memberships
         const { data: membership, error } = await supabase
-          .from('organization_memberships')
+          .from('organization_members')
           .select('organization_id')
           .eq('user_id', session.user.id)
           .eq('status', 'active')
@@ -172,8 +172,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
       const { data: obligationsData, error: obligationsError } = await supabase
         .from('use_case_obligations')
         .select('*')
-        .eq('use_case_id', useCase.id)
-        .eq('user_id', session.user.id);
+        .eq('use_case_id', useCase.id);
 
       if (obligationsError) throw obligationsError;
 
@@ -188,8 +187,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         const { data: evidencesData, error: evidencesError } = await supabase
           .from('obligation_evidences')
           .select('*')
-          .in('obligation_id', obligationIds)
-          .eq('user_id', session.user.id);
+          .in('obligation_id', obligationIds);
 
         if (evidencesError) throw evidencesError;
 
