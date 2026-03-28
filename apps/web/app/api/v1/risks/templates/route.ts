@@ -1,5 +1,6 @@
 // app/api/v1/risks/templates/route.ts
 import { createClient } from '@/lib/supabase/server';
+import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -119,6 +120,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'At least one risk must be selected' },
         { status: 400 }
+      );
+    }
+
+    // Check permission: only owner/admin can create templates
+    const permCheck = await requirePermission(supabase, user.id, 'templates:manage');
+    if (!permCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions. Only owners and admins can create templates.' },
+        { status: 403 }
       );
     }
 

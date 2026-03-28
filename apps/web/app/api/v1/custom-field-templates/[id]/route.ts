@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
@@ -67,6 +68,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    const permCheck = await requirePermission(supabase, user.id, 'templates:manage');
+    if (!permCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions. Only owners and admins can manage templates.' },
+        { status: 403 }
       );
     }
 
@@ -192,6 +201,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    const permCheckDel = await requirePermission(supabase, user.id, 'templates:manage');
+    if (!permCheckDel.allowed) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions. Only owners and admins can delete templates.' },
+        { status: 403 }
       );
     }
 

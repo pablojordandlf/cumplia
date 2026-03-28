@@ -1,15 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { FileWarning, FormInput, Settings2, ArrowLeft } from 'lucide-react';
 import { RiskTemplatesPanel } from './components/risk-templates-panel';
 import { CustomFieldsPanel } from './components/custom-fields-panel';
+import { usePermissions } from '@/hooks/use-permissions';
+import { toast } from '@/hooks/use-toast';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('risk-templates');
+  const router = useRouter();
+  const { can, isLoading } = usePermissions();
+
+  useEffect(() => {
+    if (!isLoading && !can('templates:manage')) {
+      toast({
+        title: 'Acceso denegado',
+        description: 'Solo los propietarios y administradores pueden acceder a esta sección.',
+        variant: 'destructive',
+      });
+      router.replace('/dashboard');
+    }
+  }, [isLoading, can, router]);
+
+  if (isLoading || !can('templates:manage')) return null;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
