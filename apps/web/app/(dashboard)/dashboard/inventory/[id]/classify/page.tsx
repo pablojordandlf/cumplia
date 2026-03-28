@@ -30,6 +30,7 @@ import {
   Bot
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { AIClassificationAssistant } from '@/components/ai-classification-assistant';
 
 // Schema para el cuestionario de clasificación
 const classificationSchema = z.object({
@@ -122,6 +123,7 @@ export default function ClassifyUseCasePage() {
   const [result, setResult] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [stepValidation, setStepValidation] = useState<Record<number, boolean>>({});
+  const [classifyMode, setClassifyMode] = useState<'ai' | 'manual'>('ai');
 
   const form = useForm<z.infer<typeof classificationSchema>>({
     resolver: zodResolver(classificationSchema),
@@ -319,6 +321,69 @@ export default function ClassifyUseCasePage() {
           </div>
         </div>
 
+        {/* Mode toggle */}
+        <div className="flex gap-2 mb-5 p-1 bg-gray-100 rounded-xl w-fit">
+          <button
+            onClick={() => setClassifyMode('ai')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${classifyMode === 'ai' ? 'bg-white shadow text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <Sparkles className="w-4 h-4" />
+            Clasificar con IA
+          </button>
+          <button
+            onClick={() => setClassifyMode('manual')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${classifyMode === 'manual' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <Shield className="w-4 h-4" />
+            Cuestionario manual
+          </button>
+        </div>
+
+        {classifyMode === 'ai' ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                Asistente de Clasificación IA
+              </CardTitle>
+              <CardDescription>
+                Claude analiza tu sistema y lo clasifica con justificación legal. Puedes aplicar la sugerencia directamente o ajustarla con el cuestionario manual.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AIClassificationAssistant
+                systemName={useCase?.name}
+                systemDescription={useCase?.description}
+                onClassificationSuggested={async (classification) => {
+                  // Apply AI classification to the form and save
+                  setCalculating(true);
+                  try {
+                    const levelMap: Record<string, string> = {
+                      prohibited: 'prohibited',
+                      high_risk: 'high_risk',
+                      limited_risk: 'limited_risk',
+                      minimal_risk: 'minimal_risk',
+                    };
+                    const level = levelMap[classification.level] ?? 'unclassified';
+                    await supabase.from('use_cases').update({
+                      ai_act_level: level,
+                      classification_data: { ai_assisted: true, confidence: classification.confidence, articles: classification.articles, obligations: classification.obligations },
+                      status: 'classified',
+                      updated_at: new Date().toISOString(),
+                    }).eq('id', useCaseId);
+                    setResult(level);
+                    toast({ title: 'Clasificación aplicada', description: `Sistema clasificado como: ${riskLevels[level as keyof typeof riskLevels]?.label ?? level}` });
+                  } catch (err: any) {
+                    toast({ title: 'Error', description: err.message ?? 'No se pudo guardar la clasificación', variant: 'destructive' });
+                  } finally {
+                    setCalculating(false);
+                  }
+                }}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <>
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2"><span className="text-gray-600">Progreso</span><span className="font-medium">Paso {currentStep} de {totalSteps}</span></div>
           <Progress value={progressValue} className="h-2" />
@@ -436,6 +501,8 @@ export default function ClassifyUseCasePage() {
             </Form>
           </CardContent>
         </Card>
+          </>
+        )}
       </div>
     </div>
   );

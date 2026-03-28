@@ -41,7 +41,8 @@ import {
   Eye,
   ClipboardCheck,
   History,
-  MoreVertical
+  MoreVertical,
+  Download,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { RiskManagementTab } from '@/components/risks/risk-management-tab';
@@ -143,6 +144,7 @@ export default function UseCaseDetailPage() {
   const [userRole, setUserRole] = useState<MemberRole | null>(null);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [isPoCEditing, setIsPoCEditing] = useState(false);
+  const [downloadingReport, setDownloadingReport] = useState(false);
   
   const { templates } = useCustomFieldTemplates();
   
@@ -275,6 +277,25 @@ export default function UseCaseDetailPage() {
     }
   }
 
+  async function downloadReport() {
+    setDownloadingReport(true);
+    try {
+      const res = await fetch(`/api/v1/ai-systems/${useCaseId}/report`);
+      if (!res.ok) throw new Error('Error al generar el informe');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = res.headers.get('Content-Disposition')?.split('filename="')[1]?.replace('"', '') ?? 'informe.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message ?? 'No se pudo generar el informe', variant: 'destructive' });
+    } finally {
+      setDownloadingReport(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-4 sm:p-8 bg-gray-50 min-h-screen flex items-center justify-center">
@@ -326,6 +347,10 @@ export default function UseCaseDetailPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={downloadReport} disabled={downloadingReport}>
+              <Download className="w-4 h-4 mr-2" />
+              {downloadingReport ? 'Generando...' : 'Informe PDF'}
+            </Button>
             <Link href={`/dashboard/inventory/${useCaseId}/classify`}>
               <Button>
                 <Shield className="w-4 h-4 mr-2" />
