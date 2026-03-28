@@ -46,45 +46,42 @@ export default function AcceptInviteClient() {
       // Call server-side validation endpoint
       const validationUrl = new URL('/api/v1/invitations/validate', window.location.origin);
       validationUrl.searchParams.append('token', token!);
-      if (emailParam) {
-        validationUrl.searchParams.append('email', emailParam);
-      }
 
       const validateResponse = await fetch(validationUrl.toString(), {
-        method: 'POST',
+        method: 'GET',
       });
 
-      if (!validateResponse.ok) {
-        const errorData = await validateResponse.json();
-        console.error('🔴 Server validation failed:', errorData);
-
-        if (validateResponse.status === 404) {
-          setStatus('error');
-          setError('Invalid or expired invitation link');
-        } else if (errorData.error?.includes('expired')) {
-          setStatus('expired');
-          setError(errorData.error);
-        } else {
-          setStatus('error');
-          setError(errorData.error || 'Failed to validate invitation');
-        }
+      let validationData;
+      try {
+        validationData = await validateResponse.json();
+      } catch (e) {
+        console.error('🔴 Failed to parse JSON response:', e);
+        setStatus('error');
+        setError('Server error: Invalid response format');
         return;
       }
 
-      const { valid, data: invitationData } = await validateResponse.json();
+      if (!validationData.isValid) {
+        console.error('🔴 Server validation failed:', validationData);
+        setStatus('error');
+        setError(validationData.error || 'Invalid or expired invitation');
+        return;
+      }
 
-      if (!valid || !invitationData) {
+      const invitationData = validationData.data;
+
+      if (!invitationData) {
         setStatus('error');
         setError('Invalid invitation');
         return;
       }
 
       console.log('🟢 Step 1b: Invitation is valid:', {
-        org: invitationData.organization_name,
+        org: invitationData.organizationName,
         role: invitationData.role,
       });
 
-      setOrganizationName(invitationData.organization_name);
+      setOrganizationName(invitationData.organizationName);
 
       // 🟡 Step 2: Check authentication status
       console.log('🟡 Step 2: Checking authentication status...');
@@ -136,20 +133,25 @@ export default function AcceptInviteClient() {
     console.log('🟡 Step 4: Accepting invitation via backend...');
 
     try {
-      const response = await fetch('/api/v1/invitations/accept', {
+      const response = await fetch('/api/invitations/accept', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inviteToken: invitationToken,
-          email: invitationEmail,
+          token: invitationToken,
         }),
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        console.error('🔴 Failed to parse response:', e);
+        throw new Error('Server error: Invalid response format');
+      }
 
-      if (!response.ok) {
+      if (!response.ok || !result.success) {
         console.error('🔴 Backend error:', result);
         throw new Error(result.error || 'Failed to accept invitation');
       }
