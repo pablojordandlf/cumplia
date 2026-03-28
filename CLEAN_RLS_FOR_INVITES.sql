@@ -21,6 +21,9 @@ DROP POLICY IF EXISTS "allow_public_token_lookup" ON pending_invitations;
 DROP POLICY IF EXISTS "allow_member_invite_creation" ON pending_invitations;
 DROP POLICY IF EXISTS "allow_invited_user_accept" ON pending_invitations;
 DROP POLICY IF EXISTS "allow_delete_pending_invitations" ON pending_invitations;
+DROP POLICY IF EXISTS "allow_select_for_token_lookup" ON pending_invitations;
+DROP POLICY IF EXISTS "allow_insert_for_admins" ON pending_invitations;
+DROP POLICY IF EXISTS "allow_update_for_admins_or_service" ON pending_invitations;
 
 -- 3. Re-enable RLS
 ALTER TABLE pending_invitations ENABLE ROW LEVEL SECURITY;
