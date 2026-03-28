@@ -1,5 +1,6 @@
 // app/api/v1/risks/templates/[id]/route.ts
 import { createClient } from '@/lib/supabase/server';
+import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
@@ -69,12 +70,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createClient();
     const { id } = await params;
-    
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    const permCheck = await requirePermission(supabase, user.id, 'templates:manage');
+    if (!permCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions. Only owners and admins can manage templates.' },
+        { status: 403 }
       );
     }
 
@@ -159,7 +168,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           );
         }
 
-        const allowedRoles = ['owner', 'admin', 'editor'];
+        const allowedRoles = ['owner', 'admin'];
         if (!allowedRoles.includes(membership.role)) {
           return NextResponse.json(
             { error: 'Not authorized - editor role required' },
@@ -263,12 +272,20 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createClient();
     const { id } = await params;
-    
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    const permCheck = await requirePermission(supabase, user.id, 'templates:manage');
+    if (!permCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions. Only owners and admins can delete templates.' },
+        { status: 403 }
       );
     }
 

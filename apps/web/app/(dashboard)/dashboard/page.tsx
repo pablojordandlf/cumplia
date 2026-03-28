@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PendingObligationsWidget } from '@/components/pending-obligations-widget';
 import { RiskDistributionChart } from '@/components/risk-distribution-chart';
 import { RiskAnalysisStatusCard } from '@/components/risk-analysis-status-card';
+import { usePermissions } from '@/hooks/use-permissions';
 
 interface DashboardStats {
   totalSystems: number;
@@ -63,6 +64,7 @@ export default function DashboardPage() {
   const [selectedRisk, setSelectedRisk] = useState<string | null>(null);
   const supabase = createClient();
   const { toast } = useToast();
+  const { can } = usePermissions();
 
   useEffect(() => {
     fetchDashboardData();
@@ -237,12 +239,14 @@ export default function DashboardPage() {
               Ver Inventario
             </Button>
           </Link>
-          <Link href="/dashboard/inventory/new" className="flex-1 sm:flex-none">
-            <Button className="w-full px-6 py-6 text-base bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all">
-              <Plus className="w-5 h-5 mr-2" />
-              Nuevo Sistema
-            </Button>
-          </Link>
+          {can('ai_systems:create') && (
+            <Link href="/dashboard/inventory/new" className="flex-1 sm:flex-none">
+              <Button className="w-full px-6 py-6 text-base bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all">
+                <Plus className="w-5 h-5 mr-2" />
+                Nuevo Sistema
+              </Button>
+            </Link>
+          )}
         </motion.div>
 
         {/* THREE METRIC CARDS - HERO ROW */}

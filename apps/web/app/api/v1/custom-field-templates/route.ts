@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -111,6 +112,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'At least one field definition is required' },
         { status: 400 }
+      );
+    }
+
+    // Check permission: only owner/admin can manage custom field templates
+    const permCheck = await requirePermission(supabase, user.id, 'templates:manage');
+    if (!permCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions. Only owners and admins can create templates.' },
+        { status: 403 }
       );
     }
 

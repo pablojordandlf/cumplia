@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -32,6 +32,7 @@ import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 import { LimitGate } from '@/components/permission-gate';
 import { useLimit } from '@/hooks/use-limit';
+import { usePermissions } from '@/hooks/use-permissions';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
@@ -99,6 +100,19 @@ export const dynamic = 'force-dynamic';
 export default function NewUseCasePage() {
   const router = useRouter();
   const { limit, used, remaining, percentage, canUse, isLoading } = useLimit('useCases');
+  const { can, isLoading: permLoading } = usePermissions();
+
+  // Redirect viewers — they can read but not create systems
+  useEffect(() => {
+    if (!permLoading && !can('ai_systems:create')) {
+      toast({
+        title: 'Acceso denegado',
+        description: 'No tienes permisos para crear sistemas de IA.',
+        variant: 'destructive',
+      });
+      router.replace('/dashboard/inventory');
+    }
+  }, [permLoading, can, router]);
   
   // Custom fields state
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
