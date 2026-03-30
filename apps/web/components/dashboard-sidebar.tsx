@@ -24,6 +24,9 @@ import {
   FileText,
   Users,
   Eye,
+  CalendarClock,
+  CheckSquare,
+  History,
 } from "lucide-react";
 
 type UserRole = 'admin' | 'compliance_officer' | 'auditor' | 'viewer';
@@ -64,6 +67,22 @@ const allNavItems: NavItem[] = [
     title: "Sistemas de IA",
     href: "/dashboard/inventory",
     icon: FolderKanban,
+    roles: ['admin'],
+  },
+  {
+    title: "Timeline regulatorio",
+    href: "/dashboard/timeline",
+    icon: CalendarClock,
+  },
+  {
+    title: "Mi trabajo",
+    href: "/dashboard/my-work",
+    icon: CheckSquare,
+  },
+  {
+    title: "Actividad",
+    href: "/dashboard/activity",
+    icon: History,
     roles: ['admin'],
   },
   {
