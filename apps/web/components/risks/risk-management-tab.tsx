@@ -8,16 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  AlertTriangle, 
-  CheckCircle, 
-  ShieldAlert, 
+import {
+  AlertTriangle,
+  CheckCircle,
+  ShieldAlert,
   ShieldCheck,
   Shield,
   AlertCircle,
   Lock,
   Plus,
-  Eye
+  Eye,
+  Sparkles,
 } from 'lucide-react';
 import { 
   AISystemRisk, 
@@ -30,6 +31,8 @@ import { RiskMatrix } from './risk-matrix';
 import { RiskTemplateSelector } from './risk-template-selector';
 import { RiskProgressIndicator } from './risk-progress-indicator';
 import { AddCustomRiskDialog } from './add-custom-risk-dialog';
+import { RiskAIAssistant } from './risk-ai-assistant';
+
 interface RiskManagementTabProps {
   aiSystemId: string;
   aiActLevel: string;
@@ -50,6 +53,7 @@ export function RiskManagementTab({
   const [status, setStatus] = useState<RiskManagementStatus | null>(null);
   const [activeTab, setActiveTab] = useState('registry');
   const [showAddRiskDialog, setShowAddRiskDialog] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [analysisCompleted, setAnalysisCompleted] = useState(riskAnalysisCompleted);
   const { toast } = useToast();
 
@@ -102,6 +106,11 @@ export function RiskManagementTab({
 
   const handleRiskDeleted = (riskId: string) => {
     setRisks(prev => prev.filter(r => r.id !== riskId));
+  };
+
+  const handleAIApply = () => {
+    // Refresh risks after AI analysis applies them
+    fetchRisks();
   };
 
   // Render blocked state for prohibited systems
@@ -198,13 +207,25 @@ export function RiskManagementTab({
       {risks.length === 0 && !isReadOnly && (
         <Card>
           <CardHeader>
-            <CardTitle>Iniciar Gestión de Riesgos</CardTitle>
-            <CardDescription>
-              Selecciona una plantilla para comenzar el registro de riesgos de este sistema
-            </CardDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardTitle>Iniciar Gestión de Riesgos</CardTitle>
+                <CardDescription>
+                  Selecciona una plantilla o usa IA para identificar los factores de riesgo aplicables
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => setShowAIAssistant(true)}
+                className="flex-shrink-0 bg-gradient-to-r from-[#E09E50] to-[#D9885F] hover:opacity-90 text-white gap-2 shadow-sm"
+                size="sm"
+              >
+                <Sparkles className="h-4 w-4" />
+                Completar con IA
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <RiskTemplateSelector 
+            <RiskTemplateSelector
               aiSystemId={aiSystemId}
               aiActLevel={aiActLevel}
               onTemplateApplied={handleTemplateApplied}
@@ -236,20 +257,31 @@ export function RiskManagementTab({
       {/* Risk Management Tabs */}
       {risks.length > 0 && (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <TabsList className="grid flex-1 grid-cols-2 max-w-md">
               <TabsTrigger value="registry">Registro de Riesgos</TabsTrigger>
               <TabsTrigger value="matrix">Matriz de Riesgos</TabsTrigger>
             </TabsList>
             {!isReadOnly && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddRiskDialog(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Añadir Riesgos
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAIAssistant(true)}
+                  className="gap-1.5 border-[#E09E50]/40 text-[#E09E50] hover:bg-[#F5DFB3]/30"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Analizar con IA
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddRiskDialog(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Añadir Riesgos
+                </Button>
+              </div>
             )}
           </div>
           
@@ -279,6 +311,18 @@ export function RiskManagementTab({
           open={showAddRiskDialog}
           onOpenChange={setShowAddRiskDialog}
           onRisksAdded={fetchRisks}
+        />
+      )}
+
+      {/* AI Risk Analysis Assistant */}
+      {!isReadOnly && (
+        <RiskAIAssistant
+          aiSystemId={aiSystemId}
+          systemName={systemName}
+          aiActLevel={aiActLevel}
+          open={showAIAssistant}
+          onOpenChange={setShowAIAssistant}
+          onApply={handleAIApply}
         />
       )}
     </div>
