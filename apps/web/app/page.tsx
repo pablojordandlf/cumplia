@@ -339,9 +339,34 @@ function useCountUp(end: number, duration = 2000, start = 0) {
 function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-white pt-8 pb-16 lg:pt-16 lg:pb-24">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(224,158,80,0.08),transparent)]" />
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#F8FAFB] to-transparent" />
+      {/* Dot grid pattern */}
+      <div className="absolute inset-0 [background-image:radial-gradient(circle,#d1d5db_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_40%,transparent_100%)] opacity-40" />
+
+      {/* Animated colour blobs */}
+      <div
+        className="absolute -top-40 -left-40 w-[560px] h-[560px] rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(224,158,80,0.22) 0%, transparent 70%)',
+          filter: 'blur(50px)',
+          animation: 'float 9s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="absolute top-1/3 -right-32 w-[420px] h-[420px] rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(140,189,185,0.18) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          animation: 'float 11s ease-in-out infinite 3s reverse',
+        }}
+      />
+      <div
+        className="absolute bottom-0 left-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(224,158,80,0.10) 0%, transparent 70%)',
+          filter: 'blur(40px)',
+          animation: 'float 7s ease-in-out infinite 1s',
+        }}
+      />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -352,10 +377,18 @@ function HeroSection() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E09E50]/10 border border-[#E09E50]/25 text-[#B8720A] text-sm font-medium mb-6"
+              className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E09E50]/10 border border-[#E09E50]/30 text-[#B8720A] text-sm font-medium mb-6 overflow-hidden"
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Cumplimiento del AI Act con IA</span>
+              {/* Shimmer sweep */}
+              <span
+                className="absolute inset-0 -translate-x-full"
+                style={{
+                  background: 'linear-gradient(90deg,transparent,rgba(224,158,80,0.25),transparent)',
+                  animation: 'shimmer 3s ease-in-out infinite 1s',
+                }}
+              />
+              <Sparkles className="h-3.5 w-3.5 relative z-10" />
+              <span className="relative z-10">Cumplimiento del AI Act con IA</span>
             </motion.div>
 
             {/* Headline */}
@@ -394,10 +427,15 @@ function HeroSection() {
               <Link href="/register">
                 <Button
                   size="lg"
-                  className="bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/35 transition-all w-full sm:w-auto"
+                  className="relative overflow-hidden bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto group"
                 >
-                  Empezar gratis
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <span
+                    className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
+                  />
+                  <span className="relative z-10 flex items-center">
+                    Empezar gratis
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </span>
                 </Button>
               </Link>
               <a href="#how-it-works">
@@ -442,7 +480,20 @@ function HeroSection() {
             className="relative hidden lg:block"
             style={{ perspective: '1200px' }}
           >
-            <div style={{ transform: 'rotateX(3deg) rotateY(-4deg)' }}>
+            {/* Aurora glow behind */}
+            <div
+              className="absolute -inset-8 rounded-3xl pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse at 60% 40%, rgba(224,158,80,0.18) 0%, rgba(140,189,185,0.12) 50%, transparent 75%)',
+                filter: 'blur(32px)',
+              }}
+            />
+            <div
+              style={{
+                transform: 'rotateX(3deg) rotateY(-4deg)',
+                animation: 'float 5s ease-in-out infinite',
+              }}
+            >
               <DashboardMockup />
             </div>
           </motion.div>
@@ -465,33 +516,44 @@ function HeroSection() {
 // ─────────────────────────────────────────────────────────
 // 2. STATS SECTION
 // ─────────────────────────────────────────────────────────
-function StatItem({ icon: Icon, value, suffix, label, color }: {
-  icon: any; value: number; suffix: string; label: string; color: string;
+function StatItem({ icon: Icon, value, suffix, label, color, isWarm }: {
+  icon: any; value: number; suffix: string; label: string; color: string; isWarm: boolean;
 }) {
   const { count, ref } = useCountUp(value, 1800);
   return (
-    <div ref={ref} className="text-center">
-      <Icon className={`h-6 w-6 mx-auto mb-2 ${color}`} />
-      <div className="text-3xl lg:text-4xl font-bold text-white mb-1">
+    <div ref={ref} className="text-center relative group">
+      <div className={`w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center ${isWarm ? 'bg-[#E09E50]/15' : 'bg-[#8CBDB9]/15'}`}>
+        <Icon className={`h-5 w-5 ${color}`} />
+      </div>
+      <div
+        className="text-4xl lg:text-5xl font-bold mb-1 bg-clip-text text-transparent"
+        style={{
+          backgroundImage: isWarm
+            ? 'linear-gradient(135deg, #F0B870 0%, #E09E50 100%)'
+            : 'linear-gradient(135deg, #A8D4D0 0%, #8CBDB9 100%)',
+        }}
+      >
         {count}{suffix}
       </div>
-      <div className="text-sm text-[#8CBDB9]/80">{label}</div>
+      <div className="text-sm text-[#8CBDB9]/70 max-w-[140px] mx-auto leading-snug">{label}</div>
     </div>
   );
 }
 
 function StatsSection() {
   const stats = [
-    { icon: Building2, value: 50, suffix: '+', label: 'Factores de riesgo catalogados', color: 'text-[#E09E50]' },
-    { icon: Scale, value: 4, suffix: '', label: 'Niveles de riesgo AI Act cubiertos', color: 'text-[#8CBDB9]' },
-    { icon: FileText, value: 100, suffix: '%', label: 'Generación automática de informes', color: 'text-[#E09E50]' },
-    { icon: Clock, value: 5, suffix: 'min', label: 'Para tener tu primer sistema clasificado', color: 'text-[#8CBDB9]' },
+    { icon: Building2, value: 50, suffix: '+', label: 'Factores de riesgo catalogados', color: 'text-[#E09E50]', isWarm: true },
+    { icon: Scale, value: 4, suffix: '', label: 'Niveles de riesgo AI Act cubiertos', color: 'text-[#8CBDB9]', isWarm: false },
+    { icon: FileText, value: 100, suffix: '%', label: 'Generación automática de informes', color: 'text-[#E09E50]', isWarm: true },
+    { icon: Clock, value: 5, suffix: 'min', label: 'Para tener tu primer sistema clasificado', color: 'text-[#8CBDB9]', isWarm: false },
   ];
 
   return (
-    <section className="py-12 bg-[#2D3E4E]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+    <section className="py-14 bg-[#2D3E4E] relative overflow-hidden">
+      {/* Subtle grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 max-w-4xl mx-auto">
           {stats.map((stat, index) => (
             <StatItem key={index} {...stat} />
           ))}
@@ -629,7 +691,13 @@ function HowItWorksSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto relative">
           {/* Connector line */}
-          <div className="hidden md:block absolute top-16 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-[#E09E50]/30 via-[#8CBDB9]/30 to-green-200 z-0" />
+          <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            whileInView={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+            viewport={{ once: true }}
+            className="hidden md:block absolute top-[52px] left-[calc(33.33%+28px)] right-[calc(33.33%+28px)] h-0.5 bg-gradient-to-r from-[#E09E50]/50 via-[#8CBDB9]/50 to-green-300/50 z-0 origin-left"
+          />
 
           {steps.map((step, index) => (
             <motion.div
@@ -641,10 +709,14 @@ function HowItWorksSection() {
               className={`relative p-6 rounded-2xl bg-gradient-to-b ${step.color} border ${step.borderColor}`}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-white/80">
-                  <step.icon className={`w-5 h-5 ${step.iconColor}`} />
+                <div className="relative w-10 h-10">
+                  {/* Glow ring */}
+                  <div className={`absolute inset-0 rounded-xl opacity-50 blur-md scale-125 ${step.number === '01' ? 'bg-[#E09E50]/40' : step.number === '02' ? 'bg-[#8CBDB9]/40' : 'bg-green-400/30'}`} />
+                  <div className="relative w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-white/80">
+                    <step.icon className={`w-5 h-5 ${step.iconColor}`} />
+                  </div>
                 </div>
-                <span className="text-3xl font-bold text-[#E8ECEB]">{step.number}</span>
+                <span className="text-3xl font-bold text-[#E8ECEB]/60">{step.number}</span>
               </div>
               <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{step.title}</h3>
               <p className="text-sm text-[#7a8a92] leading-relaxed mb-4">{step.desc}</p>
@@ -832,11 +904,11 @@ function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: (index % 6) * 0.07 }}
               viewport={{ once: true }}
-              className={`group p-6 rounded-2xl border border-[#E8ECEB] hover:border-[#E09E50]/30 hover:shadow-md transition-all duration-300 ${feature.color} ${
+              className={`group p-6 rounded-2xl border border-[#E8ECEB] hover:border-[#E09E50]/40 hover:shadow-[0_8px_40px_rgba(224,158,80,0.12)] transition-all duration-300 ${feature.color} ${
                 feature.size === 'lg' ? 'lg:col-span-1' : ''
               }`}
             >
-              <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-[#E8ECEB] flex items-center justify-center mb-4 group-hover:border-[#E09E50]/30 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-[#E8ECEB] flex items-center justify-center mb-4 group-hover:border-[#E09E50]/30 group-hover:bg-[#E09E50]/8 group-hover:scale-110 transition-all duration-300">
                 <feature.icon className="w-5 h-5 text-[#E09E50]" />
               </div>
               <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{feature.title}</h3>
@@ -1000,7 +1072,7 @@ function TestimonialsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white p-6 rounded-2xl border border-[#E8ECEB] shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white p-6 rounded-2xl border border-[#E8ECEB] shadow-sm hover:shadow-[0_12px_40px_rgba(45,62,78,0.1)] hover:-translate-y-1 transition-all duration-300"
             >
               {/* Stars */}
               <div className="flex gap-1 mb-4">
@@ -1131,10 +1203,10 @@ function PricingSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.08 }}
               viewport={{ once: true }}
-              className={`relative rounded-2xl p-6 flex flex-col ${
+              className={`relative rounded-2xl p-6 flex flex-col transition-all duration-300 ${
                 plan.highlight
-                  ? 'bg-[#2D3E4E] text-white shadow-2xl shadow-[#2D3E4E]/25 scale-[1.02]'
-                  : 'bg-white border border-[#E8ECEB]'
+                  ? 'bg-[#2D3E4E] text-white shadow-2xl shadow-[#2D3E4E]/30 scale-[1.02] hover:shadow-[0_24px_60px_rgba(45,62,78,0.35)]'
+                  : 'bg-white border border-[#E8ECEB] hover:border-[#E09E50]/30 hover:shadow-[0_8px_40px_rgba(224,158,80,0.08)]'
               }`}
             >
               {plan.badge && (
@@ -1183,13 +1255,16 @@ function PricingSection() {
 
               <Link href={plan.href}>
                 <Button
-                  className={`w-full py-5 h-auto text-sm font-semibold ${
+                  className={`relative overflow-hidden w-full py-5 h-auto text-sm font-semibold group ${
                     plan.highlight
                       ? 'bg-[#E09E50] hover:bg-[#D9885F] text-white shadow-lg shadow-[#E09E50]/25'
                       : 'bg-[#F8FAFB] hover:bg-[#E8ECEB] text-[#2D3E4E] border border-[#E8ECEB]'
                   }`}
                 >
-                  {plan.cta}
+                  {plan.highlight && (
+                    <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+                  )}
+                  <span className="relative z-10">{plan.cta}</span>
                 </Button>
               </Link>
             </motion.div>
@@ -1296,11 +1371,32 @@ function FAQSection() {
 // ─────────────────────────────────────────────────────────
 function CTASection() {
   return (
-    <section className="py-20 bg-[#2D3E4E]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 bg-[#2D3E4E] relative overflow-hidden">
+      {/* Grid mesh */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
+      {/* Floating orbs */}
+      <div
+        className="absolute top-0 left-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(224,158,80,0.18) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          animation: 'float 8s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(140,189,185,0.14) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+          animation: 'float 11s ease-in-out infinite reverse 2s',
+        }}
+      />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#E09E50]/20 flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-8 h-8 text-[#E09E50]" />
+          <div className="w-16 h-16 rounded-2xl bg-[#E09E50]/20 flex items-center justify-center mx-auto mb-6 relative">
+            <div className="absolute inset-0 rounded-2xl bg-[#E09E50]/10 scale-150 blur-lg" />
+            <Shield className="w-8 h-8 text-[#E09E50] relative z-10" />
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
             Agosto 2026 se acerca.
