@@ -40,7 +40,17 @@ import {
 import { Header } from '@/components/landing-header';
 import { Footer } from '@/components/landing-footer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+
+// Stagger animation variants
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' as const } },
+};
 
 // ─────────────────────────────────────────────────────────
 // Dashboard Mockup Component
@@ -334,6 +344,30 @@ function useCountUp(end: number, duration = 2000, start = 0) {
 }
 
 // ─────────────────────────────────────────────────────────
+// Countdown hook
+// ─────────────────────────────────────────────────────────
+function useCountdown() {
+  const deadline = useMemo(() => new Date('2026-08-02T00:00:00Z'), []);
+  const [t, setT] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  useEffect(() => {
+    const tick = () => {
+      const diff = deadline.getTime() - Date.now();
+      if (diff <= 0) return;
+      setT({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [deadline]);
+  return t;
+}
+
+// ─────────────────────────────────────────────────────────
 // 1. HERO SECTION
 // ─────────────────────────────────────────────────────────
 function HeroSection() {
@@ -399,9 +433,17 @@ function HeroSection() {
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D3E4E] tracking-tight leading-tight mb-6"
             >
               Cumple con el{' '}
-              <span className="relative">
-                <span className="relative z-10 text-[#E09E50]">AI Act europeo</span>
-                <span className="absolute bottom-1 left-0 right-0 h-3 bg-[#E09E50]/15 -z-0 rounded" />
+              <span
+                style={{
+                  background: 'linear-gradient(135deg, #E09E50 0%, #D9885F 30%, #8CBDB9 65%, #E09E50 100%)',
+                  backgroundSize: '200% 200%',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  animation: 'gradient-shift 5s ease-in-out infinite',
+                }}
+              >
+                AI Act europeo
               </span>{' '}
               sin complicaciones
             </motion.h1>
@@ -558,6 +600,41 @@ function StatsSection() {
             <StatItem key={index} {...stat} />
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 2b. LOGO CAROUSEL
+// ─────────────────────────────────────────────────────────
+function LogoCarousel() {
+  const logos = [
+    'Santander', 'BBVA', 'Telefónica', 'Mapfre', 'Iberdrola',
+    'Inditex', 'Repsol', 'CaixaBank', 'Amadeus', 'Acciona',
+  ];
+  const doubled = [...logos, ...logos];
+
+  return (
+    <section className="py-8 border-b border-[#E8ECEB] bg-white overflow-hidden">
+      <p className="text-center text-xs uppercase tracking-widest text-[#7a8a92]/50 font-semibold mb-5">
+        Empresas que ya trabajan en su cumplimiento con CumplIA
+      </p>
+      <div
+        className="flex gap-14 items-center"
+        style={{
+          width: 'max-content',
+          animation: 'marquee 28s linear infinite',
+        }}
+      >
+        {doubled.map((logo, i) => (
+          <span
+            key={i}
+            className="text-[#E8ECEB] font-bold text-lg whitespace-nowrap select-none tracking-wide hover:text-[#E09E50]/30 transition-colors duration-300"
+          >
+            {logo}
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -733,72 +810,228 @@ function HowItWorksSection() {
 }
 
 // ─────────────────────────────────────────────────────────
-// 5. PRODUCT PREVIEW SECTION
+// 5. AI CLASSIFICATION DEMO (Interactive showcase)
 // ─────────────────────────────────────────────────────────
-function ProductPreviewSection() {
-  const [activeTab, setActiveTab] = useState<'risks' | 'compliance'>('risks');
+function AIClassificationDemo() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [isAuto, setIsAuto] = useState(true);
+
+  useEffect(() => {
+    if (!isAuto) return;
+    const id = setInterval(() => setActiveStep(s => (s + 1) % 3), 3200);
+    return () => clearInterval(id);
+  }, [isAuto]);
+
+  const steps = [
+    {
+      icon: FolderKanban,
+      title: 'Describes tu sistema',
+      desc: 'Añades el nombre, descripción y sector de tu sistema de IA en un formulario guiado.',
+      color: 'text-[#E09E50]',
+      bg: 'bg-[#E09E50]/10',
+    },
+    {
+      icon: Sparkles,
+      title: 'La IA analiza el contexto',
+      desc: 'El asistente lee tu descripción, identifica el sector y evalúa el impacto potencial del sistema.',
+      color: 'text-purple-500',
+      bg: 'bg-purple-50',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Clasificación instantánea',
+      desc: 'Obtienes el nivel de riesgo según el AI Act, los artículos aplicables y las obligaciones a cumplir.',
+      color: 'text-[#8CBDB9]',
+      bg: 'bg-[#8CBDB9]/10',
+    },
+  ];
+
+  const panels = [
+    /* Step 0 — Input form mockup */
+    <div key="input" className="space-y-3">
+      <div className="text-xs font-semibold text-[#7a8a92] uppercase tracking-wider mb-4">Nuevo sistema de IA</div>
+      {[
+        { label: 'Nombre', value: 'Scoring de Crédito v2' },
+        { label: 'Sector', value: 'Finanzas y seguros' },
+      ].map(f => (
+        <div key={f.label}>
+          <div className="text-[10px] text-[#7a8a92] mb-1">{f.label}</div>
+          <div className="bg-[#F8FAFB] border border-[#E8ECEB] rounded-lg px-3 py-2 text-xs text-[#2D3E4E] font-medium">{f.value}</div>
+        </div>
+      ))}
+      <div>
+        <div className="text-[10px] text-[#7a8a92] mb-1">Descripción</div>
+        <div className="bg-[#F8FAFB] border border-[#E8ECEB] rounded-lg px-3 py-2.5 text-xs text-[#2D3E4E] leading-relaxed">
+          Modelo que evalúa la solvencia de personas para la concesión de préstamos personales basado en historial crediticio y datos socioeconómicos.
+        </div>
+      </div>
+      <button className="w-full mt-2 py-2.5 rounded-lg bg-[#E09E50] text-white text-xs font-semibold flex items-center justify-center gap-2">
+        <Sparkles className="w-3.5 h-3.5" /> Clasificar con IA
+      </button>
+    </div>,
+
+    /* Step 1 — AI thinking */
+    <div key="thinking" className="space-y-2">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center">
+          <Sparkles className="w-3 h-3 text-purple-500" />
+        </div>
+        <span className="text-xs font-semibold text-[#2D3E4E]">Asistente IA analizando…</span>
+        <div className="flex gap-1 ml-auto">
+          {[0, 1, 2].map(i => (
+            <div
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-purple-400"
+              style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
+            />
+          ))}
+        </div>
+      </div>
+      {[
+        '✦ Analizando sector: Finanzas → Servicios esenciales',
+        '✦ Evaluando impacto: decisiones crediticias afectan acceso a recursos financieros',
+        '✦ Consultando Anexo III del AI Act...',
+        '✦ Verificando Art. III punto 5(b): evaluación solvencia crediticia',
+        '✦ Clasificando nivel de riesgo...',
+      ].map((line, i) => (
+        <div
+          key={i}
+          className="text-[10px] text-[#7a8a92] font-mono bg-[#F8FAFB] rounded px-2.5 py-1.5 border border-[#E8ECEB]"
+          style={{ animation: `typing 0.3s ease-out ${i * 0.15}s both` }}
+        >
+          {line}
+        </div>
+      ))}
+    </div>,
+
+    /* Step 2 — Result */
+    <div key="result" className="space-y-3">
+      <div className="p-3 rounded-xl bg-orange-50 border border-orange-200">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-bold text-orange-700 uppercase tracking-wide">Clasificación AI Act</span>
+          <span className="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-semibold">Completado</span>
+        </div>
+        <div className="text-2xl font-bold text-orange-600 mb-1">Alto Riesgo</div>
+        <div className="text-[10px] text-orange-700/70">Anexo III, punto 5(b) — Evaluación solvencia crediticia</div>
+      </div>
+      <div className="p-3 rounded-xl bg-[#F8FAFB] border border-[#E8ECEB]">
+        <div className="text-[10px] font-semibold text-[#2D3E4E] mb-1.5">Justificación del asistente</div>
+        <p className="text-[10px] text-[#7a8a92] leading-relaxed">
+          Sistema que determina el acceso a recursos financieros esenciales mediante evaluación automatizada de personas físicas. Cumple criterios del Anexo III del Reglamento (UE) 2024/1689.
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="p-2.5 rounded-lg bg-red-50 border border-red-100 text-center">
+          <div className="text-base font-bold text-red-500">8</div>
+          <div className="text-[9px] text-red-500/70">obligaciones</div>
+        </div>
+        <div className="p-2.5 rounded-lg bg-[#8CBDB9]/10 border border-[#8CBDB9]/20 text-center">
+          <div className="text-base font-bold text-[#8CBDB9]">12</div>
+          <div className="text-[9px] text-[#8CBDB9]/70">riesgos a gestionar</div>
+        </div>
+      </div>
+      <button className="w-full py-2.5 rounded-lg bg-gradient-to-r from-[#E09E50] to-[#D9885F] text-white text-xs font-semibold">
+        Iniciar gestión de cumplimiento →
+      </button>
+    </div>,
+  ];
 
   return (
     <section className="py-20 bg-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">La plataforma</p>
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">La plataforma en acción</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
-            Diseñada para que compliance sea simple
+            De la descripción a la clasificación en segundos
           </h2>
           <p className="text-[#7a8a92]">
-            Cada pantalla está pensada para que tu equipo entienda el estado de cumplimiento de un vistazo.
+            Nuestro asistente IA toma el contexto de tu sistema y lo clasifica automáticamente según el AI Act.
           </p>
         </div>
 
-        {/* Tab selector */}
-        <div className="flex justify-center gap-2 mb-8">
-          <button
-            onClick={() => setActiveTab('risks')}
-            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
-              activeTab === 'risks'
-                ? 'bg-[#E09E50] text-white shadow-lg shadow-[#E09E50]/25'
-                : 'bg-[#F8FAFB] text-[#7a8a92] border border-[#E8ECEB] hover:border-[#E09E50]/40'
-            }`}
-          >
-            Gestión de Riesgos
-          </button>
-          <button
-            onClick={() => setActiveTab('compliance')}
-            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
-              activeTab === 'compliance'
-                ? 'bg-[#8CBDB9] text-white shadow-lg shadow-[#8CBDB9]/25'
-                : 'bg-[#F8FAFB] text-[#7a8a92] border border-[#E8ECEB] hover:border-[#8CBDB9]/40'
-            }`}
-          >
-            Seguimiento de Obligaciones
-          </button>
-        </div>
+        <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-10 items-center">
+          {/* Left: Steps */}
+          <div className="space-y-3">
+            {steps.map((step, i) => (
+              <motion.button
+                key={i}
+                onClick={() => { setIsAuto(false); setActiveStep(i); }}
+                className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 ${
+                  activeStep === i
+                    ? 'border-[#E09E50]/40 bg-white shadow-[0_8px_32px_rgba(224,158,80,0.12)]'
+                    : 'border-[#E8ECEB] bg-[#F8FAFB] hover:border-[#E09E50]/20'
+                }`}
+                whileHover={{ x: activeStep === i ? 0 : 4 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl ${activeStep === i ? step.bg : 'bg-[#E8ECEB]'} flex items-center justify-center flex-shrink-0 transition-colors duration-300`}>
+                    <step.icon className={`w-4.5 h-4.5 ${activeStep === i ? step.color : 'text-[#7a8a92]'} transition-colors duration-300`} />
+                  </div>
+                  <div>
+                    <div className={`text-sm font-semibold transition-colors duration-300 ${activeStep === i ? 'text-[#2D3E4E]' : 'text-[#7a8a92]'}`}>
+                      <span className="text-[#E8ECEB] mr-2 font-normal">0{i + 1}</span>
+                      {step.title}
+                    </div>
+                    {activeStep === i && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="text-xs text-[#7a8a92] mt-1 leading-relaxed"
+                      >
+                        {step.desc}
+                      </motion.p>
+                    )}
+                  </div>
+                  {activeStep === i && (
+                    <div className="ml-auto w-1.5 h-8 rounded-full bg-[#E09E50]" />
+                  )}
+                </div>
+                {/* Progress bar */}
+                {activeStep === i && isAuto && (
+                  <div className="mt-3 h-0.5 bg-[#E8ECEB] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#E09E50] rounded-full"
+                      style={{ animation: 'shimmer-bar 3.2s linear forwards' }}
+                    />
+                  </div>
+                )}
+              </motion.button>
+            ))}
+          </div>
 
-        <div className="max-w-2xl mx-auto">
-          <AnimatePresence mode="wait">
-            {activeTab === 'risks' ? (
-              <motion.div
-                key="risks"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.3 }}
-              >
-                <RiskMockup />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="compliance"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ComplianceMockup />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Right: Panel */}
+          <div className="relative">
+            <div className="rounded-2xl border border-[#E8ECEB] bg-white overflow-hidden shadow-xl">
+              <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-2.5 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                </div>
+                <span className="text-xs text-[#7a8a92] ml-1">app.cumplia.com/dashboard/inventory/nuevo</span>
+              </div>
+              <div className="p-5 min-h-[320px]">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeStep}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                  >
+                    {panels[activeStep]}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Glow */}
+            <div
+              className="absolute -inset-4 -z-10 rounded-3xl opacity-30 blur-2xl pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse, rgba(224,158,80,0.3) 0%, rgba(140,189,185,0.2) 60%, transparent 80%)' }}
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -896,14 +1129,17 @@ function FeaturesSection() {
         </div>
 
         {/* Bento grid */}
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: (index % 6) * 0.07 }}
-              viewport={{ once: true }}
+              variants={itemVariants}
               className={`group p-6 rounded-2xl border border-[#E8ECEB] hover:border-[#E09E50]/40 hover:shadow-[0_8px_40px_rgba(224,158,80,0.12)] transition-all duration-300 ${feature.color} ${
                 feature.size === 'lg' ? 'lg:col-span-1' : ''
               }`}
@@ -915,7 +1151,7 @@ function FeaturesSection() {
               <p className="text-sm text-[#7a8a92] leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -1370,6 +1606,7 @@ function FAQSection() {
 // 11. FINAL CTA
 // ─────────────────────────────────────────────────────────
 function CTASection() {
+  const { days, hours, minutes, seconds } = useCountdown();
   return (
     <section className="py-20 bg-[#2D3E4E] relative overflow-hidden">
       {/* Grid mesh */}
@@ -1401,8 +1638,40 @@ function CTASection() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
             Agosto 2026 se acerca.
             <br />
-            <span className="text-[#E09E50]">Empieza hoy.</span>
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #E09E50 0%, #F0C070 50%, #E09E50 100%)',
+                backgroundSize: '200% 200%',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                animation: 'gradient-shift 4s ease-in-out infinite',
+              }}
+            >
+              Empieza hoy.
+            </span>
           </h2>
+
+          {/* Countdown */}
+          <div className="flex justify-center gap-3 mb-8">
+            {[
+              { value: days, label: 'días' },
+              { value: hours, label: 'horas' },
+              { value: minutes, label: 'min' },
+              { value: seconds, label: 'seg' },
+            ].map(({ value, label }) => (
+              <div key={label} className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-xl bg-white/8 border border-white/12 flex items-center justify-center backdrop-blur-sm">
+                  <span className="text-2xl font-bold text-white tabular-nums">
+                    {String(value).padStart(2, '0')}
+                  </span>
+                </div>
+                <span className="text-[10px] text-[#8CBDB9]/60 mt-1 uppercase tracking-wider">{label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-[#8CBDB9]/50 -mt-4 mb-8">hasta la entrada en vigor plena del AI Act (agosto 2026)</p>
+
           <p className="text-lg text-[#8CBDB9] mb-8 leading-relaxed">
             Cada semana que no actúas, el trabajo crece. Regístrate gratis y
             ten tu primer sistema clasificado en menos de 5 minutos.
@@ -1456,9 +1725,10 @@ export default function HomePage() {
       <Header />
       <HeroSection />
       <StatsSection />
+      <LogoCarousel />
       <ProblemSection />
       <HowItWorksSection />
-      <ProductPreviewSection />
+      <AIClassificationDemo />
       <FeaturesSection />
       <AIActSection />
       <TestimonialsSection />
