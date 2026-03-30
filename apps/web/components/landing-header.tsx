@@ -1,19 +1,28 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Shield, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => {
+      setLoggedIn(!!data.session);
+    });
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#E8ECEB] bg-white/95 backdrop-blur-xl">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href={loggedIn ? '/dashboard' : '/'} className="flex items-center space-x-2">
             <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-[#E09E50]" />
             <span className="text-xl sm:text-2xl font-bold text-[#2D3E4E]">CumplIA</span>
           </Link>

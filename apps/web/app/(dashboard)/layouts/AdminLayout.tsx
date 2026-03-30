@@ -22,7 +22,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <DashboardNavbar />
       <div className="flex flex-1">
         <DashboardSidebar />
-        <main className="flex-1 bg-slate-50 dark:bg-slate-900 pt-16 lg:pt-0 lg:pl-64 pb-16 lg:pb-0 min-h-screen">
+        <main className="flex-1 bg-slate-50 dark:bg-slate-900 pt-16 lg:pt-16 lg:pl-64 pb-16 lg:pb-0 min-h-screen">
           {children}
         </main>
       </div>

@@ -215,17 +215,11 @@ export default function DashboardPage() {
 
   return (
     <motion.div
-      className="min-h-screen pt-20 pb-12"
+      className="min-h-screen pt-6 pb-12 bg-gray-50 dark:bg-slate-900"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Background gradient effect */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 dark:bg-blue-600/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600/10 dark:bg-cyan-600/5 rounded-full blur-3xl" />
-      </div>
 
       <div className="container mx-auto px-6 space-y-8 max-w-7xl">
 
@@ -272,7 +266,7 @@ export default function DashboardPage() {
           <Link href="/dashboard/inventory" className="flex-1 sm:flex-none">
             <Button 
               variant="outline" 
-              className="w-full px-6 py-6 text-base border-white/20 hover:bg-white/5 text-gray-900 dark:text-gray-100"
+              className="w-full px-6 py-6 text-base border-gray-200 hover:bg-gray-50 text-gray-900 dark:text-gray-100"
             >
               <List className="w-5 h-5 mr-2" />
               Ver Inventario
@@ -297,7 +291,7 @@ export default function DashboardPage() {
           <Link href="/dashboard/inventory">
             <motion.div
               whileHover={{ translateY: -4 }}
-              className="glass rounded-2xl p-6 cursor-pointer group hover:shadow-xl transition-all border border-white/20"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-6 cursor-pointer group hover:shadow-md transition-all border border-gray-200 dark:border-slate-700"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all">
@@ -314,7 +308,7 @@ export default function DashboardPage() {
           {/* Compliance Rate */}
           <motion.div
             whileHover={{ translateY: -4 }}
-            className="glass rounded-2xl p-6 group hover:shadow-xl transition-all border border-white/20"
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 group hover:shadow-md transition-all border border-gray-200 dark:border-slate-700"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 group-hover:from-green-500/30 group-hover:to-emerald-500/30 transition-all">
@@ -330,7 +324,7 @@ export default function DashboardPage() {
           {/* High Risk Alert */}
           <motion.div
             whileHover={{ translateY: -4 }}
-            className="glass rounded-2xl p-6 group hover:shadow-xl transition-all border border-white/20"
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 group hover:shadow-md transition-all border border-gray-200 dark:border-slate-700"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 group-hover:from-red-500/30 group-hover:to-rose-500/30 transition-all">
@@ -348,7 +342,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT: Risk Classification (2/3) */}
           <motion.div variants={itemVariants} className="lg:col-span-2">
-            <div className="glass rounded-2xl p-8 border border-white/20">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-gray-200 dark:border-slate-700">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -375,7 +369,7 @@ export default function DashboardPage() {
 
           {/* RIGHT: Recent Systems (1/3) */}
           <motion.div variants={itemVariants}>
-            <div className="glass rounded-2xl p-6 border border-white/20 h-full overflow-hidden flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 h-full overflow-hidden flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Últimas Novedades</h3>
@@ -390,7 +384,7 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.05 }}
-                        className="p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 cursor-pointer transition-all group"
+                        className="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-slate-700 dark:hover:bg-slate-600 border border-gray-100 dark:border-slate-600 cursor-pointer transition-all group"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
@@ -401,7 +395,7 @@ export default function DashboardPage() {
                               {new Date(system.created_at).toLocaleDateString('es-ES')}
                             </p>
                           </div>
-                          <Badge variant="outline" className="text-xs flex-shrink-0 bg-gray-100/10 border-gray-400/20">
+                          <Badge variant="outline" className="text-xs flex-shrink-0 bg-gray-50 border-gray-200">
                             {system.ai_act_level === 'prohibited' && '🔴'}
                             {system.ai_act_level === 'high_risk' && '🟠'}
                             {system.ai_act_level === 'limited_risk' && '🟡'}
@@ -440,7 +434,7 @@ export default function DashboardPage() {
 
         {/* Compliance Tip Card */}
         <motion.div variants={itemVariants}>
-          <div className="glass rounded-2xl p-6 border border-white/20 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-6 border border-blue-100 dark:border-blue-900/50">
             <div className="flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <div>

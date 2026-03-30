@@ -130,7 +130,12 @@ function SidebarContent({
       try {
         const { data, error } = await fetchUserOrganization();
         if (!error && data) {
-          setUserRole((data.role as UserRole) || 'viewer');
+          const raw = data.role as string;
+          const mapped: UserRole =
+            raw === 'owner' || raw === 'admin' ? 'admin'
+            : raw === 'editor' ? 'compliance_officer'
+            : 'viewer';
+          setUserRole(mapped);
         } else {
           setUserRole('viewer');
         }
@@ -162,7 +167,7 @@ function SidebarContent({
     <div className={cn("flex flex-col h-full", isMobile ? "bg-white" : "bg-white border-r border-[#E8ECEB]")}>
       {/* Logo */}
       <div className="p-6">
-        <Link href="/" className="flex items-center space-x-2" onClick={onNavigate}>
+        <Link href="/dashboard" className="flex items-center space-x-2" onClick={onNavigate}>
           <Shield className="h-8 w-8 text-[#E09E50]" />
           <span className="text-xl font-bold text-[#2D3E4E]">CumplIA</span>
         </Link>
