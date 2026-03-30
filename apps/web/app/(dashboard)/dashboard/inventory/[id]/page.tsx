@@ -351,6 +351,12 @@ export default function UseCaseDetailPage() {
               <Download className="w-4 h-4 mr-2" />
               {downloadingReport ? 'Generando...' : 'Informe PDF'}
             </Button>
+            <Link href={`/dashboard/inventory/${useCaseId}/technical-docs`}>
+              <Button variant="outline">
+                <FileText className="w-4 h-4 mr-2" />
+                Doc. técnica
+              </Button>
+            </Link>
             <Link href={`/dashboard/inventory/${useCaseId}/classify`}>
               <Button>
                 <Shield className="w-4 h-4 mr-2" />

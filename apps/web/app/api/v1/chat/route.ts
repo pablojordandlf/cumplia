@@ -100,28 +100,27 @@ export async function POST(request: NextRequest) {
   const orgId = membership.organization_id;
   const orgName = (membership.organizations as any)?.name ?? 'Mi Organización';
 
-  // Fetch org data in parallel
-  const [systemsRes, risksRes, obligationsRes] = await Promise.all([
-    supabase
-      .from('use_cases')
-      .select('id, name, description, sector, status, ai_act_level, confidence_score')
-      .eq('organization_id', orgId)
-      .is('deleted_at', null),
-    supabase
-      .from('use_case_risks')
-      .select('id, use_case_id, status, probability, impact, residual_risk_score, mitigation_measures, responsible_person, due_date')
-      .in('use_case_id',
-        (await supabase.from('use_cases').select('id').eq('organization_id', orgId).is('deleted_at', null))
-          .data?.map(s => s.id) ?? []
-      ),
-    supabase
-      .from('use_case_obligations')
-      .select('id, use_case_id, obligation_key, obligation_title, is_completed, completed_at')
-      .in('use_case_id',
-        (await supabase.from('use_cases').select('id').eq('organization_id', orgId).is('deleted_at', null))
-          .data?.map(s => s.id) ?? []
-      ),
-  ]);
+  // Fetch systems first to get IDs, then fetch related data in parallel
+  const systemsRes = await supabase
+    .from('use_cases')
+    .select('id, name, description, sector, status, ai_act_level, confidence_score')
+    .eq('organization_id', orgId)
+    .is('deleted_at', null);
+
+  const systemIds = systemsRes.data?.map(s => s.id) ?? [];
+
+  const [risksRes, obligationsRes] = systemIds.length > 0
+    ? await Promise.all([
+        supabase
+          .from('use_case_risks')
+          .select('id, use_case_id, status, probability, impact, residual_risk_score, mitigation_measures, responsible_person, due_date')
+          .in('use_case_id', systemIds),
+        supabase
+          .from('use_case_obligations')
+          .select('id, use_case_id, obligation_key, obligation_title, is_completed, completed_at')
+          .in('use_case_id', systemIds),
+      ])
+    : [{ data: [] }, { data: [] }];
 
   const orgContext = buildOrgContext({
     orgName,

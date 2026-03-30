@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -80,7 +81,29 @@ export function RiskDetailCard({
 }: RiskDetailCardProps) {
   const [loading, setLoading] = useState(false);
   const [editedRisk, setEditedRisk] = useState<AISystemRisk>(risk);
+  const [orgMembers, setOrgMembers] = useState<{ email: string; name: string }[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchMembers() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      if (!membership) return;
+      const { data: members } = await supabase
+        .from('organization_members')
+        .select('email, name')
+        .eq('organization_id', membership.organization_id)
+        .eq('status', 'active');
+      setOrgMembers((members ?? []).filter(m => m.email));
+    }
+    fetchMembers();
+  }, []);
 
   const validateForm = (): boolean => {
     // Estado siempre requerido
@@ -403,17 +426,37 @@ export function RiskDetailCard({
                       <User className="h-4 w-4" />
                       Responsable
                     </Label>
-                    <Input
-                      id="responsible"
-                      placeholder="Nombre del responsable"
-                      value={editedRisk.responsible_person || ''}
-                      onChange={(e) => setEditedRisk(prev => ({ 
-                        ...prev, 
-                        responsible_person: e.target.value 
-                      }))}
-                      disabled={isReadOnly}
-                      className={isReadOnly ? "bg-[#E8ECEB]" : ""}
-                    />
+                    {orgMembers.length > 0 && !isReadOnly ? (
+                      <Select
+                        value={editedRisk.responsible_person || ''}
+                        onValueChange={(v) => setEditedRisk(prev => ({ ...prev, responsible_person: v }))}
+                        disabled={isReadOnly}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Asignar a un miembro" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Sin asignar</SelectItem>
+                          {orgMembers.map(m => (
+                            <SelectItem key={m.email} value={m.email}>
+                              {m.name ? `${m.name} (${m.email})` : m.email}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        id="responsible"
+                        placeholder="Email o nombre del responsable"
+                        value={editedRisk.responsible_person || ''}
+                        onChange={(e) => setEditedRisk(prev => ({
+                          ...prev,
+                          responsible_person: e.target.value
+                        }))}
+                        disabled={isReadOnly}
+                        className={isReadOnly ? "bg-[#E8ECEB]" : ""}
+                      />
+                    )}
                   </div>
 
                   <div className="space-y-2">

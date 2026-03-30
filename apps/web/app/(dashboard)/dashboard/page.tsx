@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
+import {
   BarChart3,
   TrendingUp,
   AlertTriangle,
@@ -20,12 +20,15 @@ import {
   Eye,
   Flame,
   Sparkles,
+  CalendarClock,
+  ChevronRight,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PendingObligationsWidget } from '@/components/pending-obligations-widget';
 import { RiskDistributionChart } from '@/components/risk-distribution-chart';
 import { RiskAnalysisStatusCard } from '@/components/risk-analysis-status-card';
 import { usePermissions } from '@/hooks/use-permissions';
+import { OnboardingWizard } from '@/components/onboarding-wizard';
 
 interface DashboardStats {
   totalSystems: number;
@@ -225,6 +228,42 @@ export default function DashboardPage() {
       </div>
 
       <div className="container mx-auto px-6 space-y-8 max-w-7xl">
+
+        {/* Deadline alert banner */}
+        {!loading && stats.highRiskCount > 0 && (
+          <motion.div variants={itemVariants}>
+            <Link href="/dashboard/timeline">
+              <div className="flex items-center justify-between gap-3 px-5 py-3.5 bg-orange-500 text-white rounded-xl shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <CalendarClock className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-semibold text-sm">
+                    {stats.highRiskCount} sistema{stats.highRiskCount !== 1 ? 's' : ''} de alto riesgo {stats.highRiskCount !== 1 ? 'requieren' : 'requiere'} cumplimiento antes del 2 ago 2026
+                    <span className="font-normal text-orange-100 ml-2">
+                      — quedan {Math.ceil((new Date('2026-08-02').getTime() - Date.now()) / (1000 * 60 * 60 * 24))} días
+                    </span>
+                  </span>
+                </div>
+                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+              </div>
+            </Link>
+          </motion.div>
+        )}
+        {!loading && stats.prohibitedCount > 0 && (
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center gap-3 px-5 py-3.5 bg-red-600 text-white rounded-xl shadow-lg">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <span className="font-semibold text-sm">
+                ⚠ {stats.prohibitedCount} sistema{stats.prohibitedCount !== 1 ? 's' : ''} clasificado{stats.prohibitedCount !== 1 ? 's' : ''} como <strong>PROHIBIDO</strong> — las prácticas prohibidas están en vigor desde febrero 2025
+              </span>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Onboarding wizard */}
+        <motion.div variants={itemVariants}>
+          <OnboardingWizard />
+        </motion.div>
+
         {/* Header - Buttons Row - UNIFORM SIZES */}
         <motion.div
           className="flex flex-col sm:flex-row gap-3 justify-end"
