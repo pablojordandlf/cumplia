@@ -1,8 +1,5 @@
 'use client';
 
-import type { Metadata } from "next";
-import { DashboardSidebar, MobileBottomNav } from "@/components/dashboard-sidebar";
-import { DashboardNavbar } from "@/components/dashboard-navbar";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { ComplianceLayout } from "./layouts/ComplianceLayout";
 import { AuditorLayout } from "./layouts/AuditorLayout";
@@ -10,56 +7,44 @@ import { ViewerLayout } from "./layouts/ViewerLayout";
 import { useAuthReady, fetchUserOrganization } from "@/lib/auth-helpers";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { OrganizationContext } from "@/hooks/use-organization";
+import type { MemberRole } from "@/types/organization";
+import { FloatingChat } from "@/components/floating-chat";
 
 export const dynamic = 'force-dynamic';
 
-// Role type definition
-type UserRole = 'admin' | 'compliance_officer' | 'auditor' | 'viewer';
+type UserRole = 'owner' | 'admin' | 'editor' | 'viewer';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-/**
- * DashboardLayout - Main layout wrapper with role-based routing
- * 
- * Routes to different layouts based on user role:
- * - admin → AdminLayout (full featured)
- * - compliance_officer → ComplianceLayout (risk-focused)
- * - auditor → AuditorLayout (report-focused)
- * - viewer → ViewerLayout (minimal, read-only)
- */
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, isReady } = useAuthReady();
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [orgId, setOrgId] = useState<string | null>(null);
+  const [orgName, setOrgName] = useState<string>('');
+  const [orgPlan, setOrgPlan] = useState<string>('starter');
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    if (!isReady) {
-      // Aún esperando autenticación
-      return;
-    }
-
-    if (!user) {
-      // No hay sesión, redirigir al login
-      router.push('/login');
-      return;
-    }
+    if (!isReady) return;
+    if (!user) { router.push('/login'); return; }
 
     const loadUserRole = async () => {
       try {
         const { data, error } = await fetchUserOrganization();
-        
         if (error || !data) {
           console.error('Failed to fetch user organization:', error);
-          setUserRole('viewer'); // Default to viewer on error
+          setUserRole('viewer');
           setIsLoading(false);
           return;
         }
-
-        const role = (data.role as UserRole) || 'viewer';
-        setUserRole(role);
+        setUserRole((data.role as UserRole) || 'viewer');
+        setOrgId(data.organizationId);
+        setOrgName(data.organization?.name ?? '');
+        setOrgPlan(data.organization?.plan_name ?? 'starter');
       } catch (err) {
         console.error('Error loading user role:', err);
         setUserRole('viewer');
@@ -67,32 +52,53 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         setIsLoading(false);
       }
     };
-
     loadUserRole();
   }, [isReady, user, router]);
 
   if (isLoading || !userRole) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-[#7a8a92] dark:text-[#7a8a92]">Cargando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-500">Cargando...</p>
         </div>
       </div>
     );
   }
 
-  // Route based on role
-  switch (userRole) {
-    case 'admin':
-      return <AdminLayout>{children}</AdminLayout>;
-    case 'compliance_officer':
-      return <ComplianceLayout>{children}</ComplianceLayout>;
-    case 'auditor':
-      return <AuditorLayout>{children}</AuditorLayout>;
-    case 'viewer':
-      return <ViewerLayout>{children}</ViewerLayout>;
-    default:
-      return <ViewerLayout>{children}</ViewerLayout>;
-  }
+  // Provide OrganizationContext so usePermissions() works across all dashboard pages
+  const orgContextValue = {
+    organization: orgId ? {
+      id: orgId,
+      name: orgName,
+      slug: '',
+      ownerId: '',
+      plan: orgPlan as any,
+      seatsTotal: 0,
+      seatsUsed: 0,
+      createdAt: '',
+      updatedAt: '',
+      currentUserRole: userRole as MemberRole,
+    } : null,
+    members: [],
+    usage: null,
+    limits: null,
+    isLoading: false,
+    error: null,
+    refresh: async () => {},
+  };
+
+  // Map owner/editor to the layout system
+  const layoutRole = userRole === 'owner' || userRole === 'admin' ? 'admin' : userRole;
+
+  const LayoutComponent = layoutRole === 'admin' ? AdminLayout
+    : layoutRole === 'editor' ? ComplianceLayout
+    : ViewerLayout;
+
+  return (
+    <OrganizationContext.Provider value={orgContextValue}>
+      <LayoutComponent>{children}</LayoutComponent>
+      <FloatingChat />
+    </OrganizationContext.Provider>
+  );
 }

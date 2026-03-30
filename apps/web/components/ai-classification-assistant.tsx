@@ -24,6 +24,7 @@ interface ClassificationResult {
 interface AIClassificationAssistantProps {
   systemName?: string;
   systemDescription?: string;
+  initialQuestions?: string[];
   onClassificationSuggested?: (result: ClassificationResult) => void;
 }
 
@@ -70,6 +71,7 @@ function renderMessageContent(content: string): { text: string; classification: 
 export function AIClassificationAssistant({
   systemName,
   systemDescription,
+  initialQuestions,
   onClassificationSuggested,
 }: AIClassificationAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -82,6 +84,18 @@ export function AIClassificationAssistant({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Auto-start with initial questions from AI autofill unclear fields
+  useEffect(() => {
+    if (initialQuestions && initialQuestions.length > 0 && !started) {
+      setStarted(true);
+      const questionsText = initialQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n');
+      setMessages([{
+        role: 'assistant',
+        content: `Para completar la clasificación de "${systemName ?? 'tu sistema'}", necesito que me aclares lo siguiente:\n\n${questionsText}\n\nResponde a estas preguntas y podré completar el cuestionario automáticamente.`,
+      }]);
+    }
+  }, [initialQuestions, started, systemName]);
 
   function buildInitialPrompt() {
     if (systemName || systemDescription) {
