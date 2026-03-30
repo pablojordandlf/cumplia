@@ -59,7 +59,7 @@ export function DashboardNavbar() {
 
   return (
     <nav 
-      className={`hidden lg:flex fixed top-0 left-0 right-0 h-16 glass border-b border-white/10 dark:border-white/5 items-center justify-between px-8 z-30 transition-all duration-300 ease-in-out ${
+      className={`hidden lg:flex fixed top-0 left-64 right-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-gray-200 dark:border-white/5 items-center justify-between px-8 z-30 transition-all duration-300 ease-in-out ${
         isVisible ? 'translate-y-0 shadow-lg' : '-translate-y-full shadow-none'
       }`}
     >
