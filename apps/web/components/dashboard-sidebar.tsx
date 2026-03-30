@@ -46,28 +46,28 @@ const allNavItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: "Riesgo",
+    title: "Inventario IA",
+    href: "/dashboard/inventory",
+    icon: FolderKanban,
+    roles: ['admin'],
+  },
+  {
+    title: "Gestión de Riesgos",
     href: "/dashboard/risk",
     icon: AlertCircle,
     roles: ['compliance_officer', 'auditor', 'admin'],
   },
   {
-    title: "Evaluaciones",
+    title: "Compliance",
     href: "/dashboard/assessments",
     icon: BarChart3,
     roles: ['compliance_officer', 'auditor', 'admin'],
   },
   {
-    title: "Reportes",
+    title: "Documentación",
     href: "/dashboard/reports",
     icon: FileText,
     roles: ['compliance_officer', 'auditor', 'admin'],
-  },
-  {
-    title: "Sistemas de IA",
-    href: "/dashboard/inventory",
-    icon: FolderKanban,
-    roles: ['admin'],
   },
   {
     title: "Timeline regulatorio",
@@ -345,7 +345,7 @@ export function MobileBottomNav() {
               >
                 <Icon className="h-5 w-5" />
                 <span className="text-[10px] mt-1 font-medium truncate max-w-[60px]">
-                  {item.title === "Sistemas de IA" ? "Sistemas" : item.title}
+                  {item.title === "Inventario IA" ? "Inventario" : item.title === "Gestión de Riesgos" ? "Riesgos" : item.title}
                 </span>
               </Link>
             </li>
