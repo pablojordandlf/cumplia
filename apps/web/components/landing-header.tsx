@@ -29,17 +29,17 @@ export function Header() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#who-applies" className="text-sm font-medium text-[#7a8a92] hover:text-[#E09E50] transition-colors">
-              AI Act
+            <a href="#how-it-works" className="text-sm font-medium text-[#7a8a92] hover:text-[#E09E50] transition-colors">
+              Cómo funciona
             </a>
             <a href="#features" className="text-sm font-medium text-[#7a8a92] hover:text-[#E09E50] transition-colors">
               Funciones
             </a>
+            <a href="#who-applies" className="text-sm font-medium text-[#7a8a92] hover:text-[#E09E50] transition-colors">
+              AI Act
+            </a>
             <Link href="/pricing" className="text-sm font-medium text-[#7a8a92] hover:text-[#E09E50] transition-colors">
               Precios
-            </Link>
-            <Link href="/guia-ai-act" className="text-sm font-medium text-[#7a8a92] hover:text-[#E09E50] transition-colors">
-              Guía
             </Link>
           </nav>
 
@@ -82,33 +82,33 @@ export function Header() {
               className="md:hidden border-t border-[#E8ECEB] bg-white/95 backdrop-blur-xl"
             >
               <nav className="flex flex-col py-4 space-y-1">
-                <a 
-                  href="#who-applies" 
+                <a
+                  href="#how-it-works"
                   className="mx-4 px-4 py-4 text-base font-medium text-[#7a8a92] hover:text-[#E09E50] hover:bg-[#E8ECEB] rounded-xl transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  AI Act
+                  Cómo funciona
                 </a>
-                <a 
-                  href="#features" 
+                <a
+                  href="#features"
                   className="mx-4 px-4 py-4 text-base font-medium text-[#7a8a92] hover:text-[#E09E50] hover:bg-[#E8ECEB] rounded-xl transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Funciones
                 </a>
-                <Link 
-                  href="/pricing" 
+                <a
+                  href="#who-applies"
+                  className="mx-4 px-4 py-4 text-base font-medium text-[#7a8a92] hover:text-[#E09E50] hover:bg-[#E8ECEB] rounded-xl transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  AI Act
+                </a>
+                <Link
+                  href="/pricing"
                   className="mx-4 px-4 py-4 text-base font-medium text-[#7a8a92] hover:text-[#E09E50] hover:bg-[#E8ECEB] rounded-xl transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Precios
-                </Link>
-                <Link 
-                  href="/guia-ai-act" 
-                  className="mx-4 px-4 py-4 text-base font-medium text-[#7a8a92] hover:text-[#E09E50] hover:bg-[#E8ECEB] rounded-xl transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Guía
                 </Link>
                 <div className="border-t border-[#E8ECEB] pt-4 mt-2 px-4 space-y-3">
                   <Link href="/login" className="block w-full" onClick={() => setMobileMenuOpen(false)}>

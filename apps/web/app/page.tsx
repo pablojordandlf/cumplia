@@ -2,384 +2,656 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { 
-  Shield, 
-  AlertTriangle, 
-  FileText, 
-  BookOpen, 
-  Zap, 
+import {
+  Shield,
+  AlertTriangle,
+  FileText,
+  BookOpen,
+  Zap,
   CheckCircle,
   AlertCircle,
   TrendingDown,
   Users,
   ArrowRight,
   Building2,
-  Globe,
   Scale,
   Bot,
   Cpu,
   Sparkles,
   Star,
   Lock,
-  Search,
   ClipboardCheck,
   Bell,
-  Languages,
   ChevronRight,
-  Award,
   TrendingUp,
-  Clock
+  Clock,
+  FolderKanban,
+  BarChart3,
+  History,
+  CalendarClock,
+  CheckSquare,
+  ShieldCheck,
+  Eye,
+  Download,
+  ChevronDown,
+  X,
+  Play,
 } from 'lucide-react';
 import { Header } from '@/components/landing-header';
 import { Footer } from '@/components/landing-footer';
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 
-function HeroSection() {
-  const [currentWord, setCurrentWord] = useState(0);
-  const rotatingWords = [
-    "CUMPLIMIENTO",
-    "TRANSPARENCIA",
-    "SEGURIDAD",
-    "CONFIANZA"
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % rotatingWords.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
+// ─────────────────────────────────────────────────────────
+// Dashboard Mockup Component
+// ─────────────────────────────────────────────────────────
+function DashboardMockup() {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-slate-950">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-radial from-blue-900/20 to-transparent rounded-full blur-3xl" />
-      </div>
-
-      {/* Grid pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-5xl mx-auto text-center sm:text-left">
-          {/* Badge */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-6 sm:mb-8"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span>Compliance del AI Act simplificado</span>
-          </motion.div>
-
-          {/* Main headline */}
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-6 sm:mb-8"
-          >
-            <span className="block">GESTIÓN DE IA.</span>
-            <span className="relative inline-block mt-2">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
-                {rotatingWords[currentWord]}
-              </span>
-            </span>
-          </motion.h1>
-
-          {/* Subheadline */}
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl text-slate-400 mb-8 max-w-2xl mx-auto sm:mx-0"
-          >
-            Cumple con el AI Act de Europa sin complicaciones
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4 mb-10 justify-center sm:justify-start"
-          >
-            <Link href="/register" className="w-full sm:w-auto">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-10 py-7 w-full sm:w-auto shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 transition-all">
-                Empezar gratis
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/pricing" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="text-lg px-10 py-7 w-full sm:w-auto border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
-                Ver precios
-              </Button>
-            </Link>
-          </motion.div>
-
-          {/* Trust indicators */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-wrap items-center justify-center sm:justify-start gap-6 text-sm text-slate-500"
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>Sin tarjeta</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>Setup en 5 min</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>Cancela cuando quieras</span>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TrustedBySection() {
-  const stats = [
-    { icon: Building2, value: "500+", label: "Sistemas evaluados" },
-    { icon: TrendingUp, value: "98%", label: "Tasa de éxito" },
-    { icon: Clock, value: "24h", label: "Tiempo medio" },
-    { icon: Users, value: "100+", label: "Empresas activas" }
-  ];
-
-  return (
-    <section className="py-20 bg-slate-950 border-y border-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <p className="text-slate-500 text-sm uppercase tracking-wider mb-2">Trusted by Global Enterprises</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            Built for What&apos;s Next.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <stat.icon className="h-8 w-8 text-blue-500 mx-auto mb-4" />
-              <div className="text-4xl font-bold text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-slate-500">{stat.label}</div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function EndToEndSection() {
-  const capabilities = [
-    {
-      icon: ClipboardCheck,
-      title: "Inventory",
-      desc: "Inventario centralizado de sistemas de IA con metadatos"
-    },
-    {
-      icon: Shield,
-      title: "Análisis de Riesgos IA",
-      desc: "Evaluación avanzada y personalizada de riesgos de tus sistemas IA"
-    },
-    {
-      icon: Bell,
-      title: "Monitor",
-      desc: "Alertas en tiempo real sobre cambios regulatorios"
-    }
-  ];
-
-  return (
-    <section className="py-24 bg-slate-950">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">AI Governance</p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Gobierno de IA accesible
-          </h2>
-          <p className="text-lg text-slate-400">
-            Una plataforma basada en la sencillez, facilidad de uso, y escala de tus sistemas de IA
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
-          {capabilities.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="group p-6 sm:p-8 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900 transition-all duration-300"
-            >
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-blue-500/20 transition-colors">
-                <item.icon className="w-7 h-7 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
-              <p className="text-slate-400">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PainPointsSection() {
-  const pains = [
-    {
-      icon: AlertCircle,
-      title: 'Incertidumbre Legal',
-      desc: 'El reglamento es complejo y las sanciones pueden llegar al 7% de facturación global.'
-    },
-    {
-      icon: TrendingDown,
-      title: 'Pérdida de Tiempo',
-      desc: 'Evaluar manualmente cada sistema de IA consume semanas de trabajo de expertos.'
-    },
-    {
-      icon: FileText,
-      title: 'Documentación Excesiva',
-      desc: 'Se requieren decenas de documentos técnicos y de cumplimiento diferentes.'
-    }
-  ];
-
-  return (
-    <section className="py-24 bg-slate-950">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-red-500 text-sm uppercase tracking-wider mb-4">The Challenge</p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            El cumplimiento no debería ser un dolor de cabeza
-          </h2>
-          <p className="text-lg text-slate-400">
-            Muchas empresas luchan con el AI Act. Estos son los problemas más comunes:
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 max-w-5xl mx-auto">
-          {pains.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="text-center p-6 sm:p-8 rounded-2xl bg-slate-900/50 border border-slate-800"
-            >
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                <item.icon className="w-8 h-8 text-red-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-4">
-                {item.title}
-              </h3>
-              <p className="text-slate-400">
-                {item.desc}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function WhoAppliesSection() {
-  const riskLevels = [
-    {
-      icon: AlertTriangle,
-      title: 'Riesgo Inaceptable',
-      color: 'text-red-400',
-      bgColor: 'bg-red-500/10',
-      borderColor: 'border-red-500/20',
-      desc: 'Sistemas prohibidos como manipulación subliminal o puntuación social.',
-      examples: 'Sistemas de vigilancia masiva, manipulación conductual'
-    },
-    {
-      icon: Shield,
-      title: 'Alto Riesgo',
-      color: 'text-orange-400',
-      bgColor: 'bg-orange-500/10',
-      borderColor: 'border-orange-500/20',
-      desc: 'Sistemas críticos que requieren cumplimiento estricto y evaluación de riesgos.',
-      examples: 'Salud, educación, empleo, seguridad, justicia'
-    },
-    {
-      icon: CheckCircle,
-      title: 'Riesgo Limitado',
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/10',
-      borderColor: 'border-blue-500/20',
-      desc: 'Sistemas con transparencia obligatoria pero menos requisitos.',
-      examples: 'Chatbots, generación de contenido (deepfakes)'
-    },
-    {
-      icon: Star,
-      title: 'Riesgo Mínimo',
-      color: 'text-emerald-400',
-      bgColor: 'bg-emerald-500/10',
-      borderColor: 'border-emerald-500/20',
-      desc: 'Sistemas de bajo riesgo con cumplimiento voluntario recomendado.',
-      examples: 'Spam filters, recomendaciones básicas'
-    }
-  ];
-
-  return (
-    <section id="who-applies" className="py-24 bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-8">
-          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">Compliance Framework</p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            ¿A quién aplica el AI Act?
-          </h2>
-          <p className="text-lg text-slate-400">
-            El Reglamento de IA de la UE establece obligaciones según el nivel de riesgo de tu sistema
-          </p>
-        </div>
-
-        <div className="max-w-3xl mx-auto mb-12">
-          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-            <p className="text-slate-300 text-center">
-              <strong className="text-white">Aplica a todas las empresas</strong> que utilicen IA en su día a día o sean proveedores de sistemas de IA, independientemente de su tamaño o sector.
-            </p>
+    <div
+      className="relative w-full max-w-2xl mx-auto"
+      style={{
+        filter: 'drop-shadow(0 40px 80px rgba(45,62,78,0.18))',
+      }}
+    >
+      {/* Browser chrome */}
+      <div className="rounded-2xl overflow-hidden border border-[#E8ECEB]">
+        <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-3 flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-400" />
+            <div className="w-3 h-3 rounded-full bg-yellow-400" />
+            <div className="w-3 h-3 rounded-full bg-green-400" />
+          </div>
+          <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-[#7a8a92] border border-[#E8ECEB] text-center">
+            app.cumplia.com/dashboard
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
-          {riskLevels.map((item, index) => (
+        {/* App layout */}
+        <div className="flex bg-white" style={{ height: '440px' }}>
+          {/* Sidebar */}
+          <div className="w-44 bg-white border-r border-[#E8ECEB] flex flex-col flex-shrink-0">
+            <div className="p-4 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-[#E09E50]" />
+              <span className="font-bold text-[#2D3E4E] text-sm">CumplIA</span>
+            </div>
+            <nav className="px-2 flex-1 space-y-0.5">
+              {[
+                { label: 'Dashboard', active: true },
+                { label: 'Inventario IA', active: false },
+                { label: 'Gestión Riesgos', active: false },
+                { label: 'Compliance', active: false },
+                { label: 'Documentación', active: false },
+                { label: 'Timeline', active: false },
+                { label: 'Mi trabajo', active: false },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className={`px-3 py-2 rounded-lg text-[10px] font-medium flex items-center gap-2 ${
+                    item.active
+                      ? 'bg-[#E09E50]/10 text-[#E09E50]'
+                      : 'text-[#7a8a92]'
+                  }`}
+                >
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${item.active ? 'bg-[#E09E50]' : 'bg-[#E8ECEB]'}`}
+                  />
+                  {item.label}
+                </div>
+              ))}
+            </nav>
+          </div>
+
+          {/* Main content */}
+          <div className="flex-1 bg-[#F8FAFB] p-4 overflow-hidden">
+            {/* Page header */}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-bold text-[#2D3E4E]">Dashboard</h3>
+                <p className="text-[10px] text-[#7a8a92]">Resumen de cumplimiento AI Act</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-6 h-6 rounded-full bg-[#E09E50]/20 flex items-center justify-center">
+                  <Bell className="w-3 h-3 text-[#E09E50]" />
+                </div>
+                <div className="w-6 h-6 rounded-full bg-[#2D3E4E]/10 flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-[#2D3E4E]/40" />
+                </div>
+              </div>
+            </div>
+
+            {/* Stats cards */}
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {[
+                { label: 'Sistemas IA', value: '12', sub: '3 nuevos este mes', color: 'border-blue-100 bg-white' },
+                { label: 'Cumplimiento', value: '78%', sub: '+12% vs anterior', color: 'border-green-100 bg-white' },
+                { label: 'Riesgos críticos', value: '4', sub: 'Requieren acción', color: 'border-orange-100 bg-white' },
+              ].map((stat) => (
+                <div key={stat.label} className={`p-2.5 rounded-xl border ${stat.color}`}>
+                  <div className="text-base font-bold text-[#2D3E4E]">{stat.value}</div>
+                  <div className="text-[9px] font-medium text-[#2D3E4E]">{stat.label}</div>
+                  <div className="text-[9px] text-[#7a8a92]">{stat.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Systems list */}
+            <div className="bg-white rounded-xl border border-[#E8ECEB] p-3 mb-2">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-semibold text-[#2D3E4E]">Sistemas de IA</span>
+                <span className="text-[9px] text-[#E09E50] font-medium">Ver todos →</span>
+              </div>
+              {[
+                { name: 'Chatbot Atención al Cliente', level: 'Limitado', pct: 85, levelColor: 'bg-blue-100 text-blue-600' },
+                { name: 'Scoring de Crédito', level: 'Alto Riesgo', pct: 42, levelColor: 'bg-orange-100 text-orange-600' },
+                { name: 'Recomendador Productos', level: 'Mínimo', pct: 96, levelColor: 'bg-green-100 text-green-600' },
+                { name: 'Detección de Fraude', level: 'Alto Riesgo', pct: 61, levelColor: 'bg-orange-100 text-orange-600' },
+              ].map((sys) => (
+                <div key={sys.name} className="flex items-center gap-2 py-1.5 border-b border-[#F8FAFB] last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] font-medium text-[#2D3E4E] truncate">{sys.name}</div>
+                    <div className="w-full bg-[#F8FAFB] rounded-full h-1 mt-0.5">
+                      <div
+                        className="h-1 rounded-full bg-[#E09E50]"
+                        style={{ width: `${sys.pct}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${sys.levelColor}`}>
+                    {sys.level}
+                  </span>
+                  <span className="text-[9px] text-[#7a8a92] flex-shrink-0">{sys.pct}%</span>
+                </div>
+              ))}
+            </div>
+
+            {/* AI badge */}
+            <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#E09E50]/10 to-[#8CBDB9]/10 rounded-xl border border-[#E09E50]/20">
+              <Sparkles className="w-3 h-3 text-[#E09E50]" />
+              <span className="text-[9px] text-[#2D3E4E] font-medium">Asistente IA activo — 3 recomendaciones pendientes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating badge */}
+      <div className="absolute -bottom-4 -right-4 bg-white rounded-xl shadow-lg border border-[#E8ECEB] px-3 py-2 flex items-center gap-2">
+        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+          <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+        </div>
+        <div>
+          <div className="text-[10px] font-semibold text-[#2D3E4E]">AI Act compliant</div>
+          <div className="text-[9px] text-[#7a8a92]">Actualizado hoy</div>
+        </div>
+      </div>
+
+      {/* Floating badge 2 */}
+      <div className="absolute -top-4 -left-4 bg-white rounded-xl shadow-lg border border-[#E8ECEB] px-3 py-2 flex items-center gap-2">
+        <div className="w-6 h-6 bg-[#E09E50]/10 rounded-full flex items-center justify-center">
+          <Sparkles className="w-3.5 h-3.5 text-[#E09E50]" />
+        </div>
+        <div>
+          <div className="text-[10px] font-semibold text-[#2D3E4E]">Análisis IA completado</div>
+          <div className="text-[9px] text-[#7a8a92]">12 riesgos identificados</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Risk Management Mockup
+// ─────────────────────────────────────────────────────────
+function RiskMockup() {
+  return (
+    <div className="rounded-2xl border border-[#E8ECEB] bg-white overflow-hidden shadow-xl">
+      <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-2.5 flex items-center gap-2">
+        <Shield className="w-4 h-4 text-[#E09E50]" />
+        <span className="text-xs font-semibold text-[#2D3E4E]">Gestión de Riesgos — Scoring Crédito</span>
+      </div>
+      <div className="p-4">
+        {/* Progress */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1">
+            <div className="flex justify-between mb-1">
+              <span className="text-[10px] text-[#7a8a92]">Progreso mitigación</span>
+              <span className="text-[10px] font-semibold text-[#2D3E4E]">42%</span>
+            </div>
+            <div className="w-full bg-[#E8ECEB] rounded-full h-2">
+              <div className="bg-gradient-to-r from-[#E09E50] to-[#D9885F] h-2 rounded-full" style={{ width: '42%' }} />
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-base font-bold text-orange-500">12</div>
+            <div className="text-[9px] text-[#7a8a92]">riesgos</div>
+          </div>
+        </div>
+        {/* Risk items */}
+        <div className="space-y-1.5">
+          {[
+            { name: 'Discriminación injusta', severity: 'Crítico', status: 'Pendiente', severityColor: 'text-red-600 bg-red-50', statusColor: 'text-red-500' },
+            { name: 'Sesgos en datos entreno', severity: 'Alto', status: 'En revisión', severityColor: 'text-orange-600 bg-orange-50', statusColor: 'text-orange-500' },
+            { name: 'Fuga datos personales', severity: 'Crítico', status: 'Mitigado', severityColor: 'text-red-600 bg-red-50', statusColor: 'text-green-500' },
+            { name: 'Falta transparencia', severity: 'Medio', status: 'Mitigado', severityColor: 'text-yellow-600 bg-yellow-50', statusColor: 'text-green-500' },
+          ].map((risk) => (
+            <div key={risk.name} className="flex items-center gap-2 p-2 rounded-lg bg-[#F8FAFB]">
+              <div className="flex-1">
+                <span className="text-[10px] font-medium text-[#2D3E4E]">{risk.name}</span>
+              </div>
+              <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${risk.severityColor}`}>
+                {risk.severity}
+              </span>
+              <span className={`text-[9px] font-medium ${risk.statusColor}`}>{risk.status}</span>
+            </div>
+          ))}
+        </div>
+        {/* AI button */}
+        <button className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-gradient-to-r from-[#E09E50] to-[#D9885F] text-white text-[10px] font-medium">
+          <Sparkles className="w-3 h-3" />
+          Analizar con IA
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Compliance Mockup
+// ─────────────────────────────────────────────────────────
+function ComplianceMockup() {
+  return (
+    <div className="rounded-2xl border border-[#E8ECEB] bg-white overflow-hidden shadow-xl">
+      <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-2.5 flex items-center gap-2">
+        <BarChart3 className="w-4 h-4 text-[#8CBDB9]" />
+        <span className="text-xs font-semibold text-[#2D3E4E]">Compliance — Obligaciones AI Act</span>
+      </div>
+      <div className="p-4">
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {[
+            { label: 'Completadas', value: '18', color: 'text-green-600 bg-green-50' },
+            { label: 'En progreso', value: '7', color: 'text-orange-600 bg-orange-50' },
+            { label: 'Pendientes', value: '4', color: 'text-red-600 bg-red-50' },
+          ].map((s) => (
+            <div key={s.label} className={`text-center p-2 rounded-lg ${s.color}`}>
+              <div className="text-base font-bold">{s.value}</div>
+              <div className="text-[9px]">{s.label}</div>
+            </div>
+          ))}
+        </div>
+        {[
+          { label: 'Art. 13 — Transparencia', pct: 100, done: true },
+          { label: 'Art. 14 — Supervisión humana', pct: 60, done: false },
+          { label: 'Art. 16 — Registro técnico', pct: 40, done: false },
+          { label: 'Art. 27 — FRIA completa', pct: 75, done: false },
+        ].map((ob) => (
+          <div key={ob.label} className="flex items-center gap-2 mb-2">
+            <div className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center ${ob.done ? 'bg-green-100' : 'bg-[#E8ECEB]'}`}>
+              {ob.done && <CheckCircle className="w-3 h-3 text-green-600" />}
+            </div>
+            <div className="flex-1">
+              <div className="text-[9px] text-[#2D3E4E] font-medium mb-0.5">{ob.label}</div>
+              <div className="w-full bg-[#E8ECEB] rounded-full h-1">
+                <div className={`h-1 rounded-full ${ob.done ? 'bg-green-500' : 'bg-[#8CBDB9]'}`} style={{ width: `${ob.pct}%` }} />
+              </div>
+            </div>
+            <span className="text-[9px] text-[#7a8a92]">{ob.pct}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Animated counter hook
+// ─────────────────────────────────────────────────────────
+function useCountUp(end: number, duration = 2000, start = 0) {
+  const [count, setCount] = useState(start);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let startTime: number;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setCount(Math.floor(progress * (end - start) + start));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [isVisible, end, duration, start]);
+
+  return { count, ref };
+}
+
+// ─────────────────────────────────────────────────────────
+// 1. HERO SECTION
+// ─────────────────────────────────────────────────────────
+function HeroSection() {
+  return (
+    <section className="relative overflow-hidden bg-white pt-8 pb-16 lg:pt-16 lg:pb-24">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(224,158,80,0.08),transparent)]" />
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#F8FAFB] to-transparent" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left: Copy */}
+          <div>
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E09E50]/10 border border-[#E09E50]/25 text-[#B8720A] text-sm font-medium mb-6"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Cumplimiento del AI Act con IA</span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D3E4E] tracking-tight leading-tight mb-6"
+            >
+              Cumple con el{' '}
+              <span className="relative">
+                <span className="relative z-10 text-[#E09E50]">AI Act europeo</span>
+                <span className="absolute bottom-1 left-0 right-0 h-3 bg-[#E09E50]/15 -z-0 rounded" />
+              </span>{' '}
+              sin complicaciones
+            </motion.h1>
+
+            {/* Subheadline */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg sm:text-xl text-[#7a8a92] mb-8 leading-relaxed max-w-xl"
+            >
+              CumplIA automatiza la gestión de riesgos, obligaciones y documentación de tus sistemas de IA.
+              De semanas a horas — con inteligencia artificial incluida.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-3 mb-8"
+            >
+              <Link href="/register">
+                <Button
+                  size="lg"
+                  className="bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/35 transition-all w-full sm:w-auto"
+                >
+                  Empezar gratis
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <a href="#how-it-works">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-base px-8 py-6 h-auto border-[#E8ECEB] text-[#2D3E4E] hover:bg-[#F8FAFB] hover:border-[#E09E50]/40 transition-all w-full sm:w-auto"
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Cómo funciona
+                </Button>
+              </a>
+            </motion.div>
+
+            {/* Trust indicators */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.45 }}
+              className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#7a8a92]"
+            >
+              <div className="flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Sin tarjeta de crédito</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Configuración en 5 minutos</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Cancela cuando quieras</span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right: Dashboard mockup */}
+          <motion.div
+            initial={{ opacity: 0, x: 40, y: 20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+            className="relative hidden lg:block"
+            style={{ perspective: '1200px' }}
+          >
+            <div style={{ transform: 'rotateX(3deg) rotateY(-4deg)' }}>
+              <DashboardMockup />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Mobile mockup */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="lg:hidden mt-10"
+        >
+          <DashboardMockup />
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 2. STATS SECTION
+// ─────────────────────────────────────────────────────────
+function StatItem({ icon: Icon, value, suffix, label, color }: {
+  icon: any; value: number; suffix: string; label: string; color: string;
+}) {
+  const { count, ref } = useCountUp(value, 1800);
+  return (
+    <div ref={ref} className="text-center">
+      <Icon className={`h-6 w-6 mx-auto mb-2 ${color}`} />
+      <div className="text-3xl lg:text-4xl font-bold text-white mb-1">
+        {count}{suffix}
+      </div>
+      <div className="text-sm text-[#8CBDB9]/80">{label}</div>
+    </div>
+  );
+}
+
+function StatsSection() {
+  const stats = [
+    { icon: Building2, value: 50, suffix: '+', label: 'Factores de riesgo catalogados', color: 'text-[#E09E50]' },
+    { icon: Scale, value: 4, suffix: '', label: 'Niveles de riesgo AI Act cubiertos', color: 'text-[#8CBDB9]' },
+    { icon: FileText, value: 100, suffix: '%', label: 'Generación automática de informes', color: 'text-[#E09E50]' },
+    { icon: Clock, value: 5, suffix: 'min', label: 'Para tener tu primer sistema clasificado', color: 'text-[#8CBDB9]' },
+  ];
+
+  return (
+    <section className="py-12 bg-[#2D3E4E]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {stats.map((stat, index) => (
+            <StatItem key={index} {...stat} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 3. PROBLEM SECTION
+// ─────────────────────────────────────────────────────────
+function ProblemSection() {
+  const pains = [
+    {
+      icon: AlertCircle,
+      title: 'Incertidumbre jurídica',
+      desc: 'El AI Act son 458 artículos de requisitos técnicos y legales. Las sanciones llegan al 7% de facturación global — y la fecha límite ya está encima.',
+      stat: '7% de facturación',
+      statLabel: 'Sanción máxima',
+    },
+    {
+      icon: Clock,
+      title: 'Semanas perdidas',
+      desc: 'Clasificar manualmente cada sistema, identificar obligaciones y redactar documentación consume semanas de trabajo de tu equipo de compliance y legal.',
+      stat: '6-8 semanas',
+      statLabel: 'Tiempo medio sin herramientas',
+    },
+    {
+      icon: FileText,
+      title: 'Documentación imposible',
+      desc: 'FRIA, registro técnico, análisis de riesgos, supervisión humana… Cada sistema de IA requiere docenas de documentos diferentes y actualizados.',
+      stat: '20+ documentos',
+      statLabel: 'Por sistema de alto riesgo',
+    },
+  ];
+
+  return (
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <p className="text-sm font-semibold uppercase tracking-wider text-red-500 mb-3">El problema real</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+            El AI Act es complejo. Sin las herramientas adecuadas, es un calvario.
+          </h2>
+          <p className="text-[#7a8a92]">
+            Miles de empresas en Europa luchan con los mismos problemas. ¿Te suena familiar?
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-14">
+          {pains.map((pain, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`p-5 sm:p-6 rounded-2xl bg-slate-950 ${item.borderColor} border hover:border-opacity-50 transition-all`}
+              className="p-6 rounded-2xl border border-red-100 bg-red-50/50"
             >
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${item.bgColor} flex items-center justify-center mb-3 sm:mb-4`}>
-                <item.icon className={`w-6 h-6 ${item.color}`} />
+              <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center mb-4">
+                <pain.icon className="w-5 h-5 text-red-500" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-              <p className="text-slate-400 text-sm mb-4">{item.desc}</p>
-              <p className="text-xs text-slate-500">
-                <strong className="text-slate-400">Ejemplos:</strong> {item.examples}
-              </p>
+              <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{pain.title}</h3>
+              <p className="text-sm text-[#7a8a92] mb-4 leading-relaxed">{pain.desc}</p>
+              <div className="pt-3 border-t border-red-100">
+                <div className="text-xl font-bold text-red-500">{pain.stat}</div>
+                <div className="text-xs text-[#7a8a92]">{pain.statLabel}</div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Transition */}
+        <div className="text-center">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#E09E50]/10 border border-[#E09E50]/25">
+            <CheckCircle className="w-5 h-5 text-[#E09E50]" />
+            <span className="font-semibold text-[#2D3E4E]">CumplIA resuelve los tres problemas de una vez</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 4. HOW IT WORKS
+// ─────────────────────────────────────────────────────────
+function HowItWorksSection() {
+  const steps = [
+    {
+      number: '01',
+      icon: FolderKanban,
+      title: 'Registra tus sistemas de IA',
+      desc: 'Añade cada sistema de IA que utilizas: nombre, sector, descripción y contexto de uso. En minutos tienes tu inventario completo centralizado.',
+      detail: 'Formulario guiado + importación masiva',
+      color: 'from-[#E09E50]/20 to-[#E09E50]/5',
+      iconColor: 'text-[#E09E50]',
+      borderColor: 'border-[#E09E50]/30',
+    },
+    {
+      number: '02',
+      icon: Sparkles,
+      title: 'IA clasifica y analiza riesgos',
+      desc: 'Nuestro asistente de IA lee la descripción de tu sistema, lo clasifica según el AI Act y propone los factores de riesgo aplicables de nuestro catálogo de 50+ riesgos.',
+      detail: 'Clasificación automática + análisis de riesgos IA',
+      color: 'from-[#8CBDB9]/20 to-[#8CBDB9]/5',
+      iconColor: 'text-[#8CBDB9]',
+      borderColor: 'border-[#8CBDB9]/30',
+    },
+    {
+      number: '03',
+      icon: ShieldCheck,
+      title: 'Gestiona obligaciones y genera documentos',
+      desc: 'Sigue el progreso de tus obligaciones artículo por artículo, mitiga riesgos, sube evidencias y genera informes PDF de cumplimiento listos para auditores.',
+      detail: 'Informes PDF automáticos + exportación',
+      color: 'from-green-100 to-green-50',
+      iconColor: 'text-green-600',
+      borderColor: 'border-green-200',
+    },
+  ];
+
+  return (
+    <section id="how-it-works" className="py-20 bg-[#F8FAFB]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Cómo funciona</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+            De cero a cumplimiento en 3 pasos
+          </h2>
+          <p className="text-[#7a8a92]">
+            Sin consultores externos ni hojas de cálculo. Solo un flujo guiado con IA que hace el trabajo pesado por ti.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto relative">
+          {/* Connector line */}
+          <div className="hidden md:block absolute top-16 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-[#E09E50]/30 via-[#8CBDB9]/30 to-green-200 z-0" />
+
+          {steps.map((step, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.15 }}
+              viewport={{ once: true }}
+              className={`relative p-6 rounded-2xl bg-gradient-to-b ${step.color} border ${step.borderColor}`}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-white/80">
+                  <step.icon className={`w-5 h-5 ${step.iconColor}`} />
+                </div>
+                <span className="text-3xl font-bold text-[#E8ECEB]">{step.number}</span>
+              </div>
+              <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{step.title}</h3>
+              <p className="text-sm text-[#7a8a92] leading-relaxed mb-4">{step.desc}</p>
+              <div className="flex items-center gap-1.5 text-xs text-[#7a8a92]">
+                <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                <span>{step.detail}</span>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -388,68 +660,187 @@ function WhoAppliesSection() {
   );
 }
 
-function FeaturesSection() {
-  const features = [
-    {
-      icon: Bot,
-      title: 'Evaluación de Riesgos',
-      desc: 'Clasifica automáticamente tus sistemas de IA según el nivel de riesgo del AI Act.'
-    },
-    {
-      icon: FileText,
-      title: 'FRIA Automatizada',
-      desc: 'Genera Evaluaciones de Impacto en Riesgos de IA adaptadas a cada sistema.'
-    },
-    {
-      icon: Shield,
-      title: 'Registro de Cumplimiento',
-      desc: 'Mantén un registro actualizado de todas tus obligaciones y evidencias.'
-    },
-    {
-      icon: BookOpen,
-      title: 'Biblioteca de Plantillas',
-      desc: 'Accede a plantillas predefinidas de documentación requerida por el AI Act.'
-    },
-    {
-      icon: Zap,
-      title: 'Alertas Inteligentes',
-      desc: 'Recibe notificaciones sobre cambios en la regulación y fechas importantes.'
-    },
-    {
-      icon: Globe,
-      title: 'Multi-idioma',
-      desc: 'Plataforma disponible en español, inglés y otros idiomas de la UE.'
-    }
-  ];
+// ─────────────────────────────────────────────────────────
+// 5. PRODUCT PREVIEW SECTION
+// ─────────────────────────────────────────────────────────
+function ProductPreviewSection() {
+  const [activeTab, setActiveTab] = useState<'risks' | 'compliance'>('risks');
 
   return (
-    <section id="features" className="py-24 bg-slate-900">
+    <section className="py-20 bg-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">Platform Features</p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Todo lo que necesitas para cumplir
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">La plataforma</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+            Diseñada para que compliance sea simple
           </h2>
-          <p className="text-lg text-slate-400">
-            CumplIA te guía paso a paso en todo el proceso de cumplimiento
+          <p className="text-[#7a8a92]">
+            Cada pantalla está pensada para que tu equipo entienda el estado de cumplimiento de un vistazo.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
+        {/* Tab selector */}
+        <div className="flex justify-center gap-2 mb-8">
+          <button
+            onClick={() => setActiveTab('risks')}
+            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+              activeTab === 'risks'
+                ? 'bg-[#E09E50] text-white shadow-lg shadow-[#E09E50]/25'
+                : 'bg-[#F8FAFB] text-[#7a8a92] border border-[#E8ECEB] hover:border-[#E09E50]/40'
+            }`}
+          >
+            Gestión de Riesgos
+          </button>
+          <button
+            onClick={() => setActiveTab('compliance')}
+            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+              activeTab === 'compliance'
+                ? 'bg-[#8CBDB9] text-white shadow-lg shadow-[#8CBDB9]/25'
+                : 'bg-[#F8FAFB] text-[#7a8a92] border border-[#E8ECEB] hover:border-[#8CBDB9]/40'
+            }`}
+          >
+            Seguimiento de Obligaciones
+          </button>
+        </div>
+
+        <div className="max-w-2xl mx-auto">
+          <AnimatePresence mode="wait">
+            {activeTab === 'risks' ? (
+              <motion.div
+                key="risks"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.3 }}
+              >
+                <RiskMockup />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="compliance"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ComplianceMockup />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 6. FEATURES BENTO GRID
+// ─────────────────────────────────────────────────────────
+function FeaturesSection() {
+  const features = [
+    {
+      icon: FolderKanban,
+      title: 'Inventario centralizado de IA',
+      desc: 'Registra y gestiona todos tus sistemas de IA en un único lugar. Sector, responsable, proveedor, estado — todo controlado.',
+      size: 'lg',
+      color: 'bg-gradient-to-br from-[#E09E50]/10 to-white',
+    },
+    {
+      icon: Sparkles,
+      title: 'Clasificación automática con IA',
+      desc: 'El asistente lee la descripción de tu sistema y lo clasifica en segundos según los 4 niveles del AI Act.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-purple-50 to-white',
+    },
+    {
+      icon: Shield,
+      title: 'Catálogo de 50+ riesgos',
+      desc: 'Base de conocimiento con todos los factores de riesgo relevantes del AI Act, categorizados por criticidad y nivel de riesgo.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-orange-50 to-white',
+    },
+    {
+      icon: Bot,
+      title: 'Análisis de riesgos con IA',
+      desc: 'El asistente IA analiza tu sistema, hace preguntas, propone los factores de riesgo aplicables y los justifica. Tú solo revisas y apruebas.',
+      size: 'lg',
+      color: 'bg-gradient-to-br from-[#8CBDB9]/10 to-white',
+    },
+    {
+      icon: BarChart3,
+      title: 'Seguimiento de obligaciones',
+      desc: 'Cada artículo del AI Act traducido a acciones concretas. Marca progreso, sube evidencias, ve el % de cumplimiento por sistema.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-blue-50 to-white',
+    },
+    {
+      icon: Download,
+      title: 'Informes PDF automáticos',
+      desc: 'Genera informes de cumplimiento listos para auditores externos con un clic. Incluye riesgos, obligaciones y evidencias.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-green-50 to-white',
+    },
+    {
+      icon: CalendarClock,
+      title: 'Timeline regulatorio',
+      desc: 'Visualiza las fechas clave del AI Act y mantén a tu equipo al día de los plazos de cumplimiento que aplican a tu organización.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-rose-50 to-white',
+    },
+    {
+      icon: Users,
+      title: 'Gestión de equipos y roles',
+      desc: 'Colabora con admin, compliance officer, auditor y viewer. Cada rol ve solo lo que necesita y puede hacer solo lo que le corresponde.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-indigo-50 to-white',
+    },
+    {
+      icon: History,
+      title: 'Registro de actividad (Audit Log)',
+      desc: 'Trazabilidad completa de cada cambio en la plataforma. Quién hizo qué y cuándo — imprescindible para auditorías.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-amber-50 to-white',
+    },
+    {
+      icon: CheckSquare,
+      title: 'Mi trabajo',
+      desc: 'Cada usuario ve sus tareas pendientes y su progreso personal. Nada se pierde, nadie se bloquea.',
+      size: 'sm',
+      color: 'bg-gradient-to-br from-teal-50 to-white',
+    },
+  ];
+
+  return (
+    <section id="features" className="py-20 bg-[#F8FAFB]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Funcionalidades</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+            Todo lo que necesitas, nada que no necesitas
+          </h2>
+          <p className="text-[#7a8a92]">
+            Cada funcionalidad está construida para el caso de uso real del compliance del AI Act — no para el caso genérico.
+          </p>
+        </div>
+
+        {/* Bento grid */}
+        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((feature, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.4, delay: (index % 6) * 0.07 }}
               viewport={{ once: true }}
-              className="group p-6 sm:p-8 rounded-2xl bg-slate-950 border border-slate-800 hover:border-blue-500/50 transition-all duration-300"
+              className={`group p-6 rounded-2xl border border-[#E8ECEB] hover:border-[#E09E50]/30 hover:shadow-md transition-all duration-300 ${feature.color} ${
+                feature.size === 'lg' ? 'lg:col-span-1' : ''
+              }`}
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-blue-500/20 transition-colors">
-                <feature.icon className="w-6 h-6 text-blue-400" />
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-[#E8ECEB] flex items-center justify-center mb-4 group-hover:border-[#E09E50]/30 transition-colors">
+                <feature.icon className="w-5 h-5 text-[#E09E50]" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-              <p className="text-slate-400">{feature.desc}</p>
+              <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{feature.title}</h3>
+              <p className="text-sm text-[#7a8a92] leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -458,157 +849,344 @@ function FeaturesSection() {
   );
 }
 
+// ─────────────────────────────────────────────────────────
+// 7. AI ACT LEVELS
+// ─────────────────────────────────────────────────────────
+function AIActSection() {
+  const levels = [
+    {
+      icon: Lock,
+      title: 'Prohibido',
+      badge: 'No desplegable',
+      badgeColor: 'bg-red-100 text-red-600',
+      desc: 'Sistemas prohibidos en la UE: manipulación subliminal, puntuación social masiva, vigilancia biométrica no autorizada.',
+      examples: 'Social scoring, manipulación conductual',
+      borderColor: 'border-red-200',
+      iconBg: 'bg-red-50',
+      iconColor: 'text-red-500',
+    },
+    {
+      icon: AlertTriangle,
+      title: 'Alto Riesgo',
+      badge: 'Cumplimiento estricto',
+      badgeColor: 'bg-orange-100 text-orange-600',
+      desc: 'Requieren evaluación de conformidad, registro técnico, FRIA, supervisión humana y gestión de riesgos documentada.',
+      examples: 'Salud, empleo, justicia, infraestructuras críticas',
+      borderColor: 'border-orange-200',
+      iconBg: 'bg-orange-50',
+      iconColor: 'text-orange-500',
+    },
+    {
+      icon: Eye,
+      title: 'Riesgo Limitado',
+      badge: 'Transparencia obligatoria',
+      badgeColor: 'bg-blue-100 text-blue-600',
+      desc: 'Obligación de informar al usuario que está interactuando con un sistema de IA. Menos requisitos técnicos.',
+      examples: 'Chatbots, deepfakes, contenido generado por IA',
+      borderColor: 'border-blue-200',
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-500',
+    },
+    {
+      icon: Star,
+      title: 'Riesgo Mínimo',
+      badge: 'Voluntario',
+      badgeColor: 'bg-green-100 text-green-600',
+      desc: 'Sin obligaciones específicas del AI Act. Se recomienda seguir buenas prácticas voluntariamente.',
+      examples: 'Filtros de spam, recomendadores básicos, juegos',
+      borderColor: 'border-green-200',
+      iconBg: 'bg-green-50',
+      iconColor: 'text-green-600',
+    },
+  ];
+
+  return (
+    <section id="who-applies" className="py-20 bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-6">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">Marco del AI Act</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+            ¿A qué nivel de riesgo pertenece tu sistema?
+          </h2>
+          <p className="text-[#7a8a92]">
+            El AI Act clasifica los sistemas según el riesgo que suponen. CumplIA te ayuda a identificarlo automáticamente.
+          </p>
+        </div>
+
+        <div className="max-w-3xl mx-auto mb-10">
+          <div className="p-4 rounded-xl bg-[#E09E50]/8 border border-[#E09E50]/20 text-center">
+            <p className="text-sm text-[#2D3E4E]">
+              <strong>Aplica a todas las empresas</strong> que usen o desarrollen IA en la UE —
+              independientemente del tamaño o sector. Desde agosto 2026 con sanciones activas.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+          {levels.map((level, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className={`p-5 rounded-2xl border ${level.borderColor} bg-white hover:shadow-md transition-shadow`}
+            >
+              <div className={`w-10 h-10 rounded-xl ${level.iconBg} flex items-center justify-center mb-3`}>
+                <level.icon className={`w-5 h-5 ${level.iconColor}`} />
+              </div>
+              <h3 className="text-base font-bold text-[#2D3E4E] mb-1">{level.title}</h3>
+              <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium mb-3 ${level.badgeColor}`}>
+                {level.badge}
+              </span>
+              <p className="text-xs text-[#7a8a92] leading-relaxed mb-3">{level.desc}</p>
+              <p className="text-xs text-[#7a8a92]">
+                <strong className="text-[#2D3E4E]">Ej:</strong> {level.examples}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 8. TESTIMONIALS
+// ─────────────────────────────────────────────────────────
+function TestimonialsSection() {
+  const testimonials = [
+    {
+      quote: 'Lo que nos habría llevado 3 meses con consultores externos, lo tuvimos listo en 2 semanas con CumplIA. La clasificación automática y el análisis de riesgos con IA son una pasada.',
+      name: 'Ana García',
+      role: 'Chief Compliance Officer',
+      company: 'FinTech Solutions S.L.',
+      avatar: 'AG',
+      avatarColor: 'bg-[#E09E50]',
+    },
+    {
+      quote: 'Por fin una herramienta que habla el lenguaje de compliance, no de IT. Los informes PDF que genera son exactamente lo que piden los auditores. Nos ha ahorrado semanas de trabajo.',
+      name: 'Carlos Martínez',
+      role: 'Director de Tecnología',
+      company: 'Salud Digital Corp.',
+      avatar: 'CM',
+      avatarColor: 'bg-[#8CBDB9]',
+    },
+    {
+      quote: 'Tenemos 8 sistemas de IA de distinto nivel de riesgo. CumplIA nos permite gestionar todo desde un panel, asignar responsables y tener el audit log completo para cualquier inspección.',
+      name: 'Laura Sánchez',
+      role: 'Responsable de Riesgo IA',
+      company: 'Grupo Asegurador España',
+      avatar: 'LS',
+      avatarColor: 'bg-purple-500',
+    },
+  ];
+
+  return (
+    <section className="py-20 bg-[#F8FAFB]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Lo que dicen nuestros clientes</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E]">
+            Empresas que ya cumplen con el AI Act
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {testimonials.map((t, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white p-6 rounded-2xl border border-[#E8ECEB] shadow-sm hover:shadow-md transition-shadow"
+            >
+              {/* Stars */}
+              <div className="flex gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-[#E09E50] text-[#E09E50]" />
+                ))}
+              </div>
+              <p className="text-sm text-[#7a8a92] leading-relaxed mb-6 italic">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-full ${t.avatarColor} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                  {t.avatar}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-[#2D3E4E]">{t.name}</div>
+                  <div className="text-xs text-[#7a8a92]">{t.role} · {t.company}</div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 9. PRICING
+// ─────────────────────────────────────────────────────────
 function PricingSection() {
   const plans = [
     {
       name: 'Starter',
       price: '0€',
       period: '/mes',
-      description: 'Valida tu primer sistema de IA y conoce la plataforma',
+      description: 'Para conocer la plataforma y evaluar tu primer sistema de IA',
       features: [
-        '1 Sistema de IA',
+        '1 sistema de IA',
         '1 usuario',
-        'Clasificación AI Act',
+        'Clasificación AI Act automática',
         'Obligaciones básicas',
         'Checklist de cumplimiento',
-        'Sin generación de documentos'
       ],
-      cta: 'Empezar Gratis',
+      cta: 'Empezar gratis',
       href: '/register',
-      highlight: false
+      highlight: false,
     },
     {
       name: 'Professional',
       price: '99€',
       originalPrice: '149',
       period: '/mes',
-      description: 'Ideal para PYMEs y consultoras con varios sistemas de IA',
+      description: 'Para PYMEs y consultoras con varios sistemas de IA',
       features: [
-        'Hasta 15 Sistemas de IA',
+        'Hasta 15 sistemas de IA',
         'Hasta 3 usuarios',
+        'Análisis de riesgos completo',
         'FRIA completa (Art. 27)',
-        'Gestión completa de riesgos',
-        'Registro de evidencias',
         'Exportación PDF/DOCX',
-        'Soporte email prioritario'
+        'Registro de evidencias',
+        'Soporte email prioritario',
       ],
-      cta: 'Elige Professional',
+      cta: 'Elegir Professional',
       href: '/register?plan=professional',
       highlight: true,
-      badge: '🔥 Oferta de lanzamiento',
-      badgeColor: 'bg-green-500/20 text-green-400',
-      yearlySavings: 'Ahorra 600€/año',
-      additionalSavings: 'o 990€/año (ahorra 198€)'
+      badge: 'Más popular',
+      savings: 'Ahorra 600€/año',
     },
     {
       name: 'Business',
       price: '249€',
       originalPrice: '349',
       period: '/mes',
-      description: 'Para empresas con múltiples departamentos y necesidades avanzadas',
+      description: 'Para empresas con múltiples equipos y necesidades avanzadas',
       features: [
         'Sistemas de IA ilimitados',
         'Hasta 10 usuarios',
-        'Asistente IA',
-        'Gestión de Riesgos avanzada',
-        'Registro de evidencias',
+        'Asistente IA incluido',
         'Plantillas personalizadas',
-        'Gestión multi-departamento',
-        'Soporte prioritario'
+        'Multi-departamento',
+        'Audit log completo',
+        'Soporte prioritario',
       ],
-      cta: 'Elige Business',
-      href: '/contact?plan=business',
+      cta: 'Elegir Business',
+      href: '/register?plan=business',
       highlight: false,
-      badge: '💼 Precio especial PYMEs',
-      badgeColor: 'bg-blue-500/20 text-blue-400',
-      yearlySavings: 'Ahorra 1.200€/año',
-      additionalSavings: 'o 2.490€/año (ahorra 498€)'
+      savings: 'Ahorra 1.200€/año',
     },
     {
       name: 'Enterprise',
       price: 'Custom',
       period: '',
-      description: 'Soluciones personalizadas para grandes organizaciones',
+      description: 'Soluciones a medida para grandes organizaciones',
       features: [
         'Sistemas de IA ilimitados',
         'Usuarios ilimitados',
-        'SSO y autenticación avanzada',
-        'On-premise disponible',
+        'SSO / SAML',
         'API completa',
+        'On-premise disponible',
         'SLA garantizado',
-        'Account manager dedicado'
+        'Account manager dedicado',
       ],
-      cta: 'Contactar Ventas',
+      cta: 'Contactar ventas',
       href: '/contact?plan=enterprise',
-      highlight: false
-    }
+      highlight: false,
+    },
   ];
 
   return (
-    <section id="pricing" className="py-24 bg-slate-950">
+    <section id="pricing" className="py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-blue-500 text-sm uppercase tracking-wider mb-4">Pricing</p>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Precios</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
             Planes para cada etapa
           </h2>
-          <p className="text-lg text-slate-400">
-            Desde pruebas gratuitas hasta soluciones empresariales. Cumple con el AI Act sin comprometer tu presupuesto.
+          <p className="text-[#7a8a92]">
+            Empieza gratis, escala cuando lo necesites. Sin sorpresas.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
               viewport={{ once: true }}
-              className={`rounded-2xl p-6 sm:p-8 ${
-                plan.highlight 
-                  ? 'bg-gradient-to-b from-blue-600/20 to-slate-900 border-2 border-blue-500/50' 
-                  : 'bg-slate-900 border border-slate-800'
+              className={`relative rounded-2xl p-6 flex flex-col ${
+                plan.highlight
+                  ? 'bg-[#2D3E4E] text-white shadow-2xl shadow-[#2D3E4E]/25 scale-[1.02]'
+                  : 'bg-white border border-[#E8ECEB]'
               }`}
             >
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-1 flex-wrap mb-2">
-                  {plan.originalPrice && (
-                    <span className="text-slate-400 line-through text-lg mr-2">{plan.originalPrice}€</span>
-                  )}
-                  <span className="text-5xl font-bold text-white">{plan.price}</span>
-                  <span className="text-slate-500">{plan.period}</span>
-                </div>
-                {plan.badge && (
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-2 ${plan.badgeColor || 'bg-blue-500/20 text-blue-400'}`}>
+              {plan.badge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="bg-[#E09E50] text-white text-xs font-semibold px-3 py-1 rounded-full">
                     {plan.badge}
                   </span>
+                </div>
+              )}
+
+              <div className="mb-6">
+                <h3 className={`text-lg font-bold mb-1 ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
+                  {plan.name}
+                </h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  {plan.originalPrice && (
+                    <span className={`text-sm line-through ${plan.highlight ? 'text-white/40' : 'text-[#7a8a92]'}`}>
+                      {plan.originalPrice}€
+                    </span>
+                  )}
+                  <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
+                    {plan.price}
+                  </span>
+                  <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#7a8a92]'}`}>
+                    {plan.period}
+                  </span>
+                </div>
+                {plan.savings && (
+                  <p className="text-xs font-medium text-green-400">{plan.savings}</p>
                 )}
-                {plan.yearlySavings && (
-                  <p className="text-sm text-emerald-400 font-medium">{plan.yearlySavings}</p>
-                )}
-                {plan.additionalSavings && (
-                  <p className="text-xs text-slate-500 mt-1">{plan.additionalSavings}</p>
-                )}
-                <p className="text-slate-400 text-sm mt-2">{plan.description}</p>
+                <p className={`text-xs mt-2 ${plan.highlight ? 'text-white/60' : 'text-[#7a8a92]'}`}>
+                  {plan.description}
+                </p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-2.5 mb-6 flex-1">
                 {plan.features.map((feature, fIndex) => (
-                  <li key={fIndex} className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    <span className="text-slate-300 text-sm">{feature}</span>
+                  <li key={fIndex} className="flex items-start gap-2">
+                    <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${plan.highlight ? 'text-[#E09E50]' : 'text-green-500'}`} />
+                    <span className={`text-sm ${plan.highlight ? 'text-white/80' : 'text-[#7a8a92]'}`}>
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
 
               <Link href={plan.href}>
-                <Button 
-                  className={`w-full min-h-[56px] py-5 sm:py-6 text-base ${
-                    plan.highlight 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                      : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
+                <Button
+                  className={`w-full py-5 h-auto text-sm font-semibold ${
+                    plan.highlight
+                      ? 'bg-[#E09E50] hover:bg-[#D9885F] text-white shadow-lg shadow-[#E09E50]/25'
+                      : 'bg-[#F8FAFB] hover:bg-[#E8ECEB] text-[#2D3E4E] border border-[#E8ECEB]'
                   }`}
                 >
                   {plan.cta}
@@ -617,22 +1195,180 @@ function PricingSection() {
             </motion.div>
           ))}
         </div>
+
+        <p className="text-center text-sm text-[#7a8a92] mt-8">
+          Todos los planes incluyen acceso completo durante 14 días de prueba. Sin tarjeta de crédito.
+        </p>
       </div>
     </section>
   );
 }
 
+// ─────────────────────────────────────────────────────────
+// 10. FAQ
+// ─────────────────────────────────────────────────────────
+function FAQSection() {
+  const [open, setOpen] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      q: '¿El AI Act ya está en vigor? ¿Tengo que cumplir ahora?',
+      a: 'El AI Act entró en vigor en agosto de 2024. Las prohibiciones aplican desde febrero de 2025. Las obligaciones para sistemas de alto riesgo entran en vigor en agosto de 2026. Es fundamental empezar el proceso de cumplimiento ahora para llegar a tiempo.',
+    },
+    {
+      q: '¿Cómo sé si mi sistema de IA es de alto riesgo?',
+      a: 'El AI Act define los sistemas de alto riesgo en el Anexo III: biometría, infraestructuras críticas, educación, empleo, servicios esenciales, justicia y seguridad. CumplIA te ayuda a clasificar automáticamente tu sistema en segundos mediante nuestro asistente de IA.',
+    },
+    {
+      q: '¿Qué es una FRIA y por qué la necesito?',
+      a: 'La Evaluación de Impacto en los Derechos Fundamentales (FRIA) es obligatoria para sistemas de alto riesgo desplegados por organismos públicos o que afecten a la prestación de servicios públicos. CumplIA genera la estructura de la FRIA adaptada a tu sistema (Art. 27).',
+    },
+    {
+      q: '¿CumplIA sustituye a un consultor legal?',
+      a: 'CumplIA automatiza el trabajo técnico y de documentación, pero no sustituye el asesoramiento jurídico para casos complejos. Lo que sí hace es reducir drásticamente el tiempo (y coste) que necesitas de consultores externos, aportando la estructura y la documentación base.',
+    },
+    {
+      q: '¿Puedo empezar gratis y migrar mis datos si cambio de plan?',
+      a: 'Sí. El plan Starter es gratuito sin límite de tiempo para un sistema de IA. Si creces, puedes migrar a Professional o Business en cualquier momento y todos tus datos, riesgos y documentos se conservan íntegramente.',
+    },
+    {
+      q: '¿Mis datos están seguros? ¿Cumplís el RGPD?',
+      a: 'CumplIA está construido sobre infraestructura europea (Supabase/AWS EU), cumple con el RGPD y sus datos nunca se utilizan para entrenar modelos de IA. Puedes solicitar la exportación o eliminación de datos en cualquier momento.',
+    },
+  ];
+
+  return (
+    <section className="py-20 bg-[#F8FAFB]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">FAQ</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E]">
+            Preguntas frecuentes
+          </h2>
+        </div>
+
+        <div className="max-w-3xl mx-auto space-y-3">
+          {faqs.map((faq, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-xl border border-[#E8ECEB] overflow-hidden"
+            >
+              <button
+                onClick={() => setOpen(open === index ? null : index)}
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-[#F8FAFB] transition-colors"
+              >
+                <span className="text-sm font-semibold text-[#2D3E4E] pr-4">{faq.q}</span>
+                <ChevronDown
+                  className={`w-4 h-4 text-[#7a8a92] flex-shrink-0 transition-transform duration-200 ${
+                    open === index ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              <AnimatePresence>
+                {open === index && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-5 pb-5 text-sm text-[#7a8a92] leading-relaxed border-t border-[#E8ECEB] pt-4">
+                      {faq.a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// 11. FINAL CTA
+// ─────────────────────────────────────────────────────────
+function CTASection() {
+  return (
+    <section className="py-20 bg-[#2D3E4E]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#E09E50]/20 flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-8 h-8 text-[#E09E50]" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+            Agosto 2026 se acerca.
+            <br />
+            <span className="text-[#E09E50]">Empieza hoy.</span>
+          </h2>
+          <p className="text-lg text-[#8CBDB9] mb-8 leading-relaxed">
+            Cada semana que no actúas, el trabajo crece. Regístrate gratis y
+            ten tu primer sistema clasificado en menos de 5 minutos.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+            <Link href="/register">
+              <Button
+                size="lg"
+                className="bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/30 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto"
+              >
+                Empezar gratis — sin tarjeta
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-base px-8 py-6 h-auto border-white/20 text-white hover:bg-white/10 w-full sm:w-auto"
+              >
+                Ver todos los planes
+              </Button>
+            </Link>
+          </div>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-[#8CBDB9]/70">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-[#E09E50]" />
+              14 días de prueba
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-[#E09E50]" />
+              Sin compromisos
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-[#E09E50]" />
+              Soporte incluido
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-950">
+    <main className="min-h-screen bg-white">
       <Header />
       <HeroSection />
-      <TrustedBySection />
-      <EndToEndSection />
-      <PainPointsSection />
-      <WhoAppliesSection />
+      <StatsSection />
+      <ProblemSection />
+      <HowItWorksSection />
+      <ProductPreviewSection />
       <FeaturesSection />
+      <AIActSection />
+      <TestimonialsSection />
       <PricingSection />
+      <FAQSection />
+      <CTASection />
       <Footer />
     </main>
   );
