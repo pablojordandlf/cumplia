@@ -99,7 +99,7 @@ const allNavItems: NavItem[] = [
   },
   {
     title: "Usuarios",
-    href: "/dashboard/settings/users",
+    href: "/dashboard/settings/members",
     icon: Users,
     roles: ['admin'],
   },
