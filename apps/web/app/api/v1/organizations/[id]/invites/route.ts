@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { sendInviteEmail } from '@/lib/email/send-invite';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,7 +76,35 @@ export async function POST(
       );
     }
 
-    // TODO: Send invite email
+    // Send invite email
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('name')
+        .eq('id', id)
+        .single();
+
+      const { data: inviterData } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
+      await sendInviteEmail({
+        email: updatedMember.email,
+        name: updatedMember.name || undefined,
+        organizationName: orgData?.name || 'CumplIA',
+        inviterName: inviterData?.full_name || 'Tu colega',
+        inviteToken,
+        role: updatedMember.role as 'admin' | 'editor' | 'viewer',
+        appUrl,
+      });
+    } catch (emailError) {
+      console.error('Failed to send resend invite email:', emailError);
+      // Don't fail the request if email fails
+    }
 
     return NextResponse.json({ success: true, data: updatedMember });
   } catch (error: any) {
