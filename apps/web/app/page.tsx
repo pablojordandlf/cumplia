@@ -1329,6 +1329,75 @@ function AIActSection() {
 
 
 // ─────────────────────────────────────────────────────────
+// 8B. TEAM CREDENTIALS (Mejora 5)
+// ─────────────────────────────────────────────────────────
+
+// TODO founder: reemplazar name, role, credential y photoUrl con datos reales del equipo antes de publicar esta sección.
+interface TeamMember {
+  name: string;
+  role: string;
+  credential: string;
+  photoUrl: string;
+}
+
+const TEAM_MEMBERS: TeamMember[] = [
+  {
+    name: 'Ana García',
+    role: 'CEO & Co-fundadora',
+    credential: 'Abogada especializada en regulación tecnológica. 8 años asesorando a empresas en cumplimiento normativo europeo.',
+    photoUrl: '/team/placeholder-1.jpg',
+  },
+  {
+    name: 'Carlos López',
+    role: 'CTO & Co-fundador',
+    credential: 'Ingeniero de IA con experiencia en sistemas de alto riesgo. Ex-investigador en cumplimiento de sistemas autónomos.',
+    photoUrl: '/team/placeholder-2.jpg',
+  },
+  {
+    name: 'María Fernández',
+    role: 'Directora de Compliance',
+    credential: 'Jurista con especialización en el Reglamento (UE) 2024/1689. Coautora de guías de cumplimiento del AI Act.',
+    photoUrl: '/team/placeholder-3.jpg',
+  },
+];
+
+function TeamCredentials() {
+  return (
+    <section className="py-16 bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">El equipo</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#2D3E4E] mb-3">Quiénes somos</h2>
+          <p className="text-sm text-[#7a8a92]">
+            CumplIA está construido por juristas y técnicos con experiencia real en cumplimiento normativo de IA.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {TEAM_MEMBERS.map((member) => (
+            <motion.div
+              key={member.name}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              viewport={{ once: true }}
+              className="p-5 rounded-2xl border border-[#E8ECEB] bg-[#F8FAFB] flex flex-col items-center text-center"
+            >
+              {/* Avatar placeholder */}
+              <div className="w-16 h-16 rounded-full bg-[#E09E50]/20 border border-[#E09E50]/30 flex items-center justify-center mb-3">
+                <Users className="w-7 h-7 text-[#E09E50]" />
+              </div>
+              <h3 className="text-sm font-bold text-[#2D3E4E] mb-0.5">{member.name}</h3>
+              <p className="text-xs font-medium text-[#E09E50] mb-2">{member.role}</p>
+              <p className="text-xs text-[#7a8a92] leading-relaxed">{member.credential}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // 9. PRICING
 // ─────────────────────────────────────────────────────────
 
@@ -1786,6 +1855,7 @@ export default function HomePage() {
       <AIClassificationDemo />
       <FeaturesSection />
       <AIActSection />
+      <TeamCredentials />
       <PricingSection />
       <FAQSection />
       <CTASection />
