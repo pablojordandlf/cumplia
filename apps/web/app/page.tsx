@@ -1329,6 +1329,37 @@ function AIActSection() {
 
 
 // ─────────────────────────────────────────────────────────
+// 8A. LEAD MAGNET BLOCK (Mejora 6C)
+// ─────────────────────────────────────────────────────────
+function LeadMagnet() {
+  return (
+    <section className="py-12 bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-6 py-6 rounded-2xl border-l-4 border-[#E09E50] bg-[#E09E50]/5 border border-[#E09E50]/20">
+            <div>
+              <p className="text-base font-semibold text-[#2D3E4E] mb-1">
+                ¿No estás seguro de si el AI Act te afecta?
+              </p>
+              <p className="text-sm text-[#7a8a92]">
+                Descarga el checklist gratuito y compruébalo en 5 minutos.
+              </p>
+            </div>
+            <Link href="/checklist-ai-act" className="flex-shrink-0">
+              <Button
+                className="bg-[#E09E50] hover:bg-[#D9885F] text-white text-sm px-6 py-3 h-auto min-h-[48px] font-semibold whitespace-nowrap"
+              >
+                Descargar checklist →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // 8B. TEAM CREDENTIALS (Mejora 5)
 // ─────────────────────────────────────────────────────────
 
@@ -1854,6 +1885,7 @@ export default function HomePage() {
       <HowItWorksSection />
       <AIClassificationDemo />
       <FeaturesSection />
+      <LeadMagnet />
       <AIActSection />
       <TeamCredentials />
       <PricingSection />
