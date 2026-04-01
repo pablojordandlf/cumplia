@@ -438,7 +438,7 @@ function DashboardKPIMobile() {
     { value: '✓', label: 'AI Act compliant' },
   ];
   return (
-    <div className="md:hidden grid grid-cols-2 gap-3 mt-6">
+    <div className="md:hidden grid grid-cols-2 gap-3 mt-6" aria-label="Indicadores clave del dashboard">
       {kpis.map((kpi) => (
         <div
           key={kpi.label}
@@ -448,6 +448,39 @@ function DashboardKPIMobile() {
           <div className="text-xs text-[#7a8a92] mt-1 text-center">{kpi.label}</div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Countdown Banner Component (Mejora 2)
+// ─────────────────────────────────────────────────────────
+const COUNTDOWN_COPY = {
+  above: 'Las obligaciones de transparencia y formación (Art. 4) aplican el 2 de agosto de 2026 — sin prórroga posible.',
+  below: 'Los sistemas de alto riesgo tienen plazo hasta dic. 2027, pero la documentación lleva meses. Quien empieza hoy llega con margen.',
+};
+
+function CountdownBanner() {
+  const { days, hours, minutes, seconds } = useCountdown();
+  return (
+    <div className="rounded-xl border border-[#E09E50]/30 bg-[#E09E50]/6 px-4 py-3 my-6 max-w-xl">
+      <p className="text-xs font-medium text-[#2D3E4E] mb-2 leading-snug">{COUNTDOWN_COPY.above}</p>
+      <div className="flex items-center gap-2 mb-2">
+        {[
+          { value: days, label: 'días' },
+          { value: hours, label: 'horas' },
+          { value: minutes, label: 'min' },
+          { value: seconds, label: 'seg' },
+        ].map(({ value, label }) => (
+          <div key={label} className="flex flex-col items-center">
+            <div className="w-12 h-10 rounded-lg bg-[#2D3E4E] flex items-center justify-center">
+              <span className="text-base font-bold text-white tabular-nums">{String(value).padStart(2, '0')}</span>
+            </div>
+            <span className="text-[9px] text-[#7a8a92] mt-0.5 uppercase tracking-wider">{label}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-[#7a8a92] leading-snug">{COUNTDOWN_COPY.below}</p>
     </div>
   );
 }
@@ -504,60 +537,60 @@ function HeroSection() {
                 }}
               />
               <Sparkles className="h-3.5 w-3.5 relative z-10" />
-              <span className="relative z-10">Cumplimiento del AI Act con IA</span>
+              <span className="relative z-10">{HERO_COPY.badge}</span>
             </motion.div>
 
-            {/* Headline */}
+            {/* Headline — Mejora 1A */}
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D3E4E] tracking-tight leading-tight mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D3E4E] tracking-tight leading-tight mb-3"
             >
-              Cumple con el{' '}
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #E09E50 0%, #D9885F 30%, #8CBDB9 65%, #E09E50 100%)',
-                  backgroundSize: '200% 200%',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                  animation: 'gradient-shift 5s ease-in-out infinite',
-                }}
-              >
-                AI Act europeo
-              </span>{' '}
-              sin complicaciones
+              <span className="text-green-600">{HERO_COPY.headlineAct}</span>
+              <AnimatedCheckmark />
             </motion.h1>
 
-            {/* Subheadline */}
+            {/* Tagline — Mejora 1A */}
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1.0 }}
+              className="text-xl font-light text-[#7a8a92] mb-4 leading-relaxed max-w-xl"
+            >
+              {HERO_COPY.tagline}
+            </motion.p>
+
+            {/* Subheadline — Mejora 1B */}
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg sm:text-xl text-[#7a8a92] mb-8 leading-relaxed max-w-xl"
+              className="text-base text-[#7a8a92] mb-2 leading-relaxed max-w-xl"
             >
-              CumplIA automatiza la gestión de riesgos, obligaciones y documentación de tus sistemas de IA.
-              De semanas a horas — con inteligencia artificial incluida.
+              {HERO_COPY.subheadline}
             </motion.p>
 
-            {/* CTAs */}
+            {/* Countdown Banner — Mejora 2 */}
+            <CountdownBanner />
+
+            {/* CTAs — Mejora 1C */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-3 mb-8"
+              className="flex flex-col sm:flex-row gap-3 mb-4"
             >
               <Link href="/register">
                 <Button
                   size="lg"
-                  className="relative overflow-hidden bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto group"
+                  className="relative overflow-hidden bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto min-h-[48px] shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto group"
                 >
                   <span
                     className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
                   />
                   <span className="relative z-10 flex items-center">
-                    Empezar gratis
+                    {HERO_COPY.ctaPrimary}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 </Button>
@@ -566,42 +599,39 @@ function HeroSection() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-base px-8 py-6 h-auto border-[#E8ECEB] text-[#2D3E4E] hover:bg-[#F8FAFB] hover:border-[#E09E50]/40 transition-all w-full sm:w-auto"
+                  className="text-base px-8 py-6 h-auto min-h-[48px] border-[#E8ECEB] text-[#2D3E4E] hover:bg-[#F8FAFB] hover:border-[#E09E50]/40 transition-all w-full sm:w-auto"
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  Cómo funciona
+                  {HERO_COPY.ctaSecondary}
                 </Button>
               </a>
             </motion.div>
 
-            {/* Trust indicators */}
+            {/* Micro-copy — Mejora 1D */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.45 }}
-              className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#7a8a92]"
             >
-              <div className="flex items-center gap-1.5">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Sin tarjeta de crédito</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Configuración en 5 minutos</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Cancela cuando quieras</span>
+              <p className="text-xs text-[#7a8a92] mb-2">{HERO_COPY.microCopy}</p>
+              {/* Trust badges row */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                {HERO_COPY.trustBadges.map((badge, i) => (
+                  <span key={i} className="text-xs text-[#7a8a92]">{badge}</span>
+                ))}
               </div>
             </motion.div>
+
+            {/* Mobile KPI grid — Mejora 10 */}
+            <DashboardKPIMobile />
           </div>
 
-          {/* Right: Dashboard mockup */}
+          {/* Right: Dashboard mockup — hidden on mobile (Mejora 10) */}
           <motion.div
             initial={{ opacity: 0, x: 40, y: 20 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-            className="relative hidden lg:block"
+            className="relative hidden md:block"
             style={{ perspective: '1200px' }}
           >
             {/* Aurora glow behind */}
@@ -622,16 +652,6 @@ function HeroSection() {
             </div>
           </motion.div>
         </div>
-
-        {/* Mobile mockup */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="lg:hidden mt-10"
-        >
-          <DashboardMockup />
-        </motion.div>
       </div>
     </section>
   );
