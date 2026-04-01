@@ -1554,38 +1554,59 @@ function PricingSection() {
 // ─────────────────────────────────────────────────────────
 // 10. FAQ
 // ─────────────────────────────────────────────────────────
+const FAQ_ITEMS = [
+  {
+    q: '¿Los informes que genera CumplIA son válidos para una auditoría real?',
+    a: 'CumplIA genera los documentos en el formato que exige el Reglamento (UE) 2024/1689: registro técnico conforme al Anexo IV, FRIA según el Art. 27 y análisis de riesgos documentado. La validez legal final depende del contenido que introduzcas, no del formato. Para sistemas de alto riesgo, recomendamos revisión jurídica adicional.',
+  },
+  {
+    q: '¿Qué pasa si cancelo? ¿Puedo exportar toda mi documentación?',
+    // TODO founder: confirmar el número de días de acceso tras baja (aquí se usa 30 días).
+    a: 'Sí. Todos tus documentos son tuyos. Puedes exportar en PDF o DOCX en cualquier momento, antes o después de cancelar. Tus datos permanecen accesibles durante 30 días tras la baja.',
+  },
+  {
+    q: '¿Mi sector tiene requisitos específicos que CumplIA cubre?',
+    a: 'CumplIA cubre los requisitos horizontales del AI Act para todos los sectores. Los sectores con mayor detalle en la plataforma son finanzas, salud y RRHH, que concentran la mayoría de sistemas de alto riesgo. Si tienes dudas sobre tu caso concreto, escríbenos.',
+  },
+  {
+    q: '¿Cuánto tiempo real me lleva? ¿Necesito conocimientos técnicos?',
+    a: 'El primer sistema clasificado lleva menos de 5 minutos. Un inventario completo de 10-15 sistemas suele completarse en 2-3 días. No necesitas conocimientos técnicos — el flujo está diseñado para equipos de compliance y legal, no para IT.',
+  },
+  {
+    q: '¿Sois juristas especializados o solo una herramienta de software?',
+    a: 'CumplIA fue desarrollado con la supervisión de juristas especializados en regulación IA. La plataforma no sustituye el asesoramiento legal, pero automatiza el 80% del trabajo que hoy hacen manualmente los equipos de compliance y sus consultores.',
+  },
+  {
+    q: 'Si la normativa cambia, ¿actualizáis la plataforma?',
+    a: 'Sí. Monitorizamos continuamente las publicaciones de la Comisión Europea, los actos delegados del AI Act y las guías de la AESIA. Cuando hay cambios relevantes, actualizamos la base de conocimiento y notificamos a los usuarios afectados.',
+  },
+];
+
+// FAQ JSON-LD schema data (rendered in FAQSection via Script tag)
+const FAQ_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ_ITEMS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.a,
+    },
+  })),
+};
+
 function FAQSection() {
   const [open, setOpen] = useState<number | null>(null);
-
-  const faqs = [
-    {
-      q: '¿El AI Act ya está en vigor? ¿Tengo que cumplir ahora?',
-      a: 'El AI Act entró en vigor en agosto de 2024. Las prohibiciones aplican desde febrero de 2025. Las obligaciones para sistemas de alto riesgo entran en vigor en agosto de 2026. Es fundamental empezar el proceso de cumplimiento ahora para llegar a tiempo.',
-    },
-    {
-      q: '¿Cómo sé si mi sistema de IA es de alto riesgo?',
-      a: 'El AI Act define los sistemas de alto riesgo en el Anexo III: biometría, infraestructuras críticas, educación, empleo, servicios esenciales, justicia y seguridad. CumplIA te ayuda a clasificar automáticamente tu sistema en segundos mediante nuestro asistente de IA.',
-    },
-    {
-      q: '¿Qué es una FRIA y por qué la necesito?',
-      a: 'La Evaluación de Impacto en los Derechos Fundamentales (FRIA) es obligatoria para sistemas de alto riesgo desplegados por organismos públicos o que afecten a la prestación de servicios públicos. CumplIA genera la estructura de la FRIA adaptada a tu sistema (Art. 27).',
-    },
-    {
-      q: '¿CumplIA sustituye a un consultor legal?',
-      a: 'CumplIA automatiza el trabajo técnico y de documentación, pero no sustituye el asesoramiento jurídico para casos complejos. Lo que sí hace es reducir drásticamente el tiempo (y coste) que necesitas de consultores externos, aportando la estructura y la documentación base.',
-    },
-    {
-      q: '¿Puedo empezar gratis y migrar mis datos si cambio de plan?',
-      a: 'Sí. El plan Starter es gratuito sin límite de tiempo para un sistema de IA. Si creces, puedes migrar a Professional o Business en cualquier momento y todos tus datos, riesgos y documentos se conservan íntegramente.',
-    },
-    {
-      q: '¿Mis datos están seguros? ¿Cumplís el RGPD?',
-      a: 'CumplIA está construido sobre infraestructura europea (Supabase/AWS EU), cumple con el RGPD y sus datos nunca se utilizan para entrenar modelos de IA. Puedes solicitar la exportación o eliminación de datos en cualquier momento.',
-    },
-  ];
+  const faqs = FAQ_ITEMS;
 
   return (
     <section className="py-20 bg-[#F8FAFB]">
+      {/* FAQ JSON-LD for rich snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
+      />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">FAQ</p>
