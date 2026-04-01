@@ -1470,10 +1470,17 @@ function PricingCaseStudy() {
 }
 
 function PricingSection() {
+  // Mejora 8: billing toggle (monthly / annual)
+  const [isAnnual, setIsAnnual] = useState(false);
+
+  // TODO founder: considerar ampliar el límite de 1 a 3 sistemas en el plan Starter
+  // para mejorar la experiencia de evaluación y la conversión a planes de pago.
   const plans = [
     {
       name: 'Starter',
-      price: '0€',
+      monthlyPrice: '0€',
+      annualPrice: '0€',
+      originalPrice: null as string | null,
       period: '/mes',
       description: 'Para conocer la plataforma y evaluar tu primer sistema de IA',
       features: [
@@ -1486,11 +1493,15 @@ function PricingSection() {
       cta: 'Empezar gratis',
       href: '/register',
       highlight: false,
+      badge: null as string | null,
+      urgencyBadge: null as string | null,
+      savings: null as string | null,
     },
     {
       name: 'Professional',
-      price: '99€',
-      originalPrice: '149',
+      monthlyPrice: '99€',
+      annualPrice: '49€',
+      originalPrice: '149' as string | null,
       period: '/mes',
       description: 'Para PYMEs y consultoras con varios sistemas de IA',
       features: [
@@ -1506,12 +1517,14 @@ function PricingSection() {
       href: '/register?plan=professional',
       highlight: true,
       badge: 'Más popular',
+      urgencyBadge: 'PRECIO DE LANZAMIENTO · Válido hasta el 2 de agosto de 2026',
       savings: 'Ahorra 600€/año',
     },
     {
       name: 'Business',
-      price: '249€',
-      originalPrice: '349',
+      monthlyPrice: '249€',
+      annualPrice: '149€',
+      originalPrice: '349' as string | null,
       period: '/mes',
       description: 'Para empresas con múltiples equipos y necesidades avanzadas',
       features: [
@@ -1526,11 +1539,15 @@ function PricingSection() {
       cta: 'Elegir Business',
       href: '/register?plan=business',
       highlight: false,
+      badge: null as string | null,
+      urgencyBadge: null as string | null,
       savings: 'Ahorra 1.200€/año',
     },
     {
       name: 'Enterprise',
-      price: 'Custom',
+      monthlyPrice: 'Custom',
+      annualPrice: 'Custom',
+      originalPrice: null as string | null,
       period: '',
       description: 'Soluciones a medida para grandes organizaciones',
       features: [
@@ -1545,13 +1562,16 @@ function PricingSection() {
       cta: 'Contactar ventas',
       href: '/contact?plan=enterprise',
       highlight: false,
+      badge: null as string | null,
+      urgencyBadge: null as string | null,
+      savings: null as string | null,
     },
   ];
 
   return (
     <section id="pricing" className="py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-10">
           <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Precios</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
             Planes para cada etapa
@@ -1561,11 +1581,31 @@ function PricingSection() {
           </p>
         </div>
 
+        {/* Billing toggle — Mejora 8 */}
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-[#2D3E4E]' : 'text-[#7a8a92]'}`}>Mensual</span>
+          <button
+            onClick={() => setIsAnnual(!isAnnual)}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${isAnnual ? 'bg-[#E09E50]' : 'bg-[#E8ECEB]'}`}
+            aria-label="Cambiar entre pago mensual y anual"
+          >
+            <span
+              className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${isAnnual ? 'translate-x-7' : 'translate-x-1'}`}
+            />
+          </button>
+          <span className={`text-sm font-medium transition-colors ${isAnnual ? 'text-[#2D3E4E]' : 'text-[#7a8a92]'}`}>
+            Anual
+            <span className="ml-1.5 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">-50%</span>
+          </span>
+        </div>
+
         {/* Metrics bar above pricing cards — Mejora 3 */}
         <PricingMetricsBar />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
+          {plans.map((plan, index) => {
+            const displayPrice = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+            return (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -1585,6 +1625,14 @@ function PricingSection() {
                   </span>
                 </div>
               )}
+              {/* Urgency badge — Mejora 8 */}
+              {plan.urgencyBadge && (
+                <div className="mb-2">
+                  <span className="text-[10px] font-bold text-[#E09E50] bg-[#E09E50]/10 border border-[#E09E50]/30 px-2 py-0.5 rounded-full leading-tight">
+                    {plan.urgencyBadge}
+                  </span>
+                </div>
+              )}
 
               <div className="mb-6">
                 <h3 className={`text-lg font-bold mb-1 ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
@@ -1597,7 +1645,7 @@ function PricingSection() {
                     </span>
                   )}
                   <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
-                    {plan.price}
+                    {displayPrice}
                   </span>
                   <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#7a8a92]'}`}>
                     {plan.period}
@@ -1637,7 +1685,8 @@ function PricingSection() {
                 </Button>
               </Link>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
 
         <p className="text-center text-sm text-[#7a8a92] mt-8">
