@@ -1709,8 +1709,7 @@ function CTASection() {
           <p className="text-xs text-[#8CBDB9]/50 -mt-4 mb-8">hasta la entrada en vigor plena del AI Act (agosto 2026)</p>
 
           <p className="text-lg text-[#8CBDB9] mb-8 leading-relaxed">
-            Cada semana que no actúas, el trabajo crece. Regístrate gratis y
-            ten tu primer sistema clasificado en menos de 5 minutos.
+            Agosto 2026 ya está aquí. ¿Está tu empresa preparada?
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
             <Link href="/register">
