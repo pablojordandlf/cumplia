@@ -605,40 +605,6 @@ function StatsSection() {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// 2b. LOGO CAROUSEL
-// ─────────────────────────────────────────────────────────
-function LogoCarousel() {
-  const logos = [
-    'Santander', 'BBVA', 'Telefónica', 'Mapfre', 'Iberdrola',
-    'Inditex', 'Repsol', 'CaixaBank', 'Amadeus', 'Acciona',
-  ];
-  const doubled = [...logos, ...logos];
-
-  return (
-    <section className="py-8 border-b border-[#E8ECEB] bg-white overflow-hidden">
-      <p className="text-center text-xs uppercase tracking-widest text-[#7a8a92]/50 font-semibold mb-5">
-        Empresas que ya trabajan en su cumplimiento con CumplIA
-      </p>
-      <div
-        className="flex gap-14 items-center"
-        style={{
-          width: 'max-content',
-          animation: 'marquee 28s linear infinite',
-        }}
-      >
-        {doubled.map((logo, i) => (
-          <span
-            key={i}
-            className="text-[#E8ECEB] font-bold text-lg whitespace-nowrap select-none tracking-wide hover:text-[#E09E50]/30 transition-colors duration-300"
-          >
-            {logo}
-          </span>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 // ─────────────────────────────────────────────────────────
 // 3. PROBLEM SECTION
@@ -1259,82 +1225,6 @@ function AIActSection() {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// 8. TESTIMONIALS
-// ─────────────────────────────────────────────────────────
-function TestimonialsSection() {
-  const testimonials = [
-    {
-      quote: 'Lo que nos habría llevado 3 meses con consultores externos, lo tuvimos listo en 2 semanas con CumplIA. La clasificación automática y el análisis de riesgos con IA son una pasada.',
-      name: 'Ana García',
-      role: 'Chief Compliance Officer',
-      company: 'FinTech Solutions S.L.',
-      avatar: 'AG',
-      avatarColor: 'bg-[#E09E50]',
-    },
-    {
-      quote: 'Por fin una herramienta que habla el lenguaje de compliance, no de IT. Los informes PDF que genera son exactamente lo que piden los auditores. Nos ha ahorrado semanas de trabajo.',
-      name: 'Carlos Martínez',
-      role: 'Director de Tecnología',
-      company: 'Salud Digital Corp.',
-      avatar: 'CM',
-      avatarColor: 'bg-[#8CBDB9]',
-    },
-    {
-      quote: 'Tenemos 8 sistemas de IA de distinto nivel de riesgo. CumplIA nos permite gestionar todo desde un panel, asignar responsables y tener el audit log completo para cualquier inspección.',
-      name: 'Laura Sánchez',
-      role: 'Responsable de Riesgo IA',
-      company: 'Grupo Asegurador España',
-      avatar: 'LS',
-      avatarColor: 'bg-purple-500',
-    },
-  ];
-
-  return (
-    <section className="py-20 bg-[#F8FAFB]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Lo que dicen nuestros clientes</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E]">
-            Empresas que ya cumplen con el AI Act
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {testimonials.map((t, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="bg-white p-6 rounded-2xl border border-[#E8ECEB] shadow-sm hover:shadow-[0_12px_40px_rgba(45,62,78,0.1)] hover:-translate-y-1 transition-all duration-300"
-            >
-              {/* Stars */}
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-[#E09E50] text-[#E09E50]" />
-                ))}
-              </div>
-              <p className="text-sm text-[#7a8a92] leading-relaxed mb-6 italic">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-full ${t.avatarColor} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
-                  {t.avatar}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-[#2D3E4E]">{t.name}</div>
-                  <div className="text-xs text-[#7a8a92]">{t.role} · {t.company}</div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 // ─────────────────────────────────────────────────────────
 // 9. PRICING
@@ -1725,13 +1615,11 @@ export default function HomePage() {
       <Header />
       <HeroSection />
       <StatsSection />
-      <LogoCarousel />
       <ProblemSection />
       <HowItWorksSection />
       <AIClassificationDemo />
       <FeaturesSection />
       <AIActSection />
-      <TestimonialsSection />
       <PricingSection />
       <FAQSection />
       <CTASection />
