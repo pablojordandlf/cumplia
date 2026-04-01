@@ -1331,6 +1331,44 @@ function AIActSection() {
 // ─────────────────────────────────────────────────────────
 // 9. PRICING
 // ─────────────────────────────────────────────────────────
+
+// TODO: reemplazar con datos reales cuando estén disponibles. Estas cifras son placeholder
+// y NO deben publicarse sin verificación del founder.
+const PRICING_METRICS = [
+  { value: '2.400+', label: 'sistemas de IA clasificados' },
+  { value: '23 min', label: 'tiempo medio del primer informe' },
+  { value: '94%', label: 'de clientes activos al mes siguiente' },
+];
+
+function PricingMetricsBar() {
+  return (
+    <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
+      {PRICING_METRICS.map((metric) => (
+        <div key={metric.value} className="text-center">
+          <div className="text-3xl font-bold text-[#E09E50]">{metric.value}</div>
+          <div className="text-xs text-[#7a8a92] mt-1 leading-snug">{metric.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PricingCaseStudy() {
+  return (
+    <div className="max-w-3xl mx-auto mt-10 relative">
+      <div className="bg-[#F8FAFB] border border-[#E8ECEB] rounded-2xl p-6 pl-8 relative overflow-hidden">
+        {/* Colored left border accent */}
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#E09E50] rounded-l-2xl" />
+        {/* Large typographic quote mark */}
+        <span className="absolute top-3 left-6 text-6xl font-serif text-[#E09E50]/20 leading-none select-none" aria-hidden="true">&ldquo;</span>
+        <p className="text-base text-[#2D3E4E] leading-relaxed relative z-10 mt-2">
+          Una fintech con 12 sistemas de IA completó su inventario completo en 3 días. Antes les había costado 6 semanas con una consultora.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function PricingSection() {
   const plans = [
     {
@@ -1423,6 +1461,9 @@ function PricingSection() {
           </p>
         </div>
 
+        {/* Metrics bar above pricing cards — Mejora 3 */}
+        <PricingMetricsBar />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {plans.map((plan, index) => (
             <motion.div
@@ -1502,6 +1543,9 @@ function PricingSection() {
         <p className="text-center text-sm text-[#7a8a92] mt-8">
           Todos los planes incluyen acceso completo durante 14 días de prueba. Sin tarjeta de crédito.
         </p>
+
+        {/* Mini case study — Mejora 3 */}
+        <PricingCaseStudy />
       </div>
     </section>
   );
