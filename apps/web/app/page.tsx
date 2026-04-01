@@ -370,6 +370,88 @@ function useCountdown() {
 // ─────────────────────────────────────────────────────────
 // 1. HERO SECTION
 // ─────────────────────────────────────────────────────────
+
+// Centralized copy for the Hero section
+const HERO_COPY = {
+  badge: 'Cumplimiento del AI Act con IA',
+  headlineAct: 'AI Act',
+  tagline: 'No dejes que una normativa frene lo que la IA puede hacer por tu empresa.',
+  subheadline:
+    'CumplIA clasifica tus sistemas de IA, genera toda la documentación exigida y te mantiene al día ante cualquier auditoría. De 8 semanas a 5 minutos.',
+  ctaPrimary: 'Clasificar mi primer sistema gratis',
+  ctaSecondary: 'Cómo funciona',
+  microCopy: 'Sin tarjeta · Tu primer sistema clasificado en 5 minutos · Datos alojados en España',
+  trustBadges: [
+    '✓ Metodología revisada por juristas',
+    '✓ Datos alojados en España',
+    '✓ Conforme al RGPD',
+  ],
+};
+
+function AnimatedCheckmark() {
+  const [isPulsing, setIsPulsing] = useState(false);
+  return (
+    <svg
+      viewBox="0 0 52 52"
+      className="inline-block w-12 h-12 ml-3 align-middle text-green-600"
+      aria-hidden="true"
+      style={isPulsing ? { animation: 'checkPulse 0.3s ease-in-out 1' } : undefined}
+    >
+      <circle
+        cx="26"
+        cy="26"
+        r="24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        style={{
+          strokeDasharray: 166,
+          strokeDashoffset: 166,
+          animation: 'drawCircle 0.4s ease-out 0.2s forwards',
+        }}
+      />
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14 27 L22 35 L38 18"
+        style={{
+          strokeDasharray: 48,
+          strokeDashoffset: 48,
+          animation: 'drawCheck 0.4s ease-out 0.6s forwards',
+        }}
+        onAnimationEnd={() => setIsPulsing(true)}
+      />
+    </svg>
+  );
+}
+
+// TODO mejora futura: considerar un GIF de 5s mostrando el flujo completo
+// (añadir sistema → clasificar → generar informe) para mobile.
+function DashboardKPIMobile() {
+  const kpis = [
+    { value: '12', label: 'Sistemas IA' },
+    { value: '78%', label: 'Cumplimiento' },
+    { value: '4', label: 'Riesgos críticos' },
+    { value: '✓', label: 'AI Act compliant' },
+  ];
+  return (
+    <div className="md:hidden grid grid-cols-2 gap-3 mt-6">
+      {kpis.map((kpi) => (
+        <div
+          key={kpi.label}
+          className="bg-white rounded-xl border border-[#E8ECEB] shadow-sm p-4 flex flex-col items-center justify-center"
+        >
+          <div className="text-2xl font-bold text-[#2D3E4E]">{kpi.value}</div>
+          <div className="text-xs text-[#7a8a92] mt-1 text-center">{kpi.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-white pt-8 pb-16 lg:pt-16 lg:pb-24">
