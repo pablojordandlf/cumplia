@@ -718,21 +718,21 @@ function ProblemSection() {
       title: 'Incertidumbre jurídica',
       desc: 'El AI Act son 458 artículos de requisitos técnicos y legales. Las sanciones llegan al 7% de facturación global — y la fecha límite ya está encima.',
       stat: '7% de facturación',
-      statLabel: 'Sanción máxima',
+      statLabel: 'Art. 99 del AI Act',
     },
     {
       icon: Clock,
       title: 'Semanas perdidas',
       desc: 'Clasificar manualmente cada sistema, identificar obligaciones y redactar documentación consume semanas de trabajo de tu equipo de compliance y legal.',
       stat: '6-8 semanas',
-      statLabel: 'Tiempo medio sin herramientas',
+      statLabel: 'media observada en nuestros primeros clientes',
     },
     {
       icon: FileText,
       title: 'Documentación imposible',
       desc: 'FRIA, registro técnico, análisis de riesgos, supervisión humana… Cada sistema de IA requiere docenas de documentos diferentes y actualizados.',
       stat: '20+ documentos',
-      statLabel: 'Por sistema de alto riesgo',
+      statLabel: 'Art. 11 y Anexo IV del AI Act',
     },
   ];
 
