@@ -370,121 +370,6 @@ function useCountdown() {
 // ─────────────────────────────────────────────────────────
 // 1. HERO SECTION
 // ─────────────────────────────────────────────────────────
-
-// Centralized copy for the Hero section
-const HERO_COPY = {
-  badge: 'Cumplimiento del AI Act con IA',
-  headlineAct: 'AI Act',
-  tagline: 'No dejes que una normativa frene lo que la IA puede hacer por tu empresa.',
-  subheadline:
-    'CumplIA clasifica tus sistemas de IA, genera toda la documentación exigida y te mantiene al día ante cualquier auditoría. De 8 semanas a 5 minutos.',
-  ctaPrimary: 'Clasificar mi primer sistema gratis',
-  ctaSecondary: 'Cómo funciona',
-  microCopy: 'Sin tarjeta · Tu primer sistema clasificado en 5 minutos · Datos alojados en España',
-  trustBadges: [
-    '✓ Metodología revisada por juristas',
-    '✓ Datos alojados en España',
-    '✓ Conforme al RGPD',
-  ],
-};
-
-function AnimatedCheckmark() {
-  const [isPulsing, setIsPulsing] = useState(false);
-  return (
-    <svg
-      viewBox="0 0 52 52"
-      className="inline-block w-12 h-12 ml-3 align-middle text-green-600"
-      aria-hidden="true"
-      style={isPulsing ? { animation: 'checkPulse 0.3s ease-in-out 1' } : undefined}
-    >
-      <circle
-        cx="26"
-        cy="26"
-        r="24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        style={{
-          strokeDasharray: 166,
-          strokeDashoffset: 166,
-          animation: 'drawCircle 0.4s ease-out 0.2s forwards',
-        }}
-      />
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M14 27 L22 35 L38 18"
-        style={{
-          strokeDasharray: 48,
-          strokeDashoffset: 48,
-          animation: 'drawCheck 0.4s ease-out 0.6s forwards',
-        }}
-        onAnimationEnd={() => setIsPulsing(true)}
-      />
-    </svg>
-  );
-}
-
-// TODO mejora futura: considerar un GIF de 5s mostrando el flujo completo
-// (añadir sistema → clasificar → generar informe) para mobile.
-function DashboardKPIMobile() {
-  const kpis = [
-    { value: '12', label: 'Sistemas IA' },
-    { value: '78%', label: 'Cumplimiento' },
-    { value: '4', label: 'Riesgos críticos' },
-    { value: '✓', label: 'AI Act compliant' },
-  ];
-  return (
-    <div className="md:hidden grid grid-cols-2 gap-3 mt-6" aria-label="Indicadores clave del dashboard">
-      {kpis.map((kpi) => (
-        <div
-          key={kpi.label}
-          className="bg-white rounded-xl border border-[#E8ECEB] shadow-sm p-4 flex flex-col items-center justify-center"
-        >
-          <div className="text-2xl font-bold text-[#2D3E4E]">{kpi.value}</div>
-          <div className="text-xs text-[#7a8a92] mt-1 text-center">{kpi.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// Countdown Banner Component (Mejora 2)
-// ─────────────────────────────────────────────────────────
-const COUNTDOWN_COPY = {
-  above: 'Las obligaciones de transparencia y formación (Art. 4) aplican el 2 de agosto de 2026 — sin prórroga posible.',
-  below: 'Los sistemas de alto riesgo tienen plazo hasta dic. 2027, pero la documentación lleva meses. Quien empieza hoy llega con margen.',
-};
-
-function CountdownBanner() {
-  const { days, hours, minutes, seconds } = useCountdown();
-  return (
-    <div className="rounded-xl border border-[#E09E50]/30 bg-[#E09E50]/6 px-4 py-3 my-6 max-w-xl">
-      <p className="text-xs font-medium text-[#2D3E4E] mb-2 leading-snug">{COUNTDOWN_COPY.above}</p>
-      <div className="flex items-center gap-2 mb-2">
-        {[
-          { value: days, label: 'días' },
-          { value: hours, label: 'horas' },
-          { value: minutes, label: 'min' },
-          { value: seconds, label: 'seg' },
-        ].map(({ value, label }) => (
-          <div key={label} className="flex flex-col items-center">
-            <div className="w-12 h-10 rounded-lg bg-[#2D3E4E] flex items-center justify-center">
-              <span className="text-base font-bold text-white tabular-nums">{String(value).padStart(2, '0')}</span>
-            </div>
-            <span className="text-[9px] text-[#7a8a92] mt-0.5 uppercase tracking-wider">{label}</span>
-          </div>
-        ))}
-      </div>
-      <p className="text-xs text-[#7a8a92] leading-snug">{COUNTDOWN_COPY.below}</p>
-    </div>
-  );
-}
-
 function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-white pt-8 pb-16 lg:pt-16 lg:pb-24">
@@ -537,60 +422,60 @@ function HeroSection() {
                 }}
               />
               <Sparkles className="h-3.5 w-3.5 relative z-10" />
-              <span className="relative z-10">{HERO_COPY.badge}</span>
+              <span className="relative z-10">Cumplimiento del AI Act con IA</span>
             </motion.div>
 
-            {/* Headline — Mejora 1A */}
+            {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D3E4E] tracking-tight leading-tight mb-3"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D3E4E] tracking-tight leading-tight mb-6"
             >
-              <span className="text-green-600">{HERO_COPY.headlineAct}</span>
-              <AnimatedCheckmark />
+              Cumple con el{' '}
+              <span
+                style={{
+                  background: 'linear-gradient(135deg, #E09E50 0%, #D9885F 30%, #8CBDB9 65%, #E09E50 100%)',
+                  backgroundSize: '200% 200%',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  animation: 'gradient-shift 5s ease-in-out infinite',
+                }}
+              >
+                AI Act europeo
+              </span>{' '}
+              sin complicaciones
             </motion.h1>
 
-            {/* Tagline — Mejora 1A */}
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1.0 }}
-              className="text-xl font-light text-[#7a8a92] mb-4 leading-relaxed max-w-xl"
-            >
-              {HERO_COPY.tagline}
-            </motion.p>
-
-            {/* Subheadline — Mejora 1B */}
+            {/* Subheadline */}
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base text-[#7a8a92] mb-2 leading-relaxed max-w-xl"
+              className="text-lg sm:text-xl text-[#7a8a92] mb-8 leading-relaxed max-w-xl"
             >
-              {HERO_COPY.subheadline}
+              CumplIA automatiza la gestión de riesgos, obligaciones y documentación de tus sistemas de IA.
+              De semanas a horas — con inteligencia artificial incluida.
             </motion.p>
 
-            {/* Countdown Banner — Mejora 2 */}
-            <CountdownBanner />
-
-            {/* CTAs — Mejora 1C */}
+            {/* CTAs */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-3 mb-4"
+              className="flex flex-col sm:flex-row gap-3 mb-8"
             >
               <Link href="/register">
                 <Button
                   size="lg"
-                  className="relative overflow-hidden bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto min-h-[48px] shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto group"
+                  className="relative overflow-hidden bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto group"
                 >
                   <span
                     className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
                   />
                   <span className="relative z-10 flex items-center">
-                    {HERO_COPY.ctaPrimary}
+                    Empezar gratis
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 </Button>
@@ -599,39 +484,42 @@ function HeroSection() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-base px-8 py-6 h-auto min-h-[48px] border-[#E8ECEB] text-[#2D3E4E] hover:bg-[#F8FAFB] hover:border-[#E09E50]/40 transition-all w-full sm:w-auto"
+                  className="text-base px-8 py-6 h-auto border-[#E8ECEB] text-[#2D3E4E] hover:bg-[#F8FAFB] hover:border-[#E09E50]/40 transition-all w-full sm:w-auto"
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  {HERO_COPY.ctaSecondary}
+                  Cómo funciona
                 </Button>
               </a>
             </motion.div>
 
-            {/* Micro-copy — Mejora 1D */}
+            {/* Trust indicators */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.45 }}
+              className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#7a8a92]"
             >
-              <p className="text-xs text-[#7a8a92] mb-2">{HERO_COPY.microCopy}</p>
-              {/* Trust badges row */}
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                {HERO_COPY.trustBadges.map((badge, i) => (
-                  <span key={i} className="text-xs text-[#7a8a92]">{badge}</span>
-                ))}
+              <div className="flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Sin tarjeta de crédito</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Configuración en 5 minutos</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Cancela cuando quieras</span>
               </div>
             </motion.div>
-
-            {/* Mobile KPI grid — Mejora 10 */}
-            <DashboardKPIMobile />
           </div>
 
-          {/* Right: Dashboard mockup — hidden on mobile (Mejora 10) */}
+          {/* Right: Dashboard mockup */}
           <motion.div
             initial={{ opacity: 0, x: 40, y: 20 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-            className="relative hidden md:block"
+            className="relative hidden lg:block"
             style={{ perspective: '1200px' }}
           >
             {/* Aurora glow behind */}
@@ -652,6 +540,16 @@ function HeroSection() {
             </div>
           </motion.div>
         </div>
+
+        {/* Mobile mockup */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="lg:hidden mt-10"
+        >
+          <DashboardMockup />
+        </motion.div>
       </div>
     </section>
   );
@@ -718,21 +616,21 @@ function ProblemSection() {
       title: 'Incertidumbre jurídica',
       desc: 'El AI Act son 458 artículos de requisitos técnicos y legales. Las sanciones llegan al 7% de facturación global — y la fecha límite ya está encima.',
       stat: '7% de facturación',
-      statLabel: 'Art. 99 del AI Act',
+      statLabel: 'Sanción máxima',
     },
     {
       icon: Clock,
       title: 'Semanas perdidas',
       desc: 'Clasificar manualmente cada sistema, identificar obligaciones y redactar documentación consume semanas de trabajo de tu equipo de compliance y legal.',
       stat: '6-8 semanas',
-      statLabel: 'media observada en nuestros primeros clientes',
+      statLabel: 'Tiempo medio sin herramientas',
     },
     {
       icon: FileText,
       title: 'Documentación imposible',
       desc: 'FRIA, registro técnico, análisis de riesgos, supervisión humana… Cada sistema de IA requiere docenas de documentos diferentes y actualizados.',
       stat: '20+ documentos',
-      statLabel: 'Art. 11 y Anexo IV del AI Act',
+      statLabel: 'Por sistema de alto riesgo',
     },
   ];
 
@@ -794,7 +692,6 @@ function HowItWorksSection() {
       icon: FolderKanban,
       title: 'Registra tus sistemas de IA',
       desc: 'Añade cada sistema de IA que utilizas: nombre, sector, descripción y contexto de uso. En minutos tienes tu inventario completo centralizado.',
-      consequence: 'Sin inventario no hay cumplimiento posible. La AESIA puede solicitar en cualquier momento un listado completo de tus sistemas activos.',
       detail: 'Formulario guiado + importación masiva',
       color: 'from-[#E09E50]/20 to-[#E09E50]/5',
       iconColor: 'text-[#E09E50]',
@@ -805,7 +702,6 @@ function HowItWorksSection() {
       icon: Sparkles,
       title: 'IA clasifica y analiza riesgos',
       desc: 'Nuestro asistente de IA lee la descripción de tu sistema, lo clasifica según el AI Act y propone los factores de riesgo aplicables de nuestro catálogo de 50+ riesgos.',
-      consequence: 'Clasificar mal un sistema de alto riesgo puede costarte hasta 15M€ en multas. La IA lo hace en segundos con los criterios exactos del Anexo III.',
       detail: 'Clasificación automática + análisis de riesgos IA',
       color: 'from-[#8CBDB9]/20 to-[#8CBDB9]/5',
       iconColor: 'text-[#8CBDB9]',
@@ -816,7 +712,6 @@ function HowItWorksSection() {
       icon: ShieldCheck,
       title: 'Gestiona obligaciones y genera documentos',
       desc: 'Sigue el progreso de tus obligaciones artículo por artículo, mitiga riesgos, sube evidencias y genera informes PDF de cumplimiento listos para auditores.',
-      consequence: 'Los auditores no aceptan intenciones: aceptan documentos. CumplIA genera los PDFs exactos que necesitan ver.',
       detail: 'Informes PDF automáticos + exportación',
       color: 'from-green-100 to-green-50',
       iconColor: 'text-green-600',
@@ -867,9 +762,7 @@ function HowItWorksSection() {
                 <span className="text-3xl font-bold text-[#E8ECEB]/60">{step.number}</span>
               </div>
               <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{step.title}</h3>
-              <p className="text-sm text-[#7a8a92] leading-relaxed mb-3">{step.desc}</p>
-              {/* Consequence sentence — Mejora 9 */}
-              <p className="text-sm text-[#7a8a92]/70 leading-relaxed mb-4 italic">{step.consequence}</p>
+              <p className="text-sm text-[#7a8a92] leading-relaxed mb-4">{step.desc}</p>
               <div className="flex items-center gap-1.5 text-xs text-[#7a8a92]">
                 <CheckCircle className="w-3.5 h-3.5 text-green-500" />
                 <span>{step.detail}</span>
@@ -1334,158 +1227,13 @@ function AIActSection() {
 
 
 // ─────────────────────────────────────────────────────────
-// 8A. LEAD MAGNET BLOCK (Mejora 6C)
-// ─────────────────────────────────────────────────────────
-function LeadMagnet() {
-  return (
-    <section className="py-12 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-6 py-6 rounded-2xl border-l-4 border-[#E09E50] bg-[#E09E50]/5 border border-[#E09E50]/20">
-            <div>
-              <p className="text-base font-semibold text-[#2D3E4E] mb-1">
-                ¿No estás seguro de si el AI Act te afecta?
-              </p>
-              <p className="text-sm text-[#7a8a92]">
-                Descarga el checklist gratuito y compruébalo en 5 minutos.
-              </p>
-            </div>
-            <Link href="/checklist-ai-act" className="flex-shrink-0">
-              <Button
-                className="bg-[#E09E50] hover:bg-[#D9885F] text-white text-sm px-6 py-3 h-auto min-h-[48px] font-semibold whitespace-nowrap"
-              >
-                Descargar checklist →
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// 8B. TEAM CREDENTIALS (Mejora 5)
-// ─────────────────────────────────────────────────────────
-
-// TODO founder: reemplazar name, role, credential y photoUrl con datos reales del equipo antes de publicar esta sección.
-interface TeamMember {
-  name: string;
-  role: string;
-  credential: string;
-  photoUrl: string;
-}
-
-const TEAM_MEMBERS: TeamMember[] = [
-  {
-    name: 'Ana García',
-    role: 'CEO & Co-fundadora',
-    credential: 'Abogada especializada en regulación tecnológica. 8 años asesorando a empresas en cumplimiento normativo europeo.',
-    photoUrl: '/team/placeholder-1.jpg',
-  },
-  {
-    name: 'Carlos López',
-    role: 'CTO & Co-fundador',
-    credential: 'Ingeniero de IA con experiencia en sistemas de alto riesgo. Ex-investigador en cumplimiento de sistemas autónomos.',
-    photoUrl: '/team/placeholder-2.jpg',
-  },
-  {
-    name: 'María Fernández',
-    role: 'Directora de Compliance',
-    credential: 'Jurista con especialización en el Reglamento (UE) 2024/1689. Coautora de guías de cumplimiento del AI Act.',
-    photoUrl: '/team/placeholder-3.jpg',
-  },
-];
-
-function TeamCredentials() {
-  return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">El equipo</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#2D3E4E] mb-3">Quiénes somos</h2>
-          <p className="text-sm text-[#7a8a92]">
-            CumplIA está construido por juristas y técnicos con experiencia real en cumplimiento normativo de IA.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {TEAM_MEMBERS.map((member) => (
-            <motion.div
-              key={member.name}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              viewport={{ once: true }}
-              className="p-5 rounded-2xl border border-[#E8ECEB] bg-[#F8FAFB] flex flex-col items-center text-center"
-            >
-              {/* Avatar placeholder */}
-              <div className="w-16 h-16 rounded-full bg-[#E09E50]/20 border border-[#E09E50]/30 flex items-center justify-center mb-3">
-                <Users className="w-7 h-7 text-[#E09E50]" />
-              </div>
-              <h3 className="text-sm font-bold text-[#2D3E4E] mb-0.5">{member.name}</h3>
-              <p className="text-xs font-medium text-[#E09E50] mb-2">{member.role}</p>
-              <p className="text-xs text-[#7a8a92] leading-relaxed">{member.credential}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
 // 9. PRICING
 // ─────────────────────────────────────────────────────────
-
-// TODO: reemplazar con datos reales cuando estén disponibles. Estas cifras son placeholder
-// y NO deben publicarse sin verificación del founder.
-const PRICING_METRICS = [
-  { value: '2.400+', label: 'sistemas de IA clasificados' },
-  { value: '23 min', label: 'tiempo medio del primer informe' },
-  { value: '94%', label: 'de clientes activos al mes siguiente' },
-];
-
-function PricingMetricsBar() {
-  return (
-    <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
-      {PRICING_METRICS.map((metric) => (
-        <div key={metric.value} className="text-center">
-          <div className="text-3xl font-bold text-[#E09E50]">{metric.value}</div>
-          <div className="text-xs text-[#7a8a92] mt-1 leading-snug">{metric.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function PricingCaseStudy() {
-  return (
-    <div className="max-w-3xl mx-auto mt-10 relative">
-      <div className="bg-[#F8FAFB] border border-[#E8ECEB] rounded-2xl p-6 pl-8 relative overflow-hidden">
-        {/* Colored left border accent */}
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#E09E50] rounded-l-2xl" />
-        {/* Large typographic quote mark */}
-        <span className="absolute top-3 left-6 text-6xl font-serif text-[#E09E50]/20 leading-none select-none" aria-hidden="true">&ldquo;</span>
-        <p className="text-base text-[#2D3E4E] leading-relaxed relative z-10 mt-2">
-          Una fintech con 12 sistemas de IA completó su inventario completo en 3 días. Antes les había costado 6 semanas con una consultora.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function PricingSection() {
-  // Mejora 8: billing toggle (monthly / annual)
-  const [isAnnual, setIsAnnual] = useState(false);
-
-  // TODO founder: considerar ampliar el límite de 1 a 3 sistemas en el plan Starter
-  // para mejorar la experiencia de evaluación y la conversión a planes de pago.
   const plans = [
     {
       name: 'Starter',
-      monthlyPrice: '0€',
-      annualPrice: '0€',
-      originalPrice: null as string | null,
+      price: '0€',
       period: '/mes',
       description: 'Para conocer la plataforma y evaluar tu primer sistema de IA',
       features: [
@@ -1498,15 +1246,11 @@ function PricingSection() {
       cta: 'Empezar gratis',
       href: '/register',
       highlight: false,
-      badge: null as string | null,
-      urgencyBadge: null as string | null,
-      savings: null as string | null,
     },
     {
       name: 'Professional',
-      monthlyPrice: '99€',
-      annualPrice: '49€',
-      originalPrice: '149' as string | null,
+      price: '99€',
+      originalPrice: '149',
       period: '/mes',
       description: 'Para PYMEs y consultoras con varios sistemas de IA',
       features: [
@@ -1522,14 +1266,12 @@ function PricingSection() {
       href: '/register?plan=professional',
       highlight: true,
       badge: 'Más popular',
-      urgencyBadge: 'PRECIO DE LANZAMIENTO · Válido hasta el 2 de agosto de 2026',
       savings: 'Ahorra 600€/año',
     },
     {
       name: 'Business',
-      monthlyPrice: '249€',
-      annualPrice: '149€',
-      originalPrice: '349' as string | null,
+      price: '249€',
+      originalPrice: '349',
       period: '/mes',
       description: 'Para empresas con múltiples equipos y necesidades avanzadas',
       features: [
@@ -1544,15 +1286,11 @@ function PricingSection() {
       cta: 'Elegir Business',
       href: '/register?plan=business',
       highlight: false,
-      badge: null as string | null,
-      urgencyBadge: null as string | null,
       savings: 'Ahorra 1.200€/año',
     },
     {
       name: 'Enterprise',
-      monthlyPrice: 'Custom',
-      annualPrice: 'Custom',
-      originalPrice: null as string | null,
+      price: 'Custom',
       period: '',
       description: 'Soluciones a medida para grandes organizaciones',
       features: [
@@ -1567,16 +1305,13 @@ function PricingSection() {
       cta: 'Contactar ventas',
       href: '/contact?plan=enterprise',
       highlight: false,
-      badge: null as string | null,
-      urgencyBadge: null as string | null,
-      savings: null as string | null,
     },
   ];
 
   return (
     <section id="pricing" className="py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Precios</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
             Planes para cada etapa
@@ -1586,31 +1321,8 @@ function PricingSection() {
           </p>
         </div>
 
-        {/* Billing toggle — Mejora 8 */}
-        <div className="flex items-center justify-center gap-3 mb-10">
-          <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-[#2D3E4E]' : 'text-[#7a8a92]'}`}>Mensual</span>
-          <button
-            onClick={() => setIsAnnual(!isAnnual)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${isAnnual ? 'bg-[#E09E50]' : 'bg-[#E8ECEB]'}`}
-            aria-label="Cambiar entre pago mensual y anual"
-          >
-            <span
-              className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${isAnnual ? 'translate-x-7' : 'translate-x-1'}`}
-            />
-          </button>
-          <span className={`text-sm font-medium transition-colors ${isAnnual ? 'text-[#2D3E4E]' : 'text-[#7a8a92]'}`}>
-            Anual
-            <span className="ml-1.5 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">-50%</span>
-          </span>
-        </div>
-
-        {/* Metrics bar above pricing cards — Mejora 3 */}
-        <PricingMetricsBar />
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
-          {plans.map((plan, index) => {
-            const displayPrice = isAnnual ? plan.annualPrice : plan.monthlyPrice;
-            return (
+          {plans.map((plan, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -1630,14 +1342,6 @@ function PricingSection() {
                   </span>
                 </div>
               )}
-              {/* Urgency badge — Mejora 8 */}
-              {plan.urgencyBadge && (
-                <div className="mb-2">
-                  <span className="text-[10px] font-bold text-[#E09E50] bg-[#E09E50]/10 border border-[#E09E50]/30 px-2 py-0.5 rounded-full leading-tight">
-                    {plan.urgencyBadge}
-                  </span>
-                </div>
-              )}
 
               <div className="mb-6">
                 <h3 className={`text-lg font-bold mb-1 ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
@@ -1650,7 +1354,7 @@ function PricingSection() {
                     </span>
                   )}
                   <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
-                    {displayPrice}
+                    {plan.price}
                   </span>
                   <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#7a8a92]'}`}>
                     {plan.period}
@@ -1690,16 +1394,12 @@ function PricingSection() {
                 </Button>
               </Link>
             </motion.div>
-            );
-          })}
+          ))}
         </div>
 
         <p className="text-center text-sm text-[#7a8a92] mt-8">
           Todos los planes incluyen acceso completo durante 14 días de prueba. Sin tarjeta de crédito.
         </p>
-
-        {/* Mini case study — Mejora 3 */}
-        <PricingCaseStudy />
       </div>
     </section>
   );
@@ -1708,59 +1408,38 @@ function PricingSection() {
 // ─────────────────────────────────────────────────────────
 // 10. FAQ
 // ─────────────────────────────────────────────────────────
-const FAQ_ITEMS = [
-  {
-    q: '¿Los informes que genera CumplIA son válidos para una auditoría real?',
-    a: 'CumplIA genera los documentos en el formato que exige el Reglamento (UE) 2024/1689: registro técnico conforme al Anexo IV, FRIA según el Art. 27 y análisis de riesgos documentado. La validez legal final depende del contenido que introduzcas, no del formato. Para sistemas de alto riesgo, recomendamos revisión jurídica adicional.',
-  },
-  {
-    q: '¿Qué pasa si cancelo? ¿Puedo exportar toda mi documentación?',
-    // TODO founder: confirmar el número de días de acceso tras baja (aquí se usa 30 días).
-    a: 'Sí. Todos tus documentos son tuyos. Puedes exportar en PDF o DOCX en cualquier momento, antes o después de cancelar. Tus datos permanecen accesibles durante 30 días tras la baja.',
-  },
-  {
-    q: '¿Mi sector tiene requisitos específicos que CumplIA cubre?',
-    a: 'CumplIA cubre los requisitos horizontales del AI Act para todos los sectores. Los sectores con mayor detalle en la plataforma son finanzas, salud y RRHH, que concentran la mayoría de sistemas de alto riesgo. Si tienes dudas sobre tu caso concreto, escríbenos.',
-  },
-  {
-    q: '¿Cuánto tiempo real me lleva? ¿Necesito conocimientos técnicos?',
-    a: 'El primer sistema clasificado lleva menos de 5 minutos. Un inventario completo de 10-15 sistemas suele completarse en 2-3 días. No necesitas conocimientos técnicos — el flujo está diseñado para equipos de compliance y legal, no para IT.',
-  },
-  {
-    q: '¿Sois juristas especializados o solo una herramienta de software?',
-    a: 'CumplIA fue desarrollado con la supervisión de juristas especializados en regulación IA. La plataforma no sustituye el asesoramiento legal, pero automatiza el 80% del trabajo que hoy hacen manualmente los equipos de compliance y sus consultores.',
-  },
-  {
-    q: 'Si la normativa cambia, ¿actualizáis la plataforma?',
-    a: 'Sí. Monitorizamos continuamente las publicaciones de la Comisión Europea, los actos delegados del AI Act y las guías de la AESIA. Cuando hay cambios relevantes, actualizamos la base de conocimiento y notificamos a los usuarios afectados.',
-  },
-];
-
-// FAQ JSON-LD schema data (rendered in FAQSection via Script tag)
-const FAQ_JSON_LD = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQ_ITEMS.map((faq) => ({
-    '@type': 'Question',
-    name: faq.q,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: faq.a,
-    },
-  })),
-};
-
 function FAQSection() {
   const [open, setOpen] = useState<number | null>(null);
-  const faqs = FAQ_ITEMS;
+
+  const faqs = [
+    {
+      q: '¿El AI Act ya está en vigor? ¿Tengo que cumplir ahora?',
+      a: 'El AI Act entró en vigor en agosto de 2024. Las prohibiciones aplican desde febrero de 2025. Las obligaciones para sistemas de alto riesgo entran en vigor en agosto de 2026. Es fundamental empezar el proceso de cumplimiento ahora para llegar a tiempo.',
+    },
+    {
+      q: '¿Cómo sé si mi sistema de IA es de alto riesgo?',
+      a: 'El AI Act define los sistemas de alto riesgo en el Anexo III: biometría, infraestructuras críticas, educación, empleo, servicios esenciales, justicia y seguridad. CumplIA te ayuda a clasificar automáticamente tu sistema en segundos mediante nuestro asistente de IA.',
+    },
+    {
+      q: '¿Qué es una FRIA y por qué la necesito?',
+      a: 'La Evaluación de Impacto en los Derechos Fundamentales (FRIA) es obligatoria para sistemas de alto riesgo desplegados por organismos públicos o que afecten a la prestación de servicios públicos. CumplIA genera la estructura de la FRIA adaptada a tu sistema (Art. 27).',
+    },
+    {
+      q: '¿CumplIA sustituye a un consultor legal?',
+      a: 'CumplIA automatiza el trabajo técnico y de documentación, pero no sustituye el asesoramiento jurídico para casos complejos. Lo que sí hace es reducir drásticamente el tiempo (y coste) que necesitas de consultores externos, aportando la estructura y la documentación base.',
+    },
+    {
+      q: '¿Puedo empezar gratis y migrar mis datos si cambio de plan?',
+      a: 'Sí. El plan Starter es gratuito sin límite de tiempo para un sistema de IA. Si creces, puedes migrar a Professional o Business en cualquier momento y todos tus datos, riesgos y documentos se conservan íntegramente.',
+    },
+    {
+      q: '¿Mis datos están seguros? ¿Cumplís el RGPD?',
+      a: 'CumplIA está construido sobre infraestructura europea (Supabase/AWS EU), cumple con el RGPD y sus datos nunca se utilizan para entrenar modelos de IA. Puedes solicitar la exportación o eliminación de datos en cualquier momento.',
+    },
+  ];
 
   return (
     <section className="py-20 bg-[#F8FAFB]">
-      {/* FAQ JSON-LD for rich snippets */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
-      />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">FAQ</p>
@@ -1884,7 +1563,8 @@ function CTASection() {
           <p className="text-xs text-[#8CBDB9]/50 -mt-4 mb-8">hasta la entrada en vigor plena del AI Act (agosto 2026)</p>
 
           <p className="text-lg text-[#8CBDB9] mb-8 leading-relaxed">
-            Agosto 2026 ya está aquí. ¿Está tu empresa preparada?
+            Cada semana que no actúas, el trabajo crece. Regístrate gratis y
+            ten tu primer sistema clasificado en menos de 5 minutos.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
             <Link href="/register">
@@ -1939,9 +1619,7 @@ export default function HomePage() {
       <HowItWorksSection />
       <AIClassificationDemo />
       <FeaturesSection />
-      <LeadMagnet />
       <AIActSection />
-      <TeamCredentials />
       <PricingSection />
       <FAQSection />
       <CTASection />
