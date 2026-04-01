@@ -794,6 +794,7 @@ function HowItWorksSection() {
       icon: FolderKanban,
       title: 'Registra tus sistemas de IA',
       desc: 'Añade cada sistema de IA que utilizas: nombre, sector, descripción y contexto de uso. En minutos tienes tu inventario completo centralizado.',
+      consequence: 'Sin inventario no hay cumplimiento posible. La AESIA puede solicitar en cualquier momento un listado completo de tus sistemas activos.',
       detail: 'Formulario guiado + importación masiva',
       color: 'from-[#E09E50]/20 to-[#E09E50]/5',
       iconColor: 'text-[#E09E50]',
@@ -804,6 +805,7 @@ function HowItWorksSection() {
       icon: Sparkles,
       title: 'IA clasifica y analiza riesgos',
       desc: 'Nuestro asistente de IA lee la descripción de tu sistema, lo clasifica según el AI Act y propone los factores de riesgo aplicables de nuestro catálogo de 50+ riesgos.',
+      consequence: 'Clasificar mal un sistema de alto riesgo puede costarte hasta 15M€ en multas. La IA lo hace en segundos con los criterios exactos del Anexo III.',
       detail: 'Clasificación automática + análisis de riesgos IA',
       color: 'from-[#8CBDB9]/20 to-[#8CBDB9]/5',
       iconColor: 'text-[#8CBDB9]',
@@ -814,6 +816,7 @@ function HowItWorksSection() {
       icon: ShieldCheck,
       title: 'Gestiona obligaciones y genera documentos',
       desc: 'Sigue el progreso de tus obligaciones artículo por artículo, mitiga riesgos, sube evidencias y genera informes PDF de cumplimiento listos para auditores.',
+      consequence: 'Los auditores no aceptan intenciones: aceptan documentos. CumplIA genera los PDFs exactos que necesitan ver.',
       detail: 'Informes PDF automáticos + exportación',
       color: 'from-green-100 to-green-50',
       iconColor: 'text-green-600',
@@ -864,7 +867,9 @@ function HowItWorksSection() {
                 <span className="text-3xl font-bold text-[#E8ECEB]/60">{step.number}</span>
               </div>
               <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{step.title}</h3>
-              <p className="text-sm text-[#7a8a92] leading-relaxed mb-4">{step.desc}</p>
+              <p className="text-sm text-[#7a8a92] leading-relaxed mb-3">{step.desc}</p>
+              {/* Consequence sentence — Mejora 9 */}
+              <p className="text-sm text-[#7a8a92]/70 leading-relaxed mb-4 italic">{step.consequence}</p>
               <div className="flex items-center gap-1.5 text-xs text-[#7a8a92]">
                 <CheckCircle className="w-3.5 h-3.5 text-green-500" />
                 <span>{step.detail}</span>
