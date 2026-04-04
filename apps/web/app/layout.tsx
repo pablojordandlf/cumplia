@@ -79,6 +79,13 @@ export default function RootLayout({
     <html lang="es-ES" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        {/* Google Fonts: Fraunces (display) + Geist (UI) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,900&family=Geist:wght@200;300;400;500&display=swap"
+          rel="stylesheet"
+        />
         {/* Organization Schema */}
         <script
           type="application/ld+json"
@@ -132,7 +139,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased bg-ivory">
         {children}
         <Toaster />
       </body>

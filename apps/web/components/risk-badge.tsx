@@ -30,7 +30,7 @@ const riskConfig = {
   },
   unclassified: {
     label: 'Sin Clasificar',
-    color: 'bg-[#E8ECEB] text-[#707070] border-[#707070]/20 hover:bg-[#E8ECEB]/80',
+    color: 'bg-[#E3DFD5] text-[#707070] border-[#707070]/20 hover:bg-[#E3DFD5]/80',
     icon: Clock,
   },
 };

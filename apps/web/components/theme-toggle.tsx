@@ -51,13 +51,13 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="inline-flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground bg-[#E8ECEB] dark:bg-[#2D3E4E] hover:bg-[#E8ECEB]/80 dark:hover:bg-[#3D4E5E] transition-colors"
+      className="inline-flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground bg-[#E3DFD5] dark:bg-[#0B1C3D] hover:bg-[#E3DFD5]/80 dark:hover:bg-[#3D4E5E] transition-colors"
       aria-label={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
     >
       {theme === 'light' ? (
-        <Moon className="h-4 w-4 text-[#E09E50]" />
+        <Moon className="h-4 w-4 text-[#E8FF47]" />
       ) : (
-        <Sun className="h-4 w-4 text-[#E09E50]" />
+        <Sun className="h-4 w-4 text-[#E8FF47]" />
       )}
     </button>
   );

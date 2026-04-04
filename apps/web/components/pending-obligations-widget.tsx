@@ -58,12 +58,12 @@ const RISK_COLORS: Record<string, { badge: string; icon: string; text: string; b
     bgLight: 'bg-[#E8F5E3]'
   },
   unclassified: { 
-    badge: 'bg-[#E8ECEB] text-[#707070] border border-[#707070]/20', 
+    badge: 'bg-[#E3DFD5] text-[#707070] border border-[#707070]/20', 
     icon: '⚪', 
     text: 'Sin clasificar',
     bg: 'bg-[#707070]',
     color: 'text-[#707070]',
-    bgLight: 'bg-[#E8ECEB]'
+    bgLight: 'bg-[#E3DFD5]'
   },
 };
 
@@ -219,7 +219,7 @@ export function PendingObligationsWidget() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-[#E8ECEB] bg-white p-6">
+      <div className="rounded-lg border border-[#E3DFD5] bg-white p-6">
         <div className="space-y-4">
           <div className="h-8 w-40 animate-pulse rounded bg-gray-100" />
           <div className="space-y-2">
@@ -239,13 +239,13 @@ export function PendingObligationsWidget() {
       variants={containerVariants}
       className="space-y-4"
     >
-      <div className="rounded-lg border border-[#E8ECEB] bg-white p-6">
+      <div className="rounded-lg border border-[#E3DFD5] bg-white p-6">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ListTodo className="h-5 w-5 text-[#E09E50]" />
-            <h3 className="text-sm font-semibold text-[#2D3E4E]">Obligaciones Pendientes</h3>
+            <ListTodo className="h-5 w-5 text-[#0B1C3D]" />
+            <h3 className="text-sm font-semibold text-[#0B1C3D]">Obligaciones Pendientes</h3>
           </div>
-          <span className="text-xs text-[#7a8a92]">{filteredSystems.length} sistemas</span>
+          <span className="text-xs text-[#8B9BB4]">{filteredSystems.length} sistemas</span>
         </div>
 
         {/* Risk Level Filter */}
@@ -257,8 +257,8 @@ export function PendingObligationsWidget() {
               whileTap={{ scale: 0.95 }}
               className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
                 filterRisk === null
-                  ? 'bg-[#2D3E4E] text-white'
-                  : 'bg-[#E8ECEB] text-[#7a8a92] hover:bg-gray-200'
+                  ? 'bg-[#0B1C3D] text-white'
+                  : 'bg-[#E3DFD5] text-[#8B9BB4] hover:bg-gray-200'
               }`}
             >
               Todos
@@ -300,7 +300,7 @@ export function PendingObligationsWidget() {
                 <motion.div
                   key={system.system_id}
                   variants={itemVariants}
-                  className="group rounded-lg border border-[#E8ECEB] bg-[#F8FAFB] p-4 transition-all hover:border-[#E09E50]/40 hover:bg-white"
+                  className="group rounded-lg border border-[#E3DFD5] bg-[#F8FAFB] p-4 transition-all hover:border-[#E8FF47]/40 hover:bg-white"
                 >
                   <Link href={`/dashboard/inventory/${system.system_id}`}>
                     <div className="space-y-3 cursor-pointer">
@@ -308,7 +308,7 @@ export function PendingObligationsWidget() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span>{colors.icon}</span>
-                            <h4 className="font-medium text-[#2D3E4E] group-hover:text-[#E09E50] transition-colors truncate">
+                            <h4 className="font-medium text-[#0B1C3D] group-hover:text-[#E8FF47] transition-colors truncate">
                               {system.system_name}
                             </h4>
                           </div>
@@ -328,12 +328,12 @@ export function PendingObligationsWidget() {
                       {/* Progress Bar */}
                       <div className="space-y-1">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="text-[#7a8a92]">Evaluación de Riesgos</span>
+                          <span className="text-[#8B9BB4]">Evaluación de Riesgos</span>
                           <span className={`font-medium ${colors.color}`}>
                             {system.completed_risks}/{system.total_risks}
                           </span>
                         </div>
-                        <div className="h-2 w-full rounded-full bg-[#E8ECEB] overflow-hidden">
+                        <div className="h-2 w-full rounded-full bg-[#E3DFD5] overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${system.progress_percentage}%` }}
@@ -341,7 +341,7 @@ export function PendingObligationsWidget() {
                             className={`h-full ${colors.bg} rounded-full`}
                           />
                         </div>
-                        <div className="text-right text-xs text-[#7a8a92]">
+                        <div className="text-right text-xs text-[#8B9BB4]">
                           {system.progress_percentage}% completado
                         </div>
                       </div>
@@ -352,7 +352,7 @@ export function PendingObligationsWidget() {
             })}
           </motion.div>
         ) : (
-          <div className="text-center py-8 text-[#7a8a92]">
+          <div className="text-center py-8 text-[#8B9BB4]">
             <p className="text-sm">No hay sistemas en esta categoría</p>
           </div>
         )}

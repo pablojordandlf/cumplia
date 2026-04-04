@@ -230,7 +230,7 @@ export default function PricingPage() {
                 <div className="text-3xl font-bold">Custom</div>
                 <p className="text-sm text-[#7a8a92] mb-4">Precio según necesidades</p>
                 <Link href="mailto:sales@cumplia.com">
-                  <Button className="bg-white text-gray-900 hover:bg-[#E8ECEB]">
+                  <Button className="bg-white text-gray-900 hover:bg-[#E3DFD5]">
                     Contactar Ventas
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

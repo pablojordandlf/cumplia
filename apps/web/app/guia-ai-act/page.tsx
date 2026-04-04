@@ -262,7 +262,7 @@ function RiskClassificationSection() {
   ];
 
   return (
-    <section className="py-12 sm:py-20 bg-[#E8ECEB]">
+    <section className="py-12 sm:py-20 bg-[#E3DFD5]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
@@ -361,7 +361,7 @@ function TimelineSection() {
                 <div className="flex flex-col items-center">
                   <div className={`w-4 h-4 rounded-full ${milestone.completed ? 'bg-green-500' : 'bg-blue-600'}`} />
                   {index < milestones.length - 1 && (
-                    <div className="w-0.5 h-full bg-[#E8ECEB]/60 mt-2" />
+                    <div className="w-0.5 h-full bg-[#E3DFD5]/60 mt-2" />
                   )}
                 </div>
                 <div className="flex-1 pb-6">
@@ -478,7 +478,7 @@ function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-[#E8ECEB] px-8 py-6 text-lg w-full sm:w-auto">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-[#E3DFD5] px-8 py-6 text-lg w-full sm:w-auto">
                 <CheckCircle className="mr-2 h-5 w-5" />
                 Registrarse Gratis
               </Button>
@@ -534,7 +534,7 @@ function FAQSection() {
 
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <Card key={index} className="border border-[#E8ECEB]">
+              <Card key={index} className="border border-[#E3DFD5]">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold text-gray-900">
                     {faq.question}
@@ -555,7 +555,7 @@ function FAQSection() {
 // Related Content Section
 function RelatedContentSection() {
   return (
-    <section className="py-12 sm:py-20 bg-[#E8ECEB]">
+    <section className="py-12 sm:py-20 bg-[#E3DFD5]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">

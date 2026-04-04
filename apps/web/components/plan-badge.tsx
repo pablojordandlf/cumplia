@@ -10,15 +10,15 @@ export function PlanBadge({ plan, size = 'md' }: PlanBadgeProps) {
   const planConfig: Record<string, { label: string; className: string }> = {
     free: {
       label: 'Free',
-      className: 'bg-[#E8ECEB] text-[#2D3E4E] border-[#E8ECEB] hover:bg-[#E8ECEB]/80',
+      className: 'bg-[#E3DFD5] text-[#0B1C3D] border-[#E3DFD5] hover:bg-[#E3DFD5]/80',
     },
     pro: {
       label: 'Pro',
-      className: 'bg-[#FFE8D1] text-[#E09E50] border-[#E09E50]/20 hover:bg-[#FFE8D1]/80',
+      className: 'bg-[#FFE8D1] text-[#0B1C3D] border-[#0B1C3D]/20 hover:bg-[#FFE8D1]/80',
     },
     agency: {
       label: 'Agency',
-      className: 'bg-[#D1F0ED] text-[#8CBDB9] border-[#8CBDB9]/20 hover:bg-[#D1F0ED]/80',
+      className: 'bg-[#D1F0ED] text-[#8B9BB4] border-[#8B9BB4]/20 hover:bg-[#D1F0ED]/80',
     },
   };
 

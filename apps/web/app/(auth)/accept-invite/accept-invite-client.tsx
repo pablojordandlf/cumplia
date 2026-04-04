@@ -167,10 +167,10 @@ export default function AcceptInviteClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-[#2a2a2a] border-[#7a8a92]/30">
+      <Card className="w-full max-w-md bg-[#2a2a2a] border-[#8B9BB4]/30">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-[#E8ECEB]">Accept Invitation</CardTitle>
-          <CardDescription className="text-[#7a8a92]">
+          <CardTitle className="text-2xl text-[#E3DFD5]">Accept Invitation</CardTitle>
+          <CardDescription className="text-[#8B9BB4]">
             {organizationName && `Joining ${organizationName}`}
           </CardDescription>
         </CardHeader>
@@ -178,22 +178,22 @@ export default function AcceptInviteClient() {
         <CardContent className="flex flex-col items-center gap-6">
           {status === 'validating' && (
             <>
-              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
-              <p className="text-center text-[#E8ECEB]">Validating your invitation...</p>
+              <Loader2 className="w-12 h-12 text-[#0B1C3D] animate-spin" />
+              <p className="text-center text-[#E3DFD5]">Validating your invitation...</p>
             </>
           )}
 
           {status === 'unauthenticated' && (
             <>
-              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
-              <p className="text-center text-[#E8ECEB]">Redirecting to signup...</p>
+              <Loader2 className="w-12 h-12 text-[#0B1C3D] animate-spin" />
+              <p className="text-center text-[#E3DFD5]">Redirecting to signup...</p>
             </>
           )}
 
           {status === 'authenticated' && (
             <>
-              <Loader2 className="w-12 h-12 text-[#E09E50] animate-spin" />
-              <p className="text-center text-[#E8ECEB]">
+              <Loader2 className="w-12 h-12 text-[#0B1C3D] animate-spin" />
+              <p className="text-center text-[#E3DFD5]">
                 Accepting your invitation to {organizationName}...
               </p>
             </>
@@ -205,8 +205,8 @@ export default function AcceptInviteClient() {
                 <CheckCircle2 className="w-6 h-6 text-green-500" />
               </div>
               <div className="text-center">
-                <p className="text-[#E8ECEB] font-semibold mb-2">Welcome!</p>
-                <p className="text-[#7a8a92] text-sm">
+                <p className="text-[#E3DFD5] font-semibold mb-2">Welcome!</p>
+                <p className="text-[#8B9BB4] text-sm">
                   You have successfully joined {organizationName}. Redirecting to your dashboard...
                 </p>
               </div>
@@ -217,12 +217,12 @@ export default function AcceptInviteClient() {
             <>
               <XCircle className="w-12 h-12 text-[#C92A2A]" />
               <div className="text-center">
-                <p className="text-[#E8ECEB] font-semibold mb-2">Invitation Error</p>
-                <p className="text-[#7a8a92] text-sm mb-4">{error}</p>
+                <p className="text-[#E3DFD5] font-semibold mb-2">Invitation Error</p>
+                <p className="text-[#8B9BB4] text-sm mb-4">{error}</p>
               </div>
               <Button
                 onClick={() => router.push('/login')}
-                className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]"
+                className="w-full bg-[#E8FF47] hover:bg-[#d4ec2e] text-[#0a0a0a]"
               >
                 Go to Login
               </Button>
@@ -233,12 +233,12 @@ export default function AcceptInviteClient() {
             <>
               <AlertCircle className="w-12 h-12 text-[#D97706]" />
               <div className="text-center">
-                <p className="text-[#E8ECEB] font-semibold mb-2">Invitation Expired</p>
-                <p className="text-[#7a8a92] text-sm">{error}</p>
+                <p className="text-[#E3DFD5] font-semibold mb-2">Invitation Expired</p>
+                <p className="text-[#8B9BB4] text-sm">{error}</p>
               </div>
               <Button
                 onClick={() => router.push('/')}
-                className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]"
+                className="w-full bg-[#E8FF47] hover:bg-[#d4ec2e] text-[#0a0a0a]"
               >
                 Go to Home
               </Button>
@@ -246,9 +246,9 @@ export default function AcceptInviteClient() {
           )}
 
           {status !== 'validating' && status !== 'unauthenticated' && (
-            <p className="text-center text-xs text-[#7a8a92] mt-4">
+            <p className="text-center text-xs text-[#8B9BB4] mt-4">
               Need help?{' '}
-              <Link href="/" className="text-[#E09E50] hover:underline">
+              <Link href="/" className="text-[#0B1C3D] hover:underline font-medium">
                 Contact support
               </Link>
             </p>
