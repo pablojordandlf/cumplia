@@ -14,28 +14,66 @@ const VALID_SECTORS = [
 
 const VALID_ROLES = ['provider', 'deployer', 'distributor', 'importer'] as const;
 
-const EXTRACTION_PROMPT = `Analiza el contenido de los documentos adjuntos y extrae la información sobre el sistema de IA que describen.
+const EXTRACTION_SYSTEM_PROMPT = `Eres un experto en análisis documental de sistemas de IA según el Reglamento (UE) 2024/1689 (AI Act). Tu tarea es extraer información estructurada de documentos técnicos o fichas de sistemas de inteligencia artificial.
 
-Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta (sin texto adicional, sin markdown, sin bloques de código):
+INSTRUCCIONES DE EXTRACCIÓN:
+
+1. NOMBRE (name): Busca el nombre oficial del sistema, producto o proyecto de IA. Puede aparecer como título del documento, nombre del producto, nombre del proyecto, cabecera principal, etc.
+
+2. DESCRIPCIÓN (description): Extrae o resume en 1-3 frases el propósito principal y funcionalidad del sistema. Sé concreto y técnico.
+
+3. SECTOR: Elige exactamente uno de los siguientes valores según el dominio de aplicación del sistema:
+   - finance: banca, seguros, inversiones, pagos, crédito, auditoría financiera, fintech
+   - healthcare: medicina, diagnóstico clínico, hospitales, farmacia, salud mental, bienestar, telemedicina
+   - education: enseñanza, aprendizaje automático educativo, universidades, formación profesional, e-learning
+   - government: administración pública, justicia, defensa, seguridad nacional, servicios públicos, registro civil
+   - retail: comercio electrónico, tiendas físicas, logística, cadena de suministro, distribución comercial
+   - technology: software empresarial, TI, telecomunicaciones, ciberseguridad, cloud computing, plataformas digitales
+   - entertainment: medios de comunicación, videojuegos, streaming, música, arte generativo, redes sociales
+   - manufacturing: industria, producción automatizada, control de calidad, robótica industrial, mantenimiento predictivo
+   - transportation: movilidad urbana, vehículos autónomos, aviación, ferroviario, gestión de tráfico, logística
+   - other: cualquier otro sector no contemplado arriba
+
+4. ROL AI ACT (ai_act_role): Elige exactamente uno según el Art. 3 del AI Act:
+   - provider: la organización DESARROLLA o encarga desarrollar el sistema (es el fabricante/creador); el documento es una ficha técnica o manual del sistema propio
+   - deployer: la organización USA o IMPLANTA el sistema en sus procesos o frente a usuarios finales; el documento describe la adopción de una herramienta de terceros
+   - distributor: la organización DISTRIBUYE o revende el sistema desarrollado por terceros en el mercado
+   - importer: la organización IMPORTA el sistema desde fuera de la UE para comercializarlo en el mercado europeo
+
+5. IS_POC (is_poc):
+   - true: el documento menciona piloto, PoC, MVP, prototipo, prueba de concepto, fase de validación, proof of concept, demostración técnica, entorno de pre-producción
+   - false: el documento menciona producción, despliegue real, versión estable, usuarios reales en producción, en explotación, go-live
+   - null: no se puede determinar con certeza razonable
+
+6. PROVEEDOR (provider): nombre de la empresa u organización que ha desarrollado o suministra el sistema (no quien lo usa). Puede aparecer como "Desarrollado por", "Proveedor", "Fabricante", nombre de empresa en cabecera o pie de documento.
+
+7. AI OWNER (ai_owner): nombre de la persona responsable del sistema. Puede aparecer como AI Owner, Responsable del sistema, Product Owner, Project Manager, Director del proyecto, Responsable técnico, Persona de contacto principal.
+
+8. VERSIÓN (version): número o nombre de versión si aparece explícitamente (ej: v1.2, versión 3.0, Release 2024.1).
+
+9. CONFIANZA (confidence):
+   - high: documentación detallada y completa; la mayoría de campos se determinan con certeza directa del texto
+   - medium: información parcial; algunos campos se infieren o están incompletos; documento genérico o escueto
+   - low: documentación muy escasa, ambigua o no relacionada con un sistema de IA concreto
+
+REGLAS CRÍTICAS:
+- No inventes información que no esté explícita o muy claramente implícita en el documento.
+- Si un campo no se puede determinar con certeza razonable, usa null (excepto sector y ai_act_role que deben inferirse siempre que sea posible).
+- Devuelve ÚNICAMENTE el objeto JSON válido, sin texto adicional, sin explicaciones previas, sin bloques de código markdown ni comillas adicionales.`;
+
+const EXTRACTION_USER_PROMPT = `Analiza los documentos adjuntos y extrae la información del sistema de IA. Devuelve exclusivamente este objeto JSON (sin texto adicional):
 
 {
-  "name": "nombre del sistema de IA (string, null si no se encuentra)",
-  "description": "descripción del sistema (string, null si no se encuentra)",
-  "sector": "uno de: finance, healthcare, education, government, retail, technology, entertainment, manufacturing, transportation, other (null si no se puede determinar)",
-  "ai_act_role": "uno de: provider, deployer, distributor, importer (null si no se puede determinar)",
-  "is_poc": true o false (null si no se puede determinar — true si el doc menciona PoC, piloto, prueba de concepto, prototipo),
-  "provider": "nombre del proveedor/empresa que desarrolla el sistema (null si no se encuentra)",
-  "ai_owner": "nombre del responsable, AI Owner o persona a cargo del sistema (null si no se encuentra)",
-  "version": "versión del sistema si se menciona (null si no se encuentra)",
-  "confidence": "high si la documentación es clara y detallada, medium si hay información parcial, low si la documentación es escasa"
-}
-
-Reglas:
-- Para sector: infiere el más apropiado según el contexto del sistema descrito.
-- Para ai_act_role: provider = desarrolla el sistema; deployer = lo usa/despliega; distributor = lo distribuye; importer = lo importa desde fuera de la UE.
-- Para is_poc: si el documento menciona que es un proyecto piloto, PoC, MVP, prototipo o prueba de concepto → true. Si menciona producción, despliegue real → false.
-- No inventes información que no esté en el documento.
-- Si un campo no se puede determinar con razonable certeza, usa null.`;
+  "name": "nombre del sistema de IA o null",
+  "description": "descripción en 1-3 frases o null",
+  "sector": "finance|healthcare|education|government|retail|technology|entertainment|manufacturing|transportation|other o null",
+  "ai_act_role": "provider|deployer|distributor|importer o null",
+  "is_poc": true/false/null,
+  "provider": "nombre del proveedor/desarrollador o null",
+  "ai_owner": "nombre del responsable del sistema o null",
+  "version": "versión si se menciona o null",
+  "confidence": "high|medium|low"
+}`;
 
 type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
 
@@ -152,7 +190,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    contentBlocks.push({ type: 'text', text: EXTRACTION_PROMPT });
+    contentBlocks.push({ type: 'text', text: EXTRACTION_USER_PROMPT });
 
     const extraHeaders: Record<string, string> = hasPdf
       ? { 'anthropic-beta': 'pdfs-2024-09-25' }
@@ -161,7 +199,8 @@ export async function POST(request: NextRequest) {
     const response = await client.messages.create(
       {
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
+        max_tokens: 2048,
+        system: EXTRACTION_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: contentBlocks as any }],
       },
       { headers: extraHeaders }
@@ -172,17 +211,30 @@ export async function POST(request: NextRequest) {
       .map((block) => (block as { type: 'text'; text: string }).text)
       .join('');
 
-    // Strip possible markdown code fences
-    const cleaned = rawText.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
+    // Strip markdown code fences and trim
+    const stripped = rawText.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
 
     let parsed: Record<string, unknown>;
     try {
-      parsed = JSON.parse(cleaned);
+      parsed = JSON.parse(stripped);
     } catch {
-      return NextResponse.json(
-        { success: false, error: 'No se pudo interpretar la respuesta del modelo. Intenta con otro documento.' },
-        { status: 422 }
-      );
+      // Fallback: try to extract JSON object from response if there is surrounding text
+      const jsonMatch = stripped.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[0]);
+        } catch {
+          return NextResponse.json(
+            { success: false, error: 'No se pudo interpretar la respuesta del modelo. Intenta con otro documento.' },
+            { status: 422 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'No se pudo interpretar la respuesta del modelo. Intenta con otro documento.' },
+          { status: 422 }
+        );
+      }
     }
 
     const extracted = sanitizeExtractedData(parsed);

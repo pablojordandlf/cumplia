@@ -30,7 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Square, FlaskConical, Package, X, GripVertical, Pencil } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
-import { DocumentAnalyzer, type ExtractedDocData } from '@/components/document-analyzer';
+import { DocumentAnalyzer, type ExtractedDocData, type CurrentFormValues } from '@/components/document-analyzer';
 import { LimitGate } from '@/components/permission-gate';
 import { useLimit } from '@/hooks/use-limit';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -133,6 +133,14 @@ export default function NewUseCasePage() {
       is_poc: false,
     },
   });
+
+  const watchedValues: CurrentFormValues = {
+    name: form.watch('name'),
+    description: form.watch('description'),
+    sector: form.watch('sector'),
+    ai_act_role: form.watch('ai_act_role'),
+    is_poc: form.watch('is_poc'),
+  };
 
   // Custom fields management functions
   function addCustomField() {
@@ -407,7 +415,7 @@ export default function NewUseCasePage() {
 
       {/* Document analyzer — IA-powered pre-fill */}
       <div className="max-w-3xl mx-auto mb-6">
-        <DocumentAnalyzer onApply={handleDocumentExtraction} />
+        <DocumentAnalyzer onApply={handleDocumentExtraction} currentValues={watchedValues} />
       </div>
 
       <Card className="max-w-3xl mx-auto">
@@ -467,7 +475,7 @@ export default function NewUseCasePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Sector</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona un sector" />
@@ -674,7 +682,7 @@ export default function NewUseCasePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Rol según AI Act</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona tu rol" />

@@ -33,9 +33,22 @@ export interface ExtractedDocData {
   confidence: 'high' | 'medium' | 'low';
 }
 
+export interface CurrentFormValues {
+  name?: string;
+  description?: string;
+  sector?: string;
+  ai_act_role?: string;
+  is_poc?: boolean | null;
+}
+
 interface DocumentAnalyzerProps {
   onApply: (data: ExtractedDocData) => void;
+  currentValues?: CurrentFormValues;
 }
+
+type SelectableField = 'name' | 'description' | 'sector' | 'ai_act_role' | 'is_poc' | 'provider' | 'ai_owner' | 'version';
+
+type SelectedFields = Record<SelectableField, boolean>;
 
 const SECTOR_LABELS: Record<string, string> = {
   finance: 'Finanzas', healthcare: 'Salud', education: 'Educación',
@@ -61,21 +74,68 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function FieldRow({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) return null;
+function hasCurrentValue(value: string | boolean | null | undefined): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  return true;
+}
+
+interface FieldRowProps {
+  label: string;
+  extractedValue: string | null | undefined;
+  currentValue?: string | boolean | null;
+  selected: boolean;
+  onToggle: () => void;
+}
+
+function FieldRow({ label, extractedValue, currentValue, selected, onToggle }: FieldRowProps) {
+  if (!extractedValue) return null;
+  const hasExisting = hasCurrentValue(currentValue);
+
   return (
-    <div className="flex gap-2 text-sm">
-      <span className="text-gray-500 w-32 shrink-0">{label}</span>
-      <span className="text-gray-900 font-medium">{value}</span>
-    </div>
+    <label className="flex items-start gap-3 cursor-pointer group">
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggle}
+        className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer"
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-medium text-gray-500 w-28 shrink-0">{label}</span>
+          <span className={`text-sm font-medium truncate ${selected ? 'text-gray-900' : 'text-gray-400 line-through'}`}>
+            {extractedValue}
+          </span>
+          {hasExisting && (
+            <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded shrink-0">
+              sobreescribe valor actual
+            </span>
+          )}
+        </div>
+      </div>
+    </label>
   );
 }
 
-export function DocumentAnalyzer({ onApply }: DocumentAnalyzerProps) {
+function buildInitialSelection(extracted: ExtractedDocData): SelectedFields {
+  return {
+    name: extracted.name !== null,
+    description: extracted.description !== null,
+    sector: extracted.sector !== null,
+    ai_act_role: extracted.ai_act_role !== null,
+    is_poc: extracted.is_poc !== null,
+    provider: extracted.provider !== null,
+    ai_owner: extracted.ai_owner !== null,
+    version: extracted.version !== null,
+  };
+}
+
+export function DocumentAnalyzer({ onApply, currentValues }: DocumentAnalyzerProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [extracted, setExtracted] = useState<ExtractedDocData | null>(null);
+  const [selectedFields, setSelectedFields] = useState<SelectedFields | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -110,12 +170,14 @@ export function DocumentAnalyzer({ onApply }: DocumentAnalyzerProps) {
     });
 
     setExtracted(null);
+    setSelectedFields(null);
     setError(null);
   }
 
   function removeFile(index: number) {
     setFiles((prev) => prev.filter((_, i) => i !== index));
     setExtracted(null);
+    setSelectedFields(null);
     setError(null);
   }
 
@@ -130,6 +192,7 @@ export function DocumentAnalyzer({ onApply }: DocumentAnalyzerProps) {
     setIsAnalyzing(true);
     setError(null);
     setExtracted(null);
+    setSelectedFields(null);
 
     try {
       const body = new FormData();
@@ -143,6 +206,7 @@ export function DocumentAnalyzer({ onApply }: DocumentAnalyzerProps) {
       }
 
       setExtracted(json.data);
+      setSelectedFields(buildInitialSelection(json.data));
     } catch (err: any) {
       setError(err.message ?? 'Error al conectar con el servidor.');
     } finally {
@@ -150,18 +214,66 @@ export function DocumentAnalyzer({ onApply }: DocumentAnalyzerProps) {
     }
   }
 
-  function handleApply() {
+  function toggleField(field: SelectableField) {
+    setSelectedFields((prev) => prev ? { ...prev, [field]: !prev[field] } : prev);
+  }
+
+  function selectAll() {
     if (!extracted) return;
-    onApply(extracted);
-    toast({ title: 'Campos aplicados', description: 'El formulario se ha prerrellenado con la información extraída.' });
+    setSelectedFields(buildInitialSelection(extracted));
+  }
+
+  function deselectAll() {
+    if (!selectedFields) return;
+    const cleared = Object.fromEntries(
+      Object.keys(selectedFields).map((k) => [k, false])
+    ) as SelectedFields;
+    setSelectedFields(cleared);
+  }
+
+  function handleApply() {
+    if (!extracted || !selectedFields) return;
+
+    const filtered: ExtractedDocData = {
+      name: selectedFields.name ? extracted.name : null,
+      description: selectedFields.description ? extracted.description : null,
+      sector: selectedFields.sector ? extracted.sector : null,
+      ai_act_role: selectedFields.ai_act_role ? extracted.ai_act_role : null,
+      is_poc: selectedFields.is_poc ? extracted.is_poc : null,
+      provider: selectedFields.provider ? extracted.provider : null,
+      ai_owner: selectedFields.ai_owner ? extracted.ai_owner : null,
+      version: selectedFields.version ? extracted.version : null,
+      confidence: extracted.confidence,
+    };
+
+    const appliedCount = Object.values(selectedFields).filter(Boolean).length;
+    onApply(filtered);
+    toast({
+      title: 'Campos aplicados',
+      description: `Se han prerrellenado ${appliedCount} campo${appliedCount !== 1 ? 's' : ''} en el formulario.`,
+    });
   }
 
   const confidenceCfg = extracted ? CONFIDENCE_CONFIG[extracted.confidence] : null;
+  const anySelected = selectedFields ? Object.values(selectedFields).some(Boolean) : false;
+  const allSelected = selectedFields
+    ? Object.entries(selectedFields).every(([key, val]) => {
+        const hasData = extracted?.[key as SelectableField] !== null && extracted?.[key as SelectableField] !== undefined;
+        return !hasData || val;
+      })
+    : false;
+
   const hasUsefulData = extracted && (
     extracted.name || extracted.description || extracted.sector ||
     extracted.ai_act_role || extracted.is_poc !== null ||
-    extracted.provider || extracted.ai_owner
+    extracted.provider || extracted.ai_owner || extracted.version
   );
+
+  const pocLabel = extracted?.is_poc === true
+    ? 'Prueba de Concepto (PoC)'
+    : extracted?.is_poc === false
+    ? 'Sistema en Producción'
+    : null;
 
   return (
     <div className="border border-blue-200 rounded-xl bg-blue-50 p-5 space-y-4">
@@ -249,7 +361,7 @@ export function DocumentAnalyzer({ onApply }: DocumentAnalyzerProps) {
       )}
 
       {/* Results */}
-      {extracted && (
+      {extracted && selectedFields && (
         <div className="bg-white border border-blue-200 rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -264,39 +376,97 @@ export function DocumentAnalyzer({ onApply }: DocumentAnalyzerProps) {
           </div>
 
           {hasUsefulData ? (
-            <div className="space-y-1.5">
-              <FieldRow label="Nombre" value={extracted.name} />
-              <FieldRow label="Descripción" value={extracted.description} />
-              <FieldRow label="Sector" value={extracted.sector ? SECTOR_LABELS[extracted.sector] ?? extracted.sector : null} />
-              <FieldRow label="Rol AI Act" value={extracted.ai_act_role ? ROLE_LABELS[extracted.ai_act_role] ?? extracted.ai_act_role : null} />
-              <FieldRow
-                label="Tipo"
-                value={extracted.is_poc === true ? 'Prueba de Concepto (PoC)' : extracted.is_poc === false ? 'Sistema en Producción' : null}
-              />
-              <FieldRow label="Proveedor" value={extracted.provider} />
-              <FieldRow label="AI Owner" value={extracted.ai_owner} />
-              <FieldRow label="Versión" value={extracted.version} />
-            </div>
+            <>
+              <p className="text-xs text-gray-500">
+                Selecciona los campos que quieres aplicar al formulario. Los campos marcados con
+                {' '}<span className="text-amber-600 font-medium">sobreescribe valor actual</span>{' '}
+                reemplazarán lo que ya hayas introducido.
+              </p>
+
+              <div className="space-y-2.5">
+                <FieldRow
+                  label="Nombre"
+                  extractedValue={extracted.name}
+                  currentValue={currentValues?.name}
+                  selected={selectedFields.name}
+                  onToggle={() => toggleField('name')}
+                />
+                <FieldRow
+                  label="Descripción"
+                  extractedValue={extracted.description}
+                  currentValue={currentValues?.description}
+                  selected={selectedFields.description}
+                  onToggle={() => toggleField('description')}
+                />
+                <FieldRow
+                  label="Sector"
+                  extractedValue={extracted.sector ? SECTOR_LABELS[extracted.sector] ?? extracted.sector : null}
+                  currentValue={currentValues?.sector}
+                  selected={selectedFields.sector}
+                  onToggle={() => toggleField('sector')}
+                />
+                <FieldRow
+                  label="Rol AI Act"
+                  extractedValue={extracted.ai_act_role ? ROLE_LABELS[extracted.ai_act_role] ?? extracted.ai_act_role : null}
+                  currentValue={currentValues?.ai_act_role}
+                  selected={selectedFields.ai_act_role}
+                  onToggle={() => toggleField('ai_act_role')}
+                />
+                <FieldRow
+                  label="Tipo"
+                  extractedValue={pocLabel}
+                  currentValue={currentValues?.is_poc}
+                  selected={selectedFields.is_poc}
+                  onToggle={() => toggleField('is_poc')}
+                />
+                <FieldRow
+                  label="Proveedor"
+                  extractedValue={extracted.provider}
+                  selected={selectedFields.provider}
+                  onToggle={() => toggleField('provider')}
+                />
+                <FieldRow
+                  label="AI Owner"
+                  extractedValue={extracted.ai_owner}
+                  selected={selectedFields.ai_owner}
+                  onToggle={() => toggleField('ai_owner')}
+                />
+                <FieldRow
+                  label="Versión"
+                  extractedValue={extracted.version}
+                  selected={selectedFields.version}
+                  onToggle={() => toggleField('version')}
+                />
+              </div>
+
+              <div className="flex gap-2 text-xs pt-1 border-t border-gray-100">
+                <button type="button" onClick={selectAll} disabled={allSelected} className="text-blue-600 hover:underline disabled:opacity-40">
+                  Seleccionar todo
+                </button>
+                <span className="text-gray-300">|</span>
+                <button type="button" onClick={deselectAll} disabled={!anySelected} className="text-blue-600 hover:underline disabled:opacity-40">
+                  Deseleccionar todo
+                </button>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <Button type="button" onClick={handleApply} size="sm" className="flex-1" disabled={!anySelected}>
+                  Aplicar campos seleccionados
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setExtracted(null); setSelectedFields(null); setFiles([]); }}
+                >
+                  Descartar
+                </Button>
+              </div>
+            </>
           ) : (
             <p className="text-sm text-gray-500">
               No se encontró información suficiente en los documentos. Intenta con documentación más detallada.
             </p>
-          )}
-
-          {hasUsefulData && (
-            <div className="flex gap-2 pt-1">
-              <Button type="button" onClick={handleApply} size="sm" className="flex-1">
-                Aplicar al formulario
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => { setExtracted(null); setFiles([]); }}
-              >
-                Descartar
-              </Button>
-            </div>
           )}
         </div>
       )}
