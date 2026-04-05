@@ -40,6 +40,7 @@ interface UseCase {
   status: string;
   ai_act_level: string;
   created_at: string;
+  tags: string[];
 }
 
 interface ObligationsCount {
@@ -52,6 +53,7 @@ const columns = [
   { label: 'Sector', accessor: 'sector' },
   { label: 'Estado', accessor: 'status' },
   { label: 'Nivel AI Act', accessor: 'ai_act_level' },
+  { label: 'Etiquetas', accessor: 'tags' },
   { label: 'Obligaciones', accessor: 'obligations' },
   { label: 'Acciones', accessor: 'actions' },
 ];
@@ -64,6 +66,7 @@ export default function InventoryPage() {
   const [obligationsCounts, setObligationsCounts] = useState<Record<string, ObligationsCount>>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<MemberRole | null>(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -74,13 +77,16 @@ export default function InventoryPage() {
   }, []);
 
   useEffect(() => {
-    const results = useCases.filter(useCase =>
-      useCase.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      useCase.sector.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      useCase.ai_act_level.replace('_', ' ').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const results = useCases.filter(useCase => {
+      const matchesSearch =
+        useCase.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        useCase.sector.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        useCase.ai_act_level.replace('_', ' ').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTag = activeTag === null || (useCase.tags ?? []).includes(activeTag);
+      return matchesSearch && matchesTag;
+    });
     setFilteredUseCases(results);
-  }, [searchTerm, useCases]);
+  }, [searchTerm, activeTag, useCases]);
 
   const fetchUserRole = async () => {
     try {
@@ -131,7 +137,7 @@ export default function InventoryPage() {
       // Build query: show use cases where user_id matches OR organization_id matches
       let query = supabase
         .from('use_cases')
-        .select('id, name, sector, status, ai_act_level, created_at')
+        .select('id, name, sector, status, ai_act_level, created_at, tags')
         .is('deleted_at', null);
 
       if (organizationId) {
@@ -279,6 +285,27 @@ export default function InventoryPage() {
         return <Badge variant="outline" className="capitalize">{useCase.status}</Badge>;
       case 'ai_act_level':
         return <RiskBadge level={useCase.ai_act_level || 'unclassified'} />;
+      case 'tags': {
+        const tags = useCase.tags ?? [];
+        if (tags.length === 0) return <span className="text-gray-400 text-sm">—</span>;
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags.map(tag => (
+              <Badge
+                key={tag}
+                variant={activeTag === tag ? 'default' : 'secondary'}
+                className="cursor-pointer text-xs"
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault();
+                  setActiveTag((prev: string | null) => prev === tag ? null : tag);
+                }}
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        );
+      }
       case 'obligations':
         return renderObligationsCell(useCase);
       case 'actions':
@@ -348,10 +375,22 @@ export default function InventoryPage() {
                 placeholder="Buscar por nombre, sector o nivel..."
                 className="w-full sm:w-64"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               />
             </div>
           </CardTitle>
+          {activeTag && (
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-sm text-gray-500">Filtrando por etiqueta:</span>
+              <Badge variant="default" className="text-xs">{activeTag}</Badge>
+              <button
+                className="text-xs text-gray-400 hover:text-gray-600 underline"
+                onClick={() => setActiveTag(null)}
+              >
+                Quitar filtro
+              </button>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {filteredUseCases.length === 0 ? (
