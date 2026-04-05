@@ -40,7 +40,7 @@ interface UseCase {
   status: string;
   ai_act_level: string;
   created_at: string;
-  tags: string[];
+  tags?: string[];
 }
 
 interface ObligationsCount {
@@ -137,7 +137,7 @@ export default function InventoryPage() {
       // Build query: show use cases where user_id matches OR organization_id matches
       let query = supabase
         .from('use_cases')
-        .select('id, name, sector, status, ai_act_level, created_at, tags')
+        .select('*')
         .is('deleted_at', null);
 
       if (organizationId) {
