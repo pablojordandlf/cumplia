@@ -45,7 +45,7 @@ const TEMPLATE_DESCRIPTIONS: Record<string, { icon: React.ReactNode; description
     description: 'Catálogo reducido con los 15 riesgos prioritarios recomendados para sistemas de riesgo limitado.'
   },
   minimal_risk: {
-    icon: <AlertTriangle className="h-5 w-5 text-[#E09E50]" />,
+    icon: <AlertTriangle className="h-5 w-5 text-[#E8FF47]" />,
     description: 'Catálogo básico opcional para documentación voluntaria de sistemas de riesgo mínimo.'
   }
 };

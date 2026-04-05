@@ -14,10 +14,8 @@ import {
   Settings,
   GraduationCap,
   Settings2,
-  Shield,
   LogOut,
   Menu,
-  X,
   User,
   AlertCircle,
   BarChart3,
@@ -28,6 +26,7 @@ import {
   CheckSquare,
   History,
 } from "lucide-react";
+import { CumpliaLogo } from "@/components/ui/cumplia-logo";
 
 type UserRole = 'admin' | 'compliance_officer' | 'auditor' | 'viewer';
 
@@ -164,21 +163,20 @@ function SidebarContent({
   });
 
   return (
-    <div className={cn("flex flex-col h-full", isMobile ? "bg-white" : "bg-white border-r border-[#E8ECEB]")}>
+    <div className={cn("flex flex-col h-full", isMobile ? "bg-[#FAFAF8]" : "bg-[#FAFAF8] border-r border-[#E3DFD5]")}>
       {/* Logo */}
       <div className="p-6">
-        <Link href="/dashboard" className="flex items-center space-x-2" onClick={onNavigate}>
-          <Shield className="h-8 w-8 text-[#E09E50]" />
-          <span className="text-xl font-bold text-[#2D3E4E]">CumplIA</span>
+        <Link href="/dashboard" className="inline-flex" onClick={onNavigate}>
+          <CumpliaLogo markSize={28} wordSize={18} variant="light" />
         </Link>
       </div>
 
       {/* Role Badge (if not admin) */}
       {userRole && userRole !== 'admin' && !isLoading && (
         <div className="px-4 mb-4">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#F5DFB3]/30 border border-[#E09E50]/30">
-            <Eye className="h-4 w-4 text-[#E09E50]" />
-            <span className="text-xs font-medium text-[#B8860B]">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#E8FF47]/10 border border-[#0B1C3D]/15">
+            <Eye className="h-4 w-4 text-[#0B1C3D]" />
+            <span className="text-xs font-medium text-[#0B1C3D]">
               {userRole === 'viewer' && 'Solo lectura'}
               {userRole === 'auditor' && 'Auditor'}
               {userRole === 'compliance_officer' && 'Cumplimiento'}
@@ -205,8 +203,8 @@ function SidebarContent({
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-[#E09E50]/10 text-[#E09E50]"
-                      : "text-[#7a8a92] hover:bg-[#E8ECEB] hover:text-[#2D3E4E]"
+                      ? "bg-[#0B1C3D]/[0.07] text-[#0B1C3D]"
+                      : "text-[#8B9BB4] hover:bg-[#E3DFD5] hover:text-[#0B1C3D]"
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -226,8 +224,8 @@ function SidebarContent({
           className={cn(
             "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
             pathname === '/dashboard/settings/profile'
-              ? "bg-[#E09E50]/10 text-[#E09E50]"
-              : "text-[#7a8a92] hover:bg-[#E8ECEB] hover:text-[#2D3E4E]"
+              ? "bg-[#0B1C3D]/[0.07] text-[#0B1C3D]"
+              : "text-[#8B9BB4] hover:bg-[#E3DFD5] hover:text-[#0B1C3D]"
           )}
         >
           <User className="h-5 w-5" />
@@ -256,10 +254,9 @@ export function DashboardSidebar() {
   return (
     <>
       {/* Mobile Header with Hamburger */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#E8ECEB] z-40 flex items-center justify-between px-4">
-        <Link href="/" className="flex items-center space-x-2">
-          <Shield className="h-7 w-7 text-[#E09E50]" />
-          <span className="text-lg font-bold text-[#2D3E4E]">CumplIA</span>
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#FAFAF8] border-b border-[#E3DFD5] z-40 flex items-center justify-between px-4">
+        <Link href="/" className="inline-flex">
+          <CumpliaLogo markSize={26} wordSize={16} variant="light" />
         </Link>
         
         <Drawer open={open} onOpenChange={setOpen}>
@@ -280,7 +277,7 @@ export function DashboardSidebar() {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 min-h-screen bg-white border-r border-[#E8ECEB] flex flex-col fixed left-0 top-0 bottom-0 z-30">
+      <aside className="hidden lg:block w-64 min-h-screen bg-[#FAFAF8] border-r border-[#E3DFD5] flex flex-col fixed left-0 top-0 bottom-0 z-30">
         <SidebarContent pathname={pathname} />
       </aside>
 
@@ -323,7 +320,7 @@ export function MobileBottomNav() {
     .slice(0, 4);
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8ECEB] z-40 safe-area-pb">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3DFD5] z-40 safe-area-pb">
       <ul className="flex justify-around items-center h-16">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
@@ -339,8 +336,8 @@ export function MobileBottomNav() {
                 className={cn(
                   "flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors",
                   isActive
-                    ? "text-[#E09E50]"
-                    : "text-[#7a8a92] hover:text-[#2D3E4E]"
+                    ? "text-[#0B1C3D]"
+                    : "text-[#8B9BB4] hover:text-[#0B1C3D]"
                 )}
               >
                 <Icon className="h-5 w-5" />

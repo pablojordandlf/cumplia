@@ -184,7 +184,7 @@ export function AddCustomRiskDialog({
                   filteredRisks.map((risk) => (
                     <div
                       key={risk.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-[#E8ECEB] cursor-pointer transition-colors"
+                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-[#E3DFD5] cursor-pointer transition-colors"
                       onClick={() => toggleRisk(risk.id)}
                     >
                       <Checkbox

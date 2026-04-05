@@ -218,12 +218,12 @@ export function RiskDetailCard({
       case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-[#E8ECEB] text-gray-800';
+      default: return 'bg-[#E3DFD5] text-gray-800';
     }
   };
 
   const getRiskScoreColor = (score: number | null) => {
-    if (!score) return 'text-[#7a8a92]';
+    if (!score) return 'text-[#8B9BB4]';
     if (score >= 8) return 'text-red-600';
     if (score >= 5) return 'text-orange-600';
     if (score >= 3) return 'text-yellow-600';
@@ -244,7 +244,7 @@ export function RiskDetailCard({
 
         {/* Read-only notice */}
         {isReadOnly && (
-          <div className="p-3 bg-[#FFE8D1] border border-[#E09E50]/20 rounded-lg text-sm text-[#E09E50]">
+          <div className="p-3 bg-[#FFE8D1] border border-[#E8FF47]/20 rounded-lg text-sm text-[#E8FF47]">
             <span className="font-medium">Modo Visualizador:</span> Solo puedes ver la información del riesgo. 
             Contacta a un administrador para realizar modificaciones.
           </div>
@@ -416,7 +416,7 @@ export function RiskDetailCard({
                     }))}
                     rows={3}
                     disabled={isReadOnly}
-                    className={isReadOnly ? "bg-[#E8ECEB]" : ""}
+                    className={isReadOnly ? "bg-[#E3DFD5]" : ""}
                   />
                 </div>
 
@@ -454,7 +454,7 @@ export function RiskDetailCard({
                           responsible_person: e.target.value
                         }))}
                         disabled={isReadOnly}
-                        className={isReadOnly ? "bg-[#E8ECEB]" : ""}
+                        className={isReadOnly ? "bg-[#E3DFD5]" : ""}
                       />
                     )}
                   </div>
@@ -473,7 +473,7 @@ export function RiskDetailCard({
                         due_date: e.target.value 
                       }))}
                       disabled={isReadOnly}
-                      className={isReadOnly ? "bg-[#E8ECEB]" : ""}
+                      className={isReadOnly ? "bg-[#E3DFD5]" : ""}
                     />
                   </div>
                 </div>
@@ -498,7 +498,7 @@ export function RiskDetailCard({
                   }))}
                   rows={3}
                   disabled={isReadOnly}
-                  className={isReadOnly ? "bg-[#E8ECEB]" : ""}
+                  className={isReadOnly ? "bg-[#E3DFD5]" : ""}
                 />
               </CardContent>
             </Card>
