@@ -13,11 +13,13 @@ interface LimitResult {
 }
 
 // Default fallback limits if plans table is not accessible
+// Evalúa (starter/free): 3, Cumple (professional): 15, Protege (business): 50, Lidera (enterprise): unlimited
 const DEFAULT_LIMITS: Record<string, number> = {
-  free: 1,
-  starter: 5,
+  free: 3,
+  starter: 3,
+  pro: 15,
   professional: 15,
-  business: 30,
+  business: 50,
   enterprise: -1, // unlimited
 };
 

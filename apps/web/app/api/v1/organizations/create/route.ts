@@ -148,10 +148,11 @@ function getMaxAiSystems(plan: string): number {
   switch (plan) {
     case 'free':
     case 'starter':
-      return 1;
+      return 3;
     case 'professional':
       return 15;
     case 'business':
+      return 50;
     case 'enterprise':
       return -1; // Unlimited
     default:

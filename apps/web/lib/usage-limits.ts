@@ -7,9 +7,11 @@ interface PlanLimits {
   features: string[];
 }
 
+// Plan limits - April 2026
+// Evalúa (starter), Cumple (professional), Protege (business), Lidera (enterprise)
 export const PLAN_LIMITS: Record<OrganizationPlan, PlanLimits> = {
   starter: {
-    max_ai_systems: 1,
+    max_ai_systems: 3,
     max_users: 1,
     max_documents_monthly: 0,
     features: ['basic_compliance', 'risk_classification']
@@ -18,10 +20,10 @@ export const PLAN_LIMITS: Record<OrganizationPlan, PlanLimits> = {
     max_ai_systems: 15,
     max_users: 3,
     max_documents_monthly: -1,
-    features: ['full_fria', 'risk_management', 'evidence_registry', 'document_export']
+    features: ['full_fria', 'risk_management', 'evidence_registry', 'document_export', 'ai_assistant']
   },
   business: {
-    max_ai_systems: -1,
+    max_ai_systems: 50,
     max_users: 10,
     max_documents_monthly: -1,
     features: ['ai_assistant', 'advanced_risk_management', 'evidence_registry', 'custom_templates', 'multi_department']
