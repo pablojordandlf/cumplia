@@ -25,16 +25,6 @@ export interface Plan {
   features: PlanFeatures;
 }
 
-// Plan display name mapping for UI
-export const PLAN_DISPLAY_NAMES: Record<string, string> = {
-  starter: 'Evalúa',
-  free: 'Evalúa',
-  professional: 'Cumple',
-  pro: 'Cumple',
-  essential: 'Cumple',
-  business: 'Protege',
-  enterprise: 'Lidera',
-};
 
 // Updated plan structure - April 2026
 // Plan names: Evalúa (starter), Cumple (professional), Protege (business), Lidera (enterprise)
@@ -43,7 +33,7 @@ export const PLANS: Record<string, Plan> = {
   free: {
     id: 'starter',
     name: 'starter',
-    display_name: 'Evalúa',
+    display_name: 'Starter',
     price_monthly: 0,
     features: {
       ai_systems: 3,
@@ -59,7 +49,7 @@ export const PLANS: Record<string, Plan> = {
   starter: {
     id: 'starter',
     name: 'starter',
-    display_name: 'Evalúa',
+    display_name: 'Starter',
     price_monthly: 0,
     features: {
       ai_systems: 3,
@@ -76,7 +66,7 @@ export const PLANS: Record<string, Plan> = {
   essential: {
     id: 'professional',
     name: 'professional',
-    display_name: 'Cumple',
+    display_name: 'Professional',
     price_monthly: 399,
     features: {
       ai_systems: 15,
@@ -95,7 +85,7 @@ export const PLANS: Record<string, Plan> = {
   pro: {
     id: 'professional',
     name: 'professional',
-    display_name: 'Cumple',
+    display_name: 'Professional',
     price_monthly: 399,
     features: {
       ai_systems: 15,
@@ -113,7 +103,7 @@ export const PLANS: Record<string, Plan> = {
   professional: {
     id: 'professional',
     name: 'professional',
-    display_name: 'Cumple',
+    display_name: 'Professional',
     price_monthly: 399,
     features: {
       ai_systems: 15,
@@ -132,7 +122,7 @@ export const PLANS: Record<string, Plan> = {
   business: {
     id: 'business',
     name: 'business',
-    display_name: 'Protege',
+    display_name: 'Business',
     price_monthly: 899,
     features: {
       ai_systems: 50,
@@ -151,7 +141,7 @@ export const PLANS: Record<string, Plan> = {
   enterprise: {
     id: 'enterprise',
     name: 'enterprise',
-    display_name: 'Lidera',
+    display_name: 'Enterprise',
     price_monthly: 2499, // Base price, custom negotiated
     features: {
       ai_systems: -1,
@@ -265,13 +255,13 @@ export class PlanGate {
 
   getUpgradeMessage(feature: string): string {
     const messages: Record<string, string> = {
-      ai_systems: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza al plan Cumple para gestionar hasta 15 sistemas.`,
-      use_cases: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza al plan Cumple para gestionar hasta 15 sistemas.`,
-      api: 'El acceso a API requiere el plan Lidera.',
-      integrations: 'Las integraciones requieren el plan Lidera.',
-      custom_templates: 'Las plantillas personalizadas requieren el plan Protege o superior.',
-      multi_department: 'La gestión multi-departamento requiere el plan Protege o superior.',
-      ai_assistant: 'El asistente IA requiere el plan Cumple o superior.',
+      ai_systems: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 15 sistemas.`,
+      use_cases: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 15 sistemas.`,
+      api: 'El acceso a API requiere el plan Enterprise.',
+      integrations: 'Las integraciones requieren el plan Enterprise.',
+      custom_templates: 'Las plantillas personalizadas requieren el plan Business o superior.',
+      multi_department: 'La gestión multi-departamento requiere el plan Business o superior.',
+      ai_assistant: 'El asistente IA requiere el plan Professional o superior.',
     };
     return messages[feature] || 'Esta función requiere un plan superior.';
   }

@@ -10,31 +10,31 @@ interface PlanBadgeProps {
 
 const PLAN_CONFIG: Record<string, { label: string; className: string }> = {
   free: {
-    label: 'Evalúa',
+    label: 'Starter',
     className: 'bg-[#E3DFD5] text-[#0B1C3D] border-[#E3DFD5] hover:bg-[#E3DFD5]/80',
   },
   starter: {
-    label: 'Evalúa',
+    label: 'Starter',
     className: 'bg-[#E3DFD5] text-[#0B1C3D] border-[#E3DFD5] hover:bg-[#E3DFD5]/80',
   },
   pro: {
-    label: 'Cumple',
+    label: 'Professional',
     className: 'bg-[#FFE8D1] text-[#0B1C3D] border-[#0B1C3D]/20 hover:bg-[#FFE8D1]/80',
   },
   professional: {
-    label: 'Cumple',
+    label: 'Professional',
     className: 'bg-[#FFE8D1] text-[#0B1C3D] border-[#0B1C3D]/20 hover:bg-[#FFE8D1]/80',
   },
   agency: {
-    label: 'Protege',
+    label: 'Business',
     className: 'bg-[#D1F0ED] text-[#0B1C3D] border-[#8B9BB4]/20 hover:bg-[#D1F0ED]/80',
   },
   business: {
-    label: 'Protege',
+    label: 'Business',
     className: 'bg-[#D1F0ED] text-[#0B1C3D] border-[#8B9BB4]/20 hover:bg-[#D1F0ED]/80',
   },
   enterprise: {
-    label: 'Lidera',
+    label: 'Enterprise',
     className: 'bg-[#0B1C3D]/10 text-[#0B1C3D] border-[#0B1C3D]/20 hover:bg-[#0B1C3D]/20',
   },
 };

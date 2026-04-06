@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const tiers = [
   {
     key: "starter",
-    name: "Evalúa",
+    name: "Starter",
     description: "Conoce la plataforma y evalúa tus primeros sistemas de IA",
     price: 0,
     priceLabel: "0€",
@@ -45,14 +45,14 @@ const tiers = [
   },
   {
     key: "professional",
-    name: "Cumple",
+    name: "Professional",
     description: "Para PYMEs y consultoras que necesitan cumplir con el AI Act",
     price: 399,
     priceLabel: "399€",
     period: "/mes",
     badge: "Más popular",
     highlight: true,
-    ctaText: "Elegir Cumple",
+    ctaText: "Elegir Professional",
     ctaHref: "/register?plan=professional",
     features: [
       "Hasta 15 Sistemas de IA",
@@ -69,14 +69,14 @@ const tiers = [
   },
   {
     key: "business",
-    name: "Protege",
+    name: "Business",
     description: "Para empresas con múltiples departamentos y más sistemas de IA",
     price: 899,
     priceLabel: "899€",
     period: "/mes",
     badge: null,
     highlight: false,
-    ctaText: "Elegir Protege",
+    ctaText: "Elegir Business",
     ctaHref: "/register?plan=business",
     features: [
       "Hasta 50 Sistemas de IA",
@@ -93,7 +93,7 @@ const tiers = [
   },
   {
     key: "enterprise",
-    name: "Lidera",
+    name: "Enterprise",
     description: "Para grandes organizaciones con necesidades a medida",
     price: 2499,
     priceLabel: "2.499€+",
@@ -223,10 +223,10 @@ export default function PricingPage() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-4 px-4 font-medium"></th>
-                  <th className="text-center py-4 px-4 font-medium">Evalúa</th>
-                  <th className="text-center py-4 px-4 font-medium text-blue-600">Cumple</th>
-                  <th className="text-center py-4 px-4 font-medium">Protege</th>
-                  <th className="text-center py-4 px-4 font-medium">Lidera</th>
+                  <th className="text-center py-4 px-4 font-medium">Starter</th>
+                  <th className="text-center py-4 px-4 font-medium text-blue-600">Professional</th>
+                  <th className="text-center py-4 px-4 font-medium">Business</th>
+                  <th className="text-center py-4 px-4 font-medium">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
@@ -388,10 +388,10 @@ export default function PricingPage() {
             <div className="bg-background rounded-lg p-4 border">
               <h4 className="font-semibold mb-2 flex items-center gap-2">
                 <HelpCircle className="h-4 w-4 text-blue-600" />
-                ¿Necesito tarjeta de crédito para el plan Evalúa?
+                ¿Necesito tarjeta de crédito para el plan Starter?
               </h4>
               <p className="text-sm text-muted-foreground">
-                No, el plan Evalúa es completamente gratuito y no requiere tarjeta de crédito.
+                No, el plan Starter es completamente gratuito y no requiere tarjeta de crédito.
               </p>
             </div>
             <div className="bg-background rounded-lg p-4 border">
@@ -400,7 +400,7 @@ export default function PricingPage() {
                 ¿Qué incluye la IA generativa?
               </h4>
               <p className="text-sm text-muted-foreground">
-                Los planes Cumple, Protege y Lidera incluyen generación automática de documentos de cumplimiento,
+                Los planes Professional, Business y Enterprise incluyen generación automática de documentos de cumplimiento,
                 asistente IA para análisis de riesgos y sugerencias inteligentes para obligaciones del AI Act.
               </p>
             </div>

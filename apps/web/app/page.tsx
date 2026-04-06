@@ -1278,7 +1278,7 @@ function AIActSection() {
 function PricingSection() {
   const plans = [
     {
-      name: 'Evalúa',
+      name: 'Starter',
       price: '0€',
       period: '/mes',
       description: 'Conoce la plataforma y evalúa tus primeros sistemas de IA',
@@ -1294,7 +1294,7 @@ function PricingSection() {
       highlight: false,
     },
     {
-      name: 'Cumple',
+      name: 'Professional',
       price: '399€',
       period: '/mes',
       description: 'Para PYMEs y consultoras que necesitan cumplir con el AI Act',
@@ -1307,13 +1307,13 @@ function PricingSection() {
         'Registro de evidencias',
         'Soporte email prioritario',
       ],
-      cta: 'Elegir Cumple',
+      cta: 'Elegir Professional',
       href: '/register?plan=professional',
       highlight: true,
       badge: 'Más popular',
     },
     {
-      name: 'Protege',
+      name: 'Business',
       price: '899€',
       period: '/mes',
       description: 'Para empresas con múltiples departamentos y más sistemas de IA',
@@ -1326,12 +1326,12 @@ function PricingSection() {
         'Multi-departamento',
         'Soporte prioritario',
       ],
-      cta: 'Elegir Protege',
+      cta: 'Elegir Business',
       href: '/register?plan=business',
       highlight: false,
     },
     {
-      name: 'Lidera',
+      name: 'Enterprise',
       price: '2.499€+',
       period: '/mes',
       description: 'Soluciones a medida para grandes organizaciones',
@@ -1472,7 +1472,7 @@ function FAQSection() {
     },
     {
       q: '¿Puedo empezar gratis y migrar mis datos si cambio de plan?',
-      a: 'Sí. El plan Evalúa es gratuito sin límite de tiempo para hasta 3 sistemas de IA. Si creces, puedes migrar a Cumple, Protege o Lidera en cualquier momento y todos tus datos, riesgos y documentos se conservan íntegramente.',
+      a: 'Sí. El plan Starter es gratuito sin límite de tiempo para hasta 3 sistemas de IA. Si creces, puedes migrar a Professional, Business o Enterprise en cualquier momento y todos tus datos, riesgos y documentos se conservan íntegramente.',
     },
     {
       q: '¿Mis datos están seguros? ¿Cumplís el RGPD?',

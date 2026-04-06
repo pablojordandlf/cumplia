@@ -11,7 +11,7 @@ INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, li
 
 -- EVALÚA: Free tier - evaluate first AI systems
 ('starter',
- 'Evalúa',
+ 'Starter',
  NULL,
  0.00,
  '{
@@ -33,7 +33,7 @@ INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, li
 
 -- CUMPLE: Compliance tier - full compliance for SMEs (€399/month)
 ('professional',
- 'Cumple',
+ 'Professional',
  'price_professional_monthly',
  399.00,
  '{
@@ -55,7 +55,7 @@ INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, li
 
 -- PROTEGE: Protection tier - larger companies (€899/month)
 ('business',
- 'Protege',
+ 'Business',
  'price_business_monthly',
  899.00,
  '{
@@ -77,7 +77,7 @@ INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, li
 
 -- LIDERA: Leadership tier - large organizations (€2499+/month, custom)
 ('enterprise',
- 'Lidera',
+ 'Enterprise',
  NULL,
  2499.00,
  '{
@@ -103,7 +103,7 @@ INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, li
 -- Also keep legacy 'free' name pointing to starter limits
 INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, limits) VALUES
 ('free',
- 'Evalúa',
+ 'Starter',
  NULL,
  0.00,
  '{
@@ -217,4 +217,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON TABLE public.plans IS 'Pricing plans: Evalúa/starter (€0), Cumple/professional (€399), Protege/business (€899), Lidera/enterprise (€2499+)';
+COMMENT ON TABLE public.plans IS 'Pricing plans: Starter (€0), Professional (€399), Business (€899), Enterprise (€2499+)';
