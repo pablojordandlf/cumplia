@@ -1390,11 +1390,6 @@ function PricingSection() {
                   {plan.name}
                 </h3>
                 <div className="flex items-baseline gap-1 mb-1">
-                  {plan.originalPrice && (
-                    <span className={`text-sm line-through ${plan.highlight ? 'text-white/40' : 'text-[#8B9BB4]'}`}>
-                      {plan.originalPrice}€
-                    </span>
-                  )}
                   <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-[#0B1C3D]'}`}>
                     {plan.price}
                   </span>
@@ -1402,9 +1397,6 @@ function PricingSection() {
                     {plan.period}
                   </span>
                 </div>
-                {plan.savings && (
-                  <p className="text-xs font-medium text-green-400">{plan.savings}</p>
-                )}
                 <p className={`text-xs mt-2 ${plan.highlight ? 'text-white/60' : 'text-[#8B9BB4]'}`}>
                   {plan.description}
                 </p>
