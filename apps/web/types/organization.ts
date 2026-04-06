@@ -104,10 +104,11 @@ export function hasPermission(role: MemberRole, permission: string): boolean {
   return permissions.includes(permission);
 }
 
-// Plan limits configuration
+// Plan limits configuration - April 2026
+// Evalúa (starter), Cumple (professional), Protege (business), Lidera (enterprise)
 export const PLAN_LIMITS: Record<OrganizationPlan, OrganizationLimits> = {
   starter: {
-    maxAiSystems: 1,
+    maxAiSystems: 3,
     maxUsers: 1,
     maxDocumentsMonthly: 0,
     features: ['basic_compliance', 'risk_classification'],
@@ -121,10 +122,11 @@ export const PLAN_LIMITS: Record<OrganizationPlan, OrganizationLimits> = {
       'risk_management',
       'evidence_registry',
       'document_export',
+      'ai_assistant',
     ],
   },
   business: {
-    maxAiSystems: -1,
+    maxAiSystems: 50,
     maxUsers: 10,
     maxDocumentsMonthly: -1,
     features: [

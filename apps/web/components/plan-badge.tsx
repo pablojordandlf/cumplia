@@ -1,28 +1,49 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+type PlanKey = 'free' | 'starter' | 'pro' | 'professional' | 'agency' | 'business' | 'enterprise';
+
 interface PlanBadgeProps {
-  plan: 'free' | 'pro' | 'agency';
+  plan: PlanKey | string;
   size?: 'sm' | 'md';
 }
 
-export function PlanBadge({ plan, size = 'md' }: PlanBadgeProps) {
-  const planConfig: Record<string, { label: string; className: string }> = {
-    free: {
-      label: 'Free',
-      className: 'bg-[#E8ECEB] text-[#2D3E4E] border-[#E8ECEB] hover:bg-[#E8ECEB]/80',
-    },
-    pro: {
-      label: 'Pro',
-      className: 'bg-[#FFE8D1] text-[#E09E50] border-[#E09E50]/20 hover:bg-[#FFE8D1]/80',
-    },
-    agency: {
-      label: 'Agency',
-      className: 'bg-[#D1F0ED] text-[#8CBDB9] border-[#8CBDB9]/20 hover:bg-[#D1F0ED]/80',
-    },
-  };
+const PLAN_CONFIG: Record<string, { label: string; className: string }> = {
+  free: {
+    label: 'Starter',
+    className: 'bg-[#E3DFD5] text-[#0B1C3D] border-[#E3DFD5] hover:bg-[#E3DFD5]/80',
+  },
+  starter: {
+    label: 'Starter',
+    className: 'bg-[#E3DFD5] text-[#0B1C3D] border-[#E3DFD5] hover:bg-[#E3DFD5]/80',
+  },
+  pro: {
+    label: 'Professional',
+    className: 'bg-[#FFE8D1] text-[#0B1C3D] border-[#0B1C3D]/20 hover:bg-[#FFE8D1]/80',
+  },
+  professional: {
+    label: 'Professional',
+    className: 'bg-[#FFE8D1] text-[#0B1C3D] border-[#0B1C3D]/20 hover:bg-[#FFE8D1]/80',
+  },
+  agency: {
+    label: 'Business',
+    className: 'bg-[#D1F0ED] text-[#0B1C3D] border-[#8B9BB4]/20 hover:bg-[#D1F0ED]/80',
+  },
+  business: {
+    label: 'Business',
+    className: 'bg-[#D1F0ED] text-[#0B1C3D] border-[#8B9BB4]/20 hover:bg-[#D1F0ED]/80',
+  },
+  enterprise: {
+    label: 'Enterprise',
+    className: 'bg-[#0B1C3D]/10 text-[#0B1C3D] border-[#0B1C3D]/20 hover:bg-[#0B1C3D]/20',
+  },
+};
 
-  const config = planConfig[plan];
+export function PlanBadge({ plan, size = 'md' }: PlanBadgeProps) {
+  const config = PLAN_CONFIG[plan] ?? {
+    label: plan,
+    className: 'bg-[#E3DFD5] text-[#0B1C3D] border-[#E3DFD5] hover:bg-[#E3DFD5]/80',
+  };
 
   const sizeClasses = {
     sm: 'text-xs px-2 py-0.5',

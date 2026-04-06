@@ -129,17 +129,17 @@ export function RiskRegistry({
       case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-[#E8ECEB] text-gray-800';
+      default: return 'bg-[#E3DFD5] text-gray-800';
     }
   };
 
   const getStatusIcon = (status: RiskStatus) => {
     switch (status) {
       case 'mitigated': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'assessed': return <Shield className="h-4 w-4 text-[#E09E50]" />;
+      case 'assessed': return <Shield className="h-4 w-4 text-[#E8FF47]" />;
       case 'accepted': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'not_applicable': return <Lock className="h-4 w-4 text-[#7a8a92]" />;
-      default: return <AlertTriangle className="h-4 w-4 text-[#7a8a92]" />;
+      case 'not_applicable': return <Lock className="h-4 w-4 text-[#8B9BB4]" />;
+      default: return <AlertTriangle className="h-4 w-4 text-[#8B9BB4]" />;
     }
   };
 
@@ -147,7 +147,7 @@ export function RiskRegistry({
     <div className="space-y-4">
       {/* Read-only notice */}
       {isReadOnly && (
-        <div className="p-3 bg-[#FFE8D1] border border-[#E09E50]/20 rounded-lg text-sm text-[#E09E50]">
+        <div className="p-3 bg-[#FFE8D1] border border-[#E8FF47]/20 rounded-lg text-sm text-[#E8FF47]">
           <span className="font-medium">Modo Visualizador:</span> Solo puedes ver los riesgos. 
           Contacta a un administrador para realizar evaluaciones o modificaciones.
         </div>
@@ -228,7 +228,7 @@ export function RiskRegistry({
               className={`transition-colors border ${
                 isApplicable 
                   ? `border-solid ${isReadOnly ? 'cursor-default' : 'cursor-pointer hover:border-primary'}`
-                  : 'cursor-not-allowed border-dashed border-[#E8ECEB] bg-[#E8ECEB]/30'
+                  : 'cursor-not-allowed border-dashed border-[#E3DFD5] bg-[#E3DFD5]/30'
               }`}
               onClick={() => {
                 if (isApplicable) {
@@ -295,7 +295,7 @@ export function RiskRegistry({
                       onClick={(e) => e.stopPropagation()}
                     >
                       {!isApplicable && (
-                        <Badge variant="outline" className="text-[#7a8a92] border-[#E8ECEB] text-xs">
+                        <Badge variant="outline" className="text-[#8B9BB4] border-[#E3DFD5] text-xs">
                           <EyeOff className="h-3 w-3 mr-1" />
                           No aplica
                         </Badge>
@@ -314,7 +314,7 @@ export function RiskRegistry({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center gap-2">
-                                <span className={`text-xs ${isApplicable ? 'text-green-600 font-medium' : 'text-[#7a8a92]'}`}>
+                                <span className={`text-xs ${isApplicable ? 'text-green-600 font-medium' : 'text-[#8B9BB4]'}`}>
                                   {isApplicable ? 'Aplica' : 'No aplica'}
                                 </span>
                                 <Switch

@@ -59,51 +59,57 @@ function DashboardMockup() {
   return (
     <div
       className="relative w-full max-w-2xl mx-auto"
-      style={{
-        filter: 'drop-shadow(0 40px 80px rgba(45,62,78,0.18))',
-      }}
+      style={{ filter: 'drop-shadow(0 40px 80px rgba(11,28,61,0.45))' }}
     >
       {/* Browser chrome */}
-      <div className="rounded-2xl overflow-hidden border border-[#E8ECEB]">
-        <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-3 flex items-center gap-3">
+      <div className="rounded-2xl overflow-hidden border border-[#E3DFD5]">
+        <div className="bg-[#F0EEE8] border-b border-[#E3DFD5] px-4 py-3 flex items-center gap-3">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-400" />
             <div className="w-3 h-3 rounded-full bg-yellow-400" />
             <div className="w-3 h-3 rounded-full bg-green-400" />
           </div>
-          <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-[#7a8a92] border border-[#E8ECEB] text-center">
+          <div className="flex-1 bg-[#FAFAF8] rounded-md px-3 py-1 text-xs text-[#8B9BB4] border border-[#E3DFD5] text-center">
             app.cumplia.com/dashboard
           </div>
         </div>
 
         {/* App layout */}
-        <div className="flex bg-white" style={{ height: '440px' }}>
+        <div className="flex bg-[#FAFAF8]" style={{ height: '440px' }}>
           {/* Sidebar */}
-          <div className="w-44 bg-white border-r border-[#E8ECEB] flex flex-col flex-shrink-0">
+          <div className="w-44 bg-[#FAFAF8] border-r border-[#E3DFD5] flex flex-col flex-shrink-0">
             <div className="p-4 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-[#E09E50]" />
-              <span className="font-bold text-[#2D3E4E] text-sm">CumplIA</span>
+              {/* Mini logomark inline */}
+              <svg width="18" height="18" viewBox="0 0 88 88" fill="none">
+                <path d="M74 44 A30 30 0 1 1 62 18" stroke="#0B1C3D" strokeWidth="8" strokeLinecap="round"/>
+                <circle cx="67" cy="14" r="9" fill="#E8FF47"/>
+                <circle cx="67" cy="14" r="3.6" fill="#0B1C3D"/>
+              </svg>
+              <span className="font-bold text-[#0B1C3D] text-sm" style={{ fontFamily: '"Fraunces",serif', fontWeight: 900 }}>
+                Cumpl<span style={{ fontStyle: 'italic' }}>IA</span>
+              </span>
             </div>
             <nav className="px-2 flex-1 space-y-0.5">
               {[
-                { label: 'Dashboard', active: true },
-                { label: 'Inventario IA', active: false },
-                { label: 'Gestión Riesgos', active: false },
-                { label: 'Compliance', active: false },
-                { label: 'Documentación', active: false },
-                { label: 'Timeline', active: false },
-                { label: 'Mi trabajo', active: false },
+                { label: 'Dashboard',      active: true },
+                { label: 'Inventario IA',  active: false },
+                { label: 'Gestión Riesgos',active: false },
+                { label: 'Compliance',     active: false },
+                { label: 'Documentación',  active: false },
+                { label: 'Timeline',       active: false },
+                { label: 'Mi trabajo',     active: false },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className={`px-3 py-2 rounded-lg text-[10px] font-medium flex items-center gap-2 ${
-                    item.active
-                      ? 'bg-[#E09E50]/10 text-[#E09E50]'
-                      : 'text-[#7a8a92]'
-                  }`}
+                  className="px-3 py-2 rounded-lg text-[10px] font-medium flex items-center gap-2"
+                  style={{
+                    background: item.active ? 'rgba(11,28,61,0.07)' : 'transparent',
+                    color: item.active ? '#0B1C3D' : '#8B9BB4',
+                  }}
                 >
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${item.active ? 'bg-[#E09E50]' : 'bg-[#E8ECEB]'}`}
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: item.active ? '#E8FF47' : '#E3DFD5' }}
                   />
                   {item.label}
                 </div>
@@ -112,19 +118,18 @@ function DashboardMockup() {
           </div>
 
           {/* Main content */}
-          <div className="flex-1 bg-[#F8FAFB] p-4 overflow-hidden">
-            {/* Page header */}
+          <div className="flex-1 bg-[#F0EEE8] p-4 overflow-hidden">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="text-sm font-bold text-[#2D3E4E]">Dashboard</h3>
-                <p className="text-[10px] text-[#7a8a92]">Resumen de cumplimiento AI Act</p>
+                <h3 className="text-sm font-bold text-[#0B1C3D]">Dashboard</h3>
+                <p className="text-[10px] text-[#8B9BB4]">Resumen de cumplimiento AI Act</p>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-6 h-6 rounded-full bg-[#E09E50]/20 flex items-center justify-center">
-                  <Bell className="w-3 h-3 text-[#E09E50]" />
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'rgba(232,255,71,0.15)' }}>
+                  <Bell className="w-3 h-3" style={{ color: '#0B1C3D' }} />
                 </div>
-                <div className="w-6 h-6 rounded-full bg-[#2D3E4E]/10 flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-[#2D3E4E]/40" />
+                <div className="w-6 h-6 rounded-full bg-[#E3DFD5] flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-[#8B9BB4]/40" />
                 </div>
               </div>
             </div>
@@ -132,76 +137,78 @@ function DashboardMockup() {
             {/* Stats cards */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               {[
-                { label: 'Sistemas IA', value: '12', sub: '3 nuevos este mes', color: 'border-blue-100 bg-white' },
-                { label: 'Cumplimiento', value: '78%', sub: '+12% vs anterior', color: 'border-green-100 bg-white' },
-                { label: 'Riesgos críticos', value: '4', sub: 'Requieren acción', color: 'border-orange-100 bg-white' },
+                { label: 'Sistemas IA',     value: '12', sub: '3 nuevos este mes',   border: 'border-[#E3DFD5]' },
+                { label: 'Cumplimiento',    value: '78%', sub: '+12% vs anterior',   border: 'border-green-100' },
+                { label: 'Riesgos críticos',value: '4',  sub: 'Requieren acción',    border: 'border-orange-100' },
               ].map((stat) => (
-                <div key={stat.label} className={`p-2.5 rounded-xl border ${stat.color}`}>
-                  <div className="text-base font-bold text-[#2D3E4E]">{stat.value}</div>
-                  <div className="text-[9px] font-medium text-[#2D3E4E]">{stat.label}</div>
-                  <div className="text-[9px] text-[#7a8a92]">{stat.sub}</div>
+                <div key={stat.label} className={`p-2.5 rounded-xl border bg-[#FAFAF8] ${stat.border}`}>
+                  <div className="text-base font-bold text-[#0B1C3D]">{stat.value}</div>
+                  <div className="text-[9px] font-medium text-[#0B1C3D]">{stat.label}</div>
+                  <div className="text-[9px] text-[#8B9BB4]">{stat.sub}</div>
                 </div>
               ))}
             </div>
 
             {/* Systems list */}
-            <div className="bg-white rounded-xl border border-[#E8ECEB] p-3 mb-2">
+            <div className="bg-[#FAFAF8] rounded-xl border border-[#E3DFD5] p-3 mb-2">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-semibold text-[#2D3E4E]">Sistemas de IA</span>
-                <span className="text-[9px] text-[#E09E50] font-medium">Ver todos →</span>
+                <span className="text-[10px] font-semibold text-[#0B1C3D]">Sistemas de IA</span>
+                <span className="text-[9px] font-medium" style={{ color: '#E8FF47', filter: 'brightness(0.75)' }}>Ver todos →</span>
               </div>
               {[
-                { name: 'Chatbot Atención al Cliente', level: 'Limitado', pct: 85, levelColor: 'bg-blue-100 text-blue-600' },
-                { name: 'Scoring de Crédito', level: 'Alto Riesgo', pct: 42, levelColor: 'bg-orange-100 text-orange-600' },
-                { name: 'Recomendador Productos', level: 'Mínimo', pct: 96, levelColor: 'bg-green-100 text-green-600' },
-                { name: 'Detección de Fraude', level: 'Alto Riesgo', pct: 61, levelColor: 'bg-orange-100 text-orange-600' },
+                { name: 'Chatbot Atención al Cliente', level: 'Limitado',   pct: 85, levelColor: 'bg-blue-100 text-blue-600' },
+                { name: 'Scoring de Crédito',          level: 'Alto Riesgo',pct: 42, levelColor: 'bg-orange-100 text-orange-600' },
+                { name: 'Recomendador Productos',       level: 'Mínimo',    pct: 96, levelColor: 'bg-green-100 text-green-600' },
+                { name: 'Detección de Fraude',          level: 'Alto Riesgo',pct: 61, levelColor: 'bg-orange-100 text-orange-600' },
               ].map((sys) => (
-                <div key={sys.name} className="flex items-center gap-2 py-1.5 border-b border-[#F8FAFB] last:border-0">
+                <div key={sys.name} className="flex items-center gap-2 py-1.5 border-b border-[#F0EEE8] last:border-0">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-medium text-[#2D3E4E] truncate">{sys.name}</div>
-                    <div className="w-full bg-[#F8FAFB] rounded-full h-1 mt-0.5">
-                      <div
-                        className="h-1 rounded-full bg-[#E09E50]"
-                        style={{ width: `${sys.pct}%` }}
-                      />
+                    <div className="text-[10px] font-medium text-[#0B1C3D] truncate">{sys.name}</div>
+                    <div className="w-full bg-[#E3DFD5] rounded-full h-1 mt-0.5">
+                      <div className="h-1 rounded-full bg-[#0B1C3D]" style={{ width: `${sys.pct}%` }} />
                     </div>
                   </div>
                   <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${sys.levelColor}`}>
                     {sys.level}
                   </span>
-                  <span className="text-[9px] text-[#7a8a92] flex-shrink-0">{sys.pct}%</span>
+                  <span className="text-[9px] text-[#8B9BB4] flex-shrink-0">{sys.pct}%</span>
                 </div>
               ))}
             </div>
 
             {/* AI badge */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#E09E50]/10 to-[#8CBDB9]/10 rounded-xl border border-[#E09E50]/20">
-              <Sparkles className="w-3 h-3 text-[#E09E50]" />
-              <span className="text-[9px] text-[#2D3E4E] font-medium">Asistente IA activo — 3 recomendaciones pendientes</span>
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border"
+              style={{ background: 'rgba(11,28,61,0.05)', borderColor: 'rgba(11,28,61,0.1)' }}
+            >
+              <Sparkles className="w-3 h-3" style={{ color: '#0B1C3D' }} />
+              <span className="text-[9px] text-[#0B1C3D] font-medium">Asistente IA activo — 3 recomendaciones pendientes</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Floating badge */}
-      <div className="absolute -bottom-4 -right-4 bg-white rounded-xl shadow-lg border border-[#E8ECEB] px-3 py-2 flex items-center gap-2">
+      {/* Floating badge — compliant */}
+      <div className="absolute -bottom-4 -right-4 bg-[#FAFAF8] rounded-xl shadow-lg border border-[#E3DFD5] px-3 py-2 flex items-center gap-2">
         <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
           <CheckCircle className="w-3.5 h-3.5 text-green-600" />
         </div>
         <div>
-          <div className="text-[10px] font-semibold text-[#2D3E4E]">AI Act compliant</div>
-          <div className="text-[9px] text-[#7a8a92]">Actualizado hoy</div>
+          <div className="text-[10px] font-semibold text-[#0B1C3D]">AI Act compliant</div>
+          <div className="text-[9px] text-[#8B9BB4]">Actualizado hoy</div>
         </div>
       </div>
 
-      {/* Floating badge 2 */}
-      <div className="absolute -top-4 -left-4 bg-white rounded-xl shadow-lg border border-[#E8ECEB] px-3 py-2 flex items-center gap-2">
-        <div className="w-6 h-6 bg-[#E09E50]/10 rounded-full flex items-center justify-center">
-          <Sparkles className="w-3.5 h-3.5 text-[#E09E50]" />
+      {/* Floating badge — spark */}
+      <div className="absolute -top-4 -left-4 rounded-xl shadow-lg border px-3 py-2 flex items-center gap-2"
+        style={{ background: '#0B1C3D', borderColor: 'rgba(255,255,255,0.08)' }}
+      >
+        <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'rgba(232,255,71,0.15)' }}>
+          <Sparkles className="w-3.5 h-3.5" style={{ color: '#E8FF47' }} />
         </div>
         <div>
-          <div className="text-[10px] font-semibold text-[#2D3E4E]">Análisis IA completado</div>
-          <div className="text-[9px] text-[#7a8a92]">12 riesgos identificados</div>
+          <div className="text-[10px] font-semibold text-[#F0EEE8]">Análisis IA completado</div>
+          <div className="text-[9px] text-[#8B9BB4]">12 riesgos identificados</div>
         </div>
       </div>
     </div>
@@ -213,29 +220,27 @@ function DashboardMockup() {
 // ─────────────────────────────────────────────────────────
 function RiskMockup() {
   return (
-    <div className="rounded-2xl border border-[#E8ECEB] bg-white overflow-hidden shadow-xl">
-      <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-2.5 flex items-center gap-2">
-        <Shield className="w-4 h-4 text-[#E09E50]" />
-        <span className="text-xs font-semibold text-[#2D3E4E]">Gestión de Riesgos — Scoring Crédito</span>
+    <div className="rounded-2xl border border-[#E3DFD5] bg-[#FAFAF8] overflow-hidden shadow-xl">
+      <div className="bg-[#F0EEE8] border-b border-[#E3DFD5] px-4 py-2.5 flex items-center gap-2">
+        <Shield className="w-4 h-4 text-[#0B1C3D]" />
+        <span className="text-xs font-semibold text-[#0B1C3D]">Gestión de Riesgos — Scoring Crédito</span>
       </div>
       <div className="p-4">
-        {/* Progress */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1">
             <div className="flex justify-between mb-1">
-              <span className="text-[10px] text-[#7a8a92]">Progreso mitigación</span>
-              <span className="text-[10px] font-semibold text-[#2D3E4E]">42%</span>
+              <span className="text-[10px] text-[#8B9BB4]">Progreso mitigación</span>
+              <span className="text-[10px] font-semibold text-[#0B1C3D]">42%</span>
             </div>
-            <div className="w-full bg-[#E8ECEB] rounded-full h-2">
-              <div className="bg-gradient-to-r from-[#E09E50] to-[#D9885F] h-2 rounded-full" style={{ width: '42%' }} />
+            <div className="w-full bg-[#E3DFD5] rounded-full h-2">
+              <div className="bg-[#0B1C3D] h-2 rounded-full" style={{ width: '42%' }} />
             </div>
           </div>
           <div className="text-center">
-            <div className="text-base font-bold text-orange-500">12</div>
-            <div className="text-[9px] text-[#7a8a92]">riesgos</div>
+            <div className="text-base font-bold text-[#0B1C3D]">12</div>
+            <div className="text-[9px] text-[#8B9BB4]">riesgos</div>
           </div>
         </div>
-        {/* Risk items */}
         <div className="space-y-1.5">
           {[
             { name: 'Discriminación injusta', severity: 'Crítico', status: 'Pendiente', severityColor: 'text-red-600 bg-red-50', statusColor: 'text-red-500' },
@@ -243,9 +248,9 @@ function RiskMockup() {
             { name: 'Fuga datos personales', severity: 'Crítico', status: 'Mitigado', severityColor: 'text-red-600 bg-red-50', statusColor: 'text-green-500' },
             { name: 'Falta transparencia', severity: 'Medio', status: 'Mitigado', severityColor: 'text-yellow-600 bg-yellow-50', statusColor: 'text-green-500' },
           ].map((risk) => (
-            <div key={risk.name} className="flex items-center gap-2 p-2 rounded-lg bg-[#F8FAFB]">
+            <div key={risk.name} className="flex items-center gap-2 p-2 rounded-lg bg-[#F0EEE8]">
               <div className="flex-1">
-                <span className="text-[10px] font-medium text-[#2D3E4E]">{risk.name}</span>
+                <span className="text-[10px] font-medium text-[#0B1C3D]">{risk.name}</span>
               </div>
               <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${risk.severityColor}`}>
                 {risk.severity}
@@ -254,8 +259,10 @@ function RiskMockup() {
             </div>
           ))}
         </div>
-        {/* AI button */}
-        <button className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-gradient-to-r from-[#E09E50] to-[#D9885F] text-white text-[10px] font-medium">
+        <button
+          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-medium"
+          style={{ background: '#0B1C3D', color: '#E8FF47' }}
+        >
           <Sparkles className="w-3 h-3" />
           Analizar con IA
         </button>
@@ -269,17 +276,17 @@ function RiskMockup() {
 // ─────────────────────────────────────────────────────────
 function ComplianceMockup() {
   return (
-    <div className="rounded-2xl border border-[#E8ECEB] bg-white overflow-hidden shadow-xl">
-      <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-2.5 flex items-center gap-2">
-        <BarChart3 className="w-4 h-4 text-[#8CBDB9]" />
-        <span className="text-xs font-semibold text-[#2D3E4E]">Compliance — Obligaciones AI Act</span>
+    <div className="rounded-2xl border border-[#E3DFD5] bg-[#FAFAF8] overflow-hidden shadow-xl">
+      <div className="bg-[#F0EEE8] border-b border-[#E3DFD5] px-4 py-2.5 flex items-center gap-2">
+        <BarChart3 className="w-4 h-4 text-[#8B9BB4]" />
+        <span className="text-xs font-semibold text-[#0B1C3D]">Compliance — Obligaciones AI Act</span>
       </div>
       <div className="p-4">
         <div className="grid grid-cols-3 gap-2 mb-3">
           {[
             { label: 'Completadas', value: '18', color: 'text-green-600 bg-green-50' },
-            { label: 'En progreso', value: '7', color: 'text-orange-600 bg-orange-50' },
-            { label: 'Pendientes', value: '4', color: 'text-red-600 bg-red-50' },
+            { label: 'En progreso', value: '7',  color: 'text-orange-600 bg-orange-50' },
+            { label: 'Pendientes',  value: '4',  color: 'text-red-600 bg-red-50' },
           ].map((s) => (
             <div key={s.label} className={`text-center p-2 rounded-lg ${s.color}`}>
               <div className="text-base font-bold">{s.value}</div>
@@ -288,22 +295,22 @@ function ComplianceMockup() {
           ))}
         </div>
         {[
-          { label: 'Art. 13 — Transparencia', pct: 100, done: true },
-          { label: 'Art. 14 — Supervisión humana', pct: 60, done: false },
-          { label: 'Art. 16 — Registro técnico', pct: 40, done: false },
-          { label: 'Art. 27 — FRIA completa', pct: 75, done: false },
+          { label: 'Art. 13 — Transparencia',      pct: 100, done: true  },
+          { label: 'Art. 14 — Supervisión humana', pct: 60,  done: false },
+          { label: 'Art. 16 — Registro técnico',   pct: 40,  done: false },
+          { label: 'Art. 27 — FRIA completa',      pct: 75,  done: false },
         ].map((ob) => (
           <div key={ob.label} className="flex items-center gap-2 mb-2">
-            <div className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center ${ob.done ? 'bg-green-100' : 'bg-[#E8ECEB]'}`}>
+            <div className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center ${ob.done ? 'bg-green-100' : 'bg-[#E3DFD5]'}`}>
               {ob.done && <CheckCircle className="w-3 h-3 text-green-600" />}
             </div>
             <div className="flex-1">
-              <div className="text-[9px] text-[#2D3E4E] font-medium mb-0.5">{ob.label}</div>
-              <div className="w-full bg-[#E8ECEB] rounded-full h-1">
-                <div className={`h-1 rounded-full ${ob.done ? 'bg-green-500' : 'bg-[#8CBDB9]'}`} style={{ width: `${ob.pct}%` }} />
+              <div className="text-[9px] text-[#0B1C3D] font-medium mb-0.5">{ob.label}</div>
+              <div className="w-full bg-[#E3DFD5] rounded-full h-1">
+                <div className={`h-1 rounded-full ${ob.done ? 'bg-green-500' : 'bg-[#8B9BB4]'}`} style={{ width: `${ob.pct}%` }} />
               </div>
             </div>
-            <span className="text-[9px] text-[#7a8a92]">{ob.pct}%</span>
+            <span className="text-[9px] text-[#8B9BB4]">{ob.pct}%</span>
           </div>
         ))}
       </div>
@@ -372,33 +379,24 @@ function useCountdown() {
 // ─────────────────────────────────────────────────────────
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-white pt-8 pb-16 lg:pt-16 lg:pb-24">
-      {/* Dot grid pattern */}
-      <div className="absolute inset-0 [background-image:radial-gradient(circle,#d1d5db_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_40%,transparent_100%)] opacity-40" />
+    <section
+      className="relative overflow-hidden pt-8 pb-16 lg:pt-16 lg:pb-24"
+      style={{ background: '#0B1C3D' }}
+    >
+      {/* Dot-grid texture */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
+      />
 
-      {/* Animated colour blobs */}
+      {/* Spark glow blob — top right */}
       <div
-        className="absolute -top-40 -left-40 w-[560px] h-[560px] rounded-full pointer-events-none"
+        className="absolute top-0 right-0 w-[600px] h-[500px] pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(224,158,80,0.22) 0%, transparent 70%)',
-          filter: 'blur(50px)',
-          animation: 'float 9s ease-in-out infinite',
-        }}
-      />
-      <div
-        className="absolute top-1/3 -right-32 w-[420px] h-[420px] rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, rgba(140,189,185,0.18) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-          animation: 'float 11s ease-in-out infinite 3s reverse',
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-1/2 w-[300px] h-[300px] rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, rgba(224,158,80,0.10) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-          animation: 'float 7s ease-in-out infinite 1s',
+          background: 'radial-gradient(ellipse at top right, rgba(232,255,71,0.07) 0%, transparent 65%)',
         }}
       />
 
@@ -411,18 +409,24 @@ function HeroSection() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E09E50]/10 border border-[#E09E50]/30 text-[#B8720A] text-sm font-medium mb-6 overflow-hidden"
+              className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full border overflow-hidden mb-6"
+              style={{
+                background: 'rgba(232,255,71,0.07)',
+                borderColor: 'rgba(232,255,71,0.2)',
+                color: 'rgba(232,255,71,0.7)',
+              }}
             >
-              {/* Shimmer sweep */}
               <span
                 className="absolute inset-0 -translate-x-full"
                 style={{
-                  background: 'linear-gradient(90deg,transparent,rgba(224,158,80,0.25),transparent)',
+                  background: 'linear-gradient(90deg,transparent,rgba(232,255,71,0.12),transparent)',
                   animation: 'shimmer 3s ease-in-out infinite 1s',
                 }}
               />
               <Sparkles className="h-3.5 w-3.5 relative z-10" />
-              <span className="relative z-10">Cumplimiento del AI Act con IA</span>
+              <span className="relative z-10 text-sm font-light tracking-[0.05em]">
+                Cumplimiento del AI Act con IA
+              </span>
             </motion.div>
 
             {/* Headline */}
@@ -430,30 +434,41 @@ function HeroSection() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D3E4E] tracking-tight leading-tight mb-6"
+              className="mb-6 leading-tight"
+              style={{
+                fontFamily: '"Fraunces", Georgia, serif',
+                fontWeight: 900,
+                fontSize: 'clamp(44px, 8vw, 96px)',
+                letterSpacing: '-0.03em',
+                lineHeight: 1,
+                color: '#F0EEE8',
+              }}
             >
               Cumple con el{' '}
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #E09E50 0%, #D9885F 30%, #8CBDB9 65%, #E09E50 100%)',
-                  backgroundSize: '200% 200%',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                  animation: 'gradient-shift 5s ease-in-out infinite',
-                }}
-              >
-                AI Act europeo
+              <span style={{ color: '#E8FF47', fontStyle: 'italic' }}>
+                AI Act
               </span>{' '}
               sin complicaciones
             </motion.h1>
+
+            {/* Descriptor */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.18 }}
+              className="text-sm mb-2 tracking-[0.32em] uppercase font-light"
+              style={{ color: 'rgba(139,155,180,0.5)' }}
+            >
+              AI Act Compliance Platform
+            </motion.p>
 
             {/* Subheadline */}
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg sm:text-xl text-[#7a8a92] mb-8 leading-relaxed max-w-xl"
+              transition={{ duration: 0.6, delay: 0.22 }}
+              className="text-lg sm:text-xl mb-8 leading-relaxed max-w-xl font-light"
+              style={{ color: '#8B9BB4' }}
             >
               CumplIA automatiza la gestión de riesgos, obligaciones y documentación de tus sistemas de IA.
               De semanas a horas — con inteligencia artificial incluida.
@@ -467,28 +482,52 @@ function HeroSection() {
               className="flex flex-col sm:flex-row gap-3 mb-8"
             >
               <Link href="/register">
-                <Button
-                  size="lg"
-                  className="relative overflow-hidden bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/25 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto group"
+                <button
+                  className="relative overflow-hidden text-base px-8 py-[14px] h-auto w-full sm:w-auto group transition-all"
+                  style={{
+                    background: '#E8FF47',
+                    color: '#0B1C3D',
+                    fontWeight: 500,
+                    borderRadius: 7,
+                    fontFamily: '"Geist", system-ui, sans-serif',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#d4ec2e')}
+                  onMouseLeave={e => (e.currentTarget.style.background = '#E8FF47')}
                 >
                   <span
                     className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
                   />
-                  <span className="relative z-10 flex items-center">
+                  <span className="relative z-10 flex items-center justify-center">
                     Empezar gratis
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
-                </Button>
+                </button>
               </Link>
               <a href="#how-it-works">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-base px-8 py-6 h-auto border-[#E8ECEB] text-[#2D3E4E] hover:bg-[#F8FAFB] hover:border-[#E09E50]/40 transition-all w-full sm:w-auto"
+                <button
+                  className="text-base px-8 py-[14px] h-auto w-full sm:w-auto transition-all"
+                  style={{
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: 'rgba(240,238,232,0.6)',
+                    fontWeight: 300,
+                    borderRadius: 7,
+                    fontFamily: '"Geist", system-ui, sans-serif',
+                    background: 'transparent',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.22)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'rgba(240,238,232,0.85)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.12)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'rgba(240,238,232,0.6)';
+                  }}
                 >
-                  <Play className="mr-2 h-4 w-4" />
-                  Cómo funciona
-                </Button>
+                  <span className="flex items-center justify-center">
+                    <Play className="mr-2 h-4 w-4" />
+                    Cómo funciona
+                  </span>
+                </button>
               </a>
             </motion.div>
 
@@ -497,18 +536,19 @@ function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.45 }}
-              className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[#7a8a92]"
+              className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-light"
+              style={{ color: 'rgba(139,155,180,0.6)' }}
             >
               <div className="flex items-center gap-1.5">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4" style={{ color: '#E8FF47' }} />
                 <span>Sin tarjeta de crédito</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4" style={{ color: '#E8FF47' }} />
                 <span>Configuración en 5 minutos</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4" style={{ color: '#E8FF47' }} />
                 <span>Cancela cuando quieras</span>
               </div>
             </motion.div>
@@ -522,11 +562,10 @@ function HeroSection() {
             className="relative hidden lg:block"
             style={{ perspective: '1200px' }}
           >
-            {/* Aurora glow behind */}
             <div
               className="absolute -inset-8 rounded-3xl pointer-events-none"
               style={{
-                background: 'radial-gradient(ellipse at 60% 40%, rgba(224,158,80,0.18) 0%, rgba(140,189,185,0.12) 50%, transparent 75%)',
+                background: 'radial-gradient(ellipse at 60% 40%, rgba(232,255,71,0.06) 0%, rgba(11,28,61,0.4) 50%, transparent 75%)',
                 filter: 'blur(32px)',
               }}
             />
@@ -558,42 +597,49 @@ function HeroSection() {
 // ─────────────────────────────────────────────────────────
 // 2. STATS SECTION
 // ─────────────────────────────────────────────────────────
-function StatItem({ icon: Icon, value, suffix, label, color, isWarm }: {
-  icon: any; value: number; suffix: string; label: string; color: string; isWarm: boolean;
+function StatItem({ icon: Icon, value, suffix, label, isSpark }: {
+  icon: any; value: number; suffix: string; label: string; isSpark: boolean;
 }) {
   const { count, ref } = useCountUp(value, 1800);
   return (
     <div ref={ref} className="text-center relative group">
-      <div className={`w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center ${isWarm ? 'bg-[#E09E50]/15' : 'bg-[#8CBDB9]/15'}`}>
-        <Icon className={`h-5 w-5 ${color}`} />
+      <div
+        className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center"
+        style={{ background: isSpark ? 'rgba(232,255,71,0.12)' : 'rgba(139,155,180,0.12)' }}
+      >
+        <Icon className="h-5 w-5" style={{ color: isSpark ? '#E8FF47' : '#8B9BB4' }} />
       </div>
       <div
-        className="text-4xl lg:text-5xl font-bold mb-1 bg-clip-text text-transparent"
+        className="text-4xl lg:text-5xl font-bold mb-1"
         style={{
-          backgroundImage: isWarm
-            ? 'linear-gradient(135deg, #F0B870 0%, #E09E50 100%)'
-            : 'linear-gradient(135deg, #A8D4D0 0%, #8CBDB9 100%)',
+          fontFamily: '"Fraunces", Georgia, serif',
+          color: isSpark ? '#E8FF47' : '#F0EEE8',
         }}
       >
         {count}{suffix}
       </div>
-      <div className="text-sm text-[#8CBDB9]/70 max-w-[140px] mx-auto leading-snug">{label}</div>
+      <div className="text-sm max-w-[140px] mx-auto leading-snug font-light" style={{ color: 'rgba(139,155,180,0.7)' }}>{label}</div>
     </div>
   );
 }
 
 function StatsSection() {
   const stats = [
-    { icon: Building2, value: 50, suffix: '+', label: 'Factores de riesgo catalogados', color: 'text-[#E09E50]', isWarm: true },
-    { icon: Scale, value: 4, suffix: '', label: 'Niveles de riesgo AI Act cubiertos', color: 'text-[#8CBDB9]', isWarm: false },
-    { icon: FileText, value: 100, suffix: '%', label: 'Generación automática de informes', color: 'text-[#E09E50]', isWarm: true },
-    { icon: Clock, value: 5, suffix: 'min', label: 'Para tener tu primer sistema clasificado', color: 'text-[#8CBDB9]', isWarm: false },
+    { icon: Building2, value: 50, suffix: '+', label: 'Factores de riesgo catalogados', isSpark: true },
+    { icon: Scale,    value: 4,   suffix: '',    label: 'Niveles de riesgo AI Act cubiertos', isSpark: false },
+    { icon: FileText, value: 100, suffix: '%',  label: 'Generación automática de informes', isSpark: true },
+    { icon: Clock,    value: 5,   suffix: 'min', label: 'Para tener tu primer sistema clasificado', isSpark: false },
   ];
 
   return (
-    <section className="py-14 bg-[#2D3E4E] relative overflow-hidden">
-      {/* Subtle grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+    <section className="py-14 relative overflow-hidden" style={{ background: '#0B1C3D' }}>
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: 'linear-gradient(to right,rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.03) 1px,transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
+      />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 max-w-4xl mx-auto">
           {stats.map((stat, index) => (
@@ -635,14 +681,14 @@ function ProblemSection() {
   ];
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-[#FAFAF8]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="text-sm font-semibold uppercase tracking-wider text-red-500 mb-3">El problema real</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D] mb-4">
             El AI Act es complejo. Sin las herramientas adecuadas, es un calvario.
           </h2>
-          <p className="text-[#7a8a92]">
+          <p className="text-[#8B9BB4]">
             Miles de empresas en Europa luchan con los mismos problemas. ¿Te suena familiar?
           </p>
         </div>
@@ -660,11 +706,11 @@ function ProblemSection() {
               <div className="w-11 h-11 rounded-xl bg-red-100 flex items-center justify-center mb-4">
                 <pain.icon className="w-5 h-5 text-red-500" />
               </div>
-              <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{pain.title}</h3>
-              <p className="text-sm text-[#7a8a92] mb-4 leading-relaxed">{pain.desc}</p>
+              <h3 className="text-base font-bold text-[#0B1C3D] mb-2">{pain.title}</h3>
+              <p className="text-sm text-[#8B9BB4] mb-4 leading-relaxed">{pain.desc}</p>
               <div className="pt-3 border-t border-red-100">
                 <div className="text-xl font-bold text-red-500">{pain.stat}</div>
-                <div className="text-xs text-[#7a8a92]">{pain.statLabel}</div>
+                <div className="text-xs text-[#8B9BB4]">{pain.statLabel}</div>
               </div>
             </motion.div>
           ))}
@@ -672,9 +718,9 @@ function ProblemSection() {
 
         {/* Transition */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#E09E50]/10 border border-[#E09E50]/25">
-            <CheckCircle className="w-5 h-5 text-[#E09E50]" />
-            <span className="font-semibold text-[#2D3E4E]">CumplIA resuelve los tres problemas de una vez</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#0B1C3D]/[0.07] border border-[#0B1C3D]/25">
+            <CheckCircle className="w-5 h-5 text-[#0B1C3D]" />
+            <span className="font-semibold text-[#0B1C3D]">CumplIA resuelve los tres problemas de una vez</span>
           </div>
         </div>
       </div>
@@ -693,9 +739,9 @@ function HowItWorksSection() {
       title: 'Registra tus sistemas de IA',
       desc: 'Añade cada sistema de IA que utilizas: nombre, sector, descripción y contexto de uso. En minutos tienes tu inventario completo centralizado.',
       detail: 'Formulario guiado + importación masiva',
-      color: 'from-[#E09E50]/20 to-[#E09E50]/5',
-      iconColor: 'text-[#E09E50]',
-      borderColor: 'border-[#E09E50]/30',
+      color: 'from-[#0B1C3D]/20 to-[#0B1C3D]/5',
+      iconColor: 'text-[#0B1C3D]',
+      borderColor: 'border-[#0B1C3D]/30',
     },
     {
       number: '02',
@@ -703,9 +749,9 @@ function HowItWorksSection() {
       title: 'IA clasifica y analiza riesgos',
       desc: 'Nuestro asistente de IA lee la descripción de tu sistema, lo clasifica según el AI Act y propone los factores de riesgo aplicables de nuestro catálogo de 50+ riesgos.',
       detail: 'Clasificación automática + análisis de riesgos IA',
-      color: 'from-[#8CBDB9]/20 to-[#8CBDB9]/5',
-      iconColor: 'text-[#8CBDB9]',
-      borderColor: 'border-[#8CBDB9]/30',
+      color: 'from-[#8B9BB4]/20 to-[#8B9BB4]/5',
+      iconColor: 'text-[#8B9BB4]',
+      borderColor: 'border-[#8B9BB4]/30',
     },
     {
       number: '03',
@@ -720,14 +766,14 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 bg-[#F8FAFB]">
+    <section id="how-it-works" className="py-20 bg-[#F0EEE8]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Cómo funciona</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#0B1C3D] mb-3">Cómo funciona</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D] mb-4">
             De cero a cumplimiento en 3 pasos
           </h2>
-          <p className="text-[#7a8a92]">
+          <p className="text-[#8B9BB4]">
             Sin consultores externos ni hojas de cálculo. Solo un flujo guiado con IA que hace el trabajo pesado por ti.
           </p>
         </div>
@@ -739,7 +785,7 @@ function HowItWorksSection() {
             whileInView={{ scaleX: 1, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
             viewport={{ once: true }}
-            className="hidden md:block absolute top-[52px] left-[calc(33.33%+28px)] right-[calc(33.33%+28px)] h-0.5 bg-gradient-to-r from-[#E09E50]/50 via-[#8CBDB9]/50 to-green-300/50 z-0 origin-left"
+            className="hidden md:block absolute top-[52px] left-[calc(33.33%+28px)] right-[calc(33.33%+28px)] h-0.5 bg-gradient-to-r from-[#0B1C3D]/50 via-[#8B9BB4]/50 to-green-300/50 z-0 origin-left"
           />
 
           {steps.map((step, index) => (
@@ -754,16 +800,16 @@ function HowItWorksSection() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative w-10 h-10">
                   {/* Glow ring */}
-                  <div className={`absolute inset-0 rounded-xl opacity-50 blur-md scale-125 ${step.number === '01' ? 'bg-[#E09E50]/40' : step.number === '02' ? 'bg-[#8CBDB9]/40' : 'bg-green-400/30'}`} />
+                  <div className={`absolute inset-0 rounded-xl opacity-50 blur-md scale-125 ${step.number === '01' ? 'bg-[#E8FF47]/40' : step.number === '02' ? 'bg-[#8B9BB4]/40' : 'bg-green-400/30'}`} />
                   <div className="relative w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-white/80">
                     <step.icon className={`w-5 h-5 ${step.iconColor}`} />
                   </div>
                 </div>
-                <span className="text-3xl font-bold text-[#E8ECEB]/60">{step.number}</span>
+                <span className="text-3xl font-bold text-[#E3DFD5]/60">{step.number}</span>
               </div>
-              <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{step.title}</h3>
-              <p className="text-sm text-[#7a8a92] leading-relaxed mb-4">{step.desc}</p>
-              <div className="flex items-center gap-1.5 text-xs text-[#7a8a92]">
+              <h3 className="text-base font-bold text-[#0B1C3D] mb-2">{step.title}</h3>
+              <p className="text-sm text-[#8B9BB4] leading-relaxed mb-4">{step.desc}</p>
+              <div className="flex items-center gap-1.5 text-xs text-[#8B9BB4]">
                 <CheckCircle className="w-3.5 h-3.5 text-green-500" />
                 <span>{step.detail}</span>
               </div>
@@ -793,8 +839,8 @@ function AIClassificationDemo() {
       icon: FolderKanban,
       title: 'Describes tu sistema',
       desc: 'Añades el nombre, descripción y sector de tu sistema de IA en un formulario guiado.',
-      color: 'text-[#E09E50]',
-      bg: 'bg-[#E09E50]/10',
+      color: 'text-[#0B1C3D]',
+      bg: 'bg-[#0B1C3D]/[0.07]',
     },
     {
       icon: Sparkles,
@@ -807,31 +853,31 @@ function AIClassificationDemo() {
       icon: ShieldCheck,
       title: 'Clasificación instantánea',
       desc: 'Obtienes el nivel de riesgo según el AI Act, los artículos aplicables y las obligaciones a cumplir.',
-      color: 'text-[#8CBDB9]',
-      bg: 'bg-[#8CBDB9]/10',
+      color: 'text-[#8B9BB4]',
+      bg: 'bg-[#8B9BB4]/10',
     },
   ];
 
   const panels = [
     /* Step 0 — Input form mockup */
     <div key="input" className="space-y-3">
-      <div className="text-xs font-semibold text-[#7a8a92] uppercase tracking-wider mb-4">Nuevo sistema de IA</div>
+      <div className="text-xs font-semibold text-[#8B9BB4] uppercase tracking-wider mb-4">Nuevo sistema de IA</div>
       {[
         { label: 'Nombre', value: 'Scoring de Crédito v2' },
         { label: 'Sector', value: 'Finanzas y seguros' },
       ].map(f => (
         <div key={f.label}>
-          <div className="text-[10px] text-[#7a8a92] mb-1">{f.label}</div>
-          <div className="bg-[#F8FAFB] border border-[#E8ECEB] rounded-lg px-3 py-2 text-xs text-[#2D3E4E] font-medium">{f.value}</div>
+          <div className="text-[10px] text-[#8B9BB4] mb-1">{f.label}</div>
+          <div className="bg-[#F0EEE8] border border-[#E3DFD5] rounded-lg px-3 py-2 text-xs text-[#0B1C3D] font-medium">{f.value}</div>
         </div>
       ))}
       <div>
-        <div className="text-[10px] text-[#7a8a92] mb-1">Descripción</div>
-        <div className="bg-[#F8FAFB] border border-[#E8ECEB] rounded-lg px-3 py-2.5 text-xs text-[#2D3E4E] leading-relaxed">
+        <div className="text-[10px] text-[#8B9BB4] mb-1">Descripción</div>
+        <div className="bg-[#F0EEE8] border border-[#E3DFD5] rounded-lg px-3 py-2.5 text-xs text-[#0B1C3D] leading-relaxed">
           Modelo que evalúa la solvencia de personas para la concesión de préstamos personales basado en historial crediticio y datos socioeconómicos.
         </div>
       </div>
-      <button className="w-full mt-2 py-2.5 rounded-lg bg-[#E09E50] text-white text-xs font-semibold flex items-center justify-center gap-2">
+      <button className="w-full mt-2 py-2.5 rounded-lg bg-[#E8FF47] text-[#0B1C3D] text-xs font-semibold flex items-center justify-center gap-2">
         <Sparkles className="w-3.5 h-3.5" /> Clasificar con IA
       </button>
     </div>,
@@ -842,7 +888,7 @@ function AIClassificationDemo() {
         <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center">
           <Sparkles className="w-3 h-3 text-purple-500" />
         </div>
-        <span className="text-xs font-semibold text-[#2D3E4E]">Asistente IA analizando…</span>
+        <span className="text-xs font-semibold text-[#0B1C3D]">Asistente IA analizando…</span>
         <div className="flex gap-1 ml-auto">
           {[0, 1, 2].map(i => (
             <div
@@ -862,7 +908,7 @@ function AIClassificationDemo() {
       ].map((line, i) => (
         <div
           key={i}
-          className="text-[10px] text-[#7a8a92] font-mono bg-[#F8FAFB] rounded px-2.5 py-1.5 border border-[#E8ECEB]"
+          className="text-[10px] text-[#8B9BB4] font-mono bg-[#F0EEE8] rounded px-2.5 py-1.5 border border-[#E3DFD5]"
           style={{ animation: `typing 0.3s ease-out ${i * 0.15}s both` }}
         >
           {line}
@@ -880,9 +926,9 @@ function AIClassificationDemo() {
         <div className="text-2xl font-bold text-orange-600 mb-1">Alto Riesgo</div>
         <div className="text-[10px] text-orange-700/70">Anexo III, punto 5(b) — Evaluación solvencia crediticia</div>
       </div>
-      <div className="p-3 rounded-xl bg-[#F8FAFB] border border-[#E8ECEB]">
-        <div className="text-[10px] font-semibold text-[#2D3E4E] mb-1.5">Justificación del asistente</div>
-        <p className="text-[10px] text-[#7a8a92] leading-relaxed">
+      <div className="p-3 rounded-xl bg-[#F0EEE8] border border-[#E3DFD5]">
+        <div className="text-[10px] font-semibold text-[#0B1C3D] mb-1.5">Justificación del asistente</div>
+        <p className="text-[10px] text-[#8B9BB4] leading-relaxed">
           Sistema que determina el acceso a recursos financieros esenciales mediante evaluación automatizada de personas físicas. Cumple criterios del Anexo III del Reglamento (UE) 2024/1689.
         </p>
       </div>
@@ -891,26 +937,26 @@ function AIClassificationDemo() {
           <div className="text-base font-bold text-red-500">8</div>
           <div className="text-[9px] text-red-500/70">obligaciones</div>
         </div>
-        <div className="p-2.5 rounded-lg bg-[#8CBDB9]/10 border border-[#8CBDB9]/20 text-center">
-          <div className="text-base font-bold text-[#8CBDB9]">12</div>
-          <div className="text-[9px] text-[#8CBDB9]/70">riesgos a gestionar</div>
+        <div className="p-2.5 rounded-lg bg-[#8B9BB4]/10 border border-[#8B9BB4]/20 text-center">
+          <div className="text-base font-bold text-[#8B9BB4]">12</div>
+          <div className="text-[9px] text-[#8B9BB4]/70">riesgos a gestionar</div>
         </div>
       </div>
-      <button className="w-full py-2.5 rounded-lg bg-gradient-to-r from-[#E09E50] to-[#D9885F] text-white text-xs font-semibold">
+      <button className="w-full py-2.5 rounded-lg bg-[#0B1C3D] text-[#E8FF47] text-xs font-semibold">
         Iniciar gestión de cumplimiento →
       </button>
     </div>,
   ];
 
   return (
-    <section className="py-20 bg-white overflow-hidden">
+    <section className="py-20 bg-[#FAFAF8] overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">La plataforma en acción</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#8B9BB4] mb-3">La plataforma en acción</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D] mb-4">
             De la descripción a la clasificación en segundos
           </h2>
-          <p className="text-[#7a8a92]">
+          <p className="text-[#8B9BB4]">
             Nuestro asistente IA toma el contexto de tu sistema y lo clasifica automáticamente según el AI Act.
           </p>
         </div>
@@ -924,40 +970,40 @@ function AIClassificationDemo() {
                 onClick={() => { setIsAuto(false); setActiveStep(i); }}
                 className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 ${
                   activeStep === i
-                    ? 'border-[#E09E50]/40 bg-white shadow-[0_8px_32px_rgba(224,158,80,0.12)]'
-                    : 'border-[#E8ECEB] bg-[#F8FAFB] hover:border-[#E09E50]/20'
+                    ? 'border-[#0B1C3D]/40 bg-white shadow-[0_8px_32px_rgba(11,28,61,0.10)]'
+                    : 'border-[#E3DFD5] bg-[#F0EEE8] hover:border-[#0B1C3D]/20'
                 }`}
                 whileHover={{ x: activeStep === i ? 0 : 4 }}
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl ${activeStep === i ? step.bg : 'bg-[#E8ECEB]'} flex items-center justify-center flex-shrink-0 transition-colors duration-300`}>
-                    <step.icon className={`w-4.5 h-4.5 ${activeStep === i ? step.color : 'text-[#7a8a92]'} transition-colors duration-300`} />
+                  <div className={`w-9 h-9 rounded-xl ${activeStep === i ? step.bg : 'bg-[#E3DFD5]'} flex items-center justify-center flex-shrink-0 transition-colors duration-300`}>
+                    <step.icon className={`w-4.5 h-4.5 ${activeStep === i ? step.color : 'text-[#8B9BB4]'} transition-colors duration-300`} />
                   </div>
                   <div>
-                    <div className={`text-sm font-semibold transition-colors duration-300 ${activeStep === i ? 'text-[#2D3E4E]' : 'text-[#7a8a92]'}`}>
-                      <span className="text-[#E8ECEB] mr-2 font-normal">0{i + 1}</span>
+                    <div className={`text-sm font-semibold transition-colors duration-300 ${activeStep === i ? 'text-[#0B1C3D]' : 'text-[#8B9BB4]'}`}>
+                      <span className="text-[#E3DFD5] mr-2 font-normal">0{i + 1}</span>
                       {step.title}
                     </div>
                     {activeStep === i && (
                       <motion.p
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="text-xs text-[#7a8a92] mt-1 leading-relaxed"
+                        className="text-xs text-[#8B9BB4] mt-1 leading-relaxed"
                       >
                         {step.desc}
                       </motion.p>
                     )}
                   </div>
                   {activeStep === i && (
-                    <div className="ml-auto w-1.5 h-8 rounded-full bg-[#E09E50]" />
+                    <div className="ml-auto w-1.5 h-8 rounded-full bg-[#E8FF47]" />
                   )}
                 </div>
                 {/* Progress bar */}
                 {activeStep === i && isAuto && (
-                  <div className="mt-3 h-0.5 bg-[#E8ECEB] rounded-full overflow-hidden">
+                  <div className="mt-3 h-0.5 bg-[#E3DFD5] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#E09E50] rounded-full"
+                      className="h-full bg-[#E8FF47] rounded-full"
                       style={{ animation: 'shimmer-bar 3.2s linear forwards' }}
                     />
                   </div>
@@ -968,14 +1014,14 @@ function AIClassificationDemo() {
 
           {/* Right: Panel */}
           <div className="relative">
-            <div className="rounded-2xl border border-[#E8ECEB] bg-white overflow-hidden shadow-xl">
-              <div className="bg-[#F8FAFB] border-b border-[#E8ECEB] px-4 py-2.5 flex items-center gap-2">
+            <div className="rounded-2xl border border-[#E3DFD5] bg-white overflow-hidden shadow-xl">
+              <div className="bg-[#F0EEE8] border-b border-[#E3DFD5] px-4 py-2.5 flex items-center gap-2">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
                   <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
                 </div>
-                <span className="text-xs text-[#7a8a92] ml-1">app.cumplia.com/dashboard/inventory/nuevo</span>
+                <span className="text-xs text-[#8B9BB4] ml-1">app.cumplia.com/dashboard/inventory/nuevo</span>
               </div>
               <div className="p-5 min-h-[320px]">
                 <AnimatePresence mode="wait">
@@ -1014,7 +1060,7 @@ function FeaturesSection() {
       title: 'Inventario centralizado de IA',
       desc: 'Registra y gestiona todos tus sistemas de IA en un único lugar. Sector, responsable, proveedor, estado — todo controlado.',
       size: 'lg',
-      color: 'bg-gradient-to-br from-[#E09E50]/10 to-white',
+      color: 'bg-gradient-to-br from-[#0B1C3D]/10 to-white',
     },
     {
       icon: Sparkles,
@@ -1035,7 +1081,7 @@ function FeaturesSection() {
       title: 'Análisis de riesgos con IA',
       desc: 'El asistente IA analiza tu sistema, hace preguntas, propone los factores de riesgo aplicables y los justifica. Tú solo revisas y apruebas.',
       size: 'lg',
-      color: 'bg-gradient-to-br from-[#8CBDB9]/10 to-white',
+      color: 'bg-gradient-to-br from-[#8B9BB4]/10 to-white',
     },
     {
       icon: BarChart3,
@@ -1082,14 +1128,14 @@ function FeaturesSection() {
   ];
 
   return (
-    <section id="features" className="py-20 bg-[#F8FAFB]">
+    <section id="features" className="py-20 bg-[#F0EEE8]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Funcionalidades</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#0B1C3D] mb-3">Funcionalidades</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D] mb-4">
             Todo lo que necesitas, nada que no necesitas
           </h2>
-          <p className="text-[#7a8a92]">
+          <p className="text-[#8B9BB4]">
             Cada funcionalidad está construida para el caso de uso real del compliance del AI Act — no para el caso genérico.
           </p>
         </div>
@@ -1106,15 +1152,15 @@ function FeaturesSection() {
             <motion.div
               key={index}
               variants={itemVariants}
-              className={`group p-6 rounded-2xl border border-[#E8ECEB] hover:border-[#E09E50]/40 hover:shadow-[0_8px_40px_rgba(224,158,80,0.12)] transition-all duration-300 ${feature.color} ${
+              className={`group p-6 rounded-2xl border border-[#E3DFD5] hover:border-[#0B1C3D]/40 hover:shadow-[0_8px_40px_rgba(224,158,80,0.12)] transition-all duration-300 ${feature.color} ${
                 feature.size === 'lg' ? 'lg:col-span-1' : ''
               }`}
             >
-              <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-[#E8ECEB] flex items-center justify-center mb-4 group-hover:border-[#E09E50]/30 group-hover:bg-[#E09E50]/8 group-hover:scale-110 transition-all duration-300">
-                <feature.icon className="w-5 h-5 text-[#E09E50]" />
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm border border-[#E3DFD5] flex items-center justify-center mb-4 group-hover:border-[#0B1C3D]/30 group-hover:bg-[#E8FF47]/8 group-hover:scale-110 transition-all duration-300">
+                <feature.icon className="w-5 h-5 text-[#0B1C3D]" />
               </div>
-              <h3 className="text-base font-bold text-[#2D3E4E] mb-2">{feature.title}</h3>
-              <p className="text-sm text-[#7a8a92] leading-relaxed">{feature.desc}</p>
+              <h3 className="text-base font-bold text-[#0B1C3D] mb-2">{feature.title}</h3>
+              <p className="text-sm text-[#8B9BB4] leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -1175,21 +1221,21 @@ function AIActSection() {
   ];
 
   return (
-    <section id="who-applies" className="py-20 bg-white">
+    <section id="who-applies" className="py-20 bg-[#FAFAF8]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-6">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#8CBDB9] mb-3">Marco del AI Act</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#8B9BB4] mb-3">Marco del AI Act</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D] mb-4">
             ¿A qué nivel de riesgo pertenece tu sistema?
           </h2>
-          <p className="text-[#7a8a92]">
+          <p className="text-[#8B9BB4]">
             El AI Act clasifica los sistemas según el riesgo que suponen. CumplIA te ayuda a identificarlo automáticamente.
           </p>
         </div>
 
         <div className="max-w-3xl mx-auto mb-10">
-          <div className="p-4 rounded-xl bg-[#E09E50]/8 border border-[#E09E50]/20 text-center">
-            <p className="text-sm text-[#2D3E4E]">
+          <div className="p-4 rounded-xl bg-[#E8FF47]/8 border border-[#0B1C3D]/20 text-center">
+            <p className="text-sm text-[#0B1C3D]">
               <strong>Aplica a todas las empresas</strong> que usen o desarrollen IA en la UE —
               independientemente del tamaño o sector. Desde agosto 2026 con sanciones activas.
             </p>
@@ -1209,13 +1255,13 @@ function AIActSection() {
               <div className={`w-10 h-10 rounded-xl ${level.iconBg} flex items-center justify-center mb-3`}>
                 <level.icon className={`w-5 h-5 ${level.iconColor}`} />
               </div>
-              <h3 className="text-base font-bold text-[#2D3E4E] mb-1">{level.title}</h3>
+              <h3 className="text-base font-bold text-[#0B1C3D] mb-1">{level.title}</h3>
               <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium mb-3 ${level.badgeColor}`}>
                 {level.badge}
               </span>
-              <p className="text-xs text-[#7a8a92] leading-relaxed mb-3">{level.desc}</p>
-              <p className="text-xs text-[#7a8a92]">
-                <strong className="text-[#2D3E4E]">Ej:</strong> {level.examples}
+              <p className="text-xs text-[#8B9BB4] leading-relaxed mb-3">{level.desc}</p>
+              <p className="text-xs text-[#8B9BB4]">
+                <strong className="text-[#0B1C3D]">Ej:</strong> {level.examples}
               </p>
             </motion.div>
           ))}
@@ -1235,10 +1281,10 @@ function PricingSection() {
       name: 'Starter',
       price: '0€',
       period: '/mes',
-      description: 'Para conocer la plataforma y evaluar tu primer sistema de IA',
+      description: 'Conoce la plataforma y evalúa tus primeros sistemas de IA',
       features: [
-        '1 sistema de IA',
-        '1 usuario',
+        '3 sistemas de IA',
+        '1 usuario administrador',
         'Clasificación AI Act automática',
         'Obligaciones básicas',
         'Checklist de cumplimiento',
@@ -1249,16 +1295,15 @@ function PricingSection() {
     },
     {
       name: 'Professional',
-      price: '99€',
-      originalPrice: '149',
+      price: '399€',
       period: '/mes',
-      description: 'Para PYMEs y consultoras con varios sistemas de IA',
+      description: 'Para PYMEs y consultoras que necesitan cumplir con el AI Act',
       features: [
         'Hasta 15 sistemas de IA',
-        'Hasta 3 usuarios',
-        'Análisis de riesgos completo',
+        'Hasta 3 usuarios administradores',
+        'Funcionalidades completas',
+        'IA generativa incluida',
         'FRIA completa (Art. 27)',
-        'Exportación PDF/DOCX',
         'Registro de evidencias',
         'Soporte email prioritario',
       ],
@@ -1266,57 +1311,54 @@ function PricingSection() {
       href: '/register?plan=professional',
       highlight: true,
       badge: 'Más popular',
-      savings: 'Ahorra 600€/año',
     },
     {
       name: 'Business',
-      price: '249€',
-      originalPrice: '349',
+      price: '899€',
       period: '/mes',
-      description: 'Para empresas con múltiples equipos y necesidades avanzadas',
+      description: 'Para empresas con múltiples departamentos y más sistemas de IA',
       features: [
-        'Sistemas de IA ilimitados',
-        'Hasta 10 usuarios',
-        'Asistente IA incluido',
+        'Hasta 50 sistemas de IA',
+        'Hasta 10 usuarios administradores',
+        'Funcionalidades completas',
+        'IA generativa incluida',
         'Plantillas personalizadas',
         'Multi-departamento',
-        'Audit log completo',
         'Soporte prioritario',
       ],
       cta: 'Elegir Business',
       href: '/register?plan=business',
       highlight: false,
-      savings: 'Ahorra 1.200€/año',
     },
     {
       name: 'Enterprise',
-      price: 'Custom',
-      period: '',
+      price: '2.499€+',
+      period: '/mes',
       description: 'Soluciones a medida para grandes organizaciones',
       features: [
         'Sistemas de IA ilimitados',
-        'Usuarios ilimitados',
+        'Usuarios administradores ilimitados',
+        'Funcionalidades completas',
+        'IA generativa incluida',
         'SSO / SAML',
-        'API completa',
-        'On-premise disponible',
         'SLA garantizado',
         'Account manager dedicado',
       ],
       cta: 'Contactar ventas',
-      href: '/contact?plan=enterprise',
+      href: 'mailto:sales@cumplia.com',
       highlight: false,
     },
   ];
 
   return (
-    <section id="pricing" className="py-20 bg-white">
+    <section id="pricing" className="py-20 bg-[#FAFAF8]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">Precios</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E] mb-4">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#0B1C3D] mb-3">Precios</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D] mb-4">
             Planes para cada etapa
           </h2>
-          <p className="text-[#7a8a92]">
+          <p className="text-[#8B9BB4]">
             Empieza gratis, escala cuando lo necesites. Sin sorpresas.
           </p>
         </div>
@@ -1331,39 +1373,31 @@ function PricingSection() {
               viewport={{ once: true }}
               className={`relative rounded-2xl p-6 flex flex-col transition-all duration-300 ${
                 plan.highlight
-                  ? 'bg-[#2D3E4E] text-white shadow-2xl shadow-[#2D3E4E]/30 scale-[1.02] hover:shadow-[0_24px_60px_rgba(45,62,78,0.35)]'
-                  : 'bg-white border border-[#E8ECEB] hover:border-[#E09E50]/30 hover:shadow-[0_8px_40px_rgba(224,158,80,0.08)]'
+                  ? 'bg-[#0B1C3D] text-white shadow-2xl shadow-[#0B1C3D]/30 scale-[1.02] hover:shadow-[0_24px_60px_rgba(45,62,78,0.35)]'
+                  : 'bg-white border border-[#E3DFD5] hover:border-[#0B1C3D]/30 hover:shadow-[0_8px_40px_rgba(224,158,80,0.08)]'
               }`}
             >
               {plan.badge && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#E09E50] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  <span className="bg-[#E8FF47] text-[#0B1C3D] text-xs font-semibold px-3 py-1 rounded-full">
                     {plan.badge}
                   </span>
                 </div>
               )}
 
               <div className="mb-6">
-                <h3 className={`text-lg font-bold mb-1 ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
+                <h3 className={`text-lg font-bold mb-1 ${plan.highlight ? 'text-white' : 'text-[#0B1C3D]'}`}>
                   {plan.name}
                 </h3>
                 <div className="flex items-baseline gap-1 mb-1">
-                  {plan.originalPrice && (
-                    <span className={`text-sm line-through ${plan.highlight ? 'text-white/40' : 'text-[#7a8a92]'}`}>
-                      {plan.originalPrice}€
-                    </span>
-                  )}
-                  <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-[#2D3E4E]'}`}>
+                  <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-[#0B1C3D]'}`}>
                     {plan.price}
                   </span>
-                  <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#7a8a92]'}`}>
+                  <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#8B9BB4]'}`}>
                     {plan.period}
                   </span>
                 </div>
-                {plan.savings && (
-                  <p className="text-xs font-medium text-green-400">{plan.savings}</p>
-                )}
-                <p className={`text-xs mt-2 ${plan.highlight ? 'text-white/60' : 'text-[#7a8a92]'}`}>
+                <p className={`text-xs mt-2 ${plan.highlight ? 'text-white/60' : 'text-[#8B9BB4]'}`}>
                   {plan.description}
                 </p>
               </div>
@@ -1371,8 +1405,8 @@ function PricingSection() {
               <ul className="space-y-2.5 mb-6 flex-1">
                 {plan.features.map((feature, fIndex) => (
                   <li key={fIndex} className="flex items-start gap-2">
-                    <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${plan.highlight ? 'text-[#E09E50]' : 'text-green-500'}`} />
-                    <span className={`text-sm ${plan.highlight ? 'text-white/80' : 'text-[#7a8a92]'}`}>
+                    <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${plan.highlight ? 'text-[#E8FF47]' : 'text-green-500'}`} />
+                    <span className={`text-sm ${plan.highlight ? 'text-white/80' : 'text-[#8B9BB4]'}`}>
                       {feature}
                     </span>
                   </li>
@@ -1383,8 +1417,8 @@ function PricingSection() {
                 <Button
                   className={`relative overflow-hidden w-full py-5 h-auto text-sm font-semibold group ${
                     plan.highlight
-                      ? 'bg-[#E09E50] hover:bg-[#D9885F] text-white shadow-lg shadow-[#E09E50]/25'
-                      : 'bg-[#F8FAFB] hover:bg-[#E8ECEB] text-[#2D3E4E] border border-[#E8ECEB]'
+                      ? 'bg-[#E8FF47] hover:bg-[#d4ec2e] text-[#0B1C3D] shadow-lg shadow-[#E8FF47]/25 font-[500]'
+                      : 'bg-[#F0EEE8] hover:bg-[#E3DFD5] text-[#0B1C3D] border border-[#E3DFD5]'
                   }`}
                 >
                   {plan.highlight && (
@@ -1397,7 +1431,7 @@ function PricingSection() {
           ))}
         </div>
 
-        <p className="text-center text-sm text-[#7a8a92] mt-8">
+        <p className="text-center text-sm text-[#8B9BB4] mt-8">
           Todos los planes incluyen acceso completo durante 14 días de prueba. Sin tarjeta de crédito.
         </p>
       </div>
@@ -1430,7 +1464,7 @@ function FAQSection() {
     },
     {
       q: '¿Puedo empezar gratis y migrar mis datos si cambio de plan?',
-      a: 'Sí. El plan Starter es gratuito sin límite de tiempo para un sistema de IA. Si creces, puedes migrar a Professional o Business en cualquier momento y todos tus datos, riesgos y documentos se conservan íntegramente.',
+      a: 'Sí. El plan Starter es gratuito sin límite de tiempo para hasta 3 sistemas de IA. Si creces, puedes migrar a Professional, Business o Enterprise en cualquier momento y todos tus datos, riesgos y documentos se conservan íntegramente.',
     },
     {
       q: '¿Mis datos están seguros? ¿Cumplís el RGPD?',
@@ -1439,11 +1473,11 @@ function FAQSection() {
   ];
 
   return (
-    <section className="py-20 bg-[#F8FAFB]">
+    <section className="py-20 bg-[#F0EEE8]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#E09E50] mb-3">FAQ</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#2D3E4E]">
+          <p className="text-sm font-semibold uppercase tracking-wider text-[#0B1C3D] mb-3">FAQ</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D]">
             Preguntas frecuentes
           </h2>
         </div>
@@ -1456,15 +1490,15 @@ function FAQSection() {
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
               viewport={{ once: true }}
-              className="bg-white rounded-xl border border-[#E8ECEB] overflow-hidden"
+              className="bg-white rounded-xl border border-[#E3DFD5] overflow-hidden"
             >
               <button
                 onClick={() => setOpen(open === index ? null : index)}
-                className="w-full flex items-center justify-between p-5 text-left hover:bg-[#F8FAFB] transition-colors"
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-[#F0EEE8] transition-colors"
               >
-                <span className="text-sm font-semibold text-[#2D3E4E] pr-4">{faq.q}</span>
+                <span className="text-sm font-semibold text-[#0B1C3D] pr-4">{faq.q}</span>
                 <ChevronDown
-                  className={`w-4 h-4 text-[#7a8a92] flex-shrink-0 transition-transform duration-200 ${
+                  className={`w-4 h-4 text-[#8B9BB4] flex-shrink-0 transition-transform duration-200 ${
                     open === index ? 'rotate-180' : ''
                   }`}
                 />
@@ -1478,7 +1512,7 @@ function FAQSection() {
                     transition={{ duration: 0.25 }}
                     className="overflow-hidden"
                   >
-                    <p className="px-5 pb-5 text-sm text-[#7a8a92] leading-relaxed border-t border-[#E8ECEB] pt-4">
+                    <p className="px-5 pb-5 text-sm text-[#8B9BB4] leading-relaxed border-t border-[#E3DFD5] pt-4">
                       {faq.a}
                     </p>
                   </motion.div>
@@ -1498,14 +1532,14 @@ function FAQSection() {
 function CTASection() {
   const { days, hours, minutes, seconds } = useCountdown();
   return (
-    <section className="py-20 bg-[#2D3E4E] relative overflow-hidden">
+    <section className="py-20 bg-[#0B1C3D] relative overflow-hidden">
       {/* Grid mesh */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
       {/* Floating orbs */}
       <div
         className="absolute top-0 left-1/4 w-96 h-96 rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(224,158,80,0.18) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(232,255,71,0.08) 0%, transparent 70%)',
           filter: 'blur(60px)',
           animation: 'float 8s ease-in-out infinite',
         }}
@@ -1513,7 +1547,7 @@ function CTASection() {
       <div
         className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(140,189,185,0.14) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(139,155,180,0.10) 0%, transparent 70%)',
           filter: 'blur(60px)',
           animation: 'float 11s ease-in-out infinite reverse 2s',
         }}
@@ -1521,16 +1555,16 @@ function CTASection() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#E09E50]/20 flex items-center justify-center mx-auto mb-6 relative">
-            <div className="absolute inset-0 rounded-2xl bg-[#E09E50]/10 scale-150 blur-lg" />
-            <Shield className="w-8 h-8 text-[#E09E50] relative z-10" />
+          <div className="w-16 h-16 rounded-2xl bg-[#E8FF47]/15 flex items-center justify-center mx-auto mb-6 relative">
+            <div className="absolute inset-0 rounded-2xl bg-[#0B1C3D]/[0.07] scale-150 blur-lg" />
+            <Shield className="w-8 h-8 text-[#E8FF47] relative z-10" />
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
             Agosto 2026 se acerca.
             <br />
             <span
               style={{
-                background: 'linear-gradient(135deg, #E09E50 0%, #F0C070 50%, #E09E50 100%)',
+                background: 'linear-gradient(135deg, #E8FF47 0%, #F0C070 50%, #E8FF47 100%)',
                 backgroundSize: '200% 200%',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
@@ -1556,13 +1590,13 @@ function CTASection() {
                     {String(value).padStart(2, '0')}
                   </span>
                 </div>
-                <span className="text-[10px] text-[#8CBDB9]/60 mt-1 uppercase tracking-wider">{label}</span>
+                <span className="text-[10px] text-[#8B9BB4]/60 mt-1 uppercase tracking-wider">{label}</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-[#8CBDB9]/50 -mt-4 mb-8">hasta la entrada en vigor plena del AI Act (agosto 2026)</p>
+          <p className="text-xs text-[#8B9BB4]/50 -mt-4 mb-8">hasta la entrada en vigor plena del AI Act (agosto 2026)</p>
 
-          <p className="text-lg text-[#8CBDB9] mb-8 leading-relaxed">
+          <p className="text-lg text-[#8B9BB4] mb-8 leading-relaxed">
             Cada semana que no actúas, el trabajo crece. Regístrate gratis y
             ten tu primer sistema clasificado en menos de 5 minutos.
           </p>
@@ -1570,7 +1604,7 @@ function CTASection() {
             <Link href="/register">
               <Button
                 size="lg"
-                className="bg-[#E09E50] hover:bg-[#D9885F] text-white text-base px-8 py-6 h-auto shadow-lg shadow-[#E09E50]/30 hover:shadow-[#E09E50]/40 transition-all w-full sm:w-auto"
+                className="bg-[#E8FF47] hover:bg-[#d4ec2e] text-[#0B1C3D] text-base px-8 py-6 h-auto shadow-lg shadow-[#E8FF47]/30 hover:shadow-[#E8FF47]/40 transition-all w-full sm:w-auto font-[500]"
               >
                 Empezar gratis — sin tarjeta
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -1586,17 +1620,17 @@ function CTASection() {
               </Button>
             </Link>
           </div>
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-[#8CBDB9]/70">
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-[#8B9BB4]/70">
             <span className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-[#E09E50]" />
+              <CheckCircle className="w-4 h-4 text-[#E8FF47]" />
               14 días de prueba
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-[#E09E50]" />
+              <CheckCircle className="w-4 h-4 text-[#E8FF47]" />
               Sin compromisos
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-[#E09E50]" />
+              <CheckCircle className="w-4 h-4 text-[#E8FF47]" />
               Soporte incluido
             </span>
           </div>
@@ -1611,7 +1645,7 @@ function CTASection() {
 // ─────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#F0EEE8]">
       <Header />
       <HeroSection />
       <StatsSection />

@@ -235,15 +235,15 @@ export function RiskAIAssistant({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#E8ECEB]">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#E3DFD5]">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-[#F5DFB3]/60 rounded-lg">
-              <Sparkles className="w-4 h-4 text-[#E09E50]" />
+              <Sparkles className="w-4 h-4 text-[#E8FF47]" />
             </div>
-            <DialogTitle className="text-[#2D3E4E]">Asistente de Análisis de Riesgos IA</DialogTitle>
+            <DialogTitle className="text-[#0B1C3D]">Asistente de Análisis de Riesgos IA</DialogTitle>
           </div>
-          <DialogDescription className="text-[#7a8a92]">
-            Analizando <span className="font-medium text-[#2D3E4E]">{systemName}</span> para identificar factores de riesgo AI Act aplicables
+          <DialogDescription className="text-[#8B9BB4]">
+            Analizando <span className="font-medium text-[#0B1C3D]">{systemName}</span> para identificar factores de riesgo AI Act aplicables
           </DialogDescription>
         </DialogHeader>
 
@@ -253,28 +253,28 @@ export function RiskAIAssistant({
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
-                  msg.role === 'assistant' ? 'bg-[#F5DFB3]/60' : 'bg-[#E8ECEB]'
+                  msg.role === 'assistant' ? 'bg-[#F5DFB3]/60' : 'bg-[#E3DFD5]'
                 }`}>
                   {msg.role === 'assistant'
-                    ? <Bot className="w-3.5 h-3.5 text-[#E09E50]" />
-                    : <User className="w-3.5 h-3.5 text-[#7a8a92]" />
+                    ? <Bot className="w-3.5 h-3.5 text-[#E8FF47]" />
+                    : <User className="w-3.5 h-3.5 text-[#8B9BB4]" />
                   }
                 </div>
                 <div className={`max-w-[85%] rounded-xl px-4 py-3 ${
                   msg.role === 'assistant'
-                    ? 'bg-[#F8FAFB] border border-[#E8ECEB] text-[#2D3E4E]'
-                    : 'bg-[#2D3E4E] text-white ml-auto'
+                    ? 'bg-[#F8FAFB] border border-[#E3DFD5] text-[#0B1C3D]'
+                    : 'bg-[#0B1C3D] text-white ml-auto'
                 }`}>
                   {msg.content ? (
                     <MessageContent content={msg.content} />
                   ) : (
                     <div className="flex items-center gap-1.5">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E09E50]" />
-                      <span className="text-xs text-[#7a8a92]">Analizando...</span>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8FF47]" />
+                      <span className="text-xs text-[#8B9BB4]">Analizando...</span>
                     </div>
                   )}
                   {msg.isStreaming && msg.content && (
-                    <span className="inline-block w-0.5 h-3.5 bg-[#E09E50] animate-pulse ml-0.5 align-middle" />
+                    <span className="inline-block w-0.5 h-3.5 bg-[#E8FF47] animate-pulse ml-0.5 align-middle" />
                   )}
                 </div>
               </div>
@@ -284,16 +284,16 @@ export function RiskAIAssistant({
 
         {/* Analysis results */}
         {analysis && (
-          <div className="px-6 py-4 border-t border-[#E8ECEB] bg-white space-y-3 max-h-64 overflow-y-auto">
+          <div className="px-6 py-4 border-t border-[#E3DFD5] bg-white space-y-3 max-h-64 overflow-y-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
-                <span className="text-sm font-semibold text-[#2D3E4E]">
+                <span className="text-sm font-semibold text-[#0B1C3D]">
                   Análisis completado · {analysis.applicable.length} riesgos aplicables
                 </span>
               </div>
               {analysis.not_applicable.length > 0 && (
-                <span className="text-xs text-[#7a8a92]">
+                <span className="text-xs text-[#8B9BB4]">
                   {analysis.not_applicable.length} descartados
                 </span>
               )}
@@ -305,7 +305,7 @@ export function RiskAIAssistant({
                   <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-medium text-[#2D3E4E] truncate">{risk.risk_name}</span>
+                      <span className="text-xs font-medium text-[#0B1C3D] truncate">{risk.risk_name}</span>
                       <Badge className={`text-[10px] px-1.5 py-0 ${PROB_COLORS[risk.probability] ?? 'bg-gray-100 text-gray-600'}`}>
                         P: {risk.probability}
                       </Badge>
@@ -313,7 +313,7 @@ export function RiskAIAssistant({
                         I: {risk.impact}
                       </Badge>
                     </div>
-                    <p className="text-[11px] text-[#7a8a92] mt-0.5 line-clamp-2">{risk.reason}</p>
+                    <p className="text-[11px] text-[#8B9BB4] mt-0.5 line-clamp-2">{risk.reason}</p>
                   </div>
                 </div>
               ))}
@@ -321,7 +321,7 @@ export function RiskAIAssistant({
               {analysis.applicable.length > 5 && (
                 <button
                   onClick={() => setShowAll(prev => !prev)}
-                  className="w-full text-xs text-[#E09E50] hover:underline flex items-center justify-center gap-1 py-1"
+                  className="w-full text-xs text-[#E8FF47] hover:underline flex items-center justify-center gap-1 py-1"
                 >
                   {showAll ? (
                     <><ChevronUp className="w-3 h-3" /> Mostrar menos</>
@@ -335,7 +335,7 @@ export function RiskAIAssistant({
         )}
 
         {/* Input area */}
-        <div className="px-6 py-4 border-t border-[#E8ECEB] bg-white space-y-3">
+        <div className="px-6 py-4 border-t border-[#E3DFD5] bg-white space-y-3">
           {!analysis && (
             <div className="flex gap-2">
               <Textarea
@@ -349,7 +349,7 @@ export function RiskAIAssistant({
               <Button
                 onClick={sendMessage}
                 disabled={!input.trim() || isStreaming}
-                className="self-end bg-[#E09E50] hover:bg-[#D9885F]"
+                className="self-end bg-[#E8FF47] hover:bg-[#D9885F]"
                 size="sm"
               >
                 <Send className="w-4 h-4" />
@@ -364,14 +364,14 @@ export function RiskAIAssistant({
                   variant="outline"
                   size="sm"
                   onClick={() => { setAnalysis(null); setMessages([]); startAnalysis([]); }}
-                  className="text-[#7a8a92]"
+                  className="text-[#8B9BB4]"
                 >
                   Reiniciar análisis
                 </Button>
                 <Button
                   onClick={handleApply}
                   disabled={applying || !analysis.applicable.length}
-                  className="bg-[#E09E50] hover:bg-[#D9885F] text-white"
+                  className="bg-[#E8FF47] hover:bg-[#D9885F] text-white"
                   size="sm"
                 >
                   {applying ? (
@@ -382,7 +382,7 @@ export function RiskAIAssistant({
                 </Button>
               </>
             ) : (
-              <p className="text-xs text-[#7a8a92] flex items-center gap-1">
+              <p className="text-xs text-[#8B9BB4] flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />
                 El asistente propone factores de riesgo. Revisa y confirma antes de aplicar.
               </p>

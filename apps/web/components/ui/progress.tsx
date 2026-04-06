@@ -12,7 +12,7 @@ const trackVariants = cva(
     variants: {
       trackVariant: {
         default: "bg-secondary",
-        blue: "bg-[#E8ECEB]",
+        blue: "bg-[#E3DFD5]",
         green: "bg-[#E8F5E3]",
         orange: "bg-[#FFE8D1]",
         red: "bg-[#F4E4D7]",
@@ -31,12 +31,12 @@ const indicatorVariants = cva(
     variants: {
       indicatorVariant: {
         default: "bg-primary",
-        blue: "bg-[#E09E50]",
+        blue: "bg-[#E8FF47]",
         green: "bg-[#27A844]",
         orange: "bg-[#D97706]",
         red: "bg-[#C92A2A]",
-        purple: "bg-[#8CBDB9]",
-        gradient: "bg-gradient-to-r from-[#E09E50] to-[#D9885F]",
+        purple: "bg-[#8B9BB4]",
+        gradient: "bg-gradient-to-r from-[#E8FF47] to-[#D9885F]",
         success: "bg-gradient-to-r from-[#27A844] to-[#219639]",
         warning: "bg-gradient-to-r from-[#D97706] to-[#C86200]",
       },

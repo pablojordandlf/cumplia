@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, CheckCircle, HelpCircle, Info, Building2 } from "lucide-react";
+import { ArrowRight, CheckCircle, HelpCircle, Info, X } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Planes y Precios - CumplIA",
@@ -19,68 +19,103 @@ export const metadata: Metadata = {
   },
 };
 
-const starterTier = {
-  name: "Starter",
-  description: "Valida tu primer sistema de IA y conoce la plataforma",
-  features: [
-    "1 Sistema de IA",
-    "1 usuario",
-    "Clasificación AI Act",
-    "Obligaciones básicas",
-    "Checklist de cumplimiento",
-    "Sin generación de documentos",
-  ],
-  ctaText: "Empieza Gratis",
-  popular: false,
-  stripeLink: "/register",
-};
-
-const professionalTier = {
-  name: "Professional",
-  description: "Ideal para PYMEs y consultoras con varios sistemas de IA",
-  features: [
-    "Hasta 15 Sistemas de IA",
-    "Hasta 3 usuarios",
-    "FRIA completa (Art. 27)",
-    "Gestión completa de riesgos",
-    "Registro de evidencias",
-    "Exportación PDF/DOCX",
-    "Soporte email prioritario",
-  ],
-  ctaText: "Elige Professional",
-  popular: true,
-  originalPrice: 149,
-  monthlyPrice: 99,
-  yearlyPrice: 990,
-  badge: "🔥 Oferta de lanzamiento",
-  badgeColor: "bg-green-500/20 text-green-400",
-  yearlySavings: "Ahorra 600€/año",
-  additionalSavings: "o 990€/año (ahorra 198€)",
-};
-
-const businessTier = {
-  name: "Business",
-  description: "Para empresas con múltiples departamentos y necesidades avanzadas",
-  features: [
-    "Sistemas de IA ilimitados",
-    "Hasta 10 usuarios",
-    "Asistente IA",
-    "Gestión de Riesgos avanzada",
-    "Registro de evidencias",
-    "Plantillas personalizadas",
-    "Gestión multi-departamento",
-    "Soporte prioritario",
-  ],
-  ctaText: "Elige Business",
-  popular: false,
-  originalPrice: 349,
-  monthlyPrice: 249,
-  yearlyPrice: 2490,
-  badge: "💼 Precio especial PYMEs",
-  badgeColor: "bg-blue-500/20 text-blue-400",
-  yearlySavings: "Ahorra 1.200€/año",
-  additionalSavings: "o 2.490€/año (ahorra 498€)",
-};
+const tiers = [
+  {
+    key: "starter",
+    name: "Starter",
+    description: "Conoce la plataforma y evalúa tus primeros sistemas de IA",
+    price: 0,
+    priceLabel: "0€",
+    period: "/mes",
+    badge: null,
+    highlight: false,
+    ctaText: "Empieza Gratis",
+    ctaHref: "/register",
+    features: [
+      "3 Sistemas de IA",
+      "1 usuario administrador",
+      "Clasificación AI Act",
+      "Obligaciones básicas",
+      "Checklist de cumplimiento",
+    ],
+    notIncluded: [
+      "IA generativa",
+      "Exportación de documentos",
+    ],
+  },
+  {
+    key: "professional",
+    name: "Professional",
+    description: "Para PYMEs y consultoras que necesitan cumplir con el AI Act",
+    price: 399,
+    priceLabel: "399€",
+    period: "/mes",
+    badge: "Más popular",
+    highlight: true,
+    ctaText: "Elegir Professional",
+    ctaHref: "/register?plan=professional",
+    features: [
+      "Hasta 15 Sistemas de IA",
+      "Hasta 3 usuarios administradores",
+      "Funcionalidades completas",
+      "IA generativa incluida",
+      "FRIA completa (Art. 27)",
+      "Gestión completa de riesgos",
+      "Registro de evidencias",
+      "Exportación PDF/DOCX",
+      "Soporte email prioritario",
+    ],
+    notIncluded: [],
+  },
+  {
+    key: "business",
+    name: "Business",
+    description: "Para empresas con múltiples departamentos y más sistemas de IA",
+    price: 899,
+    priceLabel: "899€",
+    period: "/mes",
+    badge: null,
+    highlight: false,
+    ctaText: "Elegir Business",
+    ctaHref: "/register?plan=business",
+    features: [
+      "Hasta 50 Sistemas de IA",
+      "Hasta 10 usuarios administradores",
+      "Funcionalidades completas",
+      "IA generativa incluida",
+      "Asistente IA avanzado",
+      "Gestión de riesgos avanzada",
+      "Plantillas personalizadas",
+      "Gestión multi-departamento",
+      "Soporte prioritario",
+    ],
+    notIncluded: [],
+  },
+  {
+    key: "enterprise",
+    name: "Enterprise",
+    description: "Para grandes organizaciones con necesidades a medida",
+    price: 2499,
+    priceLabel: "2.499€+",
+    period: "/mes",
+    badge: null,
+    highlight: false,
+    ctaText: "Contactar Ventas",
+    ctaHref: "mailto:sales@cumplia.com",
+    features: [
+      "Sistemas de IA ilimitados",
+      "Usuarios administradores ilimitados",
+      "Funcionalidades completas",
+      "IA generativa incluida",
+      "SSO / SAML",
+      "API completa",
+      "SLA garantizado",
+      "Account manager dedicado",
+      "On-premise disponible",
+    ],
+    notIncluded: [],
+  },
+];
 
 export default function PricingPage() {
   return (
@@ -91,18 +126,17 @@ export default function PricingPage() {
             Planes para cada etapa
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Desde pruebas gratuitas hasta soluciones empresariales. 
-            Cumple con el AI Act sin comprometer tu presupuesto.
+            Evalúa, cumple, protege y lidera en materia de AI Act.
+            Empieza gratis y escala cuando lo necesites.
           </p>
-          
-          {/* Explicación de Sistemas de IA */}
+
           <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-blue-50 rounded-xl max-w-3xl mx-auto">
             <div className="flex flex-col sm:flex-row items-start gap-3 text-left">
               <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0 sm:mt-1" />
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">¿Qué es un Sistema de IA?</h3>
                 <p className="text-[#7a8a92] text-sm mb-3">
-                  Según el AI Act, un <strong>sistema de IA</strong> es cualquier aplicación basada en inteligencia artificial 
+                  Según el AI Act, un <strong>sistema de IA</strong> es cualquier aplicación basada en inteligencia artificial
                   que tu empresa desarrolle, despliegue o utilice. Cada sistema debe evaluarse y documentarse individualmente.
                 </p>
                 <div className="flex flex-col sm:flex-row flex-wrap gap-2">
@@ -115,235 +149,191 @@ export default function PricingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {/* Starter Card */}
-          <div className="relative rounded-2xl border bg-card p-6 shadow-sm flex flex-col">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold">{starterTier.name}</h3>
-              <p className="text-sm text-muted-foreground">{starterTier.description}</p>
-            </div>
-            <div className="text-center mb-6">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-5xl font-bold text-slate-900">0€</span>
-                <span className="text-slate-500">/mes</span>
-              </div>
-              <Badge className="mt-2 bg-slate-500/20 text-slate-300">Gratis para siempre</Badge>
-              <p className="text-xs text-slate-500 mt-2">Sin tarjeta de crédito</p>
-            </div>
-            <ul className="space-y-3 mb-6 flex-1">
-              {starterTier.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href={starterTier.stripeLink}>
-              <Button className="w-full min-h-[52px] text-base" variant="outline">
-                {starterTier.ctaText}
-              </Button>
-            </Link>
-          </div>
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+          {tiers.map((tier) => (
+            <div
+              key={tier.key}
+              className={`relative rounded-2xl p-6 flex flex-col ${
+                tier.highlight
+                  ? "border-2 border-blue-500 bg-card shadow-lg"
+                  : "border bg-card shadow-sm"
+              }`}
+            >
+              {tier.badge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-blue-500 text-white">{tier.badge}</Badge>
+                </div>
+              )}
 
-          {/* Professional Card */}
-          <div className="relative rounded-2xl border-2 border-blue-500 bg-card p-6 shadow-lg flex flex-col">
-            {professionalTier.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-blue-500 text-white">Más popular</Badge>
+              <div className="mb-4">
+                <h3 className="text-xl font-bold">{tier.name}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{tier.description}</p>
               </div>
-            )}
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold">{professionalTier.name}</h3>
-              <p className="text-sm text-muted-foreground">{professionalTier.description}</p>
-            </div>
-            <div className="text-center mb-6">
-              <div className="flex items-baseline justify-center gap-1 flex-wrap">
-                <span className="text-slate-400 line-through text-lg">{professionalTier.originalPrice}€</span>
-                <span className="text-5xl font-bold text-slate-900">{professionalTier.monthlyPrice}€</span>
-                <span className="text-slate-500">/mes</span>
-              </div>
-              <Badge className={`mt-2 ${professionalTier.badgeColor}`}>{professionalTier.badge}</Badge>
-              <p className="text-sm text-emerald-600 font-medium mt-2">{professionalTier.yearlySavings}</p>
-              <p className="text-xs text-slate-500 mt-1">{professionalTier.additionalSavings}</p>
-            </div>
-            <ul className="space-y-3 mb-6 flex-1">
-              {professionalTier.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/register">
-              <Button className="w-full min-h-[52px] text-base bg-blue-600 hover:bg-blue-700">
-                {professionalTier.ctaText}
-              </Button>
-            </Link>
-          </div>
 
-          {/* Business Card */}
-          <div className="relative rounded-2xl border bg-card p-6 shadow-sm flex flex-col">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold">{businessTier.name}</h3>
-              <p className="text-sm text-muted-foreground">{businessTier.description}</p>
-            </div>
-            <div className="text-center mb-6">
-              <div className="flex items-baseline justify-center gap-1 flex-wrap">
-                <span className="text-slate-400 line-through text-lg">{businessTier.originalPrice}€</span>
-                <span className="text-5xl font-bold text-slate-900">{businessTier.monthlyPrice}€</span>
-                <span className="text-slate-500">/mes</span>
+              <div className="text-center mb-6">
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-5xl font-bold text-slate-900">{tier.priceLabel}</span>
+                  {tier.period && <span className="text-slate-500">{tier.period}</span>}
+                </div>
+                {tier.key === "starter" && (
+                  <Badge className="mt-2 bg-slate-500/20 text-slate-300">Gratis para siempre</Badge>
+                )}
+                {tier.key === "enterprise" && (
+                  <p className="text-xs text-slate-500 mt-2">Precio según necesidades</p>
+                )}
               </div>
-              <Badge className={`mt-2 ${businessTier.badgeColor}`}>{businessTier.badge}</Badge>
-              <p className="text-sm text-emerald-600 font-medium mt-2">{businessTier.yearlySavings}</p>
-              <p className="text-xs text-slate-500 mt-1">{businessTier.additionalSavings}</p>
+
+              <ul className="space-y-3 mb-6 flex-1">
+                {tier.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+                {tier.notIncluded.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <X className="h-4 w-4 text-slate-300 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link href={tier.ctaHref}>
+                <Button
+                  className={`w-full min-h-[52px] text-base ${
+                    tier.highlight
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : ""
+                  }`}
+                  variant={tier.highlight ? "default" : "outline"}
+                >
+                  {tier.ctaText}
+                </Button>
+              </Link>
             </div>
-            <ul className="space-y-3 mb-6 flex-1">
-              {businessTier.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/register">
-              <Button className="w-full min-h-[52px] text-base" variant="outline">
-                {businessTier.ctaText}
-              </Button>
-            </Link>
-          </div>
+          ))}
         </div>
 
-        {/* Enterprise CTA - Hidden temporarily
-        <div className="mt-12 max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-white">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/10 p-3 rounded-xl">
-                  <Building2 className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Enterprise</h3>
-                  <p className="text-gray-300">Para grandes corporaciones y organizaciones reguladas</p>
-                </div>
-              </div>
-              <div className="text-center md:text-right">
-                <div className="text-3xl font-bold">Custom</div>
-                <p className="text-sm text-[#7a8a92] mb-4">Precio según necesidades</p>
-                <Link href="mailto:sales@cumplia.com">
-                  <Button className="bg-white text-gray-900 hover:bg-[#E8ECEB]">
-                    Contactar Ventas
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-400" />
-                <span>Sistemas ilimitados</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-400" />
-                <span>SSO / SAML</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-400" />
-                <span>SLA garantizado</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-400" />
-                <span>Customer Success</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        */}
-
-        {/* Feature Comparison */}
+        {/* Feature Comparison Table */}
         <div className="mt-20 max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Comparativa de funciones</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">Comparativa de planes</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-4 px-4 font-medium">Función</th>
+                  <th className="text-left py-4 px-4 font-medium"></th>
                   <th className="text-center py-4 px-4 font-medium">Starter</th>
                   <th className="text-center py-4 px-4 font-medium text-blue-600">Professional</th>
                   <th className="text-center py-4 px-4 font-medium">Business</th>
+                  <th className="text-center py-4 px-4 font-medium">Enterprise</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="py-3 px-4">Sistemas de IA</td>
-                  <td className="text-center py-3 px-4">1</td>
+                  <td className="py-3 px-4 font-medium">Sistemas de IA</td>
+                  <td className="text-center py-3 px-4">3</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">15</td>
+                  <td className="text-center py-3 px-4">50</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-3 px-4">Usuarios</td>
+                  <td className="py-3 px-4 font-medium">Usuarios administradores</td>
                   <td className="text-center py-3 px-4">1</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">3</td>
                   <td className="text-center py-3 px-4">10</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Clasificación AI Act</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Obligaciones</td>
-                  <td className="text-center py-3 px-4">Básicas</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">Completas</td>
-                  <td className="text-center py-3 px-4">Completas</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Gestión de riesgos</td>
-                  <td className="text-center py-3 px-4">Básica</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">Completa</td>
-                  <td className="text-center py-3 px-4">Avanzada</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">FRIA (Art. 27)</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Registro de evidencias</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Asistente IA</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-3 px-4">Documentos/mes</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4 font-medium text-blue-600">10</td>
                   <td className="text-center py-3 px-4">Ilimitados</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-3 px-4">Plantillas custom</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
+                  <td className="py-3 px-4 font-medium">Funcionalidades</td>
+                  <td className="text-center py-3 px-4 text-slate-500">Limitadas</td>
+                  <td className="text-center py-3 px-4 font-semibold text-blue-600">Completas</td>
+                  <td className="text-center py-3 px-4 font-semibold">Completas</td>
+                  <td className="text-center py-3 px-4 font-semibold">Completas</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">IA generativa</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
                   <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-3 px-4">Multi-departamento</td>
-                  <td className="text-center py-3 px-4">—</td>
-                  <td className="text-center py-3 px-4">—</td>
+                  <td className="py-3 px-4 font-medium">Clasificación AI Act</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
                   <td className="text-center py-3 px-4">✓</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-3 px-4">Soporte</td>
+                  <td className="py-3 px-4 font-medium">Gestión de riesgos</td>
+                  <td className="text-center py-3 px-4 text-slate-500">Básica</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">Completa</td>
+                  <td className="text-center py-3 px-4">Avanzada</td>
+                  <td className="text-center py-3 px-4">Avanzada</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">FRIA (Art. 27)</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">Registro de evidencias</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">Exportación PDF/DOCX</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 font-medium text-blue-600">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">Plantillas personalizadas</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">Multi-departamento</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">SSO / SAML</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">SLA garantizado</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4 text-slate-400">—</td>
+                  <td className="text-center py-3 px-4">✓</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4 font-medium">Soporte</td>
                   <td className="text-center py-3 px-4">Email</td>
                   <td className="text-center py-3 px-4 font-medium text-blue-600">Prioritario</td>
                   <td className="text-center py-3 px-4">Prioritario</td>
+                  <td className="text-center py-3 px-4">Dedicado</td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4 font-bold">Precio/mes</td>
+                  <td className="text-center py-4 px-4 font-bold">0€</td>
+                  <td className="text-center py-4 px-4 font-bold text-blue-600">399€</td>
+                  <td className="text-center py-4 px-4 font-bold">899€</td>
+                  <td className="text-center py-4 px-4 font-bold">2.499€+</td>
                 </tr>
               </tbody>
             </table>
@@ -354,7 +344,7 @@ export default function PricingPage() {
         <div className="mt-16 max-w-3xl mx-auto bg-muted/30 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4 text-center">¿Por qué precios por sistemas de IA?</h3>
           <p className="text-muted-foreground text-center mb-4">
-            El AI Act obliga a documentar y auditar cada sistema de IA de forma individual. 
+            El AI Act obliga a documentar y auditar cada sistema de IA de forma individual.
             Tu coste de cumplimiento depende del número de aplicaciones que gestionas.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -398,19 +388,20 @@ export default function PricingPage() {
             <div className="bg-background rounded-lg p-4 border">
               <h4 className="font-semibold mb-2 flex items-center gap-2">
                 <HelpCircle className="h-4 w-4 text-blue-600" />
-                ¿Hay descuentos por pago anual?
+                ¿Necesito tarjeta de crédito para el plan Starter?
               </h4>
               <p className="text-sm text-muted-foreground">
-                Sí, ofrecemos un ~17% de descuento en los planes Professional y Business cuando eliges facturación anual.
+                No, el plan Starter es completamente gratuito y no requiere tarjeta de crédito.
               </p>
             </div>
             <div className="bg-background rounded-lg p-4 border">
               <h4 className="font-semibold mb-2 flex items-center gap-2">
                 <HelpCircle className="h-4 w-4 text-blue-600" />
-                ¿Necesito tarjeta de crédito para el plan Starter?
+                ¿Qué incluye la IA generativa?
               </h4>
               <p className="text-sm text-muted-foreground">
-                No, el plan Starter es completamente gratuito y no requiere tarjeta de crédito.
+                Los planes Professional, Business y Enterprise incluyen generación automática de documentos de cumplimiento,
+                asistente IA para análisis de riesgos y sugerencias inteligentes para obligaciones del AI Act.
               </p>
             </div>
           </div>
