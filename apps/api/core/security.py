@@ -50,30 +50,30 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
             )
             return payload
         
-        # If no verification method available, decode without verification
-        # WARNING: Only for development!
-        payload = jwt.decode(
-            token,
-            options={"verify_signature": False, "verify_aud": False}
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service not configured",
+            headers={"WWW-Authenticate": "Bearer"},
         )
-        return payload
-        
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.InvalidTokenError as e:
+    except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token: {str(e)}",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token verification failed: {str(e)}",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

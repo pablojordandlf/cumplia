@@ -52,6 +52,7 @@ export async function PUT(
       .from('organization_members')
       .select('role')
       .eq('id', memberId)
+      .eq('organization_id', id)
       .single();
 
     if (targetMember?.role === 'owner') {
@@ -122,6 +123,7 @@ export async function DELETE(
       .from('organization_members')
       .select('role')
       .eq('id', memberId)
+      .eq('organization_id', id)
       .single();
 
     if (targetMember?.role === 'owner') {

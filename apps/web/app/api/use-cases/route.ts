@@ -1,39 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 
 // GET /api/use-cases - Listar casos de uso del usuario
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) => {
-                cookieStore.set(name, value, options);
-              });
-            } catch {
-              // Server Component context - can be ignored
-            }
-          },
-        },
-      }
-    );
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get query params
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const sector = searchParams.get('sector');
@@ -42,7 +19,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('use_cases')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (status) query = query.eq('status', status);
@@ -57,7 +34,6 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ useCases });
-
   } catch (error) {
     console.error('Error in GET /api/use-cases:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -67,31 +43,10 @@ export async function GET(request: NextRequest) {
 // POST /api/use-cases - Crear nuevo sistema de IA
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) => {
-                cookieStore.set(name, value, options);
-              });
-            } catch {
-              // Server Component context - can be ignored
-            }
-          },
-        },
-      }
-    );
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -105,7 +60,7 @@ export async function POST(request: NextRequest) {
     const { data: useCase, error } = await supabase
       .from('use_cases')
       .insert({
-        user_id: session.user.id,
+        user_id: user.id,
         name: name.trim(),
         description: description?.trim() || null,
         sector: sector?.trim() || null,
@@ -120,7 +75,6 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ useCase }, { status: 201 });
-
   } catch (error) {
     console.error('Error in POST /api/use-cases:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,34 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-
-// Helper para autenticación
-async function getAuthenticatedClient() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch {
-            // Server Component context
-          }
-        },
-      },
-    }
-  );
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  return { supabase, session };
-}
+import { createClient } from '@/lib/supabase/server';
 
 // POST /api/use-cases/[id]/classify - Guardar clasificación AI Act
 export async function POST(
@@ -37,18 +8,18 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { supabase, session } = await getAuthenticatedClient();
-    
-    if (!session) {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify ownership
     const { data: existing } = await supabase
       .from('use_cases')
       .select('id')
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (!existing) {
@@ -56,12 +27,12 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { 
-      ai_act_level, 
-      confidence, 
-      reasoning, 
+    const {
+      ai_act_level,
+      confidence,
+      reasoning,
       applicable_articles,
-      wizard_answers 
+      wizard_answers,
     } = body;
 
     const updateData: Record<string, any> = {
@@ -81,7 +52,7 @@ export async function POST(
       .from('use_cases')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -90,16 +61,15 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to save classification' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       useCase: {
         id: useCase.id,
         ai_act_level: useCase.ai_act_level,
         confidence_score: useCase.confidence_score,
         status: useCase.status,
-      }
+      },
     });
-
   } catch (error) {
     console.error('Error in POST /api/use-cases/[id]/classify:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
