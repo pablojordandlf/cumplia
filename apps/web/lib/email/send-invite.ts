@@ -1,8 +1,6 @@
 import { Resend } from 'resend';
 import { InviteEmailTemplate } from './invite-template';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface SendInviteEmailParams {
   email: string;
   name?: string;
@@ -22,6 +20,7 @@ export async function sendInviteEmail({
   role,
   appUrl,
 }: SendInviteEmailParams) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     // Build invite link with properly encoded token AND email for verification
     const inviteLink = `${appUrl}/accept-invite?token=${encodeURIComponent(inviteToken)}&email=${encodeURIComponent(email)}`;
