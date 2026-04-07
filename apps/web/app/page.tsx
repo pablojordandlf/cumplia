@@ -1276,10 +1276,21 @@ function AIActSection() {
 // 9. PRICING
 // ─────────────────────────────────────────────────────────
 function PricingSection() {
+  const [annual, setAnnual] = useState(false);
+
+  const sharedFeatures = [
+    'Asistente de IA generativa incluido para facilitarte el trabajo',
+    'FRIA completa (Art. 27)',
+    'Acceso al módulo de gestión de riesgos IA',
+    'Registro de evidencias',
+    'Exportación PDF/DOCX',
+  ];
+
   const plans = [
     {
       name: 'Starter',
       price: '0€',
+      priceAnnual: '0€',
       period: '/mes',
       description: 'Conoce la plataforma y evalúa tus primeros sistemas de IA',
       features: [
@@ -1296,16 +1307,13 @@ function PricingSection() {
     {
       name: 'Professional',
       price: '399€',
+      priceAnnual: '319€',
       period: '/mes',
       description: 'Para PYMEs y consultoras que necesitan cumplir con el AI Act',
       features: [
         'Hasta 15 sistemas de IA',
         'Hasta 3 usuarios administradores',
-        'Funcionalidades completas',
-        'IA generativa incluida',
-        'FRIA completa (Art. 27)',
-        'Registro de evidencias',
-        'Soporte email prioritario',
+        ...sharedFeatures,
       ],
       cta: 'Elegir Professional',
       href: '/register?plan=professional',
@@ -1315,16 +1323,13 @@ function PricingSection() {
     {
       name: 'Business',
       price: '899€',
+      priceAnnual: '719€',
       period: '/mes',
       description: 'Para empresas con múltiples departamentos y más sistemas de IA',
       features: [
         'Hasta 50 sistemas de IA',
         'Hasta 10 usuarios administradores',
-        'Funcionalidades completas',
-        'IA generativa incluida',
-        'Plantillas personalizadas',
-        'Multi-departamento',
-        'Soporte prioritario',
+        ...sharedFeatures,
       ],
       cta: 'Elegir Business',
       href: '/register?plan=business',
@@ -1333,16 +1338,13 @@ function PricingSection() {
     {
       name: 'Enterprise',
       price: '2.499€+',
+      priceAnnual: '2.499€+',
       period: '/mes',
       description: 'Soluciones a medida para grandes organizaciones',
       features: [
         'Sistemas de IA ilimitados',
         'Usuarios administradores ilimitados',
-        'Funcionalidades completas',
-        'IA generativa incluida',
-        'SSO / SAML',
-        'SLA garantizado',
-        'Account manager dedicado',
+        ...sharedFeatures,
       ],
       cta: 'Contactar ventas',
       href: 'mailto:sales@cumplia.com',
@@ -1358,9 +1360,28 @@ function PricingSection() {
           <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1C3D] mb-4">
             Planes para cada etapa
           </h2>
-          <p className="text-[#8B9BB4]">
+          <p className="text-[#8B9BB4] mb-6">
             Empieza gratis, escala cuando lo necesites. Sin sorpresas.
           </p>
+          <div className="inline-flex items-center gap-3 bg-white border border-[#E3DFD5] rounded-full px-2 py-1.5 shadow-sm">
+            <button
+              onClick={() => setAnnual(false)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                !annual ? 'bg-[#0B1C3D] text-white' : 'text-[#8B9BB4] hover:text-[#0B1C3D]'
+              }`}
+            >
+              Mensual
+            </button>
+            <button
+              onClick={() => setAnnual(true)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                annual ? 'bg-[#0B1C3D] text-white' : 'text-[#8B9BB4] hover:text-[#0B1C3D]'
+              }`}
+            >
+              Anual
+              <span className="bg-[#E8FF47] text-[#0B1C3D] text-xs font-bold px-2 py-0.5 rounded-full">-20%</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
@@ -1391,13 +1412,18 @@ function PricingSection() {
                 </h3>
                 <div className="flex items-baseline gap-1 mb-1">
                   <span className={`text-4xl font-bold ${plan.highlight ? 'text-white' : 'text-[#0B1C3D]'}`}>
-                    {plan.price}
+                    {annual ? plan.priceAnnual : plan.price}
                   </span>
                   <span className={`text-sm ${plan.highlight ? 'text-white/60' : 'text-[#8B9BB4]'}`}>
                     {plan.period}
                   </span>
                 </div>
-                <p className={`text-xs mt-2 ${plan.highlight ? 'text-white/60' : 'text-[#8B9BB4]'}`}>
+                {annual && plan.name !== 'Starter' && plan.name !== 'Enterprise' && (
+                  <p className={`text-xs font-medium ${plan.highlight ? 'text-[#E8FF47]' : 'text-green-600'}`}>
+                    Ahorra 20% · facturado anualmente
+                  </p>
+                )}
+                <p className={`text-xs mt-1.5 ${plan.highlight ? 'text-white/60' : 'text-[#8B9BB4]'}`}>
                   {plan.description}
                 </p>
               </div>

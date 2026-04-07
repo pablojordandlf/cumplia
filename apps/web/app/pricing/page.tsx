@@ -49,6 +49,7 @@ const tiers = [
     description: "Para PYMEs y consultoras que necesitan cumplir con el AI Act",
     price: 399,
     priceLabel: "399€",
+    priceAnnualLabel: "319€",
     period: "/mes",
     badge: "Más popular",
     highlight: true,
@@ -57,13 +58,11 @@ const tiers = [
     features: [
       "Hasta 15 Sistemas de IA",
       "Hasta 3 usuarios administradores",
-      "Funcionalidades completas",
-      "IA generativa incluida",
+      "Asistente de IA generativa incluido para facilitarte el trabajo",
       "FRIA completa (Art. 27)",
-      "Gestión completa de riesgos",
+      "Acceso al módulo de gestión de riesgos IA",
       "Registro de evidencias",
       "Exportación PDF/DOCX",
-      "Soporte email prioritario",
     ],
     notIncluded: [],
   },
@@ -73,6 +72,7 @@ const tiers = [
     description: "Para empresas con múltiples departamentos y más sistemas de IA",
     price: 899,
     priceLabel: "899€",
+    priceAnnualLabel: "719€",
     period: "/mes",
     badge: null,
     highlight: false,
@@ -81,13 +81,11 @@ const tiers = [
     features: [
       "Hasta 50 Sistemas de IA",
       "Hasta 10 usuarios administradores",
-      "Funcionalidades completas",
-      "IA generativa incluida",
-      "Asistente IA avanzado",
-      "Gestión de riesgos avanzada",
-      "Plantillas personalizadas",
-      "Gestión multi-departamento",
-      "Soporte prioritario",
+      "Asistente de IA generativa incluido para facilitarte el trabajo",
+      "FRIA completa (Art. 27)",
+      "Acceso al módulo de gestión de riesgos IA",
+      "Registro de evidencias",
+      "Exportación PDF/DOCX",
     ],
     notIncluded: [],
   },
@@ -97,6 +95,7 @@ const tiers = [
     description: "Para grandes organizaciones con necesidades a medida",
     price: 2499,
     priceLabel: "2.499€+",
+    priceAnnualLabel: null,
     period: "/mes",
     badge: null,
     highlight: false,
@@ -105,13 +104,11 @@ const tiers = [
     features: [
       "Sistemas de IA ilimitados",
       "Usuarios administradores ilimitados",
-      "Funcionalidades completas",
-      "IA generativa incluida",
-      "SSO / SAML",
-      "API completa",
-      "SLA garantizado",
-      "Account manager dedicado",
-      "On-premise disponible",
+      "Asistente de IA generativa incluido para facilitarte el trabajo",
+      "FRIA completa (Art. 27)",
+      "Acceso al módulo de gestión de riesgos IA",
+      "Registro de evidencias",
+      "Exportación PDF/DOCX",
     ],
     notIncluded: [],
   },
@@ -130,7 +127,12 @@ export default function PricingPage() {
             Empieza gratis y escala cuando lo necesites.
           </p>
 
-          <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-blue-50 rounded-xl max-w-3xl mx-auto">
+          <div className="mt-6 inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-800 text-sm font-medium px-4 py-2 rounded-full">
+            <span className="text-green-600 font-bold">Ahorra 20%</span>
+            <span>con facturación anual — disponible al contratar</span>
+          </div>
+
+          <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-blue-50 rounded-xl max-w-3xl mx-auto">
             <div className="flex flex-col sm:flex-row items-start gap-3 text-left">
               <Info className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0 sm:mt-1" />
               <div>
@@ -179,8 +181,14 @@ export default function PricingPage() {
                 {tier.key === "starter" && (
                   <Badge className="mt-2 bg-slate-500/20 text-slate-300">Gratis para siempre</Badge>
                 )}
+                {tier.priceAnnualLabel && (
+                  <p className="text-xs text-green-700 mt-2 font-medium">
+                    {tier.priceAnnualLabel}/mes pagando anual{" "}
+                    <span className="text-green-600 font-bold">(ahorra 20%)</span>
+                  </p>
+                )}
                 {tier.key === "enterprise" && (
-                  <p className="text-xs text-slate-500 mt-2">Precio según necesidades</p>
+                  <p className="text-xs text-slate-500 mt-2">Precio según necesidades · descuento anual disponible</p>
                 )}
               </div>
 
