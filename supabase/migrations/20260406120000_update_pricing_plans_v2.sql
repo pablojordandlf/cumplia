@@ -2,11 +2,11 @@
 -- New plan names: Evalúa (starter/free), Cumple (professional), Protege (business), Lidera (enterprise)
 -- Prices: 0€, 399€, 899€, 2499€+
 -- AI Systems: 3, 15, 50, unlimited
+--
+-- IMPORTANT: Uses INSERT ... ON CONFLICT DO UPDATE instead of TRUNCATE CASCADE
+-- to avoid cascading deletes through FK chain (organizations, use_cases, etc.)
 
--- Clear existing plans and insert new structure
-TRUNCATE TABLE public.plans CASCADE;
-
--- Insert new plan structure
+-- Upsert new plan structure
 INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, limits) VALUES
 
 -- EVALÚA: Free tier - evaluate first AI systems
@@ -98,10 +98,9 @@ INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, li
    "sla": true,
    "dedicated_manager": true
  }'::jsonb
-);
+),
 
 -- Also keep legacy 'free' name pointing to starter limits
-INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, limits) VALUES
 ('free',
  'Starter',
  NULL,
@@ -121,7 +120,13 @@ INSERT INTO public.plans (name, display_name, stripe_price_id, price_monthly, li
    "ai_assistant": false,
    "generative_ai": false
  }'::jsonb
-);
+)
+
+ON CONFLICT (name) DO UPDATE SET
+  display_name    = EXCLUDED.display_name,
+  stripe_price_id = EXCLUDED.stripe_price_id,
+  price_monthly   = EXCLUDED.price_monthly,
+  limits          = EXCLUDED.limits;
 
 -- Migrate existing subscriptions: map old plan names to new canonical names
 UPDATE public.subscriptions
