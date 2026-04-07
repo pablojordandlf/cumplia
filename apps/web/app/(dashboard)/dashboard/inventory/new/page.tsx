@@ -30,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Square, FlaskConical, Package, X, GripVertical, Pencil } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
+import { DocumentAnalyzer, type ExtractedDocData, type CurrentFormValues } from '@/components/document-analyzer';
 import { LimitGate } from '@/components/permission-gate';
 import { useLimit } from '@/hooks/use-limit';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -132,6 +133,14 @@ export default function NewUseCasePage() {
       is_poc: false,
     },
   });
+
+  const watchedValues: CurrentFormValues = {
+    name: form.watch('name'),
+    description: form.watch('description'),
+    sector: form.watch('sector'),
+    ai_act_role: form.watch('ai_act_role'),
+    is_poc: form.watch('is_poc'),
+  };
 
   // Custom fields management functions
   function addCustomField() {
@@ -263,6 +272,26 @@ export default function NewUseCasePage() {
     );
   }
 
+  function handleDocumentExtraction(data: ExtractedDocData) {
+    if (data.name) form.setValue('name', data.name, { shouldValidate: true });
+    if (data.description) form.setValue('description', data.description, { shouldValidate: true });
+    if (data.sector && sectors.includes(data.sector as typeof sectors[number])) {
+      form.setValue('sector', data.sector as typeof sectors[number], { shouldValidate: true });
+    }
+    if (data.ai_act_role && ['provider', 'deployer', 'distributor', 'importer'].includes(data.ai_act_role)) {
+      form.setValue('ai_act_role', data.ai_act_role as 'provider' | 'deployer' | 'distributor' | 'importer', { shouldValidate: true });
+    }
+    if (data.is_poc !== null) {
+      form.setValue('is_poc', data.is_poc, { shouldValidate: true });
+    }
+
+    const extraFields: CustomField[] = [];
+    if (data.provider) extraFields.push({ id: crypto.randomUUID(), key: 'Proveedor', value: data.provider });
+    if (data.ai_owner) extraFields.push({ id: crypto.randomUUID(), key: 'AI Owner', value: data.ai_owner });
+    if (data.version) extraFields.push({ id: crypto.randomUUID(), key: 'Versión', value: data.version });
+    if (extraFields.length) setCustomFields((prev) => [...prev, ...extraFields]);
+  }
+
   async function onSubmit(values: z.infer<typeof useCaseFormSchema>) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -384,6 +413,11 @@ export default function NewUseCasePage() {
         />
       </div>
 
+      {/* Document analyzer — IA-powered pre-fill */}
+      <div className="max-w-3xl mx-auto mb-6">
+        <DocumentAnalyzer onApply={handleDocumentExtraction} currentValues={watchedValues} />
+      </div>
+
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -441,7 +475,7 @@ export default function NewUseCasePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Sector</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona un sector" />
@@ -648,7 +682,7 @@ export default function NewUseCasePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Rol según AI Act</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona tu rol" />

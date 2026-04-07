@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -8,10 +8,7 @@ export async function POST(request: Request) {
     const supabase = await createClient();
     
     // Admin client for DB operations (bypasses RLS)
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const adminSupabase = createAdminClient();
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -38,8 +35,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Parse request body
-    const { name, size, industry, country, plan = 'professional' } = await request.json();
+    // Parse request body — plan is always set server-side, never from client input
+    const { name, size, industry, country } = await request.json();
+    const plan = 'professional';
 
     // Validation
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
@@ -148,10 +146,11 @@ function getMaxAiSystems(plan: string): number {
   switch (plan) {
     case 'free':
     case 'starter':
-      return 1;
+      return 3;
     case 'professional':
       return 15;
     case 'business':
+      return 50;
     case 'enterprise':
       return -1; // Unlimited
     default:

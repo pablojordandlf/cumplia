@@ -134,8 +134,8 @@ export function RiskProgressIndicator({
           {/* Status Breakdown */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
             {/* Identified */}
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#E8ECEB]">
-              <AlertCircle className="h-4 w-4 text-[#7a8a92]" />
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-[#E3DFD5]">
+              <AlertCircle className="h-4 w-4 text-[#8B9BB4]" />
               <div>
                 <p className="text-xs text-muted-foreground">Identificados</p>
                 <p className="text-lg font-semibold text-gray-700">{identified}</p>
@@ -144,7 +144,7 @@ export function RiskProgressIndicator({
 
             {/* Assessed */}
             <div className="flex items-center gap-2 p-2 rounded-lg bg-[#FFE8D1]">
-              <ShieldAlert className="h-4 w-4 text-[#E09E50]" />
+              <ShieldAlert className="h-4 w-4 text-[#E8FF47]" />
               <div>
                 <p className="text-xs text-muted-foreground">Evaluados</p>
                 <p className="text-lg font-semibold text-[#D9885F]">{assessed}</p>
@@ -195,7 +195,7 @@ export function RiskProgressIndicator({
                     <p className="font-semibold text-sm text-gray-900 dark:text-white">
                       {localCompleted ? '✅ Análisis de Riesgos Completado' : '📝 Marcar Análisis como Completado'}
                     </p>
-                    <p className="text-xs text-[#7a8a92] dark:text-[#7a8a92]">
+                    <p className="text-xs text-[#8B9BB4] dark:text-[#8B9BB4]">
                       {isHighRisk
                         ? '🔴 Obligatorio para sistemas de Riesgo Alto'
                         : '✓ Análisis completado cuando termines la evaluación'}
@@ -203,7 +203,7 @@ export function RiskProgressIndicator({
                   </div>
                 </div>
                 {loading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#E09E50] border-t-transparent" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#E8FF47] border-t-transparent" />
                 )}
               </button>
 

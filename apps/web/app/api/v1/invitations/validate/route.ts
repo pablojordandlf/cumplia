@@ -19,7 +19,7 @@
  * }
  */
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface ValidationResponse {
@@ -63,8 +63,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<Validation
       );
     }
 
-    // Crear cliente de Supabase (puede ser anónimo)
-    const supabase = createClient();
+    // Crear cliente de Supabase
+    const supabase = await createClient();
 
     // Llamar la función SQL validate_invitation_token
     const { data, error } = await supabase.rpc('validate_invitation_token', {

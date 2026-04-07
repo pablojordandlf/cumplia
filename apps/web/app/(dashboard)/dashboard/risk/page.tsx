@@ -116,8 +116,8 @@ export default function RiskPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D3E4E]">Gestión de Riesgos</h1>
-          <p className="text-sm text-[#7a8a92] mt-1">Estado del análisis de riesgos AI Act para todos tus sistemas</p>
+          <h1 className="text-2xl font-bold text-[#0B1C3D]">Gestión de Riesgos</h1>
+          <p className="text-sm text-[#8B9BB4] mt-1">Estado del análisis de riesgos AI Act para todos tus sistemas</p>
         </div>
         <Button variant="outline" size="sm" onClick={load} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
@@ -127,39 +127,39 @@ export default function RiskPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-4">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Shield className="w-4 h-4 text-[#E09E50]" />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">Sistemas</span>
+            <Shield className="w-4 h-4 text-[#0B1C3D]" />
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Sistemas</span>
           </div>
-          <p className="text-2xl font-bold text-[#2D3E4E]">{totalSystems}</p>
-          <p className="text-xs text-[#7a8a92] mt-1">{systemsWithRisks} con riesgos registrados</p>
+          <p className="text-2xl font-bold text-[#0B1C3D]">{totalSystems}</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">{systemsWithRisks} con riesgos registrados</p>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-4">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">Completados</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Completados</span>
           </div>
-          <p className="text-2xl font-bold text-[#2D3E4E]">{completedSystems}</p>
-          <p className="text-xs text-[#7a8a92] mt-1">de {totalSystems} sistemas</p>
+          <p className="text-2xl font-bold text-[#0B1C3D]">{completedSystems}</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">de {totalSystems} sistemas</p>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-4">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-blue-500" />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">Progreso</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Progreso</span>
           </div>
-          <p className="text-2xl font-bold text-[#2D3E4E]">
+          <p className="text-2xl font-bold text-[#0B1C3D]">
             {totalSystems > 0 ? Math.round((completedSystems / totalSystems) * 100) : 0}%
           </p>
-          <p className="text-xs text-[#7a8a92] mt-1">análisis completado</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">análisis completado</p>
         </div>
-        <div className={`bg-white rounded-xl border p-4 ${criticalTotal > 0 ? 'border-red-200' : 'border-[#E8ECEB]'}`}>
+        <div className={`bg-white rounded-xl border p-4 ${criticalTotal > 0 ? 'border-red-200' : 'border-[#E3DFD5]'}`}>
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className={`w-4 h-4 ${criticalTotal > 0 ? 'text-red-500' : 'text-[#7a8a92]'}`} />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">Críticos abiertos</span>
+            <AlertTriangle className={`w-4 h-4 ${criticalTotal > 0 ? 'text-red-500' : 'text-[#8B9BB4]'}`} />
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Críticos abiertos</span>
           </div>
-          <p className={`text-2xl font-bold ${criticalTotal > 0 ? 'text-red-600' : 'text-[#2D3E4E]'}`}>{criticalTotal}</p>
-          <p className="text-xs text-[#7a8a92] mt-1">riesgos sin mitigar</p>
+          <p className={`text-2xl font-bold ${criticalTotal > 0 ? 'text-red-600' : 'text-[#0B1C3D]'}`}>{criticalTotal}</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">riesgos sin mitigar</p>
         </div>
       </div>
 
@@ -168,7 +168,7 @@ export default function RiskPage() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilterLevel(null)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterLevel ? 'bg-[#2D3E4E] text-white border-[#2D3E4E]' : 'border-[#E8ECEB] text-[#7a8a92] hover:border-[#2D3E4E]'}`}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterLevel ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
           >
             Todos ({systems.length})
           </button>
@@ -179,7 +179,7 @@ export default function RiskPage() {
               <button
                 key={level}
                 onClick={() => setFilterLevel(level === filterLevel ? null : level)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterLevel === level ? 'bg-[#2D3E4E] text-white border-[#2D3E4E]' : 'border-[#E8ECEB] text-[#7a8a92] hover:border-[#2D3E4E]'}`}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterLevel === level ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
               >
                 {cfg.icon} {cfg.label} ({count})
               </button>
@@ -192,18 +192,18 @@ export default function RiskPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-[#E8ECEB] p-4 animate-pulse">
+            <div key={i} className="bg-white rounded-xl border border-[#E3DFD5] p-4 animate-pulse">
               <div className="h-5 w-48 bg-gray-100 rounded mb-3" />
               <div className="h-2 w-full bg-gray-100 rounded" />
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-12 text-center">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-12 text-center">
           <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-[#7a8a92] font-medium">No hay sistemas en esta categoría</p>
+          <p className="text-[#8B9BB4] font-medium">No hay sistemas en esta categoría</p>
           <p className="text-sm text-gray-400 mt-1">
-            <Link href="/dashboard/inventory/new" className="text-[#E09E50] hover:underline">Añade un sistema de IA</Link> para comenzar
+            <Link href="/dashboard/inventory/new" className="text-[#0B1C3D] hover:underline font-medium">Añade un sistema de IA</Link> para comenzar
           </p>
         </div>
       ) : (
@@ -212,29 +212,29 @@ export default function RiskPage() {
             const cfg = LEVEL_CONFIG[system.ai_act_level] ?? LEVEL_CONFIG.unclassified;
             return (
               <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
-                <div className="bg-white rounded-xl border border-[#E8ECEB] p-4 hover:border-[#E09E50]/40 hover:shadow-sm transition-all cursor-pointer group">
+                <div className="bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40 hover:shadow-sm transition-all cursor-pointer group">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-base">{cfg.icon}</span>
-                        <h3 className="font-semibold text-[#2D3E4E] group-hover:text-[#E09E50] transition-colors truncate">
+                        <h3 className="font-semibold text-[#0B1C3D] group-hover:text-[#E8FF47] transition-colors truncate">
                           {system.name}
                         </h3>
                         <Badge className={`text-xs border ${cfg.badge} ml-1`}>{cfg.label}</Badge>
                       </div>
 
                       {system.total_risks === 0 ? (
-                        <p className="text-xs text-[#7a8a92] mt-2">
+                        <p className="text-xs text-[#8B9BB4] mt-2">
                           Sin análisis de riesgos iniciado —{' '}
-                          <span className="text-[#E09E50]">abrir para iniciar</span>
+                          <span className="text-[#0B1C3D]">abrir para iniciar</span>
                         </p>
                       ) : (
                         <div className="mt-2 space-y-1">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-[#7a8a92]">
+                            <span className="text-[#8B9BB4]">
                               {system.mitigated_risks} mitigados · {system.assessed_risks} evaluados · {system.total_risks} total
                             </span>
-                            <span className="font-medium text-[#2D3E4E]">{system.completion_percentage}%</span>
+                            <span className="font-medium text-[#0B1C3D]">{system.completion_percentage}%</span>
                           </div>
                           <Progress value={system.completion_percentage} className="h-1.5" />
                         </div>
@@ -262,7 +262,7 @@ export default function RiskPage() {
                           Pendiente
                         </Badge>
                       )}
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#E09E50] transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#E8FF47] transition-colors" />
                     </div>
                   </div>
                 </div>

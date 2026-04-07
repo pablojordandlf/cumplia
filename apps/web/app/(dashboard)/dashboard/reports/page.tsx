@@ -130,8 +130,8 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D3E4E]">Reportes</h1>
-          <p className="text-sm text-[#7a8a92] mt-1">Genera informes de cumplimiento AI Act en PDF para cada sistema</p>
+          <h1 className="text-2xl font-bold text-[#0B1C3D]">Reportes</h1>
+          <p className="text-sm text-[#8B9BB4] mt-1">Genera informes de cumplimiento AI Act en PDF para cada sistema</p>
         </div>
         <Button variant="outline" size="sm" onClick={load} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
@@ -140,11 +140,11 @@ export default function ReportsPage() {
       </div>
 
       {/* Info banner */}
-      <div className="bg-[#F5DFB3]/30 border border-[#E09E50]/30 rounded-xl p-4 flex items-start gap-3">
-        <FileText className="w-5 h-5 text-[#E09E50] flex-shrink-0 mt-0.5" />
+      <div className="bg-[#F5DFB3]/30 border border-[#E8FF47]/30 rounded-xl p-4 flex items-start gap-3">
+        <FileText className="w-5 h-5 text-[#E8FF47] flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-medium text-[#2D3E4E]">Informes de cumplimiento AI Act</p>
-          <p className="text-xs text-[#7a8a92] mt-0.5">
+          <p className="text-sm font-medium text-[#0B1C3D]">Informes de cumplimiento AI Act</p>
+          <p className="text-xs text-[#8B9BB4] mt-0.5">
             Cada informe incluye la ficha técnica del sistema, obligaciones por artículo, evaluación de riesgos
             y estado general de conformidad según el Reglamento de IA de la UE.
           </p>
@@ -155,16 +155,16 @@ export default function ReportsPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-[#E8ECEB] p-4 animate-pulse">
+            <div key={i} className="bg-white rounded-xl border border-[#E3DFD5] p-4 animate-pulse">
               <div className="h-5 w-48 bg-gray-100 rounded mb-2" />
               <div className="h-3 w-32 bg-gray-100 rounded" />
             </div>
           ))}
         </div>
       ) : systems.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-12 text-center">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-12 text-center">
           <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-[#7a8a92] font-medium">No hay sistemas registrados</p>
+          <p className="text-[#8B9BB4] font-medium">No hay sistemas registrados</p>
           <p className="text-sm text-gray-400 mt-1">Añade sistemas de IA para poder generar informes</p>
         </div>
       ) : (
@@ -181,23 +181,23 @@ export default function ReportsPage() {
             return (
               <div
                 key={system.id}
-                className="bg-white rounded-xl border border-[#E8ECEB] p-4 hover:border-[#E09E50]/40 transition-all"
+                className="bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40 transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <span>{cfg.icon}</span>
-                      <h3 className="font-semibold text-[#2D3E4E] truncate">{system.name}</h3>
+                      <h3 className="font-semibold text-[#0B1C3D] truncate">{system.name}</h3>
                       <Badge className={`text-xs border ${cfg.badge}`}>{cfg.label}</Badge>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 text-xs text-[#7a8a92]">
+                    <div className="flex flex-wrap gap-4 text-xs text-[#8B9BB4]">
                       <span>
-                        <span className="font-medium text-[#2D3E4E]">{system.obligations_completed}/{system.obligations_total}</span>
+                        <span className="font-medium text-[#0B1C3D]">{system.obligations_completed}/{system.obligations_total}</span>
                         {' '}obligaciones ({oblPct}%)
                       </span>
                       <span>
-                        <span className="font-medium text-[#2D3E4E]">{system.risks_mitigated}/{system.risks_total}</span>
+                        <span className="font-medium text-[#0B1C3D]">{system.risks_mitigated}/{system.risks_total}</span>
                         {' '}riesgos mitigados ({riskPct}%)
                       </span>
                       <span className="flex items-center gap-1">
@@ -211,7 +211,7 @@ export default function ReportsPage() {
                     size="sm"
                     onClick={() => generateReport(system)}
                     disabled={generating === system.id}
-                    className="flex-shrink-0 bg-[#E09E50] hover:bg-[#D9885F] text-white"
+                    className="flex-shrink-0 bg-[#0B1C3D] hover:bg-[#122850] text-[#0B1C3D]"
                   >
                     {generating === system.id ? (
                       <>

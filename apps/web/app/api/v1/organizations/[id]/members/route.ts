@@ -77,7 +77,6 @@ export async function GET(
         name,
         role,
         status,
-        invite_token,
         invite_expires_at,
         created_at,
         updated_at
@@ -108,7 +107,6 @@ export async function GET(
       type: 'invitation' as const,
       user_id: null,
       invitedBy: i.invited_by,
-      inviteToken: i.invite_token,
       inviteExpiresAt: i.invite_expires_at,
     })) || [];
 
@@ -279,15 +277,6 @@ export async function POST(
         .select('full_name')
         .eq('id', user.id)
         .single();
-
-      // DEBUG: Log the exact token being sent
-      console.log('[INVITE_DEBUG] Sending invitation email:', {
-        email,
-        inviteToken: inviteToken,
-        organizationName: orgData?.name,
-        savedTokenInDB: invitation?.invite_token,
-        tokensMatch: inviteToken === invitation?.invite_token,
-      });
 
       await sendInviteEmail({
         email,

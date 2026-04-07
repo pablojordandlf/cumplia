@@ -1,38 +1,6 @@
 // app/api/v1/risks/templates/[id]/duplicate/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-
-// Helper para autenticación
-async function getAuthenticatedClient() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch {
-            // Server Component context
-          }
-        },
-      },
-    }
-  );
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  return { supabase, session };
-}
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
   request: NextRequest,
@@ -40,9 +8,10 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { supabase, session } = await getAuthenticatedClient();
+    const supabase = await createClient();
 
-    if (!session) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -68,8 +37,21 @@ export async function POST(
       );
     }
 
-    // Verify ownership - user_id or organization_id match
-    if (template.user_id !== session.user.id && template.organization_id !== session.user.id) {
+    // Verify ownership: user owns it directly, or user belongs to the owning organization
+    const isDirectOwner = template.user_id === user.id;
+    let isOrgOwner = false;
+    if (!isDirectOwner && template.organization_id) {
+      const { data: orgMembership } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      isOrgOwner = !!orgMembership;
+    }
+
+    if (!isDirectOwner && !isOrgOwner) {
       return NextResponse.json(
         { error: 'You do not have permission to duplicate this template' },
         { status: 403 }
@@ -86,7 +68,7 @@ export async function POST(
         is_default: false,
         is_system: false,
         organization_id: template.organization_id,
-        user_id: session.user.id,
+        user_id: user.id,
         is_active: true,
       })
       .select()

@@ -23,6 +23,25 @@ export async function GET(
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Verify the user belongs to the organization that owns this system
+  const { data: system } = await supabase
+    .from('use_cases')
+    .select('organization_id')
+    .eq('id', id)
+    .single();
+
+  if (!system) return NextResponse.json({ error: 'System not found' }, { status: 404 });
+
+  const { data: orgMembership } = await supabase
+    .from('organization_members')
+    .select('id')
+    .eq('organization_id', system.organization_id)
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (!orgMembership) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+
   const { data, error } = await supabase
     .from('technical_documentation')
     .select('*')
@@ -44,6 +63,25 @@ export async function PUT(
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // Verify the user belongs to the organization that owns this system
+  const { data: system } = await supabase
+    .from('use_cases')
+    .select('organization_id')
+    .eq('id', id)
+    .single();
+
+  if (!system) return NextResponse.json({ error: 'System not found' }, { status: 404 });
+
+  const { data: orgMembership } = await supabase
+    .from('organization_members')
+    .select('id')
+    .eq('organization_id', system.organization_id)
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (!orgMembership) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
   const body = await request.json();
   const allowed = Object.fromEntries(

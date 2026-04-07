@@ -14,21 +14,19 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     
     # Database
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/cumplia"
-    
+    DATABASE_URL: str
+
     # Supabase
     SUPABASE_URL: Optional[str] = None
     SUPABASE_ANON_KEY: Optional[str] = None
     SUPABASE_JWT_SECRET: Optional[str] = None
-    
-    # CORS
-    CORS_ORIGINS: str = "*"
-    
+
+    # CORS — comma-separated list of allowed origins (no wildcard allowed)
+    CORS_ORIGINS: str
+
     @property
     def cors_origins_list(self) -> list:
-        if self.CORS_ORIGINS == "*":
-            return ["*"]
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 
 # Global settings instance

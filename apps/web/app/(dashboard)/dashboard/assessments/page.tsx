@@ -114,8 +114,8 @@ export default function AssessmentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2D3E4E]">Evaluaciones</h1>
-          <p className="text-sm text-[#7a8a92] mt-1">Progreso de cumplimiento de obligaciones AI Act por sistema</p>
+          <h1 className="text-2xl font-bold text-[#0B1C3D]">Evaluaciones</h1>
+          <p className="text-sm text-[#8B9BB4] mt-1">Progreso de cumplimiento de obligaciones AI Act por sistema</p>
         </div>
         <Button variant="outline" size="sm" onClick={load} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
@@ -125,37 +125,37 @@ export default function AssessmentsPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-4">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
-            <BarChart3 className="w-4 h-4 text-[#E09E50]" />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">Total sistemas</span>
+            <BarChart3 className="w-4 h-4 text-[#0B1C3D]" />
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Total sistemas</span>
           </div>
-          <p className="text-2xl font-bold text-[#2D3E4E]">{totalSystems}</p>
-          <p className="text-xs text-[#7a8a92] mt-1">sistemas registrados</p>
+          <p className="text-2xl font-bold text-[#0B1C3D]">{totalSystems}</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">sistemas registrados</p>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-4">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">Completados</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Completados</span>
           </div>
-          <p className="text-2xl font-bold text-[#2D3E4E]">{fullyCompleted}</p>
-          <p className="text-xs text-[#7a8a92] mt-1">100% obligaciones cumplidas</p>
+          <p className="text-2xl font-bold text-[#0B1C3D]">{fullyCompleted}</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">100% obligaciones cumplidas</p>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-4">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-[#E09E50]" />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">En progreso</span>
+            <Clock className="w-4 h-4 text-[#0B1C3D]" />
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">En progreso</span>
           </div>
-          <p className="text-2xl font-bold text-[#2D3E4E]">{inProgress}</p>
-          <p className="text-xs text-[#7a8a92] mt-1">parcialmente completados</p>
+          <p className="text-2xl font-bold text-[#0B1C3D]">{inProgress}</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">parcialmente completados</p>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-4">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-xs font-medium text-[#7a8a92] uppercase tracking-wide">Sin iniciar</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Sin iniciar</span>
           </div>
-          <p className="text-2xl font-bold text-[#2D3E4E]">{notStarted}</p>
-          <p className="text-xs text-[#7a8a92] mt-1">sin obligaciones asignadas</p>
+          <p className="text-2xl font-bold text-[#0B1C3D]">{notStarted}</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">sin obligaciones asignadas</p>
         </div>
       </div>
 
@@ -164,7 +164,7 @@ export default function AssessmentsPage() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilterLevel(null)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterLevel ? 'bg-[#2D3E4E] text-white border-[#2D3E4E]' : 'border-[#E8ECEB] text-[#7a8a92] hover:border-[#2D3E4E]'}`}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterLevel ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
           >
             Todos ({systems.length})
           </button>
@@ -175,7 +175,7 @@ export default function AssessmentsPage() {
               <button
                 key={level}
                 onClick={() => setFilterLevel(level === filterLevel ? null : level)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterLevel === level ? 'bg-[#2D3E4E] text-white border-[#2D3E4E]' : 'border-[#E8ECEB] text-[#7a8a92] hover:border-[#2D3E4E]'}`}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterLevel === level ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
               >
                 {cfg.icon} {cfg.label} ({count})
               </button>
@@ -188,18 +188,18 @@ export default function AssessmentsPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-[#E8ECEB] p-4 animate-pulse">
+            <div key={i} className="bg-white rounded-xl border border-[#E3DFD5] p-4 animate-pulse">
               <div className="h-5 w-48 bg-gray-100 rounded mb-3" />
               <div className="h-2 w-full bg-gray-100 rounded" />
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#E8ECEB] p-12 text-center">
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-12 text-center">
           <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-[#7a8a92] font-medium">No hay sistemas registrados</p>
+          <p className="text-[#8B9BB4] font-medium">No hay sistemas registrados</p>
           <p className="text-sm text-gray-400 mt-1">
-            <Link href="/dashboard/inventory/new" className="text-[#E09E50] hover:underline">
+            <Link href="/dashboard/inventory/new" className="text-[#0B1C3D] hover:underline font-medium">
               Añade un sistema de IA
             </Link>{' '}para empezar a evaluar
           </p>
@@ -210,26 +210,26 @@ export default function AssessmentsPage() {
             const cfg = LEVEL_CONFIG[system.ai_act_level] ?? LEVEL_CONFIG.unclassified;
             return (
               <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
-                <div className="bg-white rounded-xl border border-[#E8ECEB] p-4 hover:border-[#E09E50]/40 hover:shadow-sm transition-all cursor-pointer group">
+                <div className="bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40 hover:shadow-sm transition-all cursor-pointer group">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span>{cfg.icon}</span>
-                        <h3 className="font-semibold text-[#2D3E4E] group-hover:text-[#E09E50] transition-colors truncate">
+                        <h3 className="font-semibold text-[#0B1C3D] group-hover:text-[#E8FF47] transition-colors truncate">
                           {system.name}
                         </h3>
                         <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
                       </div>
 
                       {system.total_obligations === 0 ? (
-                        <p className="text-xs text-[#7a8a92] mt-2">Sin obligaciones asignadas</p>
+                        <p className="text-xs text-[#8B9BB4] mt-2">Sin obligaciones asignadas</p>
                       ) : (
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs">
-                            <span className="text-[#7a8a92]">
+                            <span className="text-[#8B9BB4]">
                               {system.completed_obligations} completadas · {system.in_progress_obligations} en progreso · {system.total_obligations} total
                             </span>
-                            <span className="font-medium text-[#2D3E4E]">{system.completion_percentage}%</span>
+                            <span className="font-medium text-[#0B1C3D]">{system.completion_percentage}%</span>
                           </div>
                           <Progress value={system.completion_percentage} className="h-1.5" />
                         </div>
@@ -248,10 +248,10 @@ export default function AssessmentsPage() {
                           <Clock className="w-3 h-3 mr-1" /> En progreso
                         </Badge>
                       )}
-                      <span className="text-xs text-[#7a8a92] hidden sm:block">
+                      <span className="text-xs text-[#8B9BB4] hidden sm:block">
                         {STATUS_LABELS[system.status] ?? system.status}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#E09E50] transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#E8FF47] transition-colors" />
                     </div>
                   </div>
                 </div>

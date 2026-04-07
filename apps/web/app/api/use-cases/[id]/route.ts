@@ -1,34 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-
-// Helper para autenticación
-async function getAuthenticatedClient() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch {
-            // Server Component context
-          }
-        },
-      },
-    }
-  );
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  return { supabase, session };
-}
+import { createClient } from '@/lib/supabase/server';
 
 // GET /api/use-cases/[id] - Obtener sistema de IA específico
 export async function GET(
@@ -37,9 +8,10 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const { supabase, session } = await getAuthenticatedClient();
-    
-    if (!session) {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -47,7 +19,7 @@ export async function GET(
       .from('use_cases')
       .select('*')
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (error || !useCase) {
@@ -55,7 +27,6 @@ export async function GET(
     }
 
     return NextResponse.json({ useCase });
-
   } catch (error) {
     console.error('Error in GET /api/use-cases/[id]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -69,18 +40,18 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const { supabase, session } = await getAuthenticatedClient();
-    
-    if (!session) {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify ownership
     const { data: existing } = await supabase
       .from('use_cases')
       .select('id')
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (!existing) {
@@ -102,7 +73,7 @@ export async function PATCH(
       .from('use_cases')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -112,7 +83,6 @@ export async function PATCH(
     }
 
     return NextResponse.json({ useCase });
-
   } catch (error) {
     console.error('Error in PATCH /api/use-cases/[id]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -126,9 +96,10 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const { supabase, session } = await getAuthenticatedClient();
-    
-    if (!session) {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -136,7 +107,7 @@ export async function DELETE(
       .from('use_cases')
       .delete()
       .eq('id', id)
-      .eq('user_id', session.user.id);
+      .eq('user_id', user.id);
 
     if (error) {
       console.error('Error deleting use case:', error);
@@ -144,7 +115,6 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     console.error('Error in DELETE /api/use-cases/[id]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

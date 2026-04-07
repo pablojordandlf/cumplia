@@ -26,6 +26,19 @@ export async function GET(
     return NextResponse.json({ error: 'System not found' }, { status: 404 });
   }
 
+  // Verify the user belongs to the organization that owns this system
+  const { data: orgMembership } = await supabase
+    .from('organization_members')
+    .select('organization_id, organizations(name)')
+    .eq('organization_id', system.organization_id)
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (!orgMembership) {
+    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+  }
+
   // Fetch obligations
   const { data: obligations } = await supabase
     .from('use_case_obligations')
@@ -42,15 +55,7 @@ export async function GET(
     `)
     .eq('use_case_id', id);
 
-  // Fetch organization
-  const { data: membership } = await supabase
-    .from('organization_members')
-    .select('organization_id, organizations(name)')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
-
-  const orgName = (membership?.organizations as any)?.name ?? 'Mi Organización';
+  const orgName = (orgMembership.organizations as any)?.name ?? 'Mi Organización';
 
   const reportData: ComplianceReportData = {
     system,

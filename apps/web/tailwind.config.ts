@@ -10,45 +10,54 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        // Semantic tokens (Radix/shadcn compatible)
+        border:      "hsl(var(--border))",
+        input:       "hsl(var(--input))",
+        ring:        "hsl(var(--ring))",
+        background:  "hsl(var(--background))",
+        foreground:  "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT:    "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
+          DEFAULT:    "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
+          DEFAULT:    "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
+          DEFAULT:    "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
+          DEFAULT:    "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
+          DEFAULT:    "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
+          DEFAULT:    "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // New 2026 Palette Colors
-        "cumplia-white": "#FFFFFF",
-        "cumplia-nearly-white": "#E8ECEB",
-        "cumplia-warm": "#E09E50",
-        "cumplia-teal": "#8CBDB9",
-        "cumplia-dark": "#2D3E4E",
+
+        // ── CumplIA Brand Palette ──
+        night: "#0B1C3D",
+        ink:   "#0F0F0E",
+        ivory: "#F0EEE8",
+        warm:  "#E3DFD5",
+        spark: "#E8FF47",
+        mist:  "#8B9BB4",
+        smoke: "#BDB9B0",
+        "brand-white": "#FAFAF8",
+      },
+      fontFamily: {
+        display: ["Fraunces", "Georgia", "serif"],
+        sans:    ["Geist", "system-ui", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

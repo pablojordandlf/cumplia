@@ -179,10 +179,10 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-      <Card className="w-full max-w-sm sm:max-w-md bg-[#2a2a2a] border-[#7a8a92]/30">
+      <Card className="w-full max-w-sm sm:max-w-md bg-[#2a2a2a] border-[#8B9BB4]/30">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center text-green-500">¡Registro Exitoso!</CardTitle>
-          <CardDescription className="text-center text-[#7a8a92]">
+          <CardDescription className="text-center text-[#8B9BB4]">
             {invitationContext
               ? `Felicitaciones! Te has unido a ${invitationContext.orgName}. Redirigiendo al dashboard...`
               : 'Te hemos enviado un email de confirmación. Revisa tu bandeja de entrada y haz click en el enlace para activar tu cuenta.'}
@@ -190,7 +190,7 @@ export default function RegisterForm() {
         </CardHeader>
         <CardContent className="grid gap-4">
           {!invitationContext && (
-            <Button onClick={() => router.push('/login')} className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a]">
+            <Button onClick={() => router.push('/login')} className="w-full bg-[#E8FF47] hover:bg-[#d4ec2e] text-[#0a0a0a]">
               Ir a Iniciar Sesión
             </Button>
           )}
@@ -200,10 +200,10 @@ export default function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-sm sm:max-w-md bg-[#2a2a2a] border-[#7a8a92]/30">
+    <Card className="w-full max-w-sm sm:max-w-md bg-[#2a2a2a] border-[#8B9BB4]/30">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center text-[#E8ECEB]">Crear Cuenta</CardTitle>
-        <CardDescription className="text-center text-[#7a8a92]">
+        <CardTitle className="text-2xl text-center text-[#E3DFD5]">Crear Cuenta</CardTitle>
+        <CardDescription className="text-center text-[#8B9BB4]">
           {invitationContext 
             ? `Te unirás a ${invitationContext.orgName} como ${invitationContext.role}`
             : 'Regístrate para comenzar con CumplIA'}
@@ -212,9 +212,9 @@ export default function RegisterForm() {
       <CardContent className="grid gap-4">
         {/* Invitation Banner */}
         {invitationContext && (
-          <Alert className="bg-[#E09E50]/10 border-[#E09E50]/30">
-            <AlertCircle className="h-4 w-4 text-[#E09E50]" />
-            <AlertDescription className="text-[#E09E50] ml-2">
+          <Alert className="bg-[#0B1C3D]/05 border-[#0B1C3D]/15">
+            <AlertCircle className="h-4 w-4 text-[#0B1C3D]" />
+            <AlertDescription className="text-[#0B1C3D] ml-2">
               ✓ Has sido invitado a unirte a <strong>{invitationContext.orgName}</strong>
             </AlertDescription>
           </Alert>
@@ -225,7 +225,7 @@ export default function RegisterForm() {
           variant="outline" 
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full bg-[#2a2a2a] border-[#7a8a92]/30 text-[#E8ECEB] hover:bg-[#3a3a3a]"
+          className="w-full bg-[#2a2a2a] border-[#8B9BB4]/30 text-[#E3DFD5] hover:bg-[#3a3a3a]"
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
             <path
@@ -250,10 +250,10 @@ export default function RegisterForm() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full bg-[#7a8a92]/30" />
+            <Separator className="w-full bg-[#8B9BB4]/30" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-[#2a2a2a] px-2 text-[#7a8a92]">
+            <span className="bg-[#2a2a2a] px-2 text-[#8B9BB4]">
               O con tu email
             </span>
           </div>
@@ -262,7 +262,7 @@ export default function RegisterForm() {
         {/* Email/Password Form */}
         <form onSubmit={handleRegister} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email" className="text-[#E8ECEB]">Email</Label>
+            <Label htmlFor="email" className="text-[#E3DFD5]">Email</Label>
             <Input
               id="email"
               type="email"
@@ -271,11 +271,11 @@ export default function RegisterForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading || !!invitationContext}
-              className="bg-[#1a1a1a] border-[#7a8a92]/30 text-[#E8ECEB]"
+              className="bg-[#1a1a1a] border-[#8B9BB4]/30 text-[#E3DFD5]"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password" className="text-[#E8ECEB]">Contraseña</Label>
+            <Label htmlFor="password" className="text-[#E3DFD5]">Contraseña</Label>
             <Input
               id="password"
               type="password"
@@ -284,11 +284,11 @@ export default function RegisterForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              className="bg-[#1a1a1a] border-[#7a8a92]/30 text-[#E8ECEB]"
+              className="bg-[#1a1a1a] border-[#8B9BB4]/30 text-[#E3DFD5]"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="confirmPassword" className="text-[#E8ECEB]">Confirmar Contraseña</Label>
+            <Label htmlFor="confirmPassword" className="text-[#E3DFD5]">Confirmar Contraseña</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -297,10 +297,10 @@ export default function RegisterForm() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
-              className="bg-[#1a1a1a] border-[#7a8a92]/30 text-[#E8ECEB]"
+              className="bg-[#1a1a1a] border-[#8B9BB4]/30 text-[#E3DFD5]"
             />
           </div>
-          <Button type="submit" className="w-full bg-[#E09E50] hover:bg-[#E09E50]/80 text-[#0a0a0a] font-semibold" disabled={isLoading}>
+          <Button type="submit" className="w-full bg-[#E8FF47] hover:bg-[#d4ec2e] text-[#0a0a0a] font-semibold" disabled={isLoading}>
             {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </Button>
         </form>
@@ -314,9 +314,9 @@ export default function RegisterForm() {
           </Alert>
         )}
 
-        <div className="text-center text-sm text-[#7a8a92]">
+        <div className="text-center text-sm text-[#8B9BB4]">
           <span>¿Ya tienes cuenta? </span>
-          <Link href="/login" className="text-[#E09E50] hover:underline">
+          <Link href="/login" className="text-[#0B1C3D] hover:underline font-medium">
             Inicia sesión
           </Link>
         </div>

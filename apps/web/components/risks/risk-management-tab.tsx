@@ -216,7 +216,7 @@ export function RiskManagementTab({
               </div>
               <Button
                 onClick={() => setShowAIAssistant(true)}
-                className="flex-shrink-0 bg-gradient-to-r from-[#E09E50] to-[#D9885F] hover:opacity-90 text-white gap-2 shadow-sm"
+                className="flex-shrink-0 bg-gradient-to-r from-[#E8FF47] to-[#D9885F] hover:opacity-90 text-white gap-2 shadow-sm"
                 size="sm"
               >
                 <Sparkles className="h-4 w-4" />
@@ -240,7 +240,7 @@ export function RiskManagementTab({
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="rounded-full bg-[#FFE8D1] p-4 mb-4">
-                <Eye className="h-8 w-8 text-[#E09E50]" />
+                <Eye className="h-8 w-8 text-[#E8FF47]" />
               </div>
               <h3 className="text-lg font-semibold text-blue-900 mb-2">
                 Sin Riesgos Registrados
@@ -268,7 +268,7 @@ export function RiskManagementTab({
                   variant="outline"
                   size="sm"
                   onClick={() => setShowAIAssistant(true)}
-                  className="gap-1.5 border-[#E09E50]/40 text-[#E09E50] hover:bg-[#F5DFB3]/30"
+                  className="gap-1.5 border-[#E8FF47]/40 text-[#E8FF47] hover:bg-[#F5DFB3]/30"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   Analizar con IA

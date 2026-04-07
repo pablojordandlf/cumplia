@@ -25,8 +25,9 @@ export interface Plan {
   features: PlanFeatures;
 }
 
-// Updated plan structure - March 2026
-// Changed from "use_cases" to "ai_systems" to align with AI Act terminology
+
+// Updated plan structure - April 2026
+// Plan names: Evalúa (starter), Cumple (professional), Protege (business), Lidera (enterprise)
 export const PLANS: Record<string, Plan> = {
   // Legacy mapping for backward compatibility
   free: {
@@ -35,7 +36,7 @@ export const PLANS: Record<string, Plan> = {
     display_name: 'Starter',
     price_monthly: 0,
     features: {
-      ai_systems: 1,
+      ai_systems: 3,
       users: 1,
       ai_check_exports: 0,
       api_access: false,
@@ -51,7 +52,7 @@ export const PLANS: Record<string, Plan> = {
     display_name: 'Starter',
     price_monthly: 0,
     features: {
-      ai_systems: 1,
+      ai_systems: 3,
       users: 1,
       ai_check_exports: 0,
       api_access: false,
@@ -61,12 +62,12 @@ export const PLANS: Record<string, Plan> = {
       priority_support: false,
     },
   },
-  // Legacy essential maps to professional (price change from 29€ to 49€)
+  // Legacy essential maps to professional
   essential: {
     id: 'professional',
     name: 'professional',
     display_name: 'Professional',
-    price_monthly: 49,
+    price_monthly: 399,
     features: {
       ai_systems: 15,
       users: 3,
@@ -77,6 +78,7 @@ export const PLANS: Record<string, Plan> = {
       multi_department: false,
       priority_support: false,
       evidence_registry: true,
+      ai_assistant: true,
     },
   },
   // Legacy pro maps to professional
@@ -84,7 +86,7 @@ export const PLANS: Record<string, Plan> = {
     id: 'professional',
     name: 'professional',
     display_name: 'Professional',
-    price_monthly: 49,
+    price_monthly: 399,
     features: {
       ai_systems: 15,
       users: 3,
@@ -95,13 +97,14 @@ export const PLANS: Record<string, Plan> = {
       multi_department: false,
       priority_support: false,
       evidence_registry: true,
+      ai_assistant: true,
     },
   },
   professional: {
     id: 'professional',
     name: 'professional',
     display_name: 'Professional',
-    price_monthly: 49,
+    price_monthly: 399,
     features: {
       ai_systems: 15,
       users: 3,
@@ -112,16 +115,17 @@ export const PLANS: Record<string, Plan> = {
       multi_department: false,
       priority_support: true,
       evidence_registry: true,
+      ai_assistant: true,
     },
   },
-  // New Business tier
+  // Protege tier
   business: {
     id: 'business',
     name: 'business',
     display_name: 'Business',
-    price_monthly: 299,
+    price_monthly: 899,
     features: {
-      ai_systems: -1, // Unlimited
+      ai_systems: 50,
       users: 10,
       ai_check_exports: -1,
       api_access: false,
@@ -138,7 +142,7 @@ export const PLANS: Record<string, Plan> = {
     id: 'enterprise',
     name: 'enterprise',
     display_name: 'Enterprise',
-    price_monthly: 0, // Custom pricing
+    price_monthly: 2499, // Base price, custom negotiated
     features: {
       ai_systems: -1,
       users: -1,
@@ -148,6 +152,9 @@ export const PLANS: Record<string, Plan> = {
       custom_templates: true,
       multi_department: true,
       priority_support: true,
+      ai_assistant: true,
+      risk_management: true,
+      evidence_registry: true,
       sso: true,
       sla: true,
       dedicated_manager: true,
@@ -248,12 +255,13 @@ export class PlanGate {
 
   getUpgradeMessage(feature: string): string {
     const messages: Record<string, string> = {
-      ai_systems: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 10 sistemas.`,
-      use_cases: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 10 sistemas.`,
-      api: 'El acceso a API requiere un plan Business o superior.',
-      integrations: 'Las integraciones requieren un plan Business o superior.',
-      custom_templates: 'Las plantillas personalizadas requieren un plan Business o superior.',
-      multi_department: 'La gestión multi-departamento requiere un plan Business o superior.',
+      ai_systems: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 15 sistemas.`,
+      use_cases: `Has alcanzado el límite de ${this.plan.features.ai_systems} sistemas de IA. Actualiza a Professional para gestionar hasta 15 sistemas.`,
+      api: 'El acceso a API requiere el plan Enterprise.',
+      integrations: 'Las integraciones requieren el plan Enterprise.',
+      custom_templates: 'Las plantillas personalizadas requieren el plan Business o superior.',
+      multi_department: 'La gestión multi-departamento requiere el plan Business o superior.',
+      ai_assistant: 'El asistente IA requiere el plan Professional o superior.',
     };
     return messages[feature] || 'Esta función requiere un plan superior.';
   }
