@@ -343,7 +343,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         .insert({
           obligation_id: obligationId,
           use_case_id: useCase.id,
-          organization_id: organizationId,
+          organization_id: effectiveOrgId,
           user_id: session.user.id,
           file_name: selectedFile.name,
           file_type: selectedFile.type,
