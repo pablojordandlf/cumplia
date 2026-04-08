@@ -38,13 +38,18 @@ IMPORTANTE: Cuando tengas suficiente información para completar el análisis (o
   "not_applicable": [
     {
       "catalog_risk_id": "UUID_DEL_RIESGO",
+      "risk_name": "Nombre del riesgo",
       "reason": "Por qué NO aplica"
     }
   ]
 }
 </risk_analysis>
 
-Antes del bloque JSON, explica brevemente el razonamiento. Responde siempre en español.`;
+CRÍTICO PARA EL JSON:
+- El bloque <risk_analysis> DEBE incluir TODOS los riesgos del catálogo, cada uno en "applicable" o "not_applicable"
+- Antes del bloque JSON escribe únicamente 2-3 líneas de resumen (no más)
+- El JSON debe estar completo y bien formado — no lo trunces bajo ningún concepto
+- Responde siempre en español.`;
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
@@ -145,7 +150,7 @@ ${catalog?.map(r => `### [${r.id}] #${r.risk_number} - ${r.name}
 
     const stream = client.messages.stream({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
+      max_tokens: 8192,
       system: fullSystemPrompt,
       messages: conversationMessages,
     });

@@ -18,11 +18,11 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
-  ChevronDown,
-  ChevronUp,
   Bot,
   User,
   AlertTriangle,
+  Check,
+  X,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,7 +37,18 @@ interface ProposedRisk {
 
 interface NotApplicableRisk {
   catalog_risk_id: string;
+  risk_name: string;
   reason: string;
+}
+
+interface DisplayRisk {
+  catalog_risk_id: string;
+  risk_name: string;
+  reason: string;
+  probability?: string;
+  impact?: string;
+  notes?: string;
+  aiRecommendation: 'applicable' | 'not_applicable';
 }
 
 interface RiskAnalysisResult {
@@ -82,13 +93,11 @@ function parseRiskAnalysis(text: string): RiskAnalysisResult | null {
   return null;
 }
 
+// Strip the raw JSON block and return only the human-readable part
 function MessageContent({ content }: { content: string }) {
-  // Hide the raw JSON block from the chat
-  const display = content.replace(/<risk_analysis>[\s\S]*?<\/risk_analysis>/, '').trim();
+  const display = content.replace(/<risk_analysis>[\s\S]*?(<\/risk_analysis>|$)/, '').trim();
   if (!display) return null;
-  return (
-    <p className="text-sm whitespace-pre-wrap leading-relaxed">{display}</p>
-  );
+  return <p className="text-sm whitespace-pre-wrap leading-relaxed">{display}</p>;
 }
 
 export function RiskAIAssistant({
@@ -103,7 +112,7 @@ export function RiskAIAssistant({
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [analysis, setAnalysis] = useState<RiskAnalysisResult | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  const [selectedRiskIds, setSelectedRiskIds] = useState<Set<string>>(new Set());
   const [applying, setApplying] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -120,23 +129,41 @@ export function RiskAIAssistant({
     if (!open) {
       setMessages([]);
       setAnalysis(null);
+      setSelectedRiskIds(new Set());
       setInput('');
-      setShowAll(false);
     }
   }, [open]);
 
-  // Auto-scroll
+  // Initialize selected IDs from analysis result
+  useEffect(() => {
+    if (analysis) {
+      setSelectedRiskIds(new Set(analysis.applicable.map(r => r.catalog_risk_id)));
+    }
+  }, [analysis]);
+
+  // Auto-scroll chat
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
+  function toggleRisk(riskId: string) {
+    setSelectedRiskIds(prev => {
+      const next = new Set(prev);
+      if (next.has(riskId)) {
+        next.delete(riskId);
+      } else {
+        next.add(riskId);
+      }
+      return next;
+    });
+  }
+
   async function startAnalysis(conversationMessages: Message[]) {
     setIsStreaming(true);
     const assistantMsgIndex = conversationMessages.length;
-    const newMessages: Message[] = [...conversationMessages, { role: 'assistant', content: '', isStreaming: true }];
-    setMessages(newMessages);
+    setMessages([...conversationMessages, { role: 'assistant', content: '', isStreaming: true }]);
 
     try {
       const response = await fetch(`/api/v1/ai-systems/${aiSystemId}/risks/analyze`, {
@@ -170,19 +197,17 @@ export function RiskAIAssistant({
         throw new Error('El asistente no devolvió respuesta. Inténtalo de nuevo.');
       }
 
-      // Mark as done streaming
       setMessages(prev => {
         const updated = [...prev];
         updated[assistantMsgIndex] = { role: 'assistant', content: fullText, isStreaming: false };
         return updated;
       });
 
-      // Check for completed analysis
       const result = parseRiskAnalysis(fullText);
       if (result) {
         setAnalysis(result);
       }
-    } catch (err) {
+    } catch {
       toast({ title: 'Error', description: 'No se pudo conectar con el asistente', variant: 'destructive' });
       setMessages(prev => prev.slice(0, assistantMsgIndex));
     } finally {
@@ -194,7 +219,6 @@ export function RiskAIAssistant({
     const text = input.trim();
     if (!text || isStreaming) return;
     setInput('');
-
     const userMessage: Message = { role: 'user', content: text };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
@@ -202,16 +226,13 @@ export function RiskAIAssistant({
   }
 
   async function handleApply() {
-    if (!analysis?.applicable.length) return;
+    if (!analysis || !selectedRiskIds.size) return;
     setApplying(true);
     try {
-      // Create risks: first create all as "identified" with applicable=true
       const response = await fetch(`/api/v1/ai-systems/${aiSystemId}/risks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          catalog_risk_ids: analysis.applicable.map(r => r.catalog_risk_id),
-        }),
+        body: JSON.stringify({ catalog_risk_ids: Array.from(selectedRiskIds) }),
       });
 
       if (!response.ok) {
@@ -219,11 +240,23 @@ export function RiskAIAssistant({
         throw new Error(err.error || 'Error al aplicar riesgos');
       }
 
-      onApply(analysis.applicable);
+      const allRisks = buildAllRisks(analysis);
+      const applicableSelected: ProposedRisk[] = allRisks
+        .filter(r => selectedRiskIds.has(r.catalog_risk_id))
+        .map(r => ({
+          catalog_risk_id: r.catalog_risk_id,
+          risk_name: r.risk_name,
+          reason: r.reason,
+          probability: r.probability ?? 'low',
+          impact: r.impact ?? 'low',
+          notes: r.notes,
+        }));
+
+      onApply(applicableSelected);
       onOpenChange(false);
       toast({
         title: 'Análisis aplicado',
-        description: `Se han añadido ${analysis.applicable.length} factores de riesgo al sistema.`,
+        description: `Se han añadido ${selectedRiskIds.size} factores de riesgo al sistema.`,
       });
     } catch (err) {
       toast({
@@ -236,7 +269,24 @@ export function RiskAIAssistant({
     }
   }
 
-  const displayedApplicable = showAll ? analysis?.applicable : analysis?.applicable.slice(0, 5);
+  function buildAllRisks(result: RiskAnalysisResult): DisplayRisk[] {
+    return [
+      ...result.applicable.map(r => ({ ...r, aiRecommendation: 'applicable' as const })),
+      ...result.not_applicable.map(r => ({
+        catalog_risk_id: r.catalog_risk_id,
+        risk_name: r.risk_name,
+        reason: r.reason,
+        aiRecommendation: 'not_applicable' as const,
+      })),
+    ];
+  }
+
+  const allRisks = analysis ? buildAllRisks(analysis) : [];
+
+  // During the final streaming the message may contain the opening <risk_analysis> tag —
+  // hide the streaming text in that case and show a "Generando análisis..." spinner instead.
+  const isGeneratingFinalAnalysis = isStreaming &&
+    messages.some(m => m.isStreaming && m.content.includes('<risk_analysis>'));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -249,98 +299,141 @@ export function RiskAIAssistant({
             <DialogTitle className="text-[#0B1C3D]">Asistente de Análisis de Riesgos IA</DialogTitle>
           </div>
           <DialogDescription className="text-[#8B9BB4]">
-            Analizando <span className="font-medium text-[#0B1C3D]">{systemName}</span> para identificar factores de riesgo AI Act aplicables
+            {analysis
+              ? `Análisis completado · ${analysis.applicable.length} aplican · ${analysis.not_applicable.length} no aplican`
+              : <>Analizando <span className="font-medium text-[#0B1C3D]">{systemName}</span> para identificar factores de riesgo AI Act</>
+            }
           </DialogDescription>
         </DialogHeader>
 
-        {/* Chat area */}
-        <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef as any}>
-          <div className="space-y-4">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
-                  msg.role === 'assistant' ? 'bg-[#F5DFB3]/60' : 'bg-[#E3DFD5]'
-                }`}>
-                  {msg.role === 'assistant'
-                    ? <Bot className="w-3.5 h-3.5 text-[#E8FF47]" />
-                    : <User className="w-3.5 h-3.5 text-[#8B9BB4]" />
-                  }
-                </div>
-                <div className={`max-w-[85%] rounded-xl px-4 py-3 ${
-                  msg.role === 'assistant'
-                    ? 'bg-[#F8FAFB] border border-[#E3DFD5] text-[#0B1C3D]'
-                    : 'bg-[#0B1C3D] text-white ml-auto'
-                }`}>
-                  {msg.content ? (
-                    <MessageContent content={msg.content} />
-                  ) : (
-                    <div className="flex items-center gap-1.5">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8FF47]" />
-                      <span className="text-xs text-[#8B9BB4]">Analizando...</span>
-                    </div>
-                  )}
-                  {msg.isStreaming && msg.content && (
-                    <span className="inline-block w-0.5 h-3.5 bg-[#E8FF47] animate-pulse ml-0.5 align-middle" />
-                  )}
-                </div>
+        {/* Main content area: chat OR results */}
+        {analysis ? (
+          /* ── Results panel ────────────────────────────────── */
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            {/* Summary bar */}
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#E3DFD5]">
+              <div className="flex items-center gap-1.5 text-sm text-green-600 font-semibold">
+                <CheckCircle className="w-4 h-4" />
+                {selectedRiskIds.size} aplican
               </div>
-            ))}
-          </div>
-        </ScrollArea>
-
-        {/* Analysis results */}
-        {analysis && (
-          <div className="px-6 py-4 border-t border-[#E3DFD5] bg-white space-y-3 max-h-64 overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span className="text-sm font-semibold text-[#0B1C3D]">
-                  Análisis completado · {analysis.applicable.length} riesgos aplicables
-                </span>
+              <span className="text-[#E3DFD5]">|</span>
+              <div className="flex items-center gap-1.5 text-sm text-[#8B9BB4]">
+                <XCircle className="w-4 h-4" />
+                {allRisks.length - selectedRiskIds.size} no aplican
               </div>
-              {analysis.not_applicable.length > 0 && (
-                <span className="text-xs text-[#8B9BB4]">
-                  {analysis.not_applicable.length} descartados
-                </span>
-              )}
+              <span className="text-xs text-[#8B9BB4] ml-auto italic">
+                Puedes ajustar la selección antes de aplicar
+              </span>
             </div>
 
+            {/* Risk list */}
             <div className="space-y-2">
-              {displayedApplicable?.map((risk, i) => (
-                <div key={i} className="flex items-start gap-2 p-2.5 rounded-lg bg-green-50 border border-green-100">
-                  <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-medium text-[#0B1C3D] truncate">{risk.risk_name}</span>
-                      <Badge className={`text-[10px] px-1.5 py-0 ${PROB_COLORS[risk.probability] ?? 'bg-gray-100 text-gray-600'}`}>
-                        P: {risk.probability}
-                      </Badge>
-                      <Badge className={`text-[10px] px-1.5 py-0 ${PROB_COLORS[risk.impact] ?? 'bg-gray-100 text-gray-600'}`}>
-                        I: {risk.impact}
-                      </Badge>
+              {allRisks.map(risk => {
+                const isSelected = selectedRiskIds.has(risk.catalog_risk_id);
+                return (
+                  <button
+                    key={risk.catalog_risk_id}
+                    type="button"
+                    onClick={() => toggleRisk(risk.catalog_risk_id)}
+                    className={`w-full text-left flex items-start gap-3 p-3 rounded-lg border transition-all ${
+                      isSelected
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-[#F8FAFB] border-[#E3DFD5] opacity-55 hover:opacity-80'
+                    }`}
+                  >
+                    {/* Toggle indicator */}
+                    <div className={`flex-shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center ${
+                      isSelected ? 'bg-green-500' : 'bg-[#D0CFC8]'
+                    }`}>
+                      {isSelected
+                        ? <Check className="w-3 h-3 text-white" />
+                        : <X className="w-3 h-3 text-white" />
+                      }
                     </div>
-                    <p className="text-[11px] text-[#8B9BB4] mt-0.5 line-clamp-2">{risk.reason}</p>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-semibold text-[#0B1C3D]">{risk.risk_name}</span>
+                        {/* AI recommendation badge */}
+                        {risk.aiRecommendation === 'applicable' ? (
+                          <Badge className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 border-0">
+                            IA: Aplica
+                          </Badge>
+                        ) : (
+                          <Badge className="text-[10px] px-1.5 py-0 bg-gray-100 text-gray-500 border-0">
+                            IA: No aplica
+                          </Badge>
+                        )}
+                        {/* Probability/impact only for applicable risks */}
+                        {risk.probability && (
+                          <>
+                            <Badge className={`text-[10px] px-1.5 py-0 border-0 ${PROB_COLORS[risk.probability] ?? 'bg-gray-100 text-gray-600'}`}>
+                              P: {risk.probability}
+                            </Badge>
+                            <Badge className={`text-[10px] px-1.5 py-0 border-0 ${PROB_COLORS[risk.impact!] ?? 'bg-gray-100 text-gray-600'}`}>
+                              I: {risk.impact}
+                            </Badge>
+                          </>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[#8B9BB4] mt-0.5 line-clamp-2">{risk.reason}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          /* ── Chat area ────────────────────────────────────── */
+          <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef as any}>
+            <div className="space-y-4">
+              {isGeneratingFinalAnalysis ? (
+                // Final analysis in progress: show spinner instead of raw JSON
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-[#F5DFB3]/60 flex items-center justify-center">
+                    <Bot className="w-3.5 h-3.5 text-[#E8FF47]" />
+                  </div>
+                  <div className="bg-[#F8FAFB] border border-[#E3DFD5] rounded-xl px-4 py-3 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#E8FF47]" />
+                    <span className="text-sm text-[#8B9BB4]">Generando análisis de riesgos...</span>
                   </div>
                 </div>
-              ))}
-
-              {analysis.applicable.length > 5 && (
-                <button
-                  onClick={() => setShowAll(prev => !prev)}
-                  className="w-full text-xs text-[#E8FF47] hover:underline flex items-center justify-center gap-1 py-1"
-                >
-                  {showAll ? (
-                    <><ChevronUp className="w-3 h-3" /> Mostrar menos</>
-                  ) : (
-                    <><ChevronDown className="w-3 h-3" /> Ver {analysis.applicable.length - 5} más</>
-                  )}
-                </button>
+              ) : (
+                messages.map((msg, i) => (
+                  <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+                      msg.role === 'assistant' ? 'bg-[#F5DFB3]/60' : 'bg-[#E3DFD5]'
+                    }`}>
+                      {msg.role === 'assistant'
+                        ? <Bot className="w-3.5 h-3.5 text-[#E8FF47]" />
+                        : <User className="w-3.5 h-3.5 text-[#8B9BB4]" />
+                      }
+                    </div>
+                    <div className={`max-w-[85%] rounded-xl px-4 py-3 ${
+                      msg.role === 'assistant'
+                        ? 'bg-[#F8FAFB] border border-[#E3DFD5] text-[#0B1C3D]'
+                        : 'bg-[#0B1C3D] text-white ml-auto'
+                    }`}>
+                      {msg.content ? (
+                        <MessageContent content={msg.content} />
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E8FF47]" />
+                          <span className="text-xs text-[#8B9BB4]">Analizando...</span>
+                        </div>
+                      )}
+                      {msg.isStreaming && msg.content && (
+                        <span className="inline-block w-0.5 h-3.5 bg-[#E8FF47] animate-pulse ml-0.5 align-middle" />
+                      )}
+                    </div>
+                  </div>
+                ))
               )}
             </div>
-          </div>
+          </ScrollArea>
         )}
 
-        {/* Input area */}
+        {/* Input + action bar */}
         <div className="px-6 py-4 border-t border-[#E3DFD5] bg-white space-y-3">
           {!analysis && (
             <div className="flex gap-2">
@@ -355,7 +448,7 @@ export function RiskAIAssistant({
               <Button
                 onClick={sendMessage}
                 disabled={!input.trim() || isStreaming}
-                className="self-end bg-[#E8FF47] hover:bg-[#D9885F]"
+                className="self-end bg-[#0B1C3D] hover:bg-[#0B1C3D]/85 text-white"
                 size="sm"
               >
                 <Send className="w-4 h-4" />
@@ -376,14 +469,14 @@ export function RiskAIAssistant({
                 </Button>
                 <Button
                   onClick={handleApply}
-                  disabled={applying || !analysis.applicable.length}
-                  className="bg-[#E8FF47] hover:bg-[#D9885F] text-white"
+                  disabled={applying || !selectedRiskIds.size}
+                  className="bg-[#0B1C3D] hover:bg-[#0B1C3D]/85 text-white"
                   size="sm"
                 >
                   {applying ? (
                     <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Aplicando...</>
                   ) : (
-                    <><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Aplicar {analysis.applicable.length} factores</>
+                    <><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Aplicar {selectedRiskIds.size} factores</>
                   )}
                 </Button>
               </>
