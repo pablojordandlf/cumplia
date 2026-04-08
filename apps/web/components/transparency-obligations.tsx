@@ -222,7 +222,8 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         return;
       }
 
-      if (!organizationId) {
+      const effectiveOrgId = useCase.organization_id || organizationId;
+      if (!effectiveOrgId) {
         toast({ title: 'Error', description: 'No se pudo determinar la organización', variant: 'destructive' });
         return;
       }
@@ -250,7 +251,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
           .insert({
             use_case_id: useCase.id,
             user_id: session.user.id,
-            organization_id: organizationId,
+            organization_id: effectiveOrgId,
             obligation_key: obligation.key,
             obligation_title: obligation.title,
             is_completed: checked,
@@ -303,7 +304,8 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         return;
       }
 
-      if (!organizationId) {
+      const effectiveOrgId = useCase.organization_id || organizationId;
+      if (!effectiveOrgId) {
         toast({ title: 'Error', description: 'No se pudo determinar la organización', variant: 'destructive' });
         return;
       }
@@ -316,7 +318,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
           .insert({
             use_case_id: useCase.id,
             user_id: session.user.id,
-            organization_id: organizationId,
+            organization_id: effectiveOrgId,
             obligation_key: obligationKey,
             obligation_title: obligation?.title || '',
             is_completed: false,

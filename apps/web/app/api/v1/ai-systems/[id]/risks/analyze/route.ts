@@ -127,10 +127,15 @@ ${catalog?.map(r => `### [${r.id}] #${r.risk_number} - ${r.name}
 
     const fullSystemPrompt = `${RISK_ANALYSIS_SYSTEM_PROMPT}\n\n${systemContext}`;
 
-    // If no messages yet, start with an initial analysis request
+    // Always prepend the initial user context message so the conversation
+    // starts with 'user' role as required by the Anthropic API.
+    const initialUserMessage = {
+      role: 'user' as const,
+      content: `Analiza el sistema "${system.name}" y determina qué factores de riesgo del catálogo le aplican. Si necesitas más información, pregúntame.`,
+    };
     const conversationMessages = messages.length === 0
-      ? [{ role: 'user' as const, content: `Analiza el sistema "${system.name}" y determina qué factores de riesgo del catálogo le aplican. Si necesitas más información, pregúntame.` }]
-      : messages;
+      ? [initialUserMessage]
+      : [initialUserMessage, ...messages];
 
     const stream = client.messages.stream({
       model: 'claude-haiku-4-5-20251001',
