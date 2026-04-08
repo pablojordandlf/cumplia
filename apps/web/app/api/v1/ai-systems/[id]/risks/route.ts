@@ -121,6 +121,134 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 /**
+ * PATCH /api/v1/ai-systems/[id]/risks
+ * Bulk-update applicability of existing risks based on AI analysis results.
+ * Risks whose catalog_risk_id is in applicable_catalog_risk_ids are marked
+ * applicable=true/status='identified'; all others are marked not_applicable.
+ */
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  try {
+    const supabase = await createClient();
+    const { id: aiSystemId } = await params;
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data: system, error: systemError } = await supabase
+      .from('use_cases')
+      .select('id, organization_id, ai_act_level')
+      .eq('id', aiSystemId)
+      .single();
+
+    if (systemError || !system) {
+      return NextResponse.json({ error: 'AI system not found' }, { status: 404 });
+    }
+
+    // Require editor role
+    let hasEditAccess = false;
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', system.organization_id)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+
+    if (membership && ['owner', 'admin', 'editor'].includes(membership.role)) {
+      hasEditAccess = true;
+    } else {
+      const { data: ownerCheck } = await supabase
+        .from('use_cases')
+        .select('user_id')
+        .eq('id', aiSystemId)
+        .eq('user_id', user.id)
+        .single();
+      if (ownerCheck) hasEditAccess = true;
+    }
+
+    if (!hasEditAccess) {
+      return NextResponse.json({ error: 'Not authorized to modify this system' }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const applicableCatalogIds: string[] = body.applicable_catalog_risk_ids ?? [];
+    const analysisResults: Array<{
+      catalog_risk_id: string;
+      probability?: string;
+      impact?: string;
+      notes?: string;
+    }> = body.analysis_results ?? [];
+
+    const applicableSet = new Set(applicableCatalogIds);
+
+    // Mark applicable risks (status → identified, update probability/impact/notes if provided)
+    if (applicableSet.size > 0) {
+      const { error: applyErr } = await supabase
+        .from('use_case_risks')
+        .update({ applicable: true, status: 'identified' })
+        .eq('use_case_id', aiSystemId)
+        .in('catalog_risk_id', Array.from(applicableSet));
+
+      if (applyErr) {
+        console.error('Error marking applicable risks:', applyErr);
+        return NextResponse.json({ error: 'Failed to update applicable risks' }, { status: 500 });
+      }
+    }
+
+    // Mark non-applicable risks
+    const { data: allRisks } = await supabase
+      .from('use_case_risks')
+      .select('id, catalog_risk_id')
+      .eq('use_case_id', aiSystemId);
+
+    const notApplicableIds = (allRisks ?? [])
+      .filter(r => !applicableSet.has(r.catalog_risk_id))
+      .map(r => r.id);
+
+    if (notApplicableIds.length > 0) {
+      const { error: naErr } = await supabase
+        .from('use_case_risks')
+        .update({ applicable: false, status: 'not_applicable' })
+        .in('id', notApplicableIds);
+
+      if (naErr) {
+        console.error('Error marking non-applicable risks:', naErr);
+        return NextResponse.json({ error: 'Failed to update non-applicable risks' }, { status: 500 });
+      }
+    }
+
+    // Apply probability/impact/notes for each applicable risk individually
+    const detailUpdates = analysisResults
+      .filter(r => applicableSet.has(r.catalog_risk_id))
+      .map(r => {
+        const updateData: Record<string, string> = {};
+        if (r.probability) updateData.probability = r.probability;
+        if (r.impact) updateData.impact = r.impact;
+        if (r.notes) updateData.notes = r.notes;
+        if (Object.keys(updateData).length === 0) return Promise.resolve();
+        return supabase
+          .from('use_case_risks')
+          .update(updateData)
+          .eq('use_case_id', aiSystemId)
+          .eq('catalog_risk_id', r.catalog_risk_id);
+      });
+
+    await Promise.all(detailUpdates);
+
+    return NextResponse.json({
+      message: `Applicability updated: ${applicableSet.size} applicable, ${notApplicableIds.length} not applicable`,
+      applicable_count: applicableSet.size,
+      not_applicable_count: notApplicableIds.length,
+    });
+  } catch (error) {
+    console.error('Error in bulk applicability update:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
  * POST /api/v1/ai-systems/[id]/risks
  * Apply a template to create risks for an AI system
  */

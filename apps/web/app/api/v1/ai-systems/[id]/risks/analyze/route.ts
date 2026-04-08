@@ -8,19 +8,21 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-const RISK_ANALYSIS_SYSTEM_PROMPT = `Eres un experto en gestión de riesgos de sistemas de IA según el Reglamento (UE) 2024/1689 (AI Act). Tu tarea es ayudar a completar el análisis de riesgos de un sistema concreto.
+const RISK_ANALYSIS_SYSTEM_PROMPT = `Eres un experto en gestión de riesgos de sistemas de IA según el Reglamento (UE) 2024/1689 (AI Act). Tu tarea es analizar un sistema de IA concreto y determinar cuáles de sus factores de riesgo registrados le aplican.
 
 Se te proporcionará:
 1. La información del sistema de IA
-2. El catálogo de riesgos disponibles
+2. La lista de factores de riesgo ya registrados para ese sistema (extraídos de la plantilla aplicada)
 
 Tu misión es:
 - Analizar la información del sistema
-- Determinar qué riesgos del catálogo son aplicables
-- Si la información es insuficiente para valorar algún riesgo importante, hacer PREGUNTAS CONCRETAS al usuario (máximo 3-4 preguntas por turno)
+- Para CADA factor de riesgo de la lista, determinar si aplica o no a este sistema concreto
+- Si la información es insuficiente para valorar algún factor importante, hacer PREGUNTAS CONCRETAS al usuario (máximo 3-4 preguntas por turno)
 - Cuando tengas suficiente información, emitir el análisis final en formato estructurado
 
-IMPORTANTE: Cuando tengas suficiente información para completar el análisis (o el usuario haya respondido a tus preguntas), incluye un bloque JSON con este formato EXACTO:
+IMPORTANTE: Debes evaluar ÚNICAMENTE los factores de riesgo de la lista proporcionada. No puedes añadir ni eliminar factores.
+
+Cuando tengas suficiente información, incluye un bloque JSON con este formato EXACTO:
 
 <risk_analysis>
 {
@@ -46,7 +48,7 @@ IMPORTANTE: Cuando tengas suficiente información para completar el análisis (o
 </risk_analysis>
 
 CRÍTICO PARA EL JSON:
-- El bloque <risk_analysis> DEBE incluir TODOS los riesgos del catálogo, cada uno en "applicable" o "not_applicable"
+- El bloque <risk_analysis> DEBE incluir TODOS los factores de riesgo de la lista, cada uno en "applicable" o "not_applicable"
 - Antes del bloque JSON escribe únicamente 2-3 líneas de resumen (no más)
 - El JSON debe estar completo y bien formado — no lo trunces bajo ningún concepto
 - Responde siempre en español.`;
@@ -94,30 +96,69 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    // Explicitly map to only role+content to strip any client-side fields (e.g. isStreaming)
-    // that would be rejected by the Anthropic SDK message validator.
+    // Strip any client-side fields before passing to Anthropic SDK
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> =
       (body.messages ?? []).map((m: { role: string; content: string }) => ({
         role: m.role as 'user' | 'assistant',
         content: String(m.content),
       }));
 
-    // Fetch risk catalog filtered by relevant levels
-    const relevantLevels = system.ai_act_level === 'high_risk'
-      ? ['high_risk', 'limited_risk']
-      : system.ai_act_level === 'limited_risk' || system.ai_act_level === 'minimal_risk'
-        ? ['limited_risk', 'minimal_risk']
-        : ['high_risk', 'limited_risk', 'minimal_risk'];
+    // Fetch risks already registered for this system (from the applied template)
+    const { data: systemRisks } = await supabase
+      .from('use_case_risks')
+      .select(`
+        id,
+        catalog_risk_id,
+        catalog_risk:catalog_risk_id(
+          id, risk_number, name, description, domain, subdomain, criticality, ai_act_article
+        )
+      `)
+      .eq('use_case_id', aiSystemId)
+      .order('created_at', { ascending: true });
 
-    const { data: catalog } = await supabase
-      .from('risk_catalog')
-      .select('id, risk_number, name, description, domain, subdomain, criticality, ai_act_article, ai_act_level')
-      .in('ai_act_level', relevantLevels)
-      .eq('is_active', true)
-      .order('risk_number');
+    const hasTemplateRisks = systemRisks && systemRisks.length > 0;
+
+    type CatalogRisk = {
+      id: string;
+      risk_number: number;
+      name: string;
+      description: string;
+      domain: string;
+      subdomain: string | null;
+      criticality: string;
+      ai_act_article: string;
+    };
+
+    let risksForContext: CatalogRisk[];
+
+    if (hasTemplateRisks) {
+      risksForContext = systemRisks
+        .map(r => r.catalog_risk as unknown as CatalogRisk)
+        .filter(Boolean);
+    } else {
+      // Fallback: use full catalog filtered by AI act level (when no template applied)
+      const relevantLevels = system.ai_act_level === 'high_risk'
+        ? ['high_risk', 'limited_risk']
+        : system.ai_act_level === 'limited_risk' || system.ai_act_level === 'minimal_risk'
+          ? ['limited_risk', 'minimal_risk']
+          : ['high_risk', 'limited_risk', 'minimal_risk'];
+
+      const { data: catalog } = await supabase
+        .from('risk_catalog')
+        .select('id, risk_number, name, description, domain, subdomain, criticality, ai_act_article, ai_act_level')
+        .in('ai_act_level', relevantLevels)
+        .eq('is_active', true)
+        .order('risk_number');
+
+      risksForContext = (catalog ?? []) as unknown as CatalogRisk[];
+    }
 
     // Build system context
-    const classificationData = system.classification_data as Record<string, any> | null;
+    const classificationData = system.classification_data as Record<string, unknown> | null;
+    const riskListLabel = hasTemplateRisks
+      ? `## FACTORES DE RIESGO A EVALUAR (plantilla aplicada — ${risksForContext.length} factores)`
+      : '## CATÁLOGO DE RIESGOS DISPONIBLES';
+
     const systemContext = `
 ## SISTEMA DE IA A ANALIZAR
 
@@ -128,21 +169,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 **Descripción:** ${system.description || 'No disponible'}
 ${classificationData ? `**Datos de clasificación adicionales:** ${JSON.stringify(classificationData, null, 2)}` : ''}
 
-## CATÁLOGO DE RIESGOS DISPONIBLES
+${riskListLabel}
 
-${catalog?.map(r => `### [${r.id}] #${r.risk_number} - ${r.name}
+${risksForContext.map(r => `### [${r.id}] #${r.risk_number} - ${r.name}
 - **Dominio:** ${r.domain} > ${r.subdomain || 'General'}
 - **Criticidad:** ${r.criticality}
 - **Artículo AI Act:** ${r.ai_act_article}
-- **Descripción:** ${r.description}`).join('\n\n') ?? 'Sin riesgos en el catálogo'}`;
+- **Descripción:** ${r.description}`).join('\n\n') || 'Sin factores de riesgo registrados'}`;
 
     const fullSystemPrompt = `${RISK_ANALYSIS_SYSTEM_PROMPT}\n\n${systemContext}`;
 
-    // Always prepend the initial user context message so the conversation
-    // starts with 'user' role as required by the Anthropic API.
     const initialUserMessage = {
       role: 'user' as const,
-      content: `Analiza el sistema "${system.name}" y determina qué factores de riesgo del catálogo le aplican. Si necesitas más información, pregúntame.`,
+      content: `Analiza el sistema "${system.name}" y determina cuáles de los ${risksForContext.length} factores de riesgo registrados le aplican. Si necesitas más información, pregúntame.`,
     };
     const conversationMessages = messages.length === 0
       ? [initialUserMessage]
