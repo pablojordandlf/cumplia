@@ -185,12 +185,13 @@ export default function ClassifyUseCasePage() {
   useEffect(() => { loadUseCase(); }, [useCaseId]);
 
   useEffect(() => {
-    if (currentStep === totalSteps) {
+    const total = selectedSystemType === 'specific_purpose' ? 4 : 2;
+    if (currentStep === total) {
       setFinalStepReady(false);
       const timer = setTimeout(() => setFinalStepReady(true), 600);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, totalSteps]);
+  }, [currentStep, selectedSystemType]);
 
   async function loadUseCase() {
     try {
