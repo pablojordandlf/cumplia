@@ -161,6 +161,7 @@ export default function ClassifyUseCasePage() {
   const [calculating, setCalculating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [finalStepReady, setFinalStepReady] = useState(false);
 
   // AI auto-fill state
   const [isAiFilling, setIsAiFilling] = useState(false);
@@ -182,6 +183,14 @@ export default function ClassifyUseCasePage() {
   const selectedSystemType = form.watch('systemType');
 
   useEffect(() => { loadUseCase(); }, [useCaseId]);
+
+  useEffect(() => {
+    if (currentStep === totalSteps) {
+      setFinalStepReady(false);
+      const timer = setTimeout(() => setFinalStepReady(true), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, totalSteps]);
 
   async function loadUseCase() {
     try {
@@ -525,7 +534,7 @@ export default function ClassifyUseCasePage() {
                   {currentStep < totalSteps ? (
                     <Button type="button" onClick={handleNextStep}>Siguiente</Button>
                   ) : (
-                    <Button type="submit" disabled={calculating}>{calculating ? 'Calculando...' : 'Finalizar Clasificación'}</Button>
+                    <Button type="submit" disabled={calculating || !finalStepReady}>{calculating ? 'Calculando...' : 'Finalizar Clasificación'}</Button>
                   )}
                 </div>
               </form>
