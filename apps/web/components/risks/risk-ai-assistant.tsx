@@ -69,7 +69,7 @@ interface RiskAIAssistantProps {
   aiActLevel: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onApply: (applicable: ProposedRisk[]) => void;
+  onApply: () => void;
 }
 
 const PROB_COLORS: Record<string, string> = {
@@ -226,13 +226,25 @@ export function RiskAIAssistant({
   }
 
   async function handleApply() {
-    if (!analysis || !selectedRiskIds.size) return;
+    if (!analysis) return;
     setApplying(true);
     try {
+      // Build per-risk detail data from the AI's applicable recommendations
+      const analysisResults = analysis.applicable.map(r => ({
+        catalog_risk_id: r.catalog_risk_id,
+        probability: r.probability,
+        impact: r.impact,
+        notes: r.notes,
+      }));
+
       const response = await fetch(`/api/v1/ai-systems/${aiSystemId}/risks`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ catalog_risk_ids: Array.from(selectedRiskIds) }),
+        body: JSON.stringify({
+          // Send the user's final selection (may differ from AI recommendation)
+          applicable_catalog_risk_ids: Array.from(selectedRiskIds),
+          analysis_results: analysisResults,
+        }),
       });
 
       if (!response.ok) {
@@ -240,23 +252,11 @@ export function RiskAIAssistant({
         throw new Error(err.error || 'Error al aplicar riesgos');
       }
 
-      const allRisks = buildAllRisks(analysis);
-      const applicableSelected: ProposedRisk[] = allRisks
-        .filter(r => selectedRiskIds.has(r.catalog_risk_id))
-        .map(r => ({
-          catalog_risk_id: r.catalog_risk_id,
-          risk_name: r.risk_name,
-          reason: r.reason,
-          probability: r.probability ?? 'low',
-          impact: r.impact ?? 'low',
-          notes: r.notes,
-        }));
-
-      onApply(applicableSelected);
+      onApply();
       onOpenChange(false);
       toast({
         title: 'Análisis aplicado',
-        description: `Se han añadido ${selectedRiskIds.size} factores de riesgo al sistema.`,
+        description: `${selectedRiskIds.size} factor(es) marcado(s) como aplicables.`,
       });
     } catch (err) {
       toast({
@@ -469,14 +469,14 @@ export function RiskAIAssistant({
                 </Button>
                 <Button
                   onClick={handleApply}
-                  disabled={applying || !selectedRiskIds.size}
+                  disabled={applying}
                   className="bg-[#0B1C3D] hover:bg-[#0B1C3D]/85 text-white"
                   size="sm"
                 >
                   {applying ? (
                     <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Aplicando...</>
                   ) : (
-                    <><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Aplicar {selectedRiskIds.size} factores</>
+                    <><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Aplicar ({selectedRiskIds.size} aplican)</>
                   )}
                 </Button>
               </>
