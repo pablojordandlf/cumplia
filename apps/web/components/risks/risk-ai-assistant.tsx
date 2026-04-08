@@ -142,7 +142,9 @@ export function RiskAIAssistant({
       const response = await fetch(`/api/v1/ai-systems/${aiSystemId}/risks/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationMessages }),
+        body: JSON.stringify({
+          messages: conversationMessages.map(({ role, content }) => ({ role, content })),
+        }),
       });
 
       if (!response.ok || !response.body) {
@@ -162,6 +164,10 @@ export function RiskAIAssistant({
           updated[assistantMsgIndex] = { role: 'assistant', content: fullText, isStreaming: true };
           return updated;
         });
+      }
+
+      if (!fullText.trim()) {
+        throw new Error('El asistente no devolvió respuesta. Inténtalo de nuevo.');
       }
 
       // Mark as done streaming
