@@ -268,9 +268,9 @@ export function RiskManagementTab({
                   variant="outline"
                   size="sm"
                   onClick={() => setShowAIAssistant(true)}
-                  className="gap-1.5 border-[#E8FF47]/40 text-[#E8FF47] hover:bg-[#F5DFB3]/30"
+                  className="gap-1.5 bg-[#0B1C3D] text-white border-[#0B1C3D] hover:bg-[#0B1C3D]/85"
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
+                  <Sparkles className="h-3.5 w-3.5 text-[#E8FF47]" />
                   Analizar con IA
                 </Button>
                 <Button

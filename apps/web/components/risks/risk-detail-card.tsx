@@ -428,15 +428,18 @@ export function RiskDetailCard({
                     </Label>
                     {orgMembers.length > 0 && !isReadOnly ? (
                       <Select
-                        value={editedRisk.responsible_person || ''}
-                        onValueChange={(v) => setEditedRisk(prev => ({ ...prev, responsible_person: v }))}
+                        value={editedRisk.responsible_person || '__unassigned__'}
+                        onValueChange={(v) => setEditedRisk(prev => ({
+                          ...prev,
+                          responsible_person: v === '__unassigned__' ? '' : v,
+                        }))}
                         disabled={isReadOnly}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Asignar a un miembro" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Sin asignar</SelectItem>
+                          <SelectItem value="__unassigned__">Sin asignar</SelectItem>
                           {orgMembers.map(m => (
                             <SelectItem key={m.email} value={m.email}>
                               {m.name ? `${m.name} (${m.email})` : m.email}

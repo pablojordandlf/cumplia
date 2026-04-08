@@ -89,7 +89,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = body.messages ?? [];
+    // Explicitly map to only role+content to strip any client-side fields (e.g. isStreaming)
+    // that would be rejected by the Anthropic SDK message validator.
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> =
+      (body.messages ?? []).map((m: { role: string; content: string }) => ({
+        role: m.role as 'user' | 'assistant',
+        content: String(m.content),
+      }));
 
     // Fetch risk catalog filtered by relevant levels
     const relevantLevels = system.ai_act_level === 'high_risk'
