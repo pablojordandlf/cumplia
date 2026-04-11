@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FileText, Download, RefreshCw, AlertCircle, Loader2, Calendar } from 'lucide-react';
+import { FileText, Download, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageShell, PageHeader } from '@/components/ui/page-shell';
@@ -176,7 +176,7 @@ export default function ReportsPage() {
             return (
               <div
                 key={system.id}
-                className="bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40 transition-all"
+                className="card-interactive bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -205,15 +205,10 @@ export default function ReportsPage() {
                   <Button
                     size="sm"
                     onClick={() => generateReport(system)}
-                    disabled={generating === system.id}
-                    className="flex-shrink-0 bg-[#0B1C3D] hover:bg-[#122850] text-[#0B1C3D]"
+                    loading={generating === system.id}
+                    className="flex-shrink-0 bg-[#0B1C3D] hover:bg-[#122850] text-[#E8FF47]"
                   >
-                    {generating === system.id ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                        Generando...
-                      </>
-                    ) : (
+                    {generating === system.id ? 'Generando...' : (
                       <>
                         <Download className="w-4 h-4 mr-1.5" />
                         Descargar PDF

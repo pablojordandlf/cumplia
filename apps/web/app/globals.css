@@ -301,4 +301,18 @@
   .card-light       { @apply bg-[#FAFAF8] border-[#E3DFD5] text-[#0B1C3D]; }
   .card-subtle      { @apply bg-[#F0EEE8]/60 border-[#E3DFD5]/70 text-[#0B1C3D]; }
   .input-light      { @apply bg-[#FAFAF8] border-[#E3DFD5] text-[#0B1C3D] placeholder:text-[#8B9BB4]; }
+
+  /* Interactive card — add to any clickable card container */
+  .card-interactive {
+    @apply cursor-pointer transition-all duration-150;
+  }
+  .card-interactive:hover {
+    @apply shadow-sm -translate-y-0.5;
+  }
+  .card-interactive:active {
+    @apply shadow-none translate-y-0 scale-[0.99];
+  }
+  .card-interactive:focus-visible {
+    @apply outline-none ring-2 ring-night ring-offset-2;
+  }
 }
