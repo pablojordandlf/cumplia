@@ -19,7 +19,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
   AlertCircle,
-  ChevronLeft,
   Shield,
   AlertTriangle,
   CheckCircle2,
@@ -31,6 +30,7 @@ import {
   MessageSquare,
   X,
 } from 'lucide-react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { supabase } from '@/lib/supabase';
 import { AIClassificationAssistant } from '@/components/ai-classification-assistant';
 
@@ -381,9 +381,15 @@ export default function ClassifyUseCasePage() {
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-3xl mx-auto">
+        <Breadcrumb
+          items={[
+            { label: 'Inventario', href: '/dashboard/inventory' },
+            { label: useCase?.name || '...', href: `/dashboard/inventory/${useCaseId}` },
+            { label: 'Clasificar' },
+          ]}
+        />
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard/inventory"><Button variant="ghost" size="icon"><ChevronLeft className="w-6 h-6" /></Button></Link>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900">Clasificar Sistema de IA</h1>
             <p className="text-gray-600">Cuestionario de clasificación AI Act</p>

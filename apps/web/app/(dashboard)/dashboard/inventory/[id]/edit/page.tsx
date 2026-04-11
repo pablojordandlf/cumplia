@@ -28,8 +28,9 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FormSkeleton } from '@/components/ui/page-shell';
-import { ChevronLeft, FileText, Loader2 } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 // Define the sectors
 const sectors = [
@@ -69,6 +70,7 @@ export default function EditUseCasePage() {
   const useCaseId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [systemName, setSystemName] = useState('');
   
   const form = useForm<z.infer<typeof useCaseFormSchema>>({
     resolver: zodResolver(useCaseFormSchema),
@@ -95,6 +97,7 @@ export default function EditUseCasePage() {
       if (error) throw error;
 
       if (data) {
+        setSystemName(data.name);
         form.reset({
           name: data.name,
           description: data.description || '',
@@ -145,16 +148,16 @@ export default function EditUseCasePage() {
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href={`/dashboard/inventory/${useCaseId}`}>
-            <Button variant="ghost" size="icon">
-              <ChevronLeft className="w-6 h-6" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar Sistema de IA</h1>
-            <p className="text-gray-600">Modifica los datos de tu sistema de IA</p>
-          </div>
+        <Breadcrumb
+          items={[
+            { label: 'Inventario', href: '/dashboard/inventory' },
+            { label: systemName || '...', href: `/dashboard/inventory/${useCaseId}` },
+            { label: 'Editar' },
+          ]}
+        />
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Editar Sistema de IA</h1>
+          <p className="text-gray-600">Modifica los datos de tu sistema de IA</p>
         </div>
 
         <Card>

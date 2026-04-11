@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   FileDown,
 } from 'lucide-react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 // ── Annex IV sections ─────────────────────────────────────────────────────────
 
@@ -282,10 +283,13 @@ export default function TechnicalDocsPage() {
     <div className="p-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href={`/dashboard/inventory/${id}`} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-3">
-          <ChevronLeft className="w-4 h-4" />
-          Volver a {systemName}
-        </Link>
+        <Breadcrumb
+          items={[
+            { label: 'Inventario', href: '/dashboard/inventory' },
+            { label: systemName || '...', href: `/dashboard/inventory/${id}` },
+            { label: 'Doc. técnica' },
+          ]}
+        />
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
