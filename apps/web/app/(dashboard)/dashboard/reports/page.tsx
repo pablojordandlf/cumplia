@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { FileText, Download, RefreshCw, AlertCircle, Loader2, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PageShell, PageHeader } from '@/components/ui/page-shell';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner'
 
@@ -121,18 +122,17 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0B1C3D]">Reportes</h1>
-          <p className="text-sm text-[#8B9BB4] mt-1">Genera informes de cumplimiento AI Act en PDF para cada sistema</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
-        </Button>
-      </div>
+    <PageShell className="max-w-5xl">
+      <PageHeader
+        title="Reportes"
+        description="Genera informes de cumplimiento AI Act en PDF para cada sistema"
+        actions={
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+        }
+      />
 
       {/* Info banner */}
       <div className="bg-[#F5DFB3]/30 border border-[#E8FF47]/30 rounded-xl p-4 flex items-start gap-3">
@@ -226,6 +226,6 @@ export default function ReportsPage() {
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

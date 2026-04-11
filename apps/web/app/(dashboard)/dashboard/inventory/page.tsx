@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { PageShell, PageHeader } from '@/components/ui/page-shell'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
 import { supabase } from '@/lib/supabase'
@@ -394,36 +395,33 @@ export default function InventoryPage() {
   )
 
   return (
-    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-            Inventario de Sistemas de IA
-          </h1>
-          <p className="text-gray-600 mt-1 text-sm sm:text-base">
-            {isViewer
-              ? 'Visualiza los sistemas de IA de tu organización'
-              : 'Lista y gestiona tus sistemas de IA'}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/dashboard/admin">
-            <Button variant="outline">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Templates
-            </Button>
-          </Link>
-          {canCreate && (
-            <Link href="/dashboard/inventory/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Añadir Sistema
+    <PageShell className="max-w-7xl">
+      <PageHeader
+        title="Inventario de Sistemas de IA"
+        description={
+          isViewer
+            ? 'Visualiza los sistemas de IA de tu organización'
+            : 'Lista y gestiona tus sistemas de IA'
+        }
+        actions={
+          <div className="flex gap-2">
+            <Link href="/dashboard/admin">
+              <Button variant="outline">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Templates
               </Button>
             </Link>
-          )}
-        </div>
-      </div>
+            {canCreate && (
+              <Link href="/dashboard/inventory/new">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Añadir Sistema
+                </Button>
+              </Link>
+            )}
+          </div>
+        }
+      />
 
       {/* Active tag pill */}
       {activeTag && (
@@ -494,6 +492,6 @@ export default function InventoryPage() {
           }}
         />
       </div>
-    </div>
+    </PageShell>
   )
 }

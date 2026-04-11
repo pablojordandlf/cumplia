@@ -16,6 +16,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { PageShell, PageHeader } from '@/components/ui/page-shell'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
 import { createClient } from '@/lib/supabase/client'
@@ -305,20 +306,17 @@ export default function RiskPage() {
   const columns = buildColumns()
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0B1C3D]">Gestión de Riesgos</h1>
-          <p className="text-sm text-[#8B9BB4] mt-1">
-            Estado del análisis de riesgos AI Act para todos tus sistemas
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
-        </Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Gestión de Riesgos"
+        description="Estado del análisis de riesgos AI Act para todos tus sistemas"
+        actions={
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -427,6 +425,6 @@ export default function RiskPage() {
           }}
         />
       </div>
-    </div>
+    </PageShell>
   )
 }
