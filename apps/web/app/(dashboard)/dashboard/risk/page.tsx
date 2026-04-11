@@ -16,7 +16,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { PageShell, PageHeader } from '@/components/ui/page-shell'
+import { PageShell, PageHeader, StatCardsSkeleton } from '@/components/ui/page-shell'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
 import { createClient } from '@/lib/supabase/client'
@@ -319,6 +319,9 @@ export default function RiskPage() {
       />
 
       {/* Summary Cards */}
+      {loading ? (
+        <StatCardsSkeleton />
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -378,6 +381,7 @@ export default function RiskPage() {
           <p className="text-xs text-[#8B9BB4] mt-1">riesgos sin mitigar</p>
         </div>
       </div>
+      )}
 
       {/* DataTable */}
       <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">

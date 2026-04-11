@@ -62,7 +62,7 @@ export function useCustomFieldTemplates({
     } finally {
       setLoading(false);
     }
-  }, [appliesTo, includeInactive, toast]);
+  }, [appliesTo, includeInactive]);
 
   const createTemplate = useCallback(async (
     templateData: CreateCustomFieldTemplateData
@@ -96,7 +96,7 @@ export function useCustomFieldTemplates({
     } finally {
       setLoading(false);
     }
-  }, [fetchTemplates, toast]);
+  }, [fetchTemplates]);
 
   const updateTemplate = useCallback(async (
     id: string, 
@@ -130,7 +130,7 @@ export function useCustomFieldTemplates({
     } finally {
       setLoading(false);
     }
-  }, [fetchTemplates, toast]);
+  }, [fetchTemplates]);
 
   const deleteTemplate = useCallback(async (id: string): Promise<boolean> => {
     setLoading(true);
@@ -159,7 +159,7 @@ export function useCustomFieldTemplates({
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     if (autoFetch) {

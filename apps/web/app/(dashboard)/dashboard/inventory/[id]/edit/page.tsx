@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { FormSkeleton } from '@/components/ui/page-shell';
 import { ChevronLeft, FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -138,14 +139,7 @@ export default function EditUseCasePage() {
   }
 
   if (loading) {
-    return (
-      <div className="p-4 sm:p-8 bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-3">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-          <span className="text-gray-600">Cargando...</span>
-        </div>
-      </div>
-    );
+    return <FormSkeleton fields={7} />
   }
 
   return (

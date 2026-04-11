@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { PageShell, PageHeaderSkeleton } from '@/components/ui/page-shell';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   ChevronLeft,
   ChevronRight,
@@ -258,9 +260,21 @@ export default function TechnicalDocsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-      </div>
+      <PageShell className="max-w-3xl">
+        <PageHeaderSkeleton />
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-6 space-y-4">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-2 w-full rounded-full" />
+          <div className="space-y-6 pt-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </PageShell>
     );
   }
 
