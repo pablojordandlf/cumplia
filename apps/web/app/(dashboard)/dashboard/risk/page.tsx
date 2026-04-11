@@ -1,86 +1,276 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { AlertTriangle, Shield, CheckCircle2, Clock, RefreshCw, AlertCircle, ChevronRight, TrendingUp } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { ColumnDef, Row } from '@tanstack/react-table'
+import {
+  AlertTriangle,
+  Shield,
+  CheckCircle2,
+  Clock,
+  RefreshCw,
+  AlertCircle,
+  ExternalLink,
+  TrendingUp,
+} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { RiskBadge } from '@/components/risk-badge'
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
+import { createClient } from '@/lib/supabase/client'
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface SystemRiskData {
-  id: string;
-  name: string;
-  ai_act_level: string;
-  risk_analysis_completed: boolean;
-  total_risks: number;
-  assessed_risks: number;
-  mitigated_risks: number;
-  critical_open: number;
-  completion_percentage: number;
+  id: string
+  name: string
+  ai_act_level: string
+  risk_analysis_completed: boolean
+  total_risks: number
+  assessed_risks: number
+  mitigated_risks: number
+  critical_open: number
+  completion_percentage: number
 }
 
-const LEVEL_CONFIG: Record<string, { label: string; badge: string; icon: string; border: string; bg: string }> = {
-  prohibited:   { label: 'Prohibido',       badge: 'bg-red-100 text-red-700 border-red-200',      icon: '🔴', border: 'border-red-200',    bg: 'bg-red-50'    },
-  high_risk:    { label: 'Alto Riesgo',     badge: 'bg-orange-100 text-orange-700 border-orange-200', icon: '🟠', border: 'border-orange-200', bg: 'bg-orange-50' },
-  limited_risk: { label: 'Riesgo Limitado', badge: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: '🟡', border: 'border-yellow-200', bg: 'bg-yellow-50' },
-  minimal_risk: { label: 'Riesgo Mínimo',   badge: 'bg-green-100 text-green-700 border-green-200',   icon: '🟢', border: 'border-green-200',  bg: 'bg-green-50'  },
-  unclassified: { label: 'Sin clasificar',  badge: 'bg-gray-100 text-gray-600 border-gray-200',      icon: '⚪', border: 'border-gray-200',   bg: 'bg-gray-50'   },
-};
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
 
 const PRIORITY_ORDER: Record<string, number> = {
-  prohibited: 0, high_risk: 1, limited_risk: 2, minimal_risk: 3, unclassified: 4,
-};
+  prohibited: 0,
+  high_risk: 1,
+  limited_risk: 2,
+  minimal_risk: 3,
+  unclassified: 4,
+}
+
+// ---------------------------------------------------------------------------
+// Column definitions
+// ---------------------------------------------------------------------------
+
+function buildColumns(): ColumnDef<SystemRiskData>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Sistema" />
+      ),
+      cell: ({ row }) => (
+        <Link
+          href={`/dashboard/inventory/${row.original.id}`}
+          className="font-medium text-[#0B1C3D] hover:text-blue-600 hover:underline flex items-center gap-1.5 group"
+        >
+          {row.original.name}
+          <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+        </Link>
+      ),
+    },
+    {
+      accessorKey: 'ai_act_level',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Nivel AI Act" />
+      ),
+      cell: ({ row }) => (
+        <RiskBadge level={row.original.ai_act_level || 'unclassified'} />
+      ),
+      filterFn: (row, _id, value) => row.original.ai_act_level === value,
+      sortingFn: (a, b) =>
+        (PRIORITY_ORDER[a.original.ai_act_level] ?? 99) -
+        (PRIORITY_ORDER[b.original.ai_act_level] ?? 99),
+    },
+    {
+      accessorKey: 'total_risks',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Riesgos" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums">{row.original.total_risks}</span>
+      ),
+    },
+    {
+      accessorKey: 'assessed_risks',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Evaluados" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums text-muted-foreground">
+          {row.original.assessed_risks}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'mitigated_risks',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Mitigados" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums text-green-600 font-medium">
+          {row.original.mitigated_risks}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'critical_open',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Críticos" />
+      ),
+      cell: ({ row }) => {
+        const val = row.original.critical_open
+        if (val === 0) {
+          return <span className="text-sm text-muted-foreground tabular-nums">—</span>
+        }
+        return (
+          <div className="flex items-center gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+            <span className="text-sm font-semibold text-red-600 tabular-nums">{val}</span>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'completion_percentage',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Progreso" />
+      ),
+      cell: ({ row }) => {
+        const { total_risks, completion_percentage } = row.original
+        if (total_risks === 0) {
+          return <span className="text-xs text-muted-foreground">Sin análisis</span>
+        }
+        return (
+          <div className="flex items-center gap-2 min-w-[120px]">
+            <Progress value={completion_percentage} className="h-1.5 flex-1" />
+            <span className="text-xs tabular-nums text-muted-foreground w-8 text-right">
+              {completion_percentage}%
+            </span>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'risk_analysis_completed',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Estado" />
+      ),
+      cell: ({ row }) => {
+        const { risk_analysis_completed, total_risks } = row.original
+        if (risk_analysis_completed) {
+          return (
+            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border">
+              <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
+            </Badge>
+          )
+        }
+        if (total_risks > 0) {
+          return (
+            <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs border">
+              <Clock className="w-3 h-3 mr-1" /> En progreso
+            </Badge>
+          )
+        }
+        return (
+          <Badge className="bg-gray-100 text-gray-600 border-gray-200 text-xs border">
+            Pendiente
+          </Badge>
+        )
+      },
+      filterFn: (row, _id, value) => {
+        if (value === 'completed') return row.original.risk_analysis_completed
+        if (value === 'in_progress')
+          return !row.original.risk_analysis_completed && row.original.total_risks > 0
+        if (value === 'pending') return row.original.total_risks === 0
+        return true
+      },
+    },
+    {
+      id: 'actions',
+      header: '',
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Link href={`/dashboard/inventory/${row.original.id}`}>
+          <Button variant="ghost" size="sm" className="text-xs">
+            Ver análisis
+          </Button>
+        </Link>
+      ),
+    },
+  ]
+}
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
 
 export default function RiskPage() {
-  const [systems, setSystems] = useState<SystemRiskData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterLevel, setFilterLevel] = useState<string | null>(null);
-  const supabase = createClient();
+  const [systems, setSystems] = useState<SystemRiskData[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load()
+  }, [])
 
   async function load() {
-    setLoading(true);
+    setLoading(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session?.user) return
 
       const { data: membership } = await supabase
         .from('organization_members')
         .select('organization_id')
         .eq('user_id', session.user.id)
         .eq('status', 'active')
-        .single();
+        .single()
 
       let q = supabase
         .from('use_cases')
         .select('id, name, ai_act_level, risk_analysis_completed')
-        .is('deleted_at', null);
+        .is('deleted_at', null)
 
       if (membership?.organization_id) {
-        q = q.or(`organization_id.eq.${membership.organization_id},user_id.eq.${session.user.id}`);
+        q = q.or(
+          `organization_id.eq.${membership.organization_id},user_id.eq.${session.user.id}`
+        )
       } else {
-        q = q.eq('user_id', session.user.id);
+        q = q.eq('user_id', session.user.id)
       }
 
-      const { data: useCases } = await q.order('created_at', { ascending: false });
-      if (!useCases?.length) { setSystems([]); setLoading(false); return; }
+      const { data: useCases } = await q.order('created_at', { ascending: false })
+      if (!useCases?.length) {
+        setSystems([])
+        setLoading(false)
+        return
+      }
 
       const enriched: SystemRiskData[] = await Promise.all(
         useCases.map(async (uc) => {
           const { data: risks } = await supabase
             .from('ai_system_risks')
             .select('status, probability, impact')
-            .eq('ai_system_id', uc.id);
+            .eq('ai_system_id', uc.id)
 
-          const total = risks?.length ?? 0;
-          const assessed = risks?.filter(r => ['assessed', 'mitigated', 'accepted'].includes(r.status)).length ?? 0;
-          const mitigated = risks?.filter(r => ['mitigated', 'accepted'].includes(r.status)).length ?? 0;
-          const critical_open = risks?.filter(r =>
-            r.probability === 'critical' && !['mitigated', 'accepted'].includes(r.status)
-          ).length ?? 0;
-          const pct = total > 0 ? Math.round((mitigated / total) * 100) : 0;
+          const total = risks?.length ?? 0
+          const assessed =
+            risks?.filter((r) =>
+              ['assessed', 'mitigated', 'accepted'].includes(r.status)
+            ).length ?? 0
+          const mitigated =
+            risks?.filter((r) => ['mitigated', 'accepted'].includes(r.status))
+              .length ?? 0
+          const critical_open =
+            risks?.filter(
+              (r) =>
+                r.probability === 'critical' &&
+                !['mitigated', 'accepted'].includes(r.status)
+            ).length ?? 0
+          const pct = total > 0 ? Math.round((mitigated / total) * 100) : 0
 
           return {
             id: uc.id,
@@ -92,32 +282,37 @@ export default function RiskPage() {
             mitigated_risks: mitigated,
             critical_open,
             completion_percentage: pct,
-          };
+          }
         })
-      );
+      )
 
-      enriched.sort((a, b) => (PRIORITY_ORDER[a.ai_act_level] ?? 99) - (PRIORITY_ORDER[b.ai_act_level] ?? 99));
-      setSystems(enriched);
+      enriched.sort(
+        (a, b) =>
+          (PRIORITY_ORDER[a.ai_act_level] ?? 99) -
+          (PRIORITY_ORDER[b.ai_act_level] ?? 99)
+      )
+      setSystems(enriched)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
-  const available = [...new Set(systems.map(s => s.ai_act_level))];
-  const filtered = filterLevel ? systems.filter(s => s.ai_act_level === filterLevel) : systems;
+  const totalSystems = systems.length
+  const completedSystems = systems.filter((s) => s.risk_analysis_completed).length
+  const systemsWithRisks = systems.filter((s) => s.total_risks > 0).length
+  const criticalTotal = systems.reduce((acc, s) => acc + s.critical_open, 0)
 
-  const totalSystems = systems.length;
-  const completedSystems = systems.filter(s => s.risk_analysis_completed).length;
-  const systemsWithRisks = systems.filter(s => s.total_risks > 0).length;
-  const criticalTotal = systems.reduce((acc, s) => acc + s.critical_open, 0);
+  const columns = buildColumns()
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1C3D]">Gestión de Riesgos</h1>
-          <p className="text-sm text-[#8B9BB4] mt-1">Estado del análisis de riesgos AI Act para todos tus sistemas</p>
+          <p className="text-sm text-[#8B9BB4] mt-1">
+            Estado del análisis de riesgos AI Act para todos tus sistemas
+          </p>
         </div>
         <Button variant="outline" size="sm" onClick={load} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
@@ -130,15 +325,21 @@ export default function RiskPage() {
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <Shield className="w-4 h-4 text-[#0B1C3D]" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Sistemas</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              Sistemas
+            </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">{totalSystems}</p>
-          <p className="text-xs text-[#8B9BB4] mt-1">{systemsWithRisks} con riesgos registrados</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">
+            {systemsWithRisks} con riesgos registrados
+          </p>
         </div>
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Completados</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              Completados
+            </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">{completedSystems}</p>
           <p className="text-xs text-[#8B9BB4] mt-1">de {totalSystems} sistemas</p>
@@ -146,131 +347,86 @@ export default function RiskPage() {
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-blue-500" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Progreso</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              Progreso
+            </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">
-            {totalSystems > 0 ? Math.round((completedSystems / totalSystems) * 100) : 0}%
+            {totalSystems > 0
+              ? Math.round((completedSystems / totalSystems) * 100)
+              : 0}
+            %
           </p>
           <p className="text-xs text-[#8B9BB4] mt-1">análisis completado</p>
         </div>
-        <div className={`bg-white rounded-xl border p-4 ${criticalTotal > 0 ? 'border-red-200' : 'border-[#E3DFD5]'}`}>
+        <div
+          className={`bg-white rounded-xl border p-4 ${
+            criticalTotal > 0 ? 'border-red-200' : 'border-[#E3DFD5]'
+          }`}
+        >
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className={`w-4 h-4 ${criticalTotal > 0 ? 'text-red-500' : 'text-[#8B9BB4]'}`} />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Críticos abiertos</span>
+            <AlertTriangle
+              className={`w-4 h-4 ${criticalTotal > 0 ? 'text-red-500' : 'text-[#8B9BB4]'}`}
+            />
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              Críticos abiertos
+            </span>
           </div>
-          <p className={`text-2xl font-bold ${criticalTotal > 0 ? 'text-red-600' : 'text-[#0B1C3D]'}`}>{criticalTotal}</p>
+          <p
+            className={`text-2xl font-bold ${criticalTotal > 0 ? 'text-red-600' : 'text-[#0B1C3D]'}`}
+          >
+            {criticalTotal}
+          </p>
           <p className="text-xs text-[#8B9BB4] mt-1">riesgos sin mitigar</p>
         </div>
       </div>
 
-      {/* Filter pills */}
-      {available.length > 1 && (
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setFilterLevel(null)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterLevel ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
-          >
-            Todos ({systems.length})
-          </button>
-          {available.map(level => {
-            const cfg = LEVEL_CONFIG[level] ?? LEVEL_CONFIG.unclassified;
-            const count = systems.filter(s => s.ai_act_level === level).length;
-            return (
-              <button
-                key={level}
-                onClick={() => setFilterLevel(level === filterLevel ? null : level)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterLevel === level ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
-              >
-                {cfg.icon} {cfg.label} ({count})
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Systems list */}
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-[#E3DFD5] p-4 animate-pulse">
-              <div className="h-5 w-48 bg-gray-100 rounded mb-3" />
-              <div className="h-2 w-full bg-gray-100 rounded" />
-            </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#E3DFD5] p-12 text-center">
-          <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-[#8B9BB4] font-medium">No hay sistemas en esta categoría</p>
-          <p className="text-sm text-gray-400 mt-1">
-            <Link href="/dashboard/inventory/new" className="text-[#0B1C3D] hover:underline font-medium">Añade un sistema de IA</Link> para comenzar
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map(system => {
-            const cfg = LEVEL_CONFIG[system.ai_act_level] ?? LEVEL_CONFIG.unclassified;
-            return (
-              <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
-                <div className="bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40 hover:shadow-sm transition-all cursor-pointer group">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-base">{cfg.icon}</span>
-                        <h3 className="font-semibold text-[#0B1C3D] group-hover:text-[#E8FF47] transition-colors truncate">
-                          {system.name}
-                        </h3>
-                        <Badge className={`text-xs border ${cfg.badge} ml-1`}>{cfg.label}</Badge>
-                      </div>
-
-                      {system.total_risks === 0 ? (
-                        <p className="text-xs text-[#8B9BB4] mt-2">
-                          Sin análisis de riesgos iniciado —{' '}
-                          <span className="text-[#0B1C3D]">abrir para iniciar</span>
-                        </p>
-                      ) : (
-                        <div className="mt-2 space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-[#8B9BB4]">
-                              {system.mitigated_risks} mitigados · {system.assessed_risks} evaluados · {system.total_risks} total
-                            </span>
-                            <span className="font-medium text-[#0B1C3D]">{system.completion_percentage}%</span>
-                          </div>
-                          <Progress value={system.completion_percentage} className="h-1.5" />
-                        </div>
-                      )}
-
-                      {system.critical_open > 0 && (
-                        <p className="text-xs text-red-600 mt-1.5 flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3" />
-                          {system.critical_open} riesgo(s) crítico(s) pendiente(s)
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {system.risk_analysis_completed ? (
-                        <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border">
-                          <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
-                        </Badge>
-                      ) : system.total_risks > 0 ? (
-                        <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs border">
-                          <Clock className="w-3 h-3 mr-1" /> En progreso
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-gray-100 text-gray-600 border-gray-200 text-xs border">
-                          Pendiente
-                        </Badge>
-                      )}
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#E8FF47] transition-colors" />
-                    </div>
-                  </div>
-                </div>
+      {/* DataTable */}
+      <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
+        <DataTable
+          columns={columns}
+          data={systems}
+          loading={loading}
+          skeletonRows={6}
+          toolbar={{
+            searchPlaceholder: 'Buscar sistema...',
+            searchKey: 'name',
+            filters: [
+              {
+                key: 'ai_act_level',
+                label: 'Nivel AI Act',
+                options: [
+                  { label: 'Prohibido', value: 'prohibited' },
+                  { label: 'Alto Riesgo', value: 'high_risk' },
+                  { label: 'Riesgo Limitado', value: 'limited_risk' },
+                  { label: 'Riesgo Mínimo', value: 'minimal_risk' },
+                  { label: 'No Clasificado', value: 'unclassified' },
+                ],
+              },
+              {
+                key: 'risk_analysis_completed',
+                label: 'Estado',
+                options: [
+                  { label: 'Completado', value: 'completed' },
+                  { label: 'En progreso', value: 'in_progress' },
+                  { label: 'Pendiente', value: 'pending' },
+                ],
+              },
+            ],
+          }}
+          pagination={{ pageSize: 10, pageSizeOptions: [10, 25, 50] }}
+          emptyState={{
+            icon: <AlertCircle className="w-12 h-12 text-gray-300" />,
+            title: 'No hay sistemas de IA registrados',
+            description: 'Añade tu primer sistema para comenzar el análisis de riesgos.',
+            action: (
+              <Link href="/dashboard/inventory/new">
+                <Button size="sm">Añadir sistema</Button>
               </Link>
-            );
-          })}
-        </div>
-      )}
+            ),
+          }}
+        />
+      </div>
     </div>
-  );
+  )
 }
