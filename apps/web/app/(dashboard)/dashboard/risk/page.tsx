@@ -109,7 +109,7 @@ function buildColumns(): ColumnDef<SystemRiskData>[] {
         <DataTableColumnHeader column={column} title="Mitigados" />
       ),
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums text-green-600 font-medium">
+        <span className="text-sm tabular-nums text-status-success font-medium">
           {row.original.mitigated_risks}
         </span>
       ),
@@ -126,8 +126,8 @@ function buildColumns(): ColumnDef<SystemRiskData>[] {
         }
         return (
           <div className="flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span className="text-sm font-semibold text-red-600 tabular-nums">{val}</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-status-danger shrink-0" />
+            <span className="text-sm font-semibold text-status-danger tabular-nums">{val}</span>
           </div>
         )
       },
@@ -161,14 +161,14 @@ function buildColumns(): ColumnDef<SystemRiskData>[] {
         const { risk_analysis_completed, total_risks } = row.original
         if (risk_analysis_completed) {
           return (
-            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border">
+            <Badge className="bg-status-success-subtle text-status-success border-status-success-border text-xs border">
               <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
             </Badge>
           )
         }
         if (total_risks > 0) {
           return (
-            <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs border">
+            <Badge className="bg-status-warning-subtle text-status-warning border-status-warning-border text-xs border">
               <Clock className="w-3 h-3 mr-1" /> En progreso
             </Badge>
           )
@@ -374,7 +374,7 @@ export default function RiskPage() {
             </span>
           </div>
           <p
-            className={`text-2xl font-bold ${criticalTotal > 0 ? 'text-red-600' : 'text-[#0B1C3D]'}`}
+            className={`text-2xl font-bold ${criticalTotal > 0 ? 'text-status-danger' : 'text-[#0B1C3D]'}`}
           >
             {criticalTotal}
           </p>

@@ -116,7 +116,7 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
         <DataTableColumnHeader column={column} title="Completadas" />
       ),
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums text-green-600 font-medium">
+        <span className="text-sm tabular-nums text-status-success font-medium">
           {row.original.completed_obligations}
         </span>
       ),
@@ -127,7 +127,7 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
         <DataTableColumnHeader column={column} title="En progreso" />
       ),
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums text-orange-600">
+        <span className="text-sm tabular-nums text-status-warning">
           {row.original.in_progress_obligations}
         </span>
       ),
@@ -173,13 +173,13 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
         }
         if (completion_percentage === 100) {
           return (
-            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border">
+            <Badge className="bg-status-success-subtle text-status-success border-status-success-border text-xs border">
               <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
             </Badge>
           )
         }
         return (
-          <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs border">
+          <Badge className="bg-status-warning-subtle text-status-warning border-status-warning-border text-xs border">
             <Clock className="w-3 h-3 mr-1" /> En progreso
           </Badge>
         )
