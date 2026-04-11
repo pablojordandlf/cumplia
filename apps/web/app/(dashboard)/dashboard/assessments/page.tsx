@@ -1,31 +1,42 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { BarChart3, CheckCircle2, Clock, AlertCircle, RefreshCw, ChevronRight, Circle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { ColumnDef } from '@tanstack/react-table'
+import {
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  RefreshCw,
+  Circle,
+  ExternalLink,
+} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { RiskBadge } from '@/components/risk-badge'
+import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
+import { createClient } from '@/lib/supabase/client'
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface SystemAssessment {
-  id: string;
-  name: string;
-  ai_act_level: string;
-  status: string;
-  total_obligations: number;
-  completed_obligations: number;
-  in_progress_obligations: number;
-  completion_percentage: number;
+  id: string
+  name: string
+  ai_act_level: string
+  status: string
+  total_obligations: number
+  completed_obligations: number
+  in_progress_obligations: number
+  completion_percentage: number
 }
 
-const LEVEL_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  prohibited:   { label: 'Prohibido',       icon: '🔴', color: 'text-red-600'    },
-  high_risk:    { label: 'Alto Riesgo',     icon: '🟠', color: 'text-orange-600' },
-  limited_risk: { label: 'Riesgo Limitado', icon: '🟡', color: 'text-yellow-600' },
-  minimal_risk: { label: 'Riesgo Mínimo',   icon: '🟢', color: 'text-green-600'  },
-  unclassified: { label: 'Sin clasificar',  icon: '⚪', color: 'text-gray-500'   },
-};
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Borrador',
@@ -33,54 +44,231 @@ const STATUS_LABELS: Record<string, string> = {
   approved: 'Aprobado',
   active: 'Activo',
   archived: 'Archivado',
-};
+}
+
+const PRIORITY_ORDER: Record<string, number> = {
+  prohibited: 0,
+  high_risk: 1,
+  limited_risk: 2,
+  minimal_risk: 3,
+  unclassified: 4,
+}
+
+// ---------------------------------------------------------------------------
+// Column definitions
+// ---------------------------------------------------------------------------
+
+function buildColumns(): ColumnDef<SystemAssessment>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Sistema" />
+      ),
+      cell: ({ row }) => (
+        <Link
+          href={`/dashboard/inventory/${row.original.id}`}
+          className="font-medium text-[#0B1C3D] hover:text-blue-600 hover:underline flex items-center gap-1.5 group"
+        >
+          {row.original.name}
+          <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+        </Link>
+      ),
+    },
+    {
+      accessorKey: 'ai_act_level',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Nivel AI Act" />
+      ),
+      cell: ({ row }) => (
+        <RiskBadge level={row.original.ai_act_level || 'unclassified'} />
+      ),
+      filterFn: (row, _id, value) => row.original.ai_act_level === value,
+      sortingFn: (a, b) =>
+        (PRIORITY_ORDER[a.original.ai_act_level] ?? 99) -
+        (PRIORITY_ORDER[b.original.ai_act_level] ?? 99),
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Estado" />
+      ),
+      cell: ({ row }) => (
+        <Badge variant="outline" className="capitalize text-xs">
+          {STATUS_LABELS[row.original.status] ?? row.original.status}
+        </Badge>
+      ),
+      filterFn: (row, _id, value) => row.original.status === value,
+    },
+    {
+      accessorKey: 'total_obligations',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Total" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums">{row.original.total_obligations}</span>
+      ),
+    },
+    {
+      accessorKey: 'completed_obligations',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Completadas" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums text-green-600 font-medium">
+          {row.original.completed_obligations}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'in_progress_obligations',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="En progreso" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm tabular-nums text-orange-600">
+          {row.original.in_progress_obligations}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'completion_percentage',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Progreso" />
+      ),
+      cell: ({ row }) => {
+        const { total_obligations, completion_percentage } = row.original
+        if (total_obligations === 0) {
+          return <span className="text-xs text-muted-foreground">Sin obligaciones</span>
+        }
+        return (
+          <div className="flex items-center gap-2 min-w-[120px]">
+            <Progress value={completion_percentage} className="h-1.5 flex-1" />
+            <span className="text-xs tabular-nums text-muted-foreground w-8 text-right">
+              {completion_percentage}%
+            </span>
+          </div>
+        )
+      },
+    },
+    {
+      id: 'evaluation_status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Evaluacion" />
+      ),
+      accessorFn: (row) => {
+        if (row.total_obligations === 0) return 'pending'
+        if (row.completion_percentage === 100) return 'completed'
+        return 'in_progress'
+      },
+      cell: ({ row }) => {
+        const { total_obligations, completion_percentage } = row.original
+        if (total_obligations === 0) {
+          return (
+            <Badge className="bg-gray-100 text-gray-600 border-gray-200 text-xs border">
+              Sin iniciar
+            </Badge>
+          )
+        }
+        if (completion_percentage === 100) {
+          return (
+            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border">
+              <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
+            </Badge>
+          )
+        }
+        return (
+          <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs border">
+            <Clock className="w-3 h-3 mr-1" /> En progreso
+          </Badge>
+        )
+      },
+      filterFn: (row, _id, value) => {
+        const { total_obligations, completion_percentage } = row.original
+        if (value === 'completed')
+          return completion_percentage === 100 && total_obligations > 0
+        if (value === 'in_progress')
+          return completion_percentage > 0 && completion_percentage < 100
+        if (value === 'pending') return total_obligations === 0
+        return true
+      },
+    },
+    {
+      id: 'actions',
+      header: '',
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Link href={`/dashboard/inventory/${row.original.id}`}>
+          <Button variant="ghost" size="sm" className="text-xs">
+            Ver detalles
+          </Button>
+        </Link>
+      ),
+    },
+  ]
+}
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
 
 export default function AssessmentsPage() {
-  const [systems, setSystems] = useState<SystemAssessment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterLevel, setFilterLevel] = useState<string | null>(null);
-  const supabase = createClient();
+  const [systems, setSystems] = useState<SystemAssessment[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load()
+  }, [])
 
   async function load() {
-    setLoading(true);
+    setLoading(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session?.user) return
 
       const { data: membership } = await supabase
         .from('organization_members')
         .select('organization_id')
         .eq('user_id', session.user.id)
         .eq('status', 'active')
-        .single();
+        .single()
 
       let q = supabase
         .from('use_cases')
         .select('id, name, ai_act_level, status')
-        .is('deleted_at', null);
+        .is('deleted_at', null)
 
       if (membership?.organization_id) {
-        q = q.or(`organization_id.eq.${membership.organization_id},user_id.eq.${session.user.id}`);
+        q = q.or(
+          `organization_id.eq.${membership.organization_id},user_id.eq.${session.user.id}`
+        )
       } else {
-        q = q.eq('user_id', session.user.id);
+        q = q.eq('user_id', session.user.id)
       }
 
-      const { data: useCases } = await q.order('created_at', { ascending: false });
-      if (!useCases?.length) { setSystems([]); setLoading(false); return; }
+      const { data: useCases } = await q.order('created_at', { ascending: false })
+      if (!useCases?.length) {
+        setSystems([])
+        setLoading(false)
+        return
+      }
 
       const enriched: SystemAssessment[] = await Promise.all(
         useCases.map(async (uc) => {
           const { data: obligations } = await supabase
             .from('use_case_obligations')
             .select('status')
-            .eq('use_case_id', uc.id);
+            .eq('use_case_id', uc.id)
 
-          const total = obligations?.length ?? 0;
-          const completed = obligations?.filter(o => o.status === 'completed').length ?? 0;
-          const in_progress = obligations?.filter(o => o.status === 'in_progress').length ?? 0;
-          const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+          const total = obligations?.length ?? 0
+          const completed =
+            obligations?.filter((o) => o.status === 'completed').length ?? 0
+          const in_progress =
+            obligations?.filter((o) => o.status === 'in_progress').length ?? 0
+          const pct = total > 0 ? Math.round((completed / total) * 100) : 0
 
           return {
             id: uc.id,
@@ -91,31 +279,36 @@ export default function AssessmentsPage() {
             completed_obligations: completed,
             in_progress_obligations: in_progress,
             completion_percentage: pct,
-          };
+          }
         })
-      );
+      )
 
-      setSystems(enriched);
+      setSystems(enriched)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
-  const available = [...new Set(systems.map(s => s.ai_act_level))];
-  const filtered = filterLevel ? systems.filter(s => s.ai_act_level === filterLevel) : systems;
+  const totalSystems = systems.length
+  const fullyCompleted = systems.filter(
+    (s) => s.completion_percentage === 100 && s.total_obligations > 0
+  ).length
+  const inProgress = systems.filter(
+    (s) => s.completion_percentage > 0 && s.completion_percentage < 100
+  ).length
+  const notStarted = systems.filter((s) => s.total_obligations === 0).length
 
-  const totalSystems = systems.length;
-  const fullyCompleted = systems.filter(s => s.completion_percentage === 100 && s.total_obligations > 0).length;
-  const inProgress = systems.filter(s => s.completion_percentage > 0 && s.completion_percentage < 100).length;
-  const notStarted = systems.filter(s => s.total_obligations === 0).length;
+  const columns = buildColumns()
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#0B1C3D]">Evaluaciones</h1>
-          <p className="text-sm text-[#8B9BB4] mt-1">Progreso de cumplimiento de obligaciones AI Act por sistema</p>
+          <p className="text-sm text-[#8B9BB4] mt-1">
+            Progreso de cumplimiento de obligaciones AI Act por sistema
+          </p>
         </div>
         <Button variant="outline" size="sm" onClick={load} disabled={loading}>
           <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
@@ -128,7 +321,9 @@ export default function AssessmentsPage() {
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-4 h-4 text-[#0B1C3D]" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Total sistemas</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              Total sistemas
+            </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">{totalSystems}</p>
           <p className="text-xs text-[#8B9BB4] mt-1">sistemas registrados</p>
@@ -136,7 +331,9 @@ export default function AssessmentsPage() {
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Completados</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              Completados
+            </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">{fullyCompleted}</p>
           <p className="text-xs text-[#8B9BB4] mt-1">100% obligaciones cumplidas</p>
@@ -144,7 +341,9 @@ export default function AssessmentsPage() {
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-[#0B1C3D]" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">En progreso</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              En progreso
+            </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">{inProgress}</p>
           <p className="text-xs text-[#8B9BB4] mt-1">parcialmente completados</p>
@@ -152,114 +351,62 @@ export default function AssessmentsPage() {
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
             <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">Sin iniciar</span>
+            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
+              Sin iniciar
+            </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">{notStarted}</p>
           <p className="text-xs text-[#8B9BB4] mt-1">sin obligaciones asignadas</p>
         </div>
       </div>
 
-      {/* Filters */}
-      {available.length > 1 && (
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setFilterLevel(null)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterLevel ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
-          >
-            Todos ({systems.length})
-          </button>
-          {available.map(level => {
-            const cfg = LEVEL_CONFIG[level] ?? LEVEL_CONFIG.unclassified;
-            const count = systems.filter(s => s.ai_act_level === level).length;
-            return (
-              <button
-                key={level}
-                onClick={() => setFilterLevel(level === filterLevel ? null : level)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterLevel === level ? 'bg-[#0B1C3D] text-white border-[#0B1C3D]' : 'border-[#E3DFD5] text-[#8B9BB4] hover:border-[#0B1C3D]'}`}
-              >
-                {cfg.icon} {cfg.label} ({count})
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Systems list */}
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-[#E3DFD5] p-4 animate-pulse">
-              <div className="h-5 w-48 bg-gray-100 rounded mb-3" />
-              <div className="h-2 w-full bg-gray-100 rounded" />
-            </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#E3DFD5] p-12 text-center">
-          <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-[#8B9BB4] font-medium">No hay sistemas registrados</p>
-          <p className="text-sm text-gray-400 mt-1">
-            <Link href="/dashboard/inventory/new" className="text-[#0B1C3D] hover:underline font-medium">
-              Añade un sistema de IA
-            </Link>{' '}para empezar a evaluar
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map(system => {
-            const cfg = LEVEL_CONFIG[system.ai_act_level] ?? LEVEL_CONFIG.unclassified;
-            return (
-              <Link key={system.id} href={`/dashboard/inventory/${system.id}`}>
-                <div className="bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40 hover:shadow-sm transition-all cursor-pointer group">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span>{cfg.icon}</span>
-                        <h3 className="font-semibold text-[#0B1C3D] group-hover:text-[#E8FF47] transition-colors truncate">
-                          {system.name}
-                        </h3>
-                        <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
-                      </div>
-
-                      {system.total_obligations === 0 ? (
-                        <p className="text-xs text-[#8B9BB4] mt-2">Sin obligaciones asignadas</p>
-                      ) : (
-                        <div className="mt-2 space-y-1">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-[#8B9BB4]">
-                              {system.completed_obligations} completadas · {system.in_progress_obligations} en progreso · {system.total_obligations} total
-                            </span>
-                            <span className="font-medium text-[#0B1C3D]">{system.completion_percentage}%</span>
-                          </div>
-                          <Progress value={system.completion_percentage} className="h-1.5" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {system.total_obligations === 0 ? (
-                        <Badge className="bg-gray-100 text-gray-600 border-gray-200 text-xs border">Sin iniciar</Badge>
-                      ) : system.completion_percentage === 100 ? (
-                        <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border">
-                          <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs border">
-                          <Clock className="w-3 h-3 mr-1" /> En progreso
-                        </Badge>
-                      )}
-                      <span className="text-xs text-[#8B9BB4] hidden sm:block">
-                        {STATUS_LABELS[system.status] ?? system.status}
-                      </span>
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#E8FF47] transition-colors" />
-                    </div>
-                  </div>
-                </div>
+      {/* DataTable */}
+      <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
+        <DataTable
+          columns={columns}
+          data={systems}
+          loading={loading}
+          skeletonRows={6}
+          toolbar={{
+            searchPlaceholder: 'Buscar sistema...',
+            searchKey: 'name',
+            filters: [
+              {
+                key: 'ai_act_level',
+                label: 'Nivel AI Act',
+                options: [
+                  { label: 'Prohibido', value: 'prohibited' },
+                  { label: 'Alto Riesgo', value: 'high_risk' },
+                  { label: 'Riesgo Limitado', value: 'limited_risk' },
+                  { label: 'Riesgo Minimo', value: 'minimal_risk' },
+                  { label: 'No Clasificado', value: 'unclassified' },
+                ],
+              },
+              {
+                key: 'evaluation_status',
+                label: 'Evaluacion',
+                options: [
+                  { label: 'Completado', value: 'completed' },
+                  { label: 'En progreso', value: 'in_progress' },
+                  { label: 'Sin iniciar', value: 'pending' },
+                ],
+              },
+            ],
+          }}
+          pagination={{ pageSize: 10, pageSizeOptions: [10, 25, 50] }}
+          emptyState={{
+            icon: <AlertCircle className="w-12 h-12 text-gray-300" />,
+            title: 'No hay sistemas de IA registrados',
+            description:
+              'Añade tu primer sistema para comenzar a evaluar las obligaciones.',
+            action: (
+              <Link href="/dashboard/inventory/new">
+                <Button size="sm">Añadir sistema</Button>
               </Link>
-            );
-          })}
-        </div>
-      )}
+            ),
+          }}
+        />
+      </div>
     </div>
-  );
+  )
 }
