@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, AlertCircle } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { CustomFieldTemplate } from '@/types/custom-fields';
 
 interface CustomField {
@@ -97,9 +97,9 @@ export function CustomFieldsEditor({
     try {
       await onSave(fields);
       setIsEditing(false);
-      toast({ title: 'Guardado', description: 'Los campos personalizados se han actualizado correctamente.' });
+      toast.success('Guardado', { description: 'Los campos personalizados se han actualizado correctamente.' });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast.error('Error', { description: error.message });
     } finally {
       setIsSaving(false);
     }

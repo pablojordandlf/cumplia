@@ -26,7 +26,7 @@ import {
   List,
   Info
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { RiskTemplate, RiskTemplateWithItems, AISystemRisk } from '@/types/risk-management';
 
 interface RiskTemplateSelectorProps {
@@ -60,7 +60,6 @@ export function RiskTemplateSelector({
   const [loading, setLoading] = useState(false);
   const [fetchingTemplates, setFetchingTemplates] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     fetchTemplates();
@@ -99,11 +98,7 @@ export function RiskTemplateSelector({
       }
     } catch (error) {
       console.error('Error fetching templates:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar las plantillas',
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: 'No se pudieron cargar las plantillas' });
     } finally {
       setFetchingTemplates(false);
     }
@@ -111,11 +106,7 @@ export function RiskTemplateSelector({
 
   const handleApplyTemplate = async () => {
     if (!selectedTemplateId) {
-      toast({
-        title: 'Selección requerida',
-        description: 'Por favor selecciona una plantilla',
-        variant: 'destructive'
-      });
+      toast.error('Selección requerida', { description: 'Por favor selecciona una plantilla' });
       return;
     }
 
@@ -137,10 +128,7 @@ export function RiskTemplateSelector({
       const data = await response.json();
       onTemplateApplied(data.risks || []);
       
-      toast({
-        title: 'Plantilla aplicada',
-        description: `Se han creado ${data.risks?.length || 0} riesgos para este sistema`
-      });
+      toast.success('Plantilla aplicada', { description: `Se han creado ${data.risks?.length || 0} riesgos para este sistema` });
     } catch (error) {
       console.error('Error applying template:', error);
       const errorMessage = error instanceof Error ? error.message : 'No se pudo aplicar la plantilla';
@@ -153,11 +141,7 @@ export function RiskTemplateSelector({
         displayMessage = 'Error al crear los riesgos. Por favor intenta de nuevo.';
       }
       
-      toast({
-        title: 'Error',
-        description: displayMessage,
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: displayMessage });
     } finally {
       setLoading(false);
     }

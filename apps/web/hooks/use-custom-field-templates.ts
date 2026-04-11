@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { 
   CustomFieldTemplate, 
   CreateCustomFieldTemplateData, 
@@ -32,7 +32,6 @@ export function useCustomFieldTemplates({
   const [templates, setTemplates] = useState<CustomFieldTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const fetchTemplates = useCallback(async (filterAppliesTo?: string) => {
     setLoading(true);
@@ -59,11 +58,7 @@ export function useCustomFieldTemplates({
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: message });
     } finally {
       setLoading(false);
     }
@@ -90,20 +85,13 @@ export function useCustomFieldTemplates({
       const data = await response.json();
       await fetchTemplates(); // Refresh list
       
-      toast({
-        title: 'Éxito',
-        description: 'Plantilla creada correctamente',
-      });
+      toast.success('Éxito', { description: 'Plantilla creada correctamente' });
       
       return data.template;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: message });
       return null;
     } finally {
       setLoading(false);
@@ -131,20 +119,13 @@ export function useCustomFieldTemplates({
 
       await fetchTemplates(); // Refresh list
       
-      toast({
-        title: 'Éxito',
-        description: 'Plantilla actualizada correctamente',
-      });
+      toast.success('Éxito', { description: 'Plantilla actualizada correctamente' });
       
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: message });
       return false;
     } finally {
       setLoading(false);
@@ -167,20 +148,13 @@ export function useCustomFieldTemplates({
 
       setTemplates(prev => prev.filter(t => t.id !== id));
       
-      toast({
-        title: 'Éxito',
-        description: 'Plantilla eliminada correctamente',
-      });
+      toast.success('Éxito', { description: 'Plantilla eliminada correctamente' });
       
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: message });
       return false;
     } finally {
       setLoading(false);

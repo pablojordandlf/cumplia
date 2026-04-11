@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, ListTodo } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 
 interface SystemRiskStatus {
   system_id: string;
@@ -72,7 +72,6 @@ export function PendingObligationsWidget() {
   const [loading, setLoading] = useState(true);
   const [filterRisk, setFilterRisk] = useState<string | null>(null);
   const supabase = createClient();
-  const { toast } = useToast();
 
   useEffect(() => {
     fetchSystemRiskStatus();
@@ -180,11 +179,7 @@ export function PendingObligationsWidget() {
       setSystems(systemsList);
     } catch (error) {
       console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los estados de riesgos',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: 'No se pudieron cargar los estados de riesgos' });
     } finally {
       setLoading(false);
     }

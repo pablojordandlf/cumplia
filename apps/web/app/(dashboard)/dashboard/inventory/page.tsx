@@ -19,7 +19,7 @@ import { Progress } from '@/components/ui/progress'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
 import { supabase } from '@/lib/supabase'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { hasPermission, MemberRole } from '@/lib/permissions'
 
 // ---------------------------------------------------------------------------
@@ -234,7 +234,6 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true)
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<MemberRole | null>(null)
-  const { toast } = useToast()
   const router = useRouter()
 
   useEffect(() => {
@@ -272,11 +271,7 @@ export default function InventoryPage() {
       } = await supabase.auth.getSession()
 
       if (!session?.user) {
-        toast({
-          title: 'Autenticación requerida',
-          description: 'Por favor, inicia sesión para ver tu inventario.',
-          variant: 'destructive',
-        })
+        toast.error('Autenticación requerida', { description: 'Por favor, inicia sesión para ver tu inventario.' })
         router.push('/auth/login')
         return
       }
@@ -315,11 +310,7 @@ export default function InventoryPage() {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'No se pudieron cargar los sistemas de IA.'
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      })
+      toast.error('Error', { description: message })
     } finally {
       setLoading(false)
     }
@@ -359,11 +350,7 @@ export default function InventoryPage() {
   const handleDelete = useCallback(
     async (id: string) => {
       if (!userRole || !hasPermission(userRole, 'ai_systems:delete')) {
-        toast({
-          title: 'Sin permisos',
-          description: 'No tienes permisos para eliminar sistemas de IA.',
-          variant: 'destructive',
-        })
+        toast.error('Sin permisos', { description: 'No tienes permisos para eliminar sistemas de IA.' })
         return
       }
 
@@ -377,23 +364,16 @@ export default function InventoryPage() {
 
         if (error) throw error
 
-        toast({
-          title: 'Eliminado',
-          description: 'El sistema de IA ha sido eliminado correctamente.',
-        })
+        toast.success('Eliminado', { description: 'El sistema de IA ha sido eliminado correctamente.' })
 
         fetchUseCases()
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : 'No se pudo eliminar el sistema de IA.'
-        toast({
-          title: 'Error',
-          description: message,
-          variant: 'destructive',
-        })
+        toast.error('Error', { description: message })
       }
     },
-    [userRole, toast]
+    [userRole]
   )
 
   const canCreate = userRole ? hasPermission(userRole, 'ai_systems:create') : false

@@ -47,7 +47,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { RiskManagementTab } from '@/components/risks/risk-management-tab';
 import { AI_ACT_RISK_CONFIG } from '@/types/risk-management';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { hasPermission, MemberRole, canEditSystems, canCreateSystems } from '@/lib/permissions';
@@ -198,7 +198,7 @@ export default function UseCaseDetailPage() {
       
     } catch (error: any) {
       console.error('Error loading data:', error);
-      toast({ title: 'Error', description: error.message || 'No se pudo cargar el sistema de IA', variant: 'destructive' });
+      toast.error('Error', { description: error.message || 'No se pudo cargar el sistema de IA' });
     } finally {
       setLoading(false);
     }
@@ -206,7 +206,7 @@ export default function UseCaseDetailPage() {
 
   async function updateIsPoc(newValue: boolean) {
     if (!userRole || !hasPermission(userRole, 'ai_systems:update')) {
-      toast({ title: 'Sin permisos', description: 'No tienes permisos para editar este sistema.', variant: 'destructive' });
+      toast.error('Sin permisos', { description: 'No tienes permisos para editar este sistema.' });
       return;
     }
 
@@ -226,9 +226,9 @@ export default function UseCaseDetailPage() {
       const { useCase: updatedUseCase } = await response.json();
       setUseCase(updatedUseCase);
       setIsPoCEditing(false);
-      toast({ title: 'Actualizado', description: `Estado cambiado a ${newValue ? 'PoC' : 'Producción'}` });
+      toast.success('Actualizado', { description: `Estado cambiado a ${newValue ? 'PoC' : 'Producción'}` });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast.error('Error', { description: error.message });
     } finally {
       setUpdating(false);
     }
@@ -257,7 +257,7 @@ export default function UseCaseDetailPage() {
 
   async function deleteUseCase() {
     if (!userRole || !hasPermission(userRole, 'ai_systems:delete')) {
-      toast({ title: 'Sin permisos', description: 'No tienes permisos para eliminar este sistema.', variant: 'destructive' });
+      toast.error('Sin permisos', { description: 'No tienes permisos para eliminar este sistema.' });
       return;
     }
 
@@ -270,10 +270,10 @@ export default function UseCaseDetailPage() {
         .eq('id', useCaseId);
 
       if (error) throw error;
-      toast({ title: 'Eliminado', description: 'El sistema de IA ha sido eliminado.' });
+      toast.success('Eliminado', { description: 'El sistema de IA ha sido eliminado.' });
       router.push('/dashboard/inventory');
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast.error('Error', { description: error.message });
     }
   }
 
@@ -290,7 +290,7 @@ export default function UseCaseDetailPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message ?? 'No se pudo generar el informe', variant: 'destructive' });
+      toast.error('Error', { description: err.message ?? 'No se pudo generar el informe' });
     } finally {
       setDownloadingReport(false);
     }

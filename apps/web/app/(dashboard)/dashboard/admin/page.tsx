@@ -9,7 +9,7 @@ import { FileWarning, FormInput, Settings2, ArrowLeft } from 'lucide-react';
 import { RiskTemplatesPanel } from './components/risk-templates-panel';
 import { CustomFieldsPanel } from './components/custom-fields-panel';
 import { usePermissions } from '@/hooks/use-permissions';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('risk-templates');
@@ -18,11 +18,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!isLoading && !can('templates:manage')) {
-      toast({
-        title: 'Acceso denegado',
-        description: 'Solo los propietarios y administradores pueden acceder a esta sección.',
-        variant: 'destructive',
-      });
+      toast.error('Acceso denegado', { description: 'Solo los propietarios y administradores pueden acceder a esta sección.' });
       router.replace('/dashboard');
     }
   }, [isLoading, can, router]);

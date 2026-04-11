@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -103,11 +103,7 @@ export default function EditUseCasePage() {
       }
     } catch (error: any) {
       console.error('Error loading use case:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo cargar el sistema de IA.',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: error.message || 'No se pudo cargar el sistema de IA.' });
       router.push('/dashboard/inventory');
     } finally {
       setLoading(false);
@@ -130,19 +126,12 @@ export default function EditUseCasePage() {
 
       if (error) throw error;
 
-      toast({
-        title: 'Sistema de IA Actualizado',
-        description: 'Los cambios han sido guardados correctamente.',
-      });
+      toast.success('Sistema de IA Actualizado', { description: 'Los cambios han sido guardados correctamente.' });
       
       router.push(`/dashboard/inventory/${useCaseId}`);
     } catch (error: any) {
       console.error('Error updating use case:', error);
-      toast({
-        title: 'Error al Actualizar',
-        description: error.message || 'Hubo un problema al guardar los cambios.',
-        variant: 'destructive',
-      });
+      toast.error('Error al Actualizar', { description: error.message || 'Hubo un problema al guardar los cambios.' });
     } finally {
       setSaving(false);
     }

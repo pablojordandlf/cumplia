@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Search } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { RiskCatalog } from '@/types/risk-management';
 
 interface AddCustomRiskDialogProps {
@@ -31,7 +31,6 @@ export function AddCustomRiskDialog({
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
@@ -52,11 +51,7 @@ export function AddCustomRiskDialog({
       setCatalogRisks(availableRisks);
     } catch (error) {
       console.error('Error fetching catalog:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo cargar el catálogo de riesgos',
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: 'No se pudo cargar el catálogo de riesgos' });
     } finally {
       setLoading(false);
     }
@@ -85,11 +80,7 @@ export function AddCustomRiskDialog({
 
   const handleSubmit = async () => {
     if (selectedRisks.size === 0) {
-      toast({
-        title: 'Selecciona riesgos',
-        description: 'Por favor selecciona al menos un riesgo para añadir',
-        variant: 'destructive'
-      });
+      toast.error('Selecciona riesgos', { description: 'Por favor selecciona al menos un riesgo para añadir' });
       return;
     }
 
@@ -108,21 +99,14 @@ export function AddCustomRiskDialog({
         throw new Error(errorData.error || 'Failed to add risks');
       }
 
-      toast({
-        title: 'Riesgos añadidos',
-        description: `Se han añadido ${selectedRisks.size} riesgo(s) al sistema`
-      });
+      toast.success('Riesgos añadidos', { description: `Se han añadido ${selectedRisks.size} riesgo(s) al sistema` });
 
       setSelectedRisks(new Set());
       setSearchQuery('');
       onOpenChange(false);
       onRisksAdded();
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudieron añadir los riesgos',
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: error.message || 'No se pudieron añadir los riesgos' });
     } finally {
       setSubmitting(false);
     }

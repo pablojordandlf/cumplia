@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, Shield, Info, CheckCircle2, Ban, XCircle, PlusCircle, Building2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskTemplateWithItems } from '@/types/risk-management';
 import { supabase } from '@/lib/supabase';
@@ -47,7 +47,6 @@ export function EditTemplateApplicabilityDialog({
   const [loadingSystems, setLoadingSystems] = useState(false);
   
   const { updateApplicability } = useRiskTemplates({ autoFetch: false });
-  const { toast } = useToast();
 
   // Fetch AI systems from inventory
   useEffect(() => {
@@ -71,11 +70,7 @@ export function EditTemplateApplicabilityDialog({
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
-        toast({
-          title: 'Error',
-          description: 'Debes iniciar sesión para ver tus sistemas de IA',
-          variant: 'destructive',
-        });
+        toast.error('Error', { description: 'Debes iniciar sesión para ver tus sistemas de IA' });
         return;
       }
 
@@ -91,11 +86,7 @@ export function EditTemplateApplicabilityDialog({
       setAiSystems(data || []);
     } catch (error) {
       console.error('Error fetching AI systems:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los sistemas de IA',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: 'No se pudieron cargar los sistemas de IA' });
     } finally {
       setLoadingSystems(false);
     }
@@ -136,11 +127,7 @@ export function EditTemplateApplicabilityDialog({
 
   const handleSubmit = async () => {
     if (selectedLevels.length === 0) {
-      toast({
-        title: 'Nivel requerido',
-        description: 'Debes seleccionar al menos un nivel de riesgo',
-        variant: 'destructive',
-      });
+      toast.error('Nivel requerido', { description: 'Debes seleccionar al menos un nivel de riesgo' });
       return;
     }
 
@@ -155,10 +142,7 @@ export function EditTemplateApplicabilityDialog({
     setSubmitting(false);
 
     if (success) {
-      toast({
-        title: 'Configuración guardada',
-        description: 'La aplicabilidad de la plantilla ha sido actualizada.',
-      });
+      toast.success('Configuración guardada', { description: 'La aplicabilidad de la plantilla ha sido actualizada.' });
       onOpenChange(false);
     }
   };

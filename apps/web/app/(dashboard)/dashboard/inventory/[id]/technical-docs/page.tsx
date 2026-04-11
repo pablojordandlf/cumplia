@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import {
   ChevronLeft,
   ChevronRight,
@@ -244,9 +244,9 @@ export default function TechnicalDocsPage() {
       if (!res.ok) throw new Error('Error al guardar');
       const data = await res.json();
       setCompleteness(data.doc?.completeness_score ?? 0);
-      toast({ title: 'Guardado', description: 'Documentación técnica guardada correctamente.' });
+      toast.success('Guardado', { description: 'Documentación técnica guardada correctamente.' });
     } catch {
-      toast({ title: 'Error', description: 'No se pudo guardar.', variant: 'destructive' });
+      toast.error('Error', { description: 'No se pudo guardar.' });
     } finally {
       setSaving(false);
     }

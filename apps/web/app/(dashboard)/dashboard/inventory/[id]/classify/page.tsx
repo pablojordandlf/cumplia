@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -209,7 +209,7 @@ export default function ClassifyUseCasePage() {
       }
     } catch (error) {
       console.error('Error loading use case:', error);
-      toast({ title: 'Error', description: 'No se pudo cargar el sistema de IA', variant: 'destructive' });
+      toast.error('Error', { description: 'No se pudo cargar el sistema de IA' });
       router.push('/dashboard/inventory');
     } finally { setLoading(false); }
   }
@@ -270,18 +270,12 @@ export default function ClassifyUseCasePage() {
       if (unclear.length > 0 && questions.length > 0) {
         setUnclearQuestions(questions);
         setShowChat(true);
-        toast({
-          title: 'Necesito más información',
-          description: `La IA necesita aclarar ${unclear.length} preguntas. Se ha abierto el chat.`,
-        });
+        toast.success('Necesito más información', { description: `La IA necesita aclarar ${unclear.length} preguntas. Se ha abierto el chat.` });
       } else {
-        toast({
-          title: 'Cuestionario completado por IA',
-          description: `Confianza: ${data.confidence === 'high' ? 'Alta' : data.confidence === 'medium' ? 'Media' : 'Baja'}. Revisa las respuestas antes de finalizar.`,
-        });
+        toast.success('Cuestionario completado por IA', { description: `Confianza: ${data.confidence === 'high' ? 'Alta' : data.confidence === 'medium' ? 'Media' : 'Baja'}. Revisa las respuestas antes de finalizar.` });
       }
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message ?? 'No se pudo completar con IA', variant: 'destructive' });
+      toast.error('Error', { description: err.message ?? 'No se pudo completar con IA' });
     } finally {
       setIsAiFilling(false);
       setAiFillProgress(100);
@@ -332,9 +326,9 @@ export default function ClassifyUseCasePage() {
       }
 
       setResult(riskLevel);
-      toast({ title: 'Clasificación Completada', description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}` });
+      toast.success('Clasificación Completada', { description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}` });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'No se pudo guardar', variant: 'destructive' });
+      toast.error('Error', { description: error.message || 'No se pudo guardar' });
     } finally { setCalculating(false); }
   }
 
@@ -563,7 +557,7 @@ export default function ClassifyUseCasePage() {
               initialQuestions={unclearQuestions}
               onClassificationSuggested={(classification) => {
                 // Apply classification result to form
-                toast({ title: 'Clasificación aplicada', description: `Nivel: ${riskLevels[classification.level as keyof typeof riskLevels]?.label ?? classification.level}` });
+                toast.success('Clasificación aplicada', { description: `Nivel: ${riskLevels[classification.level as keyof typeof riskLevels]?.label ?? classification.level}` });
                 setShowChat(false);
               }}
             />

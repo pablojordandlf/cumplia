@@ -5,7 +5,7 @@ import { FileText, Download, RefreshCw, AlertCircle, Loader2, Calendar } from 'l
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 
 interface SystemForReport {
   id: string;
@@ -32,7 +32,6 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<string | null>(null);
   const supabase = createClient();
-  const { toast } = useToast();
 
   useEffect(() => { load(); }, []);
 
@@ -109,17 +108,13 @@ export default function ReportsPage() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        toast({ title: 'Informe generado', description: `Informe de "${system.name}" descargado correctamente.` });
+        toast.success('Informe generado', { description: `Informe de "${system.name}" descargado correctamente.` });
       } else {
         const data = await response.json();
-        toast({ title: 'Informe disponible', description: data.message ?? 'Informe generado.' });
+        toast.success('Informe disponible', { description: data.message ?? 'Informe generado.' });
       }
     } catch (err) {
-      toast({
-        title: 'Error al generar informe',
-        description: err instanceof Error ? err.message : 'Inténtalo de nuevo',
-        variant: 'destructive',
-      });
+      toast.error('Error al generar informe', { description: err instanceof Error ? err.message : 'Inténtalo de nuevo' });
     } finally {
       setGenerating(null);
     }
