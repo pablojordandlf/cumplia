@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AlertCircle, Clock, ShieldAlert, Shield, CheckCircle2, FileCheck, Info, Upload, Download, FileText, Image, FileVideo, FileAudio, Trash2, Paperclip, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, Clock, ShieldAlert, Shield, CheckCircle2, FileCheck, Info, Upload, Download, FileText, Image, FileVideo, FileAudio, Trash2, Paperclip, Lightbulb, ChevronDown, ChevronUp, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -43,6 +43,12 @@ interface UseCaseObligation {
   obligation_title: string;
   is_completed: boolean;
   completed_at: string | null;
+  assigned_to_email: string | null;
+}
+
+interface OrgMember {
+  email: string;
+  name: string | null;
 }
 
 interface Evidence {
@@ -122,6 +128,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [activeDialogObligation, setActiveDialogObligation] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [orgMembers, setOrgMembers] = useState<OrgMember[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -149,6 +156,13 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
 
         if (membership) {
           setOrganizationId(membership.organization_id);
+
+          const { data: members } = await supabase
+            .from('organization_members')
+            .select('email, name')
+            .eq('organization_id', membership.organization_id)
+            .eq('status', 'active');
+          setOrgMembers((members ?? []).filter((m: OrgMember) => m.email));
         }
       } catch (error) {
         console.error('Error fetching organization_id:', error);
@@ -170,7 +184,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
 
       const { data: obligationsData, error: obligationsError } = await supabase
         .from('use_case_obligations')
-        .select('*')
+        .select('id, use_case_id, obligation_key, obligation_title, is_completed, completed_at, assigned_to_email')
         .eq('use_case_id', useCase.id);
 
       if (obligationsError) throw obligationsError;
@@ -263,6 +277,21 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         setObligationsStatus(prev => ({ ...prev, [obligation.key]: data }));
       }
 
+      // Log to activity when completing an obligation
+      if (checked) {
+        fetch('/api/v1/audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'complete_obligation',
+            entity_type: 'obligation',
+            entity_id: existing?.id,
+            entity_name: obligation.title,
+            details: { obligation_key: obligation.key, system_id: useCase.id },
+          }),
+        }).catch(() => { /* non-blocking */ });
+      }
+
       toast.success(checked ? 'Obligación completada' : 'Obligación pendiente', {
         description: checked
           ? 'La obligación ha sido marcada como cumplida'
@@ -271,6 +300,59 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
     } catch (error) {
       console.error('Error updating obligation:', error);
       toast.error('Error', { description: 'Error al actualizar el estado' });
+    }
+  };
+
+  const assignObligation = async (obligationKey: string, memberEmail: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const effectiveOrgId = useCase.organization_id || organizationId;
+      if (!effectiveOrgId) return;
+
+      const assignedEmail = memberEmail || null;
+      const existing = obligationsStatus[obligationKey];
+
+      if (existing) {
+        const { error } = await supabase
+          .from('use_case_obligations')
+          .update({ assigned_to_email: assignedEmail })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+
+        setObligationsStatus(prev => ({
+          ...prev,
+          [obligationKey]: { ...existing, assigned_to_email: assignedEmail },
+        }));
+      } else {
+        const obligation = obligations.find(o => o.key === obligationKey);
+        const { data, error } = await supabase
+          .from('use_case_obligations')
+          .insert({
+            use_case_id: useCase.id,
+            user_id: session.user.id,
+            organization_id: effectiveOrgId,
+            obligation_key: obligationKey,
+            obligation_title: obligation?.title || '',
+            is_completed: false,
+            assigned_to_email: assignedEmail,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        setObligationsStatus(prev => ({ ...prev, [obligationKey]: data }));
+      }
+
+      toast.success(
+        assignedEmail ? `Asignado a ${assignedEmail}` : 'Asignación eliminada',
+        { description: assignedEmail ? 'El responsable ha sido asignado' : 'La obligación queda sin asignar' }
+      );
+    } catch (error) {
+      console.error('Error assigning obligation:', error);
+      toast.error('Error', { description: 'No se pudo asignar la obligación' });
     }
   };
 
@@ -491,6 +573,34 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
                         <p className="text-xs text-green-500 mt-2">
                           Completado el {new Date(obligationsStatus[obligation.key].completed_at!).toLocaleDateString('es-ES')}
                         </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Assignee picker */}
+                  <div
+                    className="mt-2 ml-7"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                      {orgMembers.length > 0 ? (
+                        <select
+                          value={obligationsStatus[obligation.key]?.assigned_to_email || ''}
+                          onChange={e => assignObligation(obligation.key, e.target.value)}
+                          className="text-xs border border-gray-200 rounded px-2 py-0.5 text-gray-600 bg-white hover:border-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer"
+                        >
+                          <option value="">Sin asignar</option>
+                          {orgMembers.map(m => (
+                            <option key={m.email} value={m.email}>
+                              {m.name ? `${m.name} (${m.email})` : m.email}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-xs text-gray-400">
+                          {obligationsStatus[obligation.key]?.assigned_to_email || 'Sin asignar'}
+                        </span>
                       )}
                     </div>
                   </div>
