@@ -32,6 +32,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, getClientIP, withRateLimitHeaders } from '@/lib/rate-limit';
 
 interface RegisterWithInvitationRequest {
   email: string;
@@ -58,6 +59,17 @@ interface RegisterWithInvitationResponse {
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<RegisterWithInvitationResponse>> {
+  // Rate limit: 10 registration attempts per minute per IP
+  const ip = getClientIP(request);
+  const { allowed, remaining, resetAt } = checkRateLimit(`register:${ip}`, 10, 60_000);
+  if (!allowed) {
+    const resp = NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+    return withRateLimitHeaders(resp, remaining, resetAt);
+  }
+
   try {
     // Parsear body
     const body: RegisterWithInvitationRequest = await request.json();

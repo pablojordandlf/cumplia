@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { checkRateLimit, getClientIP, withRateLimitHeaders } from '@/lib/rate-limit';
 
 const client = new Anthropic();
 
@@ -120,6 +121,17 @@ function sanitizeExtractedData(raw: Record<string, unknown>): ExtractedDocData {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 AI analysis calls per hour per user (checked after auth)
+  const ip = getClientIP(request);
+  const { allowed, remaining, resetAt } = checkRateLimit(`ai-analyze:${ip}`, 20, 3_600_000);
+  if (!allowed) {
+    const resp = NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+    return withRateLimitHeaders(resp, remaining, resetAt);
+  }
+
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();

@@ -21,6 +21,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, getClientIP, withRateLimitHeaders } from '@/lib/rate-limit';
 
 interface ValidationResponse {
   isValid: boolean;
@@ -37,6 +38,17 @@ interface ValidationResponse {
 
 export async function GET(request: NextRequest): Promise<NextResponse<ValidationResponse>> {
   try {
+    // Rate limit: 30 validation attempts per minute per IP
+    const ip = getClientIP(request);
+    const { allowed, remaining, resetAt } = checkRateLimit(`validate:${ip}`, 30, 60_000);
+    if (!allowed) {
+      const resp = NextResponse.json(
+        { isValid: false, error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      );
+      return withRateLimitHeaders(resp, remaining, resetAt);
+    }
+
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 

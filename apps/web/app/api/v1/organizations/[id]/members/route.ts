@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendInviteEmail } from '@/lib/email/send-invite';
+import { checkRateLimit, getClientIP, withRateLimitHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,9 +60,9 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (membersError) {
-      console.error('Error fetching members:', membersError);
+      console.error('[members/GET] DB error:', membersError);
       return NextResponse.json(
-        { success: false, error: membersError.message },
+        { success: false, error: 'Failed to retrieve members' },
         { status: 500 }
       );
     }
@@ -86,9 +87,9 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (invitationsError) {
-      console.error('Error fetching invitations:', invitationsError);
+      console.error('[members/GET] Invitations DB error:', invitationsError);
       return NextResponse.json(
-        { success: false, error: invitationsError.message },
+        { success: false, error: 'Failed to retrieve invitations' },
         { status: 500 }
       );
     }
@@ -128,6 +129,17 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Rate limit: 20 member invitations per hour per IP
+  const ip = getClientIP(request);
+  const { allowed, remaining, resetAt } = checkRateLimit(`invite:${ip}`, 20, 3_600_000);
+  if (!allowed) {
+    const resp = NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+    return withRateLimitHeaders(resp, remaining, resetAt);
+  }
+
   try {
     const { id } = await params;
     const supabase = await createClient();
@@ -358,9 +370,9 @@ export async function DELETE(
         .eq('status', 'pending');
 
       if (error) {
-        console.error('Error canceling invitation:', error);
+        console.error('[members/DELETE] Cancel invitation DB error:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Failed to cancel invitation' },
           { status: 500 }
         );
       }
@@ -407,9 +419,9 @@ export async function DELETE(
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Error removing member:', error);
+        console.error('[members/DELETE] Remove member DB error:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Failed to remove member' },
           { status: 500 }
         );
       }
@@ -419,9 +431,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 });
   } catch (error: any) {
-    console.error('Error removing member:', error);
+    console.error('[members] Unexpected error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
