@@ -5,6 +5,8 @@ import UserMenu from '@/components/auth/UserMenu';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { CumpliaLogo } from '@/components/ui/cumplia-logo';
+import { useSidebar } from '@/contexts/sidebar-context';
+import { cn } from '@/lib/utils';
 
 const pathTitles: Record<string, string> = {
   '/dashboard':            'Dashboard',
@@ -20,6 +22,7 @@ const pathTitles: Record<string, string> = {
 export function DashboardNavbar() {
   const pathname  = usePathname();
   const router    = useRouter();
+  const { isCollapsed } = useSidebar();
   const [isVisible, setIsVisible]     = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -46,9 +49,11 @@ export function DashboardNavbar() {
 
   return (
     <nav
-      className={`hidden lg:flex fixed top-0 left-64 right-0 h-16 bg-[#FAFAF8]/95 dark:bg-[#0B1C3D]/95 backdrop-blur-md border-b border-[#E3DFD5] dark:border-white/5 items-center justify-between px-8 z-30 transition-all duration-300 ease-in-out ${
+      className={cn(
+        'hidden lg:flex fixed top-0 right-0 h-16 bg-[#FAFAF8]/95 dark:bg-[#0B1C3D]/95 backdrop-blur-md border-b border-[#E3DFD5] dark:border-white/5 items-center justify-between px-8 z-30 transition-all duration-300 ease-in-out',
+        isCollapsed ? 'left-16' : 'left-64',
         isVisible ? 'translate-y-0 shadow-sm' : '-translate-y-full shadow-none'
-      }`}
+      )}
     >
       {/* Left: CumplIA Logo */}
       <button
