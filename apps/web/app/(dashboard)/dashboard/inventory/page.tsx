@@ -273,7 +273,7 @@ export default function InventoryPage() {
 
       if (!session?.user) {
         toast.error('Autenticación requerida', { description: 'Por favor, inicia sesión para ver tu inventario.' })
-        router.push('/auth/login')
+        router.push('/login')
         return
       }
 
