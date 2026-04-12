@@ -52,7 +52,7 @@ export function DataTableSkeleton({
                     <Skeleton
                       className="h-4"
                       style={{
-                        width: `${Math.floor(Math.random() * 40) + 60}%`,
+                        width: `${60 + (colIdx * 7 + rowIdx * 3) % 40}%`,
                         opacity: 1 - rowIdx * 0.04,
                       }}
                     />
