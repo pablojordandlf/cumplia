@@ -10,7 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { PageShell, PageHeaderSkeleton } from '@/components/ui/page-shell';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,6 +21,7 @@ import {
   CheckCircle2,
   FileDown,
 } from 'lucide-react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 // ── Annex IV sections ─────────────────────────────────────────────────────────
 
@@ -244,9 +247,9 @@ export default function TechnicalDocsPage() {
       if (!res.ok) throw new Error('Error al guardar');
       const data = await res.json();
       setCompleteness(data.doc?.completeness_score ?? 0);
-      toast({ title: 'Guardado', description: 'Documentación técnica guardada correctamente.' });
+      toast.success('Guardado', { description: 'Documentación técnica guardada correctamente.' });
     } catch {
-      toast({ title: 'Error', description: 'No se pudo guardar.', variant: 'destructive' });
+      toast.error('Error', { description: 'No se pudo guardar.' });
     } finally {
       setSaving(false);
     }
@@ -258,9 +261,21 @@ export default function TechnicalDocsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-      </div>
+      <PageShell className="max-w-3xl">
+        <PageHeaderSkeleton />
+        <div className="bg-white rounded-xl border border-[#E3DFD5] p-6 space-y-4">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-2 w-full rounded-full" />
+          <div className="space-y-6 pt-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </PageShell>
     );
   }
 
@@ -268,10 +283,13 @@ export default function TechnicalDocsPage() {
     <div className="p-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <Link href={`/dashboard/inventory/${id}`} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-3">
-          <ChevronLeft className="w-4 h-4" />
-          Volver a {systemName}
-        </Link>
+        <Breadcrumb
+          items={[
+            { label: 'Inventario', href: '/dashboard/inventory' },
+            { label: systemName || '...', href: `/dashboard/inventory/${id}` },
+            { label: 'Doc. técnica' },
+          ]}
+        />
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">

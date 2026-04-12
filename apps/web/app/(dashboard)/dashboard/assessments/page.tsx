@@ -15,6 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { PageShell, PageHeader, StatCardsSkeleton } from '@/components/ui/page-shell'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
 import { createClient } from '@/lib/supabase/client'
@@ -115,7 +116,7 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
         <DataTableColumnHeader column={column} title="Completadas" />
       ),
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums text-green-600 font-medium">
+        <span className="text-sm tabular-nums text-status-success font-medium">
           {row.original.completed_obligations}
         </span>
       ),
@@ -126,7 +127,7 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
         <DataTableColumnHeader column={column} title="En progreso" />
       ),
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums text-orange-600">
+        <span className="text-sm tabular-nums text-status-warning">
           {row.original.in_progress_obligations}
         </span>
       ),
@@ -172,13 +173,13 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
         }
         if (completion_percentage === 100) {
           return (
-            <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border">
+            <Badge className="bg-status-success-subtle text-status-success border-status-success-border text-xs border">
               <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
             </Badge>
           )
         }
         return (
-          <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-xs border">
+          <Badge className="bg-status-warning-subtle text-status-warning border-status-warning-border text-xs border">
             <Clock className="w-3 h-3 mr-1" /> En progreso
           </Badge>
         )
@@ -301,22 +302,22 @@ export default function AssessmentsPage() {
   const columns = buildColumns()
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0B1C3D]">Evaluaciones</h1>
-          <p className="text-sm text-[#8B9BB4] mt-1">
-            Progreso de cumplimiento de obligaciones AI Act por sistema
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
-        </Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Evaluaciones"
+        description="Progreso de cumplimiento de obligaciones AI Act por sistema"
+        actions={
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+        }
+      />
 
       {/* Summary Cards */}
+      {loading ? (
+        <StatCardsSkeleton />
+      ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -359,6 +360,7 @@ export default function AssessmentsPage() {
           <p className="text-xs text-[#8B9BB4] mt-1">sin obligaciones asignadas</p>
         </div>
       </div>
+      )}
 
       {/* DataTable */}
       <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
@@ -407,6 +409,6 @@ export default function AssessmentsPage() {
           }}
         />
       </div>
-    </div>
+    </PageShell>
   )
 }

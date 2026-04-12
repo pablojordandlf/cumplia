@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Trash2, FileWarning, Shield, Info, CheckCircle2, Ban, Settings, Target, XCircle, PlusCircle, Power, Copy, MoreVertical } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskTemplateWithItems } from '@/types/risk-management';
 import { CreateRiskTemplateDialog } from './create-risk-template-dialog';
@@ -56,34 +56,23 @@ export function RiskTemplatesPanel() {
   const [templateToDelete, setTemplateToDelete] = useState<RiskTemplateWithItems | null>(null);
   const [templateToEdit, setTemplateToEdit] = useState<RiskTemplateWithItems | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const handleDelete = async () => {
     if (!templateToDelete) return;
     
     const success = await deleteTemplate(templateToDelete.id);
     if (success) {
-      toast({
-        title: 'Plantilla eliminada',
-        description: `La plantilla "${templateToDelete.name}" ha sido eliminada correctamente.`,
-      });
+      toast.success('Plantilla eliminada', { description: `La plantilla "${templateToDelete.name}" ha sido eliminada correctamente.` });
       setTemplateToDelete(null);
     } else {
-      toast({
-        title: 'Error al eliminar',
-        description: 'No se pudo eliminar la plantilla. Verifica que seas el propietario.',
-        variant: 'destructive',
-      });
+      toast.error('Error al eliminar', { description: 'No se pudo eliminar la plantilla. Verifica que seas el propietario.' });
     }
   };
 
   const handleToggleActive = async (template: RiskTemplateWithItems) => {
     const success = await toggleTemplateActive(template.id, !template.is_active);
     if (success) {
-      toast({
-        title: template.is_active ? 'Plantilla desactivada' : 'Plantilla activada',
-        description: `La plantilla "${template.name}" ha sido ${template.is_active ? 'desactivada' : 'activada'}.`,
-      });
+      toast.success(template.is_active ? 'Plantilla desactivada' : 'Plantilla activada', { description: `La plantilla "${template.name}" ha sido ${template.is_active ? 'desactivada' : 'activada'}.` });
     }
   };
 
@@ -92,16 +81,9 @@ export function RiskTemplatesPanel() {
     try {
       const newTemplate = await duplicateTemplate(template.id);
       if (newTemplate) {
-        toast({
-          title: 'Plantilla duplicada',
-          description: `La plantilla "${template.name}" ha sido duplicada como "${newTemplate.name}".`,
-        });
+        toast.success('Plantilla duplicada', { description: `La plantilla "${template.name}" ha sido duplicada como "${newTemplate.name}".` });
       } else {
-        toast({
-          title: 'Error al duplicar',
-          description: 'No se pudo duplicar la plantilla. Verifica que seas el propietario.',
-          variant: 'destructive',
-        });
+        toast.error('Error al duplicar', { description: 'No se pudo duplicar la plantilla. Verifica que seas el propietario.' });
       }
     } finally {
       setDuplicating(null);

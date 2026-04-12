@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Search, Shield, Info, CheckCircle2, Ban, Copy } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { useRiskTemplates } from '@/hooks/use-risk-templates';
 import { RiskCatalog, RiskTemplateWithItems } from '@/types/risk-management';
 
@@ -47,7 +47,6 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
   const [existingTemplates, setExistingTemplates] = useState<RiskTemplateWithItems[]>([]);
   
   const { createTemplate, templates } = useRiskTemplates({ includeSystem: false });
-  const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
@@ -65,11 +64,7 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       setCatalogRisks(data.risks || []);
     } catch (error) {
       console.error('Error fetching catalog:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo cargar el catálogo de riesgos',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: 'No se pudo cargar el catálogo de riesgos' });
     } finally {
       setLoadingCatalog(false);
     }
@@ -108,10 +103,7 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
       const riskIds = new Set(selectedTemplate.items?.map(item => item.catalog_risk_id) || []);
       setSelectedRisks(riskIds);
       setBaseTemplate(templateId);
-      toast({
-        title: 'Plantilla cargada',
-        description: `Se han cargado los riesgos y configuración de "${selectedTemplate.name}". Modifica según sea necesario.`,
-      });
+      toast.success('Plantilla cargada', { description: `Se han cargado los riesgos y configuración de "${selectedTemplate.name}". Modifica según sea necesario.` });
     }
   };
 
@@ -126,29 +118,17 @@ export function CreateRiskTemplateDialog({ open, onOpenChange }: CreateRiskTempl
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast({
-        title: 'Nombre requerido',
-        description: 'Por favor introduce un nombre para la plantilla',
-        variant: 'destructive',
-      });
+      toast.error('Nombre requerido', { description: 'Por favor introduce un nombre para la plantilla' });
       return;
     }
 
     if (appliesToLevels.length === 0) {
-      toast({
-        title: 'Aplicabilidad requerida',
-        description: 'Por favor selecciona al menos un nivel de riesgo',
-        variant: 'destructive',
-      });
+      toast.error('Aplicabilidad requerida', { description: 'Por favor selecciona al menos un nivel de riesgo' });
       return;
     }
 
     if (selectedRisks.size === 0) {
-      toast({
-        title: 'Riesgos requeridos',
-        description: 'Por favor selecciona al menos un riesgo',
-        variant: 'destructive',
-      });
+      toast.error('Riesgos requeridos', { description: 'Por favor selecciona al menos un riesgo' });
       return;
     }
 

@@ -218,7 +218,7 @@ export default function MyWorkPage() {
                 const levelCfg = LEVEL_LABELS[obl.system_level] ?? { label: obl.system_level, color: 'bg-gray-100 text-gray-600' };
                 return (
                   <Link key={obl.id} href={`/dashboard/inventory/${obl.use_case_id}`}>
-                    <div className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 transition-colors group">
+                    <div className="card-interactive flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 group">
                       <div className="w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center flex-shrink-0 group-hover:border-blue-300">
                         <Clock className="w-4 h-4 text-gray-400" />
                       </div>
@@ -253,7 +253,7 @@ export default function MyWorkPage() {
                 const daysUntil = risk.due_date ? getDaysUntil(risk.due_date) : null;
                 return (
                   <Link key={risk.id} href={`/dashboard/inventory/${risk.use_case_id}`}>
-                    <div className={`flex items-center gap-3 p-3.5 border rounded-xl hover:bg-blue-50/30 transition-colors group ${overdue ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200 hover:border-blue-300'}`}>
+                    <div className={`card-interactive flex items-center gap-3 p-3.5 border rounded-xl hover:bg-blue-50/30 group ${overdue ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200 hover:border-blue-300'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${overdue ? 'bg-red-100' : 'bg-gray-100'}`}>
                         <AlertTriangle className={`w-4 h-4 ${overdue ? 'text-red-500' : 'text-gray-400'}`} />
                       </div>

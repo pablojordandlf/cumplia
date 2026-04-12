@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Edit, Trash2, FormInput, Text, Hash, Link, Mail, AlignLeft, ArrowUp, ArrowDown } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { useCustomFieldTemplates } from '@/hooks/use-custom-field-templates';
 import { CustomFieldTemplate } from '@/types/custom-fields';
 import { CreateCustomFieldDialog } from './create-custom-field-dialog';
@@ -55,7 +55,6 @@ export function CustomFieldsPanel() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState<CustomFieldTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<CustomFieldTemplate | null>(null);
-  const { toast } = useToast();
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
     await updateTemplate(id, { is_active: isActive });

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -27,8 +27,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronLeft, FileText, Loader2 } from 'lucide-react';
+import { FormSkeleton } from '@/components/ui/page-shell';
+import { FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 // Define the sectors
 const sectors = [
@@ -68,6 +70,7 @@ export default function EditUseCasePage() {
   const useCaseId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [systemName, setSystemName] = useState('');
   
   const form = useForm<z.infer<typeof useCaseFormSchema>>({
     resolver: zodResolver(useCaseFormSchema),
@@ -94,6 +97,7 @@ export default function EditUseCasePage() {
       if (error) throw error;
 
       if (data) {
+        setSystemName(data.name);
         form.reset({
           name: data.name,
           description: data.description || '',
@@ -103,11 +107,7 @@ export default function EditUseCasePage() {
       }
     } catch (error: any) {
       console.error('Error loading use case:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo cargar el sistema de IA.',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: error.message || 'No se pudo cargar el sistema de IA.' });
       router.push('/dashboard/inventory');
     } finally {
       setLoading(false);
@@ -130,48 +130,34 @@ export default function EditUseCasePage() {
 
       if (error) throw error;
 
-      toast({
-        title: 'Sistema de IA Actualizado',
-        description: 'Los cambios han sido guardados correctamente.',
-      });
+      toast.success('Sistema de IA Actualizado', { description: 'Los cambios han sido guardados correctamente.' });
       
       router.push(`/dashboard/inventory/${useCaseId}`);
     } catch (error: any) {
       console.error('Error updating use case:', error);
-      toast({
-        title: 'Error al Actualizar',
-        description: error.message || 'Hubo un problema al guardar los cambios.',
-        variant: 'destructive',
-      });
+      toast.error('Error al Actualizar', { description: error.message || 'Hubo un problema al guardar los cambios.' });
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return (
-      <div className="p-4 sm:p-8 bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-3">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-          <span className="text-gray-600">Cargando...</span>
-        </div>
-      </div>
-    );
+    return <FormSkeleton fields={7} />
   }
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href={`/dashboard/inventory/${useCaseId}`}>
-            <Button variant="ghost" size="icon">
-              <ChevronLeft className="w-6 h-6" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar Sistema de IA</h1>
-            <p className="text-gray-600">Modifica los datos de tu sistema de IA</p>
-          </div>
+        <Breadcrumb
+          items={[
+            { label: 'Inventario', href: '/dashboard/inventory' },
+            { label: systemName || '...', href: `/dashboard/inventory/${useCaseId}` },
+            { label: 'Editar' },
+          ]}
+        />
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Editar Sistema de IA</h1>
+          <p className="text-gray-600">Modifica los datos de tu sistema de IA</p>
         </div>
 
         <Card>

@@ -45,6 +45,30 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
 
+        // ── Status Semantic Tokens ──
+        status: {
+          success: {
+            DEFAULT: "hsl(var(--status-success))",
+            subtle:  "hsl(var(--status-success-subtle))",
+            border:  "hsl(var(--status-success-border))",
+          },
+          warning: {
+            DEFAULT: "hsl(var(--status-warning))",
+            subtle:  "hsl(var(--status-warning-subtle))",
+            border:  "hsl(var(--status-warning-border))",
+          },
+          info: {
+            DEFAULT: "hsl(var(--status-info))",
+            subtle:  "hsl(var(--status-info-subtle))",
+            border:  "hsl(var(--status-info-border))",
+          },
+          danger: {
+            DEFAULT: "hsl(var(--status-danger))",
+            subtle:  "hsl(var(--status-danger-subtle))",
+            border:  "hsl(var(--status-danger-border))",
+          },
+        },
+
         // ── CumplIA Brand Palette ──
         night: "#0B1C3D",
         ink:   "#0F0F0E",

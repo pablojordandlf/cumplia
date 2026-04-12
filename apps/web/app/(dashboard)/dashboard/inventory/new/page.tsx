@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -106,11 +106,7 @@ export default function NewUseCasePage() {
   // Redirect viewers — they can read but not create systems
   useEffect(() => {
     if (!permLoading && !can('ai_systems:create')) {
-      toast({
-        title: 'Acceso denegado',
-        description: 'No tienes permisos para crear sistemas de IA.',
-        variant: 'destructive',
-      });
+      toast.error('Acceso denegado', { description: 'No tienes permisos para crear sistemas de IA.' });
       router.replace('/dashboard/inventory');
     }
   }, [permLoading, can, router]);
@@ -145,11 +141,7 @@ export default function NewUseCasePage() {
   // Custom fields management functions
   function addCustomField() {
     if (!newFieldKey.trim() || !newFieldValue.trim()) {
-      toast({ 
-        title: 'Error', 
-        description: 'El nombre y valor del campo son obligatorios', 
-        variant: 'destructive' 
-      });
+      toast.error('Error', { description: 'El nombre y valor del campo son obligatorios' });
       return;
     }
 
@@ -162,16 +154,12 @@ export default function NewUseCasePage() {
     setCustomFields([...customFields, newField]);
     setNewFieldKey('');
     setNewFieldValue('');
-    toast({ title: 'Campo añadido', description: 'El campo personalizado se ha añadido.' });
+    toast.success('Campo añadido', { description: 'El campo personalizado se ha añadido.' });
   }
 
   function updateCustomField(fieldId: string) {
     if (!editKey.trim() || !editValue.trim()) {
-      toast({ 
-        title: 'Error', 
-        description: 'El nombre y valor del campo son obligatorios', 
-        variant: 'destructive' 
-      });
+      toast.error('Error', { description: 'El nombre y valor del campo son obligatorios' });
       return;
     }
 
@@ -185,13 +173,13 @@ export default function NewUseCasePage() {
     setEditingField(null);
     setEditKey('');
     setEditValue('');
-    toast({ title: 'Campo actualizado', description: 'Los cambios se han guardado.' });
+    toast.success('Campo actualizado', { description: 'Los cambios se han guardado.' });
   }
 
   function deleteCustomField(fieldId: string) {
     const updatedFields = customFields.filter(field => field.id !== fieldId);
     setCustomFields(updatedFields);
-    toast({ title: 'Campo eliminado', description: 'El campo personalizado se ha eliminado.' });
+    toast.success('Campo eliminado', { description: 'El campo personalizado se ha eliminado.' });
   }
 
   function startEditing(field: CustomField) {
@@ -297,11 +285,7 @@ export default function NewUseCasePage() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session?.user) {
-        toast({
-          title: 'Error de Autenticación',
-          description: 'Debes iniciar sesión para crear un sistema de IA.',
-          variant: 'destructive',
-        });
+        toast.error('Error de Autenticación', { description: 'Debes iniciar sesión para crear un sistema de IA.' });
         router.push('/auth/login');
         return;
       }
@@ -332,20 +316,12 @@ export default function NewUseCasePage() {
 
       if (error) throw error;
 
-      toast({
-        title: 'Sistema de IA Creado',
-        description: 'Continúa con el cuestionario de clasificación para determinar el nivel de riesgo AI Act.',
-        variant: 'default',
-      });
+      toast.success('Sistema de IA Creado', { description: 'Continúa con el cuestionario de clasificación para determinar el nivel de riesgo AI Act.' });
       // Redirigir al wizard de clasificación con el ID del nuevo caso
       router.push(`/dashboard/inventory/${newUseCase?.id}/classify`);
     } catch (error: any) {
       console.error('Error creating use case:', error);
-      toast({
-        title: 'Error al Crear Sistema de IA',
-        description: error.message || 'Hubo un problema al guardar tu sistema de IA. Inténtalo de nuevo.',
-        variant: 'destructive',
-      });
+      toast.error('Error al Crear Sistema de IA', { description: error.message || 'Hubo un problema al guardar tu sistema de IA. Inténtalo de nuevo.' });
     }
   }
 
@@ -405,10 +381,7 @@ export default function NewUseCasePage() {
             form.setValue('name', useCase.name);
             form.setValue('description', useCase.description);
             form.setValue('sector', useCase.sector as any);
-            toast({
-              title: 'Caso precargado',
-              description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.`,
-            });
+            toast.success('Caso precargado', { description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.` });
           }}
         />
       </div>

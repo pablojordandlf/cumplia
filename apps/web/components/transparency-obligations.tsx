@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
@@ -124,7 +124,6 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
-  const { toast } = useToast();
 
   // Obtener organization_id del usuario autenticado
   useEffect(() => {
@@ -218,13 +217,13 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        toast({ title: 'Error', description: 'Debes iniciar sesión', variant: 'destructive' });
+        toast.error('Error', { description: 'Debes iniciar sesión' });
         return;
       }
 
       const effectiveOrgId = useCase.organization_id || organizationId;
       if (!effectiveOrgId) {
-        toast({ title: 'Error', description: 'No se pudo determinar la organización', variant: 'destructive' });
+        toast.error('Error', { description: 'No se pudo determinar la organización' });
         return;
       }
 
@@ -264,34 +263,31 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         setObligationsStatus(prev => ({ ...prev, [obligation.key]: data }));
       }
 
-      toast({
-        title: checked ? 'Obligación completada' : 'Obligación pendiente',
-        description: checked ? 'La obligación ha sido marcada como cumplida' : 'La obligación ha sido marcada como pendiente',
+      toast.success(checked ? 'Obligación completada' : 'Obligación pendiente', {
+        description: checked
+          ? 'La obligación ha sido marcada como cumplida'
+          : 'La obligación ha sido marcada como pendiente',
       });
     } catch (error) {
       console.error('Error updating obligation:', error);
-      toast({ title: 'Error', description: 'Error al actualizar el estado', variant: 'destructive' });
+      toast.error('Error', { description: 'Error al actualizar el estado' });
     }
   };
 
   const handleFileUpload = async (obligationKey: string) => {
     if (!selectedFile) {
-      toast({ title: 'Error', description: 'Selecciona un archivo primero', variant: 'destructive' });
+      toast.error('Error', { description: 'Selecciona un archivo primero' });
       return;
     }
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-      toast({ 
-        title: 'Archivo demasiado grande', 
-        description: 'El tamaño máximo permitido es 10MB. Por favor, comprime el archivo o sube una versión más ligera.', 
-        variant: 'destructive' 
-      });
+      toast.error('Archivo demasiado grande', { description: 'El tamaño máximo permitido es 10MB. Por favor, comprime el archivo o sube una versión más ligera.' });
       return;
     }
 
     const obligationEvidences = evidences[obligationKey] || [];
     if (obligationEvidences.length >= MAX_EVIDENCES_PER_OBLIGATION) {
-      toast({ title: 'Límite alcanzado', description: `Máximo ${MAX_EVIDENCES_PER_OBLIGATION} evidencias por obligación`, variant: 'destructive' });
+      toast.error('Límite alcanzado', { description: `Máximo ${MAX_EVIDENCES_PER_OBLIGATION} evidencias por obligación` });
       return;
     }
 
@@ -300,13 +296,13 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        toast({ title: 'Error', description: 'Debes iniciar sesión', variant: 'destructive' });
+        toast.error('Error', { description: 'Debes iniciar sesión' });
         return;
       }
 
       const effectiveOrgId = useCase.organization_id || organizationId;
       if (!effectiveOrgId) {
-        toast({ title: 'Error', description: 'No se pudo determinar la organización', variant: 'destructive' });
+        toast.error('Error', { description: 'No se pudo determinar la organización' });
         return;
       }
 
@@ -364,7 +360,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
       setEvidenceDescription('');
       setSelectedFile(null);
       setActiveDialogObligation(null);
-      toast({ title: 'Evidencia subida', description: 'El archivo se ha subido correctamente' });
+      toast.success('Evidencia subida', { description: 'El archivo se ha subido correctamente' });
     } catch (error: any) {
       console.error('Error uploading file:', error);
       let errorMessage = 'Error al subir el archivo';
@@ -379,7 +375,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         errorMessage = `Error: ${error.message}`;
       }
       
-      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
+      toast.error('Error', { description: errorMessage });
     } finally {
       setUploadingObligation(null);
     }
@@ -396,10 +392,10 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
         [obligationKey]: prev[obligationKey]?.filter(e => e.id !== evidence.id) || []
       }));
 
-      toast({ title: 'Evidencia eliminada', description: 'El archivo se ha eliminado correctamente' });
+      toast.success('Evidencia eliminada', { description: 'El archivo se ha eliminado correctamente' });
     } catch (error) {
       console.error('Error deleting evidence:', error);
-      toast({ title: 'Error', description: 'Error al eliminar la evidencia', variant: 'destructive' });
+      toast.error('Error', { description: 'Error al eliminar la evidencia' });
     }
   };
 
@@ -413,7 +409,7 @@ export function TransparencyObligations({ useCase }: { useCase: UseCase }) {
       window.open(data.signedUrl, '_blank');
     } catch (error) {
       console.error('Error downloading file:', error);
-      toast({ title: 'Error', description: 'Error al descargar el archivo', variant: 'destructive' });
+      toast.error('Error', { description: 'Error al descargar el archivo' });
     }
   };
 

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, Text, AlignLeft, Link, Mail, Hash, FormInput, AlertCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { useCustomFieldTemplates } from '@/hooks/use-custom-field-templates';
 import { CustomFieldTemplate, CustomFieldDefinition } from '@/types/custom-fields';
 
@@ -61,7 +61,6 @@ export function CreateCustomFieldDialog({
   const [submitting, setSubmitting] = useState(false);
   
   const { createTemplate, updateTemplate } = useCustomFieldTemplates({ autoFetch: false });
-  const { toast } = useToast();
   const isEditing = !!templateToEdit;
 
   useEffect(() => {
@@ -83,11 +82,7 @@ export function CreateCustomFieldDialog({
 
   const addField = () => {
     if (!newFieldLabel.trim()) {
-      toast({
-        title: 'Etiqueta requerida',
-        description: 'Por favor introduce un nombre para el campo',
-        variant: 'destructive',
-      });
+      toast.error('Etiqueta requerida', { description: 'Por favor introduce un nombre para el campo' });
       return;
     }
 
@@ -95,11 +90,7 @@ export function CreateCustomFieldDialog({
     
     // Check for duplicate keys
     if (fields.some(f => f.key === key)) {
-      toast({
-        title: 'Campo duplicado',
-        description: 'Ya existe un campo con ese nombre',
-        variant: 'destructive',
-      });
+      toast.error('Campo duplicado', { description: 'Ya existe un campo con ese nombre' });
       return;
     }
 
@@ -133,29 +124,17 @@ export function CreateCustomFieldDialog({
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast({
-        title: 'Nombre requerido',
-        description: 'Por favor introduce un nombre para el template',
-        variant: 'destructive',
-      });
+      toast.error('Nombre requerido', { description: 'Por favor introduce un nombre para el template' });
       return;
     }
 
     if (!appliesTo || appliesTo.length === 0) {
-      toast({
-        title: 'Nivel requerido',
-        description: 'Por favor selecciona al menos un nivel de riesgo',
-        variant: 'destructive',
-      });
+      toast.error('Nivel requerido', { description: 'Por favor selecciona al menos un nivel de riesgo' });
       return;
     }
 
     if (fields.length === 0) {
-      toast({
-        title: 'Campos requeridos',
-        description: 'Por favor añade al menos un campo',
-        variant: 'destructive',
-      });
+      toast.error('Campos requeridos', { description: 'Por favor añade al menos un campo' });
       return;
     }
 

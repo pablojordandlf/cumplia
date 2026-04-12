@@ -24,7 +24,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 
 interface ProposedRisk {
   catalog_risk_id: string;
@@ -115,7 +115,6 @@ export function RiskAIAssistant({
   const [selectedRiskIds, setSelectedRiskIds] = useState<Set<string>>(new Set());
   const [applying, setApplying] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
 
   // Start analysis when dialog opens
   useEffect(() => {
@@ -208,7 +207,7 @@ export function RiskAIAssistant({
         setAnalysis(result);
       }
     } catch {
-      toast({ title: 'Error', description: 'No se pudo conectar con el asistente', variant: 'destructive' });
+      toast.error('Error', { description: 'No se pudo conectar con el asistente' });
       setMessages(prev => prev.slice(0, assistantMsgIndex));
     } finally {
       setIsStreaming(false);
@@ -254,16 +253,9 @@ export function RiskAIAssistant({
 
       onApply();
       onOpenChange(false);
-      toast({
-        title: 'Análisis aplicado',
-        description: `${selectedRiskIds.size} factor(es) marcado(s) como aplicables.`,
-      });
+      toast.success('Análisis aplicado', { description: `${selectedRiskIds.size} factor(es) marcado(s) como aplicables.` });
     } catch (err) {
-      toast({
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'No se pudo aplicar el análisis',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: err instanceof Error ? err.message : 'No se pudo aplicar el análisis' });
     } finally {
       setApplying(false);
     }

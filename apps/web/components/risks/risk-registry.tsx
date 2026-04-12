@@ -31,7 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { 
   AISystemRisk, 
   RiskStatus,
@@ -65,7 +65,6 @@ export function RiskRegistry({
   const [selectedRisk, setSelectedRisk] = useState<AISystemRisk | null>(null);
   const [togglingRiskId, setTogglingRiskId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   // Filter risks
   const filteredRisks = risks.filter(risk => {
@@ -82,11 +81,7 @@ export function RiskRegistry({
 
   const handleToggleApplicable = async (risk: AISystemRisk, newValue: boolean) => {
     if (isReadOnly) {
-      toast({
-        title: 'Sin permisos',
-        description: 'No tienes permisos para modificar riesgos',
-        variant: 'destructive'
-      });
+      toast.error('Sin permisos', { description: 'No tienes permisos para modificar riesgos' });
       return;
     }
 
@@ -106,18 +101,13 @@ export function RiskRegistry({
       const data = await response.json();
       onRiskUpdated(data.risk);
       
-      toast({
-        title: newValue ? 'Riesgo aplicable' : 'Riesgo no aplicable',
-        description: newValue 
+      toast.success(newValue ? 'Riesgo aplicable' : 'Riesgo no aplicable', {
+        description: newValue
           ? 'El riesgo ahora está activo para evaluación'
-          : 'El riesgo ha sido marcado como no aplicable'
+          : 'El riesgo ha sido marcado como no aplicable',
       });
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar el riesgo',
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: 'No se pudo actualizar el riesgo' });
     } finally {
       setTogglingRiskId(null);
     }

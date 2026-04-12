@@ -16,10 +16,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { PageShell, PageHeader } from '@/components/ui/page-shell'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
 import { supabase } from '@/lib/supabase'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { hasPermission, MemberRole } from '@/lib/permissions'
 
 // ---------------------------------------------------------------------------
@@ -234,7 +235,6 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true)
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<MemberRole | null>(null)
-  const { toast } = useToast()
   const router = useRouter()
 
   useEffect(() => {
@@ -272,11 +272,7 @@ export default function InventoryPage() {
       } = await supabase.auth.getSession()
 
       if (!session?.user) {
-        toast({
-          title: 'Autenticación requerida',
-          description: 'Por favor, inicia sesión para ver tu inventario.',
-          variant: 'destructive',
-        })
+        toast.error('Autenticación requerida', { description: 'Por favor, inicia sesión para ver tu inventario.' })
         router.push('/auth/login')
         return
       }
@@ -315,11 +311,7 @@ export default function InventoryPage() {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'No se pudieron cargar los sistemas de IA.'
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      })
+      toast.error('Error', { description: message })
     } finally {
       setLoading(false)
     }
@@ -359,11 +351,7 @@ export default function InventoryPage() {
   const handleDelete = useCallback(
     async (id: string) => {
       if (!userRole || !hasPermission(userRole, 'ai_systems:delete')) {
-        toast({
-          title: 'Sin permisos',
-          description: 'No tienes permisos para eliminar sistemas de IA.',
-          variant: 'destructive',
-        })
+        toast.error('Sin permisos', { description: 'No tienes permisos para eliminar sistemas de IA.' })
         return
       }
 
@@ -377,23 +365,16 @@ export default function InventoryPage() {
 
         if (error) throw error
 
-        toast({
-          title: 'Eliminado',
-          description: 'El sistema de IA ha sido eliminado correctamente.',
-        })
+        toast.success('Eliminado', { description: 'El sistema de IA ha sido eliminado correctamente.' })
 
         fetchUseCases()
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : 'No se pudo eliminar el sistema de IA.'
-        toast({
-          title: 'Error',
-          description: message,
-          variant: 'destructive',
-        })
+        toast.error('Error', { description: message })
       }
     },
-    [userRole, toast]
+    [userRole]
   )
 
   const canCreate = userRole ? hasPermission(userRole, 'ai_systems:create') : false
@@ -414,36 +395,33 @@ export default function InventoryPage() {
   )
 
   return (
-    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-            Inventario de Sistemas de IA
-          </h1>
-          <p className="text-gray-600 mt-1 text-sm sm:text-base">
-            {isViewer
-              ? 'Visualiza los sistemas de IA de tu organización'
-              : 'Lista y gestiona tus sistemas de IA'}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/dashboard/admin">
-            <Button variant="outline">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Templates
-            </Button>
-          </Link>
-          {canCreate && (
-            <Link href="/dashboard/inventory/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Añadir Sistema
+    <PageShell className="max-w-7xl">
+      <PageHeader
+        title="Inventario de Sistemas de IA"
+        description={
+          isViewer
+            ? 'Visualiza los sistemas de IA de tu organización'
+            : 'Lista y gestiona tus sistemas de IA'
+        }
+        actions={
+          <div className="flex gap-2">
+            <Link href="/dashboard/admin">
+              <Button variant="outline">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Templates
               </Button>
             </Link>
-          )}
-        </div>
-      </div>
+            {canCreate && (
+              <Link href="/dashboard/inventory/new">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Añadir Sistema
+                </Button>
+              </Link>
+            )}
+          </div>
+        }
+      />
 
       {/* Active tag pill */}
       {activeTag && (
@@ -514,6 +492,6 @@ export default function InventoryPage() {
           }}
         />
       </div>
-    </div>
+    </PageShell>
   )
 }
