@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +55,6 @@ export function RiskManagementTab({
   const [showAddRiskDialog, setShowAddRiskDialog] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [analysisCompleted, setAnalysisCompleted] = useState(riskAnalysisCompleted);
-  const { toast } = useToast();
 
   const config = AI_ACT_RISK_CONFIG[aiActLevel] || AI_ACT_RISK_CONFIG.unclassified;
 
@@ -82,11 +81,7 @@ export function RiskManagementTab({
       setRisks(data.risks || []);
     } catch (error) {
       console.error('Error fetching risks:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los riesgos',
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: 'No se pudieron cargar los riesgos' });
     } finally {
       setLoading(false);
     }
@@ -94,10 +89,7 @@ export function RiskManagementTab({
 
   const handleTemplateApplied = (newRisks: AISystemRisk[]) => {
     setRisks(newRisks);
-    toast({
-      title: 'Template aplicado',
-      description: `Se han creado ${newRisks.length} riesgos para este sistema`
-    });
+    toast.success('Template aplicado', { description: `Se han creado ${newRisks.length} riesgos para este sistema` });
   };
 
   const handleRiskUpdated = (updatedRisk: AISystemRisk) => {

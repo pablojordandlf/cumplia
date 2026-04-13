@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { OrganizationContext } from "@/hooks/use-organization";
 import type { MemberRole } from "@/types/organization";
 import { FloatingChat } from "@/components/floating-chat";
+import { SidebarProvider } from "@/contexts/sidebar-context";
 
 export const dynamic = 'force-dynamic';
 
@@ -96,9 +97,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     : ViewerLayout;
 
   return (
-    <OrganizationContext.Provider value={orgContextValue}>
-      <LayoutComponent>{children}</LayoutComponent>
-      <FloatingChat />
-    </OrganizationContext.Provider>
+    <SidebarProvider>
+      <OrganizationContext.Provider value={orgContextValue}>
+        <LayoutComponent>{children}</LayoutComponent>
+        <FloatingChat />
+      </OrganizationContext.Provider>
+    </SidebarProvider>
   );
 }

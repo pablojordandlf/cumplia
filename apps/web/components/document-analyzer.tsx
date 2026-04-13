@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { UploadCloud, FileText, X, Sparkles, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const ACCEPTED_TYPES: Record<string, string> = {
   'application/pdf': 'PDF',
@@ -138,8 +138,6 @@ export function DocumentAnalyzer({ onApply, currentValues }: DocumentAnalyzerPro
   const [selectedFields, setSelectedFields] = useState<SelectedFields | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-
   function addFiles(incoming: FileList | File[]) {
     const valid: File[] = [];
     const errors: string[] = [];
@@ -157,13 +155,13 @@ export function DocumentAnalyzer({ onApply, currentValues }: DocumentAnalyzerPro
     });
 
     if (errors.length) {
-      toast({ title: 'Archivos no válidos', description: errors.join(' '), variant: 'destructive' });
+      toast.error('Archivos no válidos', { description: errors.join(' ') });
     }
 
     setFiles((prev) => {
       const merged = [...prev, ...valid];
       if (merged.length > MAX_FILES) {
-        toast({ title: 'Límite alcanzado', description: `Máximo ${MAX_FILES} archivos.`, variant: 'destructive' });
+        toast.error('Límite alcanzado', { description: `Máximo ${MAX_FILES} archivos.` });
         return merged.slice(0, MAX_FILES);
       }
       return merged;
@@ -248,10 +246,7 @@ export function DocumentAnalyzer({ onApply, currentValues }: DocumentAnalyzerPro
 
     const appliedCount = Object.values(selectedFields).filter(Boolean).length;
     onApply(filtered);
-    toast({
-      title: 'Campos aplicados',
-      description: `Se han prerrellenado ${appliedCount} campo${appliedCount !== 1 ? 's' : ''} en el formulario.`,
-    });
+    toast.success('Campos aplicados', { description: `Se han prerrellenado ${appliedCount} campo${appliedCount !== 1 ? 's' : ''} en el formulario.` });
   }
 
   const confidenceCfg = extracted ? CONFIDENCE_CONFIG[extracted.confidence] : null;

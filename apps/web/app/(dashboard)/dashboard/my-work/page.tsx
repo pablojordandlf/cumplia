@@ -25,6 +25,7 @@ interface PendingObligation {
   use_case_id: string;
   system_name: string;
   system_level: string;
+  assigned_to_email: string | null;
 }
 
 interface PendingRisk {
@@ -102,12 +103,13 @@ export default function MyWorkPage() {
 
     if (systemIds.length === 0) { setLoading(false); return; }
 
-    // Fetch my obligations (created by me or all pending)
+    // Fetch obligations assigned to me
     const { data: obls } = await supabase
       .from('use_case_obligations')
-      .select('id, obligation_title, obligation_key, is_completed, use_case_id')
+      .select('id, obligation_title, obligation_key, is_completed, use_case_id, assigned_to_email')
       .in('use_case_id', systemIds)
-      .eq('is_completed', false);
+      .eq('is_completed', false)
+      .eq('assigned_to_email', user.email ?? '');
 
     const mappedObls: PendingObligation[] = (obls ?? []).map(o => ({
       ...o,
@@ -183,7 +185,7 @@ export default function MyWorkPage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
           <p className="text-3xl font-bold text-gray-900">{totalObligations}</p>
-          <p className="text-xs text-gray-500 mt-1">Obligaciones pendientes</p>
+          <p className="text-xs text-gray-500 mt-1">Obligaciones asignadas</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
           <p className="text-3xl font-bold text-blue-600">{risks.length}</p>
@@ -198,7 +200,7 @@ export default function MyWorkPage() {
       <Tabs defaultValue="obligations">
         <TabsList className="mb-4">
           <TabsTrigger value="obligations">
-            Obligaciones ({totalObligations})
+            Asignadas a mí ({totalObligations})
           </TabsTrigger>
           <TabsTrigger value="risks">
             Riesgos ({risks.length})
@@ -209,8 +211,8 @@ export default function MyWorkPage() {
           {obligations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Inbox className="w-12 h-12 text-gray-300 mb-3" />
-              <p className="text-gray-500 font-medium">Sin obligaciones pendientes</p>
-              <p className="text-xs text-gray-400 mt-1">¡Todo al día!</p>
+              <p className="text-gray-500 font-medium">No tienes obligaciones asignadas</p>
+              <p className="text-xs text-gray-400 mt-1">Las obligaciones se asignan desde cada sistema de IA</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -218,7 +220,7 @@ export default function MyWorkPage() {
                 const levelCfg = LEVEL_LABELS[obl.system_level] ?? { label: obl.system_level, color: 'bg-gray-100 text-gray-600' };
                 return (
                   <Link key={obl.id} href={`/dashboard/inventory/${obl.use_case_id}`}>
-                    <div className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 transition-colors group">
+                    <div className="card-interactive flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/30 group">
                       <div className="w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center flex-shrink-0 group-hover:border-blue-300">
                         <Clock className="w-4 h-4 text-gray-400" />
                       </div>
@@ -253,7 +255,7 @@ export default function MyWorkPage() {
                 const daysUntil = risk.due_date ? getDaysUntil(risk.due_date) : null;
                 return (
                   <Link key={risk.id} href={`/dashboard/inventory/${risk.use_case_id}`}>
-                    <div className={`flex items-center gap-3 p-3.5 border rounded-xl hover:bg-blue-50/30 transition-colors group ${overdue ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200 hover:border-blue-300'}`}>
+                    <div className={`card-interactive flex items-center gap-3 p-3.5 border rounded-xl hover:bg-blue-50/30 group ${overdue ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200 hover:border-blue-300'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${overdue ? 'bg-red-100' : 'bg-gray-100'}`}>
                         <AlertTriangle className={`w-4 h-4 ${overdue ? 'text-red-500' : 'text-gray-400'}`} />
                       </div>

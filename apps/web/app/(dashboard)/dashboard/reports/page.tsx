@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FileText, Download, RefreshCw, AlertCircle, Loader2, Calendar } from 'lucide-react';
+import { FileText, Download, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PageShell, PageHeader } from '@/components/ui/page-shell';
 import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 
 interface SystemForReport {
   id: string;
@@ -32,7 +33,6 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<string | null>(null);
   const supabase = createClient();
-  const { toast } = useToast();
 
   useEffect(() => { load(); }, []);
 
@@ -109,35 +109,30 @@ export default function ReportsPage() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        toast({ title: 'Informe generado', description: `Informe de "${system.name}" descargado correctamente.` });
+        toast.success('Informe generado', { description: `Informe de "${system.name}" descargado correctamente.` });
       } else {
         const data = await response.json();
-        toast({ title: 'Informe disponible', description: data.message ?? 'Informe generado.' });
+        toast.success('Informe disponible', { description: data.message ?? 'Informe generado.' });
       }
     } catch (err) {
-      toast({
-        title: 'Error al generar informe',
-        description: err instanceof Error ? err.message : 'Inténtalo de nuevo',
-        variant: 'destructive',
-      });
+      toast.error('Error al generar informe', { description: err instanceof Error ? err.message : 'Inténtalo de nuevo' });
     } finally {
       setGenerating(null);
     }
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0B1C3D]">Reportes</h1>
-          <p className="text-sm text-[#8B9BB4] mt-1">Genera informes de cumplimiento AI Act en PDF para cada sistema</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
-        </Button>
-      </div>
+    <PageShell className="max-w-5xl">
+      <PageHeader
+        title="Reportes"
+        description="Genera informes de cumplimiento AI Act en PDF para cada sistema"
+        actions={
+          <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+        }
+      />
 
       {/* Info banner */}
       <div className="bg-[#F5DFB3]/30 border border-[#E8FF47]/30 rounded-xl p-4 flex items-start gap-3">
@@ -181,7 +176,7 @@ export default function ReportsPage() {
             return (
               <div
                 key={system.id}
-                className="bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40 transition-all"
+                className="card-interactive bg-white rounded-xl border border-[#E3DFD5] p-4 hover:border-[#E8FF47]/40"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -210,15 +205,10 @@ export default function ReportsPage() {
                   <Button
                     size="sm"
                     onClick={() => generateReport(system)}
-                    disabled={generating === system.id}
-                    className="flex-shrink-0 bg-[#0B1C3D] hover:bg-[#122850] text-[#0B1C3D]"
+                    loading={generating === system.id}
+                    className="flex-shrink-0 bg-[#0B1C3D] hover:bg-[#122850] text-[#E8FF47]"
                   >
-                    {generating === system.id ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                        Generando...
-                      </>
-                    ) : (
+                    {generating === system.id ? 'Generando...' : (
                       <>
                         <Download className="w-4 h-4 mr-1.5" />
                         Descargar PDF
@@ -231,6 +221,6 @@ export default function ReportsPage() {
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

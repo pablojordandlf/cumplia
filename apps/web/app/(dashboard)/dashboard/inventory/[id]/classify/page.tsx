@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -19,7 +19,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
   AlertCircle,
-  ChevronLeft,
   Shield,
   AlertTriangle,
   CheckCircle2,
@@ -31,6 +30,7 @@ import {
   MessageSquare,
   X,
 } from 'lucide-react';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { supabase } from '@/lib/supabase';
 import { AIClassificationAssistant } from '@/components/ai-classification-assistant';
 
@@ -209,7 +209,7 @@ export default function ClassifyUseCasePage() {
       }
     } catch (error) {
       console.error('Error loading use case:', error);
-      toast({ title: 'Error', description: 'No se pudo cargar el sistema de IA', variant: 'destructive' });
+      toast.error('Error', { description: 'No se pudo cargar el sistema de IA' });
       router.push('/dashboard/inventory');
     } finally { setLoading(false); }
   }
@@ -270,18 +270,12 @@ export default function ClassifyUseCasePage() {
       if (unclear.length > 0 && questions.length > 0) {
         setUnclearQuestions(questions);
         setShowChat(true);
-        toast({
-          title: 'Necesito más información',
-          description: `La IA necesita aclarar ${unclear.length} preguntas. Se ha abierto el chat.`,
-        });
+        toast.success('Necesito más información', { description: `La IA necesita aclarar ${unclear.length} preguntas. Se ha abierto el chat.` });
       } else {
-        toast({
-          title: 'Cuestionario completado por IA',
-          description: `Confianza: ${data.confidence === 'high' ? 'Alta' : data.confidence === 'medium' ? 'Media' : 'Baja'}. Revisa las respuestas antes de finalizar.`,
-        });
+        toast.success('Cuestionario completado por IA', { description: `Confianza: ${data.confidence === 'high' ? 'Alta' : data.confidence === 'medium' ? 'Media' : 'Baja'}. Revisa las respuestas antes de finalizar.` });
       }
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message ?? 'No se pudo completar con IA', variant: 'destructive' });
+      toast.error('Error', { description: err.message ?? 'No se pudo completar con IA' });
     } finally {
       setIsAiFilling(false);
       setAiFillProgress(100);
@@ -332,9 +326,9 @@ export default function ClassifyUseCasePage() {
       }
 
       setResult(riskLevel);
-      toast({ title: 'Clasificación Completada', description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}` });
+      toast.success('Clasificación Completada', { description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}` });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'No se pudo guardar', variant: 'destructive' });
+      toast.error('Error', { description: error.message || 'No se pudo guardar' });
     } finally { setCalculating(false); }
   }
 
@@ -387,9 +381,15 @@ export default function ClassifyUseCasePage() {
   return (
     <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-3xl mx-auto">
+        <Breadcrumb
+          items={[
+            { label: 'Inventario', href: '/dashboard/inventory' },
+            { label: useCase?.name || '...', href: `/dashboard/inventory/${useCaseId}` },
+            { label: 'Clasificar' },
+          ]}
+        />
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard/inventory"><Button variant="ghost" size="icon"><ChevronLeft className="w-6 h-6" /></Button></Link>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900">Clasificar Sistema de IA</h1>
             <p className="text-gray-600">Cuestionario de clasificación AI Act</p>
@@ -563,7 +563,7 @@ export default function ClassifyUseCasePage() {
               initialQuestions={unclearQuestions}
               onClassificationSuggested={(classification) => {
                 // Apply classification result to form
-                toast({ title: 'Clasificación aplicada', description: `Nivel: ${riskLevels[classification.level as keyof typeof riskLevels]?.label ?? classification.level}` });
+                toast.success('Clasificación aplicada', { description: `Nivel: ${riskLevels[classification.level as keyof typeof riskLevels]?.label ?? classification.level}` });
                 setShowChat(false);
               }}
             />

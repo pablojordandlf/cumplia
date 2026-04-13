@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -112,7 +112,7 @@ export default function TemplatesPage() {
       if (error) throw error;
       setTemplates(data || []);
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast.error('Error', { description: error.message });
     } finally {
       setLoading(false);
     }
@@ -143,7 +143,7 @@ export default function TemplatesPage() {
 
   function addFieldDefinition() {
     if (!newFieldKey.trim()) {
-      toast({ title: 'Error', description: 'El nombre del campo es obligatorio', variant: 'destructive' });
+      toast.error('Error', { description: 'El nombre del campo es obligatorio' });
       return;
     }
 
@@ -162,12 +162,12 @@ export default function TemplatesPage() {
 
   async function saveTemplate() {
     if (!templateName.trim()) {
-      toast({ title: 'Error', description: 'El nombre de la plantilla es obligatorio', variant: 'destructive' });
+      toast.error('Error', { description: 'El nombre de la plantilla es obligatorio' });
       return;
     }
 
     if (fieldDefinitions.length === 0) {
-      toast({ title: 'Error', description: 'Añade al menos un campo a la plantilla', variant: 'destructive' });
+      toast.error('Error', { description: 'Añade al menos un campo a la plantilla' });
       return;
     }
 
@@ -175,7 +175,7 @@ export default function TemplatesPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        toast({ title: 'Error', description: 'Sesión no válida', variant: 'destructive' });
+        toast.error('Error', { description: 'Sesión no válida' });
         return;
       }
 
@@ -196,7 +196,7 @@ export default function TemplatesPage() {
           .eq('id', editingTemplate.id);
 
         if (error) throw error;
-        toast({ title: 'Plantilla actualizada', description: 'Los cambios se han guardado correctamente.' });
+        toast.success('Plantilla actualizada', { description: 'Los cambios se han guardado correctamente.' });
       } else {
         // Create new
         const { error } = await supabase
@@ -204,14 +204,14 @@ export default function TemplatesPage() {
           .insert(templateData);
 
         if (error) throw error;
-        toast({ title: 'Plantilla creada', description: 'La plantilla se ha creado correctamente.' });
+        toast.success('Plantilla creada', { description: 'La plantilla se ha creado correctamente.' });
       }
 
       setIsDialogOpen(false);
       resetForm();
       loadTemplates();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast.error('Error', { description: error.message });
     } finally {
       setSaving(false);
     }
@@ -229,10 +229,10 @@ export default function TemplatesPage() {
         .eq('id', templateId);
 
       if (error) throw error;
-      toast({ title: 'Plantilla eliminada', description: 'La plantilla se ha eliminado correctamente.' });
+      toast.success('Plantilla eliminada', { description: 'La plantilla se ha eliminado correctamente.' });
       loadTemplates();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast.error('Error', { description: error.message });
     }
   }
 

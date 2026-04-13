@@ -20,8 +20,8 @@ export const useUseCase = (userId: string): UseCaseHook => {
 
       if (error) throw error;
       return newUseCase;
-    } catch (err: any) {
-      console.error('Error creating use case:', err.message);
+    } catch (err: unknown) {
+      console.error('Error creating use case:', err instanceof Error ? err.message : err);
       return null;
     }
   };
@@ -36,8 +36,8 @@ export const useUseCase = (userId: string): UseCaseHook => {
 
       if (error) throw error;
       return updatedUseCase;
-    } catch (err: any) {
-      console.error('Error updating use case:', err.message);
+    } catch (err: unknown) {
+      console.error('Error updating use case:', err instanceof Error ? err.message : err);
       return null;
     }
   };
@@ -48,8 +48,8 @@ export const useUseCase = (userId: string): UseCaseHook => {
 
       if (error) throw error;
       return true;
-    } catch (err: any) {
-      console.error('Error deleting use case:', err.message);
+    } catch (err: unknown) {
+      console.error('Error deleting use case:', err instanceof Error ? err.message : err);
       return false;
     }
   };
@@ -90,8 +90,8 @@ export const useUseCase = (userId: string): UseCaseHook => {
       const result = await response.json();
       return result.useCase;
 
-    } catch (err: any) {
-      console.error('Error classifying use case:', err.message);
+    } catch (err: unknown) {
+      console.error('Error classifying use case:', err instanceof Error ? err.message : err);
       return null;
     }
   };

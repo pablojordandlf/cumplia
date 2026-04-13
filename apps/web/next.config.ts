@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configuración para Vercel - Updated March 2026
+  output: 'standalone',
   images: {
     unoptimized: true,
   },

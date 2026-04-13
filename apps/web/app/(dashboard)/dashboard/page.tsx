@@ -23,7 +23,7 @@ import {
   CalendarClock,
   ChevronRight,
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { PendingObligationsWidget } from '@/components/pending-obligations-widget';
 import { RiskDistributionChart } from '@/components/risk-distribution-chart';
 import { RiskAnalysisStatusCard } from '@/components/risk-analysis-status-card';
@@ -66,7 +66,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedRisk, setSelectedRisk] = useState<string | null>(null);
   const supabase = createClient();
-  const { toast } = useToast();
   const { can } = usePermissions();
 
   useEffect(() => {
@@ -168,11 +167,7 @@ export default function DashboardPage() {
       });
     } catch (error) {
       console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar las estadísticas',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: 'No se pudieron cargar las estadísticas' });
     } finally {
       setLoading(false);
     }

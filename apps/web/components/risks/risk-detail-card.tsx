@@ -42,7 +42,7 @@ import {
   Target,
   Info
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 import { 
   AISystemRisk, 
   RiskStatus, 
@@ -82,7 +82,6 @@ export function RiskDetailCard({
   const [loading, setLoading] = useState(false);
   const [editedRisk, setEditedRisk] = useState<AISystemRisk>(risk);
   const [orgMembers, setOrgMembers] = useState<{ email: string; name: string }[]>([]);
-  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchMembers() {
@@ -108,11 +107,7 @@ export function RiskDetailCard({
   const validateForm = (): boolean => {
     // Estado siempre requerido
     if (!editedRisk.status) {
-      toast({
-        title: 'Campo requerido',
-        description: 'Debes seleccionar un Estado para el riesgo',
-        variant: 'destructive'
-      });
+      toast.error('Campo requerido', { description: 'Debes seleccionar un Estado para el riesgo' });
       return false;
     }
 
@@ -120,19 +115,11 @@ export function RiskDetailCard({
     const statesRequiringAssessment = ['assessed', 'mitigated', 'accepted'];
     if (statesRequiringAssessment.includes(editedRisk.status)) {
       if (!editedRisk.probability) {
-        toast({
-          title: 'Campo requerido',
-          description: 'Debes seleccionar la Probabilidad para evaluar el riesgo',
-          variant: 'destructive'
-        });
+        toast.error('Campo requerido', { description: 'Debes seleccionar la Probabilidad para evaluar el riesgo' });
         return false;
       }
       if (!editedRisk.impact) {
-        toast({
-          title: 'Campo requerido',
-          description: 'Debes seleccionar el Impacto para evaluar el riesgo',
-          variant: 'destructive'
-        });
+        toast.error('Campo requerido', { description: 'Debes seleccionar el Impacto para evaluar el riesgo' });
         return false;
       }
     }
@@ -142,11 +129,7 @@ export function RiskDetailCard({
 
   const handleSave = async () => {
     if (isReadOnly) {
-      toast({
-        title: 'Sin permisos',
-        description: 'No tienes permisos para editar riesgos',
-        variant: 'destructive'
-      });
+      toast.error('Sin permisos', { description: 'No tienes permisos para editar riesgos' });
       return;
     }
 
@@ -178,17 +161,10 @@ export function RiskDetailCard({
 
       const data = await response.json();
       onRiskUpdated(data.risk);
-      toast({
-        title: 'Riesgo actualizado',
-        description: 'Los cambios han sido guardados correctamente'
-      });
+      toast.success('Riesgo actualizado', { description: 'Los cambios han sido guardados correctamente' });
     } catch (error) {
       console.error('Error updating risk:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'No se pudo guardar el riesgo',
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: error instanceof Error ? error.message : 'No se pudo guardar el riesgo' });
     } finally {
       setLoading(false);
     }

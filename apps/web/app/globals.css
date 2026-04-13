@@ -41,6 +41,23 @@
     --risk-high: 25 80% 55%;
     --risk-limited: 142 71% 45%;
     --risk-minimal: 217 91% 60%;
+
+    /* ── Status Semantic Colors ── */
+    --status-success:        142 60% 30%;   /* green-700 */
+    --status-success-subtle: 142 76% 93%;   /* green-100 */
+    --status-success-border: 142 50% 80%;   /* green-200 */
+
+    --status-warning:        25 80% 48%;    /* orange-700 */
+    --status-warning-subtle: 25 90% 93%;    /* orange-100 */
+    --status-warning-border: 25 70% 80%;    /* orange-200 */
+
+    --status-info:           217 80% 48%;   /* blue-600 */
+    --status-info-subtle:    217 90% 93%;   /* blue-100 */
+    --status-info-border:    217 60% 80%;   /* blue-200 */
+
+    --status-danger:         0 72% 45%;     /* red-600 */
+    --status-danger-subtle:  0 90% 93%;     /* red-100 */
+    --status-danger-border:  0 60% 80%;     /* red-200 */
   }
 
   .dark {
@@ -284,4 +301,18 @@
   .card-light       { @apply bg-[#FAFAF8] border-[#E3DFD5] text-[#0B1C3D]; }
   .card-subtle      { @apply bg-[#F0EEE8]/60 border-[#E3DFD5]/70 text-[#0B1C3D]; }
   .input-light      { @apply bg-[#FAFAF8] border-[#E3DFD5] text-[#0B1C3D] placeholder:text-[#8B9BB4]; }
+
+  /* Interactive card — add to any clickable card container */
+  .card-interactive {
+    @apply cursor-pointer transition-all duration-150;
+  }
+  .card-interactive:hover {
+    @apply shadow-sm -translate-y-0.5;
+  }
+  .card-interactive:active {
+    @apply shadow-none translate-y-0 scale-[0.99];
+  }
+  .card-interactive:focus-visible {
+    @apply outline-none ring-2 ring-night ring-offset-2;
+  }
 }

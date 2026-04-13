@@ -15,7 +15,7 @@ import {
   Lock
 } from 'lucide-react';
 import { useRiskAnalysis } from '@/hooks/use-risk-analysis';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 
 interface RiskProgressIndicatorProps {
   total: number;
@@ -49,7 +49,6 @@ export function RiskProgressIndicator({
   const [loading, setLoading] = useState(false);
   const [localCompleted, setLocalCompleted] = useState(isCompleted);
   const { markRiskAnalysisAsCompleted, markRiskAnalysisAsIncomplete } = useRiskAnalysis();
-  const { toast } = useToast();
 
   const isDisabled = !hasApplicableFactors || isReadOnly;
   const isHighRisk = aiActLevel === 'high_risk';
@@ -64,26 +63,16 @@ export function RiskProgressIndicator({
         await markRiskAnalysisAsCompleted(systemId);
         setLocalCompleted(true);
         onCompletionChange?.(true);
-        toast({
-          title: '✅ Análisis Completado',
-          description: `Análisis de riesgos marcado como completado para ${systemName}`
-        });
+        toast.success('✅ Análisis Completado', { description: `Análisis de riesgos marcado como completado para ${systemName}` });
       } else {
         await markRiskAnalysisAsIncomplete(systemId);
         setLocalCompleted(false);
         onCompletionChange?.(false);
-        toast({
-          title: '🔄 Análisis Reabierto',
-          description: `Análisis de riesgos marcado como incompleto para ${systemName}`
-        });
+        toast.success('🔄 Análisis Reabierto', { description: `Análisis de riesgos marcado como incompleto para ${systemName}` });
       }
     } catch (error) {
       console.error('Error toggling analysis completion:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar el estado del análisis',
-        variant: 'destructive'
-      });
+      toast.error('Error', { description: 'No se pudo actualizar el estado del análisis' });
     } finally {
       setLoading(false);
     }

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb, ChevronDown, ChevronUp, ArrowRight, Building2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner'
 
 interface UseCaseCatalog {
   id: string;
@@ -131,10 +131,7 @@ export function UseCaseSuggestions({ onSelectCase }: UseCaseSuggestionsProps) {
                 key={useCase.id}
                 onClick={() => {
                   onSelectCase(useCase);
-                  toast({
-                    title: 'Caso precargado',
-                    description: `"${useCase.name}" cargado. Puedes modificarlo antes de guardar.`,
-                  });
+                  toast.success('Caso precargado', { description: `"${useCase.name}" cargado. Puedes modificarlo antes de guardar.` });
                 }}
                 className="text-left p-3 rounded-md border border-amber-200 bg-white hover:border-amber-400 hover:shadow-sm transition-all group"
               >
