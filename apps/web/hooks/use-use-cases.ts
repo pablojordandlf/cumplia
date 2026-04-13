@@ -26,8 +26,8 @@ export const useUseCases = (userId: string): UseCasesHook => {
 
       if (error) throw error;
       setUseCases(data || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

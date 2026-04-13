@@ -9,7 +9,7 @@ export interface UseCase {
   ai_act_level: 'prohibited' | 'high_risk' | 'limited_risk' | 'minimal_risk' | null;
   confidence_score: number | null;
   classification_reason: string | null;
-  classification_data: Record<string, any> | null;
+  classification_data: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
