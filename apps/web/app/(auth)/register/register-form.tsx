@@ -49,7 +49,6 @@ export default function RegisterForm() {
 
       // Pre-fill email
       setEmail(emailParam);
-      console.log('🟡 Invitation context found:', { token: token.substring(0, 8) + '...', email: emailParam });
     }
   }, [searchParams]);
 
@@ -72,14 +71,8 @@ export default function RegisterForm() {
       return;
     }
 
-    console.log('🟡 Starting registration process...', {
-      hasInvitation: !!invitationContext,
-      email,
-    });
-
     // === If invitation exists, use special endpoint ===
     if (invitationContext) {
-      console.log('🟡 Using invitation-based registration endpoint...');
       try {
         const response = await fetch('/api/v1/auth/register-with-invitation', {
           method: 'POST',
@@ -104,8 +97,6 @@ export default function RegisterForm() {
           return;
         }
 
-        console.log('🟢 ✅ Registration with invitation successful:', result.data);
-
         // Clean up sessionStorage
         sessionStorage.removeItem('invitation_token');
         sessionStorage.removeItem('invitation_email');
@@ -121,16 +112,14 @@ export default function RegisterForm() {
           router.push('/dashboard');
         }, 1500);
         return;
-      } catch (err: any) {
-        console.error('🔴 Registration with invitation failed:', err);
-        setError(err.message || 'Error en el registro');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Error en el registro');
         setIsLoading(false);
         return;
       }
     }
 
     // === Regular signup (no invitation) ===
-    console.log('🟡 Using regular registration endpoint...');
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -148,7 +137,6 @@ export default function RegisterForm() {
       );
       setIsLoading(false);
     } else {
-      console.log('🟢 Signup successful');
       setSuccess(true);
       setIsLoading(false);
     }

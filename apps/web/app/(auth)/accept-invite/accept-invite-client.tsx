@@ -23,13 +23,11 @@ export default function AcceptInviteClient() {
 
   useEffect(() => {
     if (!token) {
-      console.error('🔴 No token provided');
       setStatus('error');
       setError('No invitation token found in URL');
       return;
     }
 
-    console.log(`🟡 Starting invitation validation with token: ${token.substring(0, 8)}...`);
     validateAndHandleInvitation();
   }, [token]);
 
@@ -41,8 +39,6 @@ export default function AcceptInviteClient() {
    */
   async function validateAndHandleInvitation() {
     try {
-      console.log('🟡 Step 1: Server-side validation of invitation token...');
-
       // Call server-side validation endpoint
       const validationUrl = new URL('/api/v1/invitations/validate', window.location.origin);
       validationUrl.searchParams.append('token', token!);
@@ -54,15 +50,13 @@ export default function AcceptInviteClient() {
       let validationData;
       try {
         validationData = await validateResponse.json();
-      } catch (e) {
-        console.error('🔴 Failed to parse JSON response:', e);
+      } catch {
         setStatus('error');
         setError('Server error: Invalid response format');
         return;
       }
 
       if (!validationData.isValid) {
-        console.error('🔴 Server validation failed:', validationData);
         setStatus('error');
         setError(validationData.error || 'Invalid or expired invitation');
         return;
@@ -76,20 +70,12 @@ export default function AcceptInviteClient() {
         return;
       }
 
-      console.log('🟢 Step 1b: Invitation is valid:', {
-        org: invitationData.organizationName,
-        role: invitationData.role,
-      });
-
       setOrganizationName(invitationData.organizationName);
 
-      // 🟡 Step 2: Check authentication status
-      console.log('🟡 Step 2: Checking authentication status...');
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user) {
         // User is authenticated - accept invite immediately
-        console.log('🟡 Step 3: User authenticated, accepting invitation...');
         await acceptInvitation(token!, invitationData.email);
         setStatus('success');
 
@@ -99,8 +85,6 @@ export default function AcceptInviteClient() {
         }, 2000);
       } else {
         // User not authenticated - store context and redirect to register
-        console.log('🟡 Step 3: User not authenticated, redirecting to signup...');
-
         // Store invitation context in sessionStorage for register form
         sessionStorage.setItem('invitation_token', token!);
         sessionStorage.setItem('invitation_email', invitationData.email);
@@ -110,7 +94,6 @@ export default function AcceptInviteClient() {
 
         // Redirect to register with invitation token
         const registerUrl = `/register?invitation_token=${encodeURIComponent(token!)}&email=${encodeURIComponent(invitationData.email)}`;
-        console.log('🟡 Redirecting to register:', registerUrl);
         setStatus('unauthenticated');
 
         // Redirect after a brief delay
@@ -118,10 +101,9 @@ export default function AcceptInviteClient() {
           router.push(registerUrl);
         }, 800);
       }
-    } catch (err: any) {
-      console.error('🔴 Unexpected error:', err);
+    } catch (err: unknown) {
       setStatus('error');
-      setError(err.message || 'An error occurred while processing your invitation');
+      setError(err instanceof Error ? err.message : 'An error occurred while processing your invitation');
     }
   }
 
@@ -130,8 +112,6 @@ export default function AcceptInviteClient() {
    * This was already validated server-side, so we just need to update DB
    */
   async function acceptInvitation(invitationToken: string, invitationEmail: string) {
-    console.log('🟡 Step 4: Accepting invitation via backend...');
-
     try {
       const response = await fetch('/api/invitations/accept', {
         method: 'POST',
@@ -146,22 +126,16 @@ export default function AcceptInviteClient() {
       let result;
       try {
         result = await response.json();
-      } catch (e) {
-        console.error('🔴 Failed to parse response:', e);
+      } catch {
         throw new Error('Server error: Invalid response format');
       }
 
       if (!response.ok || !result.success) {
-        console.error('🔴 Backend error:', result);
         throw new Error(result.error || 'Failed to accept invitation');
       }
-
-      console.log('🟢 Step 5: Backend accepted invitation successfully');
-      console.log('🟢 ✅ SUCCESS: Invitation completely accepted');
-    } catch (err: any) {
-      console.error('🔴 Error accepting invitation:', err);
+    } catch (err: unknown) {
       setStatus('error');
-      setError(err.message || 'Failed to accept invitation');
+      setError(err instanceof Error ? err.message : 'Failed to accept invitation');
     }
   }
 

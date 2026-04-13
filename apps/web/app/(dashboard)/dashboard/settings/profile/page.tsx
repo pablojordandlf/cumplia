@@ -167,8 +167,6 @@ export default function ProfilePage() {
         console.error('Error fetching membership:', memberError);
         toast.error('Error RLS al cargar tu rol: ' + memberError.message);
       } else if (memberData) {
-        console.log('Membership loaded (basic):', memberData);
-        
         // Ahora obtener la info de la organización por separado
         const { data: orgData } = await supabase
           .from('organizations')
@@ -183,7 +181,6 @@ export default function ProfilePage() {
         
         setMembership(fullMembership as OrganizationMember);
       } else {
-        console.warn('No membership found for user:', user.id);
         toast.warning('No se encontró tu membresía. Verifica que las políticas RLS estén aplicadas.');
       }
 
@@ -269,26 +266,11 @@ export default function ProfilePage() {
   }
 
   const role = membership?.role || 'viewer';
-  console.log('Role from membership:', membership?.role, '| Final role used:', role);
   const roleInfo = roleConfig[role];
   const RoleIcon = roleInfo.icon;
 
   return (
     <div className="container mx-auto py-8 max-w-4xl">
-      {/* DEBUG PANEL - Temporal para diagnóstico */}
-      <Card className="mb-6 bg-yellow-50 border-yellow-300">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-yellow-800">🔧 Debug Info (temporal)</CardTitle>
-        </CardHeader>
-        <CardContent className="text-xs font-mono text-yellow-900 space-y-1">
-          <p><strong>User ID:</strong> {profile.id}</p>
-          <p><strong>Email:</strong> {profile.email}</p>
-          <p><strong>Membership raw:</strong> {membership ? JSON.stringify(membership) : 'null'}</p>
-          <p><strong>Role from DB:</strong> {membership?.role || 'NOT FOUND'}</p>
-          <p><strong>Role used:</strong> {role}</p>
-          <Button size="sm" variant="outline" onClick={fetchProfile} className="mt-2">Recargar datos</Button>
-        </CardContent>
-      </Card>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>

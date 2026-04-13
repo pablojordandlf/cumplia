@@ -123,27 +123,22 @@ export default function LoginForm() {
     setIsLoading(true);
     setError(null);
 
-    console.log('🟡 Login: Attempt sign in with email/password...');
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (signInError) {
-      console.error('🔴 Login: Sign in error:', signInError);
-      setError(signInError.message === 'Invalid login credentials' 
+      setError(signInError.message === 'Invalid login credentials'
         ? 'Email o contraseña incorrectos'
         : signInError.message
       );
       setIsLoading(false);
     } else {
-      console.log('🟢 Login: Sign in successful');
       // If there's a redirect URL from query params (e.g., from accept-invite), use it
       if (redirectUrl) {
-        console.log(`🟡 Login: Redirecting to ${redirectUrl}`);
         router.push(decodeURIComponent(redirectUrl));
       } else {
-        console.log('🟡 Login: Redirecting to /dashboard');
         router.push('/dashboard');
       }
       router.refresh();
