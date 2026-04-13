@@ -24,9 +24,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'YOUR_GOOGLE_SEARCH_CONSOLE_CODE',
-  },
   alternates: {
     canonical: 'https://cumplia.com',
     languages: {
