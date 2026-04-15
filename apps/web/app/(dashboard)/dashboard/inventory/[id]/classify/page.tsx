@@ -103,9 +103,9 @@ function InfoTooltip({ text }: { text: string }) {
     <div ref={containerRef} className="relative inline-flex items-center ml-2" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       <HelpCircle className="w-4 h-4 text-gray-400 cursor-help hover:text-blue-500 transition-colors" />
       {show && (
-        <div className={`absolute ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-1/2 transform -translate-x-1/2 px-4 py-3 bg-gray-900 text-white text-sm rounded-lg shadow-xl z-50 w-72 leading-relaxed`}>
+        <div className={`absolute ${position === 'top' ? 'bottom-full mb-3' : 'top-full mt-3'} left-1/2 -translate-x-1/2 px-4 py-3 bg-gray-900 text-white text-sm rounded-xl shadow-2xl z-[9999] w-80 leading-relaxed pointer-events-none`}>
           {text}
-          <div className={`absolute left-1/2 transform -translate-x-1/2 border-8 border-transparent ${position === 'top' ? 'top-full border-t-gray-900' : 'bottom-full border-b-gray-900'}`} />
+          <div className={`absolute left-1/2 -translate-x-1/2 w-0 h-0 border-x-8 border-x-transparent ${position === 'top' ? 'top-full border-t-8 border-t-gray-900' : 'bottom-full border-b-8 border-b-gray-900'}`} />
         </div>
       )}
     </div>
@@ -122,13 +122,15 @@ function YesNoSelector({ value, onChange, label, tooltip, isAiFilling, aiFilled 
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border-2 p-4 transition-all cursor-pointer
+      className={`relative rounded-xl border-2 p-4 transition-all cursor-pointer
         ${aiFilled ? 'border-blue-300 bg-blue-50/50' : 'border-gray-100 hover:border-blue-200 hover:bg-blue-50/30'}`}
       onClick={() => onChange(value === 'yes' ? 'no' : 'yes')}
     >
-      {/* AI wave animation overlay */}
+      {/* AI wave animation overlay — overflow-hidden aquí para no clipar el tooltip */}
       {isAiFilling && (
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-100/0 via-blue-200/60 to-blue-100/0 animate-[shimmer_1.5s_ease-in-out_infinite]" />
+        <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+          <div className="h-full bg-gradient-to-r from-blue-100/0 via-blue-200/60 to-blue-100/0 animate-[shimmer_1.5s_ease-in-out_infinite]" />
+        </div>
       )}
       <div className="flex items-center justify-between gap-4 relative z-10">
         <div className="flex items-center gap-2 flex-1">
