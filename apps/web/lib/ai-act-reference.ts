@@ -164,25 +164,29 @@ Texto generado artificialmente publicado para informar al público sobre asuntos
 
 /** Questionnaire field definitions with AI Act article mapping */
 export const QUESTIONNAIRE_FIELDS = [
-  // Step 1: System Type (no article mapping needed, structural)
-  // Step 2: Article 5 — Prohibited
-  { key: 'isSubliminal', article: 'Art. 5(1)(a)', step: 2, category: 'prohibited' },
-  { key: 'exploitsVulnerabilities', article: 'Art. 5(1)(b)', step: 2, category: 'prohibited' },
-  { key: 'isSocialScoring', article: 'Art. 5(1)(c)', step: 2, category: 'prohibited' },
-  { key: 'isRealTimeBiometric', article: 'Art. 5(1)(h)', step: 2, category: 'prohibited' },
-  // Step 3: Annex III — High Risk
-  { key: 'isBiometricIdentification', article: 'Anexo III §1', step: 3, category: 'high_risk' },
-  { key: 'isCriticalInfrastructure', article: 'Anexo III §2', step: 3, category: 'high_risk' },
-  { key: 'isEducationVocational', article: 'Anexo III §3', step: 3, category: 'high_risk' },
-  { key: 'isEmployment', article: 'Anexo III §4', step: 3, category: 'high_risk' },
-  { key: 'isAccessToServices', article: 'Anexo III §5', step: 3, category: 'high_risk' },
-  { key: 'isLawEnforcement', article: 'Anexo III §6', step: 3, category: 'high_risk' },
-  { key: 'isMigrationAsylum', article: 'Anexo III §7', step: 3, category: 'high_risk' },
-  { key: 'isJusticeDemocratic', article: 'Anexo III §8', step: 3, category: 'high_risk' },
-  { key: 'isSafetyComponent', article: 'Art. 6(1) + Anexo I', step: 3, category: 'high_risk' },
-  // Step 4: Article 50 — Limited Risk
-  { key: 'interactsWithHumans', article: 'Art. 50(1)', step: 4, category: 'limited_risk' },
-  { key: 'isEmotionRecognition', article: 'Art. 50(3)', step: 4, category: 'limited_risk' },
-  { key: 'isBiometricCategorization', article: 'Art. 50(3)', step: 4, category: 'limited_risk' },
-  { key: 'generatesDeepfakes', article: 'Art. 50(4)', step: 4, category: 'limited_risk' },
+  // Step 1: System Type (structural, no article mapping)
+  // Step 2: Article 5 — Prohibited practices
+  { key: 'p2_1', article: 'Art. 5(1)(a)+(b)', step: 2, category: 'prohibited' },
+  { key: 'p2_2', article: 'Art. 5(1)(c)', step: 2, category: 'prohibited' },
+  { key: 'p2_3', article: 'Art. 5(1)(h)', step: 2, category: 'prohibited' },
+  { key: 'p2_3a', article: 'Art. 5(1)(h) excepción', step: 2, category: 'prohibited' },
+  { key: 'p2_4', article: 'Art. 5(1)(g)', step: 2, category: 'prohibited' },
+  { key: 'p2_5', article: 'Art. 5(1)(e)', step: 2, category: 'prohibited' },
+  { key: 'p2_6', article: 'Art. 5(1)(f)', step: 2, category: 'prohibited' },
+  // Step 3: Article 6 + Annex III — High Risk (non-GPAI only)
+  { key: 'p3_1', article: 'Anexo III §1', step: 3, category: 'high_risk' },
+  { key: 'p3_2', article: 'Anexo III §1', step: 3, category: 'high_risk' },
+  { key: 'p3_3', article: 'Anexo III §1', step: 3, category: 'high_risk' },
+  { key: 'p3_3a', article: 'Anexo III §1 excepción', step: 3, category: 'high_risk' },
+  { key: 'p3_4', article: 'Anexo III §2', step: 3, category: 'high_risk' },
+  { key: 'p3_5', article: 'Art. 6(1) + Anexo I', step: 3, category: 'high_risk' },
+  { key: 'p3_6', article: 'Anexo III §3', step: 3, category: 'high_risk' },
+  { key: 'p3_7', article: 'Anexo III §4', step: 3, category: 'high_risk' },
+  { key: 'p3_8', article: 'Anexo III §5', step: 3, category: 'high_risk' },
+  { key: 'p3_9', article: 'Anexo III §6-9', step: 3, category: 'high_risk' },
+  // Step 3 (GPAI) / Step 4 (non-GPAI): Article 50 — Transparency
+  { key: 'p4_1', article: 'Art. 50(1)', step: 4, category: 'limited_risk' },
+  { key: 'p4_2', article: 'Art. 50(4)', step: 4, category: 'limited_risk' },
+  { key: 'p4_3', article: 'Art. 50(5)', step: 4, category: 'limited_risk' },
+  { key: 'p4_4', article: 'Art. 50(3)', step: 4, category: 'limited_risk' },
 ] as const;

@@ -35,33 +35,63 @@ IMPORTANTE:
 - Si la descripción NO proporciona suficiente información para responder una pregunta con confianza, responde "unclear" para esa pregunta.
 - No asumas nada que no esté explícitamente indicado.
 - Sé conservador: si hay la más mínima duda, marca "unclear".
+- p2_3a solo se incluye si p2_3 es "yes". p3_3a solo se incluye si p3_3 es "yes".
 
 Las preguntas del cuestionario son:
-- systemType: ¿Qué tipo de sistema es? Valores posibles: "gpai_model" (modelo base), "gpai_sr" (GPAI con riesgo sistémico, >10²⁵ FLOP), "gpai_system" (sistema completo sobre GPAI), "specific_purpose" (finalidad específica)
-- isSubliminal: ¿Usa técnicas subliminales o manipuladoras? (Art. 5.1.a)
-- exploitsVulnerabilities: ¿Explota vulnerabilidades de grupos específicos? (Art. 5.1.b)
-- isSocialScoring: ¿Realiza puntuación social por autoridades? (Art. 5.1.c)
-- isRealTimeBiometric: ¿Identificación biométrica remota en tiempo real en espacios públicos para fines policiales? (Art. 5.1.h)
-- isBiometricIdentification: ¿Identificación/verificación biométrica? (Anexo III §1)
-- isCriticalInfrastructure: ¿Gestiona infraestructura crítica? (Anexo III §2)
-- isEducationVocational: ¿Evaluación/acceso educativo? (Anexo III §3)
-- isEmployment: ¿Empleo/RRHH (selección, promoción, supervisión)? (Anexo III §4)
-- isAccessToServices: ¿Acceso a servicios esenciales (crédito, seguros, servicios públicos)? (Anexo III §5)
-- isLawEnforcement: ¿Aplicación de la ley? (Anexo III §6)
-- isMigrationAsylum: ¿Migración/asilo/fronteras? (Anexo III §7)
-- isJusticeDemocratic: ¿Justicia/procesos democráticos? (Anexo III §8)
-- isSafetyComponent: ¿Componente de seguridad de producto regulado por Anexo I? (Art. 6.1)
-- interactsWithHumans: ¿Interactúa con personas (chatbot, asistente)? (Art. 50.1)
-- isEmotionRecognition: ¿Reconoce emociones con biometría? (Art. 50.3)
-- isBiometricCategorization: ¿Categoriza personas por biometría? (Art. 50.3)
-- generatesDeepfakes: ¿Genera contenido sintético (deepfakes)? (Art. 50.4)
+
+PASO 1 — Tipo de sistema:
+- systemType: Valores posibles: "gpai_base" (modelo GPAI base), "gpai_systemic" (modelo GPAI con riesgo sistémico, >10²⁵ FLOP), "specific" (sistema con finalidad definida), "multipurpose" (sistema con múltiples usos)
+
+PASO 2 — Prácticas Prohibidas (Art. 5):
+- p2_1: ¿El sistema influye en el comportamiento sin que las personas sean conscientes, o explota sus vulnerabilidades para perjudicarlas? (Art. 5.1.a+b)
+- p2_2: ¿El sistema puntúa o clasifica a personas por su comportamiento para conceder/denegar beneficios en contextos no relacionados? (Art. 5.1.c — social scoring)
+- p2_3: ¿El sistema identifica personas a distancia en tiempo real en espacios públicos mediante biometría, con fines de vigilancia policial? (Art. 5.1.h)
+- p2_3a: (solo si p2_3=yes) ¿Opera exclusivamente bajo autorización judicial para búsqueda de víctimas, prevención de terrorismo inminente o localización de sospechosos de delitos graves?
+- p2_4: ¿El sistema deduce raza, ideología, religión u orientación sexual a partir de datos biométricos? (Art. 5.1.g)
+- p2_5: ¿El sistema recopila masivamente imágenes de rostros para crear bases de datos de reconocimiento facial? (Art. 5.1.e)
+- p2_6: ¿El sistema detecta o infiere emociones de empleados o estudiantes en contexto laboral o educativo? (Art. 5.1.f)
+
+PASO 3 — Sistemas de Alto Riesgo / Anexo III (solo si systemType no es gpai_base ni gpai_systemic):
+- p3_1: ¿El sistema realiza identificación biométrica remota en diferido (no en tiempo real)? (Anexo III §1)
+- p3_2: ¿El sistema categoriza personas por características biométricas para inferir atributos sensibles? (Anexo III §1)
+- p3_3: ¿El sistema detecta, reconoce o verifica emociones? (Anexo III §1)
+- p3_3a: (solo si p3_3=yes) ¿Se usa exclusivamente con finalidad médica o de seguridad debidamente documentada?
+- p3_4: ¿El sistema gestiona o controla infraestructura crítica? (Anexo III §2)
+- p3_5: ¿El sistema es componente de seguridad de un producto regulado por legislación sectorial UE (Anexo I)? (Art. 6.1)
+- p3_6: ¿El sistema determina acceso a educación, formación profesional, o evalúa rendimiento académico? (Anexo III §3)
+- p3_7: ¿El sistema interviene en reclutamiento, selección, evaluación o gestión de personas en el empleo? (Anexo III §4)
+- p3_8: ¿El sistema evalúa la elegibilidad para servicios públicos, prestaciones, créditos, seguros u otros servicios esenciales? (Anexo III §5)
+- p3_9: ¿El sistema apoya decisiones en aplicación de la ley, gestión migratoria, asilo, fronteras, administración de justicia o procesos democráticos? (Anexo III §6-9)
+
+PASO 4 — Transparencia (Art. 50) — aplica a todos los tipos:
+- p4_1: ¿El sistema interactúa directamente con personas sin que sea evidente que están ante una IA? (Art. 50.1)
+- p4_2: ¿El sistema genera contenido sintético de imagen, audio o vídeo que representa personas, lugares o eventos reales? (Art. 50.4)
+- p4_3: ¿El sistema genera textos sobre asuntos de interés público sin revelar que son generados por IA? (Art. 50.5)
+- p4_4: ¿El sistema detecta o infiere emociones de personas fuera del ámbito laboral/educativo prohibido? (Art. 50.3)
 
 Responde SOLO con un JSON válido, sin texto adicional:
 {
   "answers": {
-    "systemType": "specific_purpose",
-    "isSubliminal": "no",
-    ...
+    "systemType": "specific",
+    "p2_1": "no",
+    "p2_2": "no",
+    "p2_3": "no",
+    "p2_4": "no",
+    "p2_5": "no",
+    "p2_6": "no",
+    "p3_1": "no",
+    "p3_2": "no",
+    "p3_3": "no",
+    "p3_4": "no",
+    "p3_5": "no",
+    "p3_6": "no",
+    "p3_7": "no",
+    "p3_8": "no",
+    "p3_9": "no",
+    "p4_1": "no",
+    "p4_2": "no",
+    "p4_3": "no",
+    "p4_4": "no"
   },
   "unclear_fields": ["fieldKey1", "fieldKey2"],
   "unclear_questions": ["¿El sistema toma decisiones sobre acceso a crédito o solo hace recomendaciones?", "..."],
