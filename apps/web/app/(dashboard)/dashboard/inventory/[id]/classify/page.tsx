@@ -36,25 +36,16 @@ import { AIClassificationAssistant } from '@/components/ai-classification-assist
 
 // ── Schema ───────────────────────────────────────────────────────────────────
 
+const yesNo = z.enum(['yes', 'no']);
+
 const classificationSchema = z.object({
-  systemType: z.enum(['gpai_model', 'gpai_sr', 'gpai_system', 'specific_purpose']),
-  isSubliminal: z.enum(['yes', 'no']),
-  isSocialScoring: z.enum(['yes', 'no']),
-  isRealTimeBiometric: z.enum(['yes', 'no']),
-  exploitsVulnerabilities: z.enum(['yes', 'no']),
-  isBiometricIdentification: z.enum(['yes', 'no']),
-  isCriticalInfrastructure: z.enum(['yes', 'no']),
-  isEducationVocational: z.enum(['yes', 'no']),
-  isEmployment: z.enum(['yes', 'no']),
-  isAccessToServices: z.enum(['yes', 'no']),
-  isLawEnforcement: z.enum(['yes', 'no']),
-  isMigrationAsylum: z.enum(['yes', 'no']),
-  isJusticeDemocratic: z.enum(['yes', 'no']),
-  isSafetyComponent: z.enum(['yes', 'no']),
-  interactsWithHumans: z.enum(['yes', 'no']),
-  isEmotionRecognition: z.enum(['yes', 'no']),
-  isBiometricCategorization: z.enum(['yes', 'no']),
-  generatesDeepfakes: z.enum(['yes', 'no']),
+  systemType: z.enum(['gpai_base', 'gpai_systemic', 'specific', 'multipurpose']),
+  p2_1: yesNo, p2_2: yesNo, p2_3: yesNo, p2_3a: yesNo,
+  p2_4: yesNo, p2_5: yesNo, p2_6: yesNo,
+  p3_1: yesNo, p3_2: yesNo, p3_3: yesNo, p3_3a: yesNo,
+  p3_4: yesNo, p3_5: yesNo, p3_6: yesNo,
+  p3_7: yesNo, p3_8: yesNo, p3_9: yesNo,
+  p4_1: yesNo, p4_2: yesNo, p4_3: yesNo, p4_4: yesNo,
 });
 
 type FormValues = z.infer<typeof classificationSchema>;
@@ -63,25 +54,55 @@ type FormValues = z.infer<typeof classificationSchema>;
 
 const riskLevels = {
   prohibited: { label: 'Prohibido', color: 'bg-red-100 text-red-800 border-red-200', icon: AlertCircle, description: 'Este sistema de IA está prohibido por el Artículo 5 del AI Act y no puede desplegarse en la UE.' },
-  high_risk: { label: 'Alto Riesgo', color: 'bg-orange-100 text-orange-800 border-orange-200', icon: AlertTriangle, description: 'Sistema de alto riesgo sujeto a obligaciones estrictas de cumplimiento (Arts. 6-51).' },
+  high_risk: { label: 'Alto Riesgo', color: 'bg-orange-100 text-orange-800 border-orange-200', icon: AlertTriangle, description: 'Sistema de alto riesgo sujeto a obligaciones estrictas de cumplimiento (Arts. 9-15).' },
+  gpai_regime: { label: 'Régimen GPAI', color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Brain, description: 'Modelo de IA de propósito general sujeto a las obligaciones del Artículo 53 del AI Act.' },
   limited_risk: { label: 'Riesgo Limitado', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Shield, description: 'Sujeto a obligaciones de transparencia (Art. 50).' },
   minimal_risk: { label: 'Riesgo Mínimo', color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, description: 'Libre uso con recomendación de códigos de conducta voluntarios.' },
 };
 
 const systemTypes = [
-  { value: 'gpai_model' as const, label: 'Modelo de IA de Propósito General (GPAI Model)', description: 'El activo es únicamente un modelo base (no incluye interfaz ni pipeline completo). Es capaz de realizar una amplia variedad de tareas y puede integrarse en otros sistemas o aplicaciones.', examples: 'Ejemplos: GPT-4, Llama, Gemini en su forma base.', icon: Brain },
-  { value: 'gpai_sr' as const, label: 'Modelo GPAI con Riesgo Sistémico (GPAI-SR)', description: 'Igual que el tipo A, pero supera los 10²⁵ FLOP de entrenamiento o la Comisión Europea lo ha designado expresamente como tal por sus capacidades de gran impacto.', examples: 'Requiere evaluación de riesgos sistémicos y medidas de mitigación.', icon: Sparkles },
-  { value: 'gpai_system' as const, label: 'Sistema de IA de Propósito General (GPAI System)', description: 'El activo es un sistema completo (con interfaz, pipeline u otros componentes) construido sobre un modelo GPAI y sin una finalidad de uso única y específica.', examples: 'Ejemplos: ChatGPT como producto, Copilot Studio sin configuración de dominio.', icon: Bot },
-  { value: 'specific_purpose' as const, label: 'Sistema de IA de Finalidad Específica', description: 'El activo es un sistema con un sistema de IA concreto y definido. Esta es la categoría donde aplican los niveles de riesgo (prohibido, alto, limitado, mínimo).', examples: 'Ejemplos: modelo de scoring de crédito, chatbot de atención, sistema de detección de fraude.', icon: Cpu },
+  {
+    value: 'gpai_base' as const,
+    label: 'Modelo GPAI',
+    description: 'Entreno y distribuyo un modelo base sin interfaz ni caso de uso propio',
+    examples: 'LLM propio, modelo de embeddings propietario',
+    badge: null as string | null,
+    icon: Brain,
+    tooltip: 'Un modelo GPAI (General Purpose AI) es un modelo entrenado con grandes cantidades de datos que puede realizar múltiples tipos de tareas. Si eres tú quien lo entrena y lo distribuye —sin definir un caso de uso concreto— selecciona esta opción. Si lo que haces es usar un modelo de otro (OpenAI, Anthropic, etc.) para construir tu aplicación, no eres proveedor de un modelo GPAI.',
+  },
+  {
+    value: 'gpai_systemic' as const,
+    label: 'Modelo GPAI de alto impacto',
+    description: 'Mi modelo supera 10²⁵ FLOP de entrenamiento o ha sido designado por la Comisión Europea',
+    examples: 'Modelos frontier de grandes laboratorios de IA',
+    badge: null as string | null,
+    icon: Sparkles,
+    tooltip: 'El AI Act define un umbral cuantitativo de 10²⁵ FLOP de cómputo de entrenamiento para considerar un modelo GPAI de "riesgo sistémico". También puede ser designado por la Comisión Europea en base a otros criterios como el número de usuarios o capacidades en dominios críticos. Esta categoría aplica a muy pocos actores a nivel mundial.',
+  },
+  {
+    value: 'specific' as const,
+    label: 'Sistema con finalidad definida',
+    description: 'Aplico IA a un caso de uso concreto, aunque use un modelo de terceros',
+    examples: 'Chatbot, detector de fraude, scoring de crédito, generador de contratos',
+    badge: '★ más habitual' as string | null,
+    icon: Cpu,
+    tooltip: 'Es la categoría más frecuente para PYMEs. Si tu sistema tiene un propósito claro y específico —aunque por debajo use GPT-4 u otro modelo— selecciona esta opción. La finalidad concreta es lo que determina el riesgo regulatorio, no el modelo subyacente.',
+  },
+  {
+    value: 'multipurpose' as const,
+    label: 'Sistema con múltiples usos',
+    description: 'Mi sistema puede aplicarse a distintos casos de uso sin uno único definido',
+    examples: 'Plataforma de automatización corporativa, asistente IA multiuso interno',
+    badge: null as string | null,
+    icon: Bot,
+    tooltip: 'Selecciona esta opción si tu sistema está diseñado para que distintos departamentos o clientes lo usen con finalidades diferentes, sin una única función predefinida. En este caso, el AI Act exige evaluar el riesgo por cada caso de uso concreto. CumplIA te mostrará una advertencia para que repitas la evaluación por cada uso previsto.',
+  },
 ];
 
-// All fillable yes/no field keys (excludes systemType)
 const YES_NO_FIELDS: (keyof FormValues)[] = [
-  'isSubliminal', 'exploitsVulnerabilities', 'isSocialScoring', 'isRealTimeBiometric',
-  'isBiometricIdentification', 'isCriticalInfrastructure', 'isEducationVocational',
-  'isEmployment', 'isAccessToServices', 'isLawEnforcement', 'isMigrationAsylum',
-  'isJusticeDemocratic', 'isSafetyComponent',
-  'interactsWithHumans', 'isEmotionRecognition', 'isBiometricCategorization', 'generatesDeepfakes',
+  'p2_1', 'p2_2', 'p2_3', 'p2_3a', 'p2_4', 'p2_5', 'p2_6',
+  'p3_1', 'p3_2', 'p3_3', 'p3_3a', 'p3_4', 'p3_5', 'p3_6', 'p3_7', 'p3_8', 'p3_9',
+  'p4_1', 'p4_2', 'p4_3', 'p4_4',
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -108,6 +129,16 @@ function InfoTooltip({ text }: { text: string }) {
           <div className={`absolute left-1/2 -translate-x-1/2 w-0 h-0 border-x-8 border-x-transparent ${position === 'top' ? 'top-full border-t-8 border-t-gray-900' : 'bottom-full border-b-8 border-b-gray-900'}`} />
         </div>
       )}
+    </div>
+  );
+}
+
+function SectionDivider({ title }: { title: string }) {
+  return (
+    <div className="flex items-center gap-3 py-1">
+      <div className="h-px flex-1 bg-gray-200" />
+      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{title}</span>
+      <div className="h-px flex-1 bg-gray-200" />
     </div>
   );
 }
@@ -161,7 +192,7 @@ export default function ClassifyUseCasePage() {
   const [useCase, setUseCase] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<{ level: string; transparencyRequired: boolean } | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [finalStepReady, setFinalStepReady] = useState(false);
 
@@ -175,25 +206,31 @@ export default function ClassifyUseCasePage() {
   const form = useForm<FormValues>({
     resolver: zodResolver(classificationSchema),
     defaultValues: {
-      systemType: 'specific_purpose', isSubliminal: 'no', isSocialScoring: 'no', isRealTimeBiometric: 'no', exploitsVulnerabilities: 'no',
-      isBiometricIdentification: 'no', isCriticalInfrastructure: 'no', isEducationVocational: 'no', isEmployment: 'no', isAccessToServices: 'no',
-      isLawEnforcement: 'no', isMigrationAsylum: 'no', isJusticeDemocratic: 'no', isSafetyComponent: 'no',
-      interactsWithHumans: 'no', isEmotionRecognition: 'no', isBiometricCategorization: 'no', generatesDeepfakes: 'no',
+      systemType: 'specific',
+      p2_1: 'no', p2_2: 'no', p2_3: 'no', p2_3a: 'no', p2_4: 'no', p2_5: 'no', p2_6: 'no',
+      p3_1: 'no', p3_2: 'no', p3_3: 'no', p3_3a: 'no', p3_4: 'no', p3_5: 'no', p3_6: 'no',
+      p3_7: 'no', p3_8: 'no', p3_9: 'no',
+      p4_1: 'no', p4_2: 'no', p4_3: 'no', p4_4: 'no',
     },
   });
 
   const selectedSystemType = form.watch('systemType');
+  const p2_3Value = form.watch('p2_3');
+  const p3_3Value = form.watch('p3_3');
+
+  const isGPAI = selectedSystemType === 'gpai_base' || selectedSystemType === 'gpai_systemic';
 
   useEffect(() => { loadUseCase(); }, [useCaseId]);
 
+  const totalSteps = isGPAI ? 3 : 4;
+
   useEffect(() => {
-    const total = selectedSystemType === 'specific_purpose' ? 4 : 2;
-    if (currentStep === total) {
+    if (currentStep === totalSteps) {
       setFinalStepReady(false);
       const timer = setTimeout(() => setFinalStepReady(true), 600);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, selectedSystemType]);
+  }, [currentStep, totalSteps]);
 
   async function loadUseCase() {
     try {
@@ -202,12 +239,16 @@ export default function ClassifyUseCasePage() {
       setUseCase(data);
       if (data?.classification_data && !data.classification_data.ai_assisted) {
         const prevData = data.classification_data;
-        const convertedData: any = { systemType: prevData.systemType || 'specific_purpose' };
-        Object.keys(prevData).forEach(key => {
-          if (typeof prevData[key] === 'boolean') convertedData[key] = prevData[key] ? 'yes' : 'no';
-          else if (prevData[key] === 'yes' || prevData[key] === 'no') convertedData[key] = prevData[key];
-        });
-        form.reset(convertedData);
+        const knownTypes = ['gpai_base', 'gpai_systemic', 'specific', 'multipurpose'];
+        if (knownTypes.includes(prevData.systemType) || prevData.p2_1 !== undefined) {
+          const convertedData: Partial<FormValues> = { systemType: prevData.systemType || 'specific' };
+          YES_NO_FIELDS.forEach(key => {
+            if (prevData[key] === 'yes' || prevData[key] === 'no') {
+              (convertedData as any)[key] = prevData[key];
+            }
+          });
+          form.reset(convertedData as FormValues);
+        }
       }
     } catch (error) {
       console.error('Error loading use case:', error);
@@ -286,27 +327,48 @@ export default function ClassifyUseCasePage() {
 
   // ── Classification logic ──────────────────────────────────────────────────
 
-  function calculateRiskLevel(values: FormValues): string {
-    if (values.isSubliminal === 'yes' || values.isSocialScoring === 'yes' || values.isRealTimeBiometric === 'yes' || values.exploitsVulnerabilities === 'yes') return 'prohibited';
-    if (values.systemType === 'specific_purpose') {
-      if (values.isBiometricIdentification === 'yes' || values.isCriticalInfrastructure === 'yes' || values.isEducationVocational === 'yes' || values.isEmployment === 'yes' || values.isAccessToServices === 'yes' || values.isLawEnforcement === 'yes' || values.isMigrationAsylum === 'yes' || values.isJusticeDemocratic === 'yes' || values.isSafetyComponent === 'yes') return 'high_risk';
-    }
-    if (values.systemType === 'gpai_sr') return 'high_risk';
-    if (values.systemType === 'specific_purpose') {
-      if (values.interactsWithHumans === 'yes' || values.isEmotionRecognition === 'yes' || values.isBiometricCategorization === 'yes' || values.generatesDeepfakes === 'yes') return 'limited_risk';
-    }
-    if (values.systemType === 'gpai_model' || values.systemType === 'gpai_system') return 'limited_risk';
-    return 'minimal_risk';
+  function calculateRiskLevel(values: FormValues): { level: string; transparencyRequired: boolean } {
+    const transparencyRequired =
+      values.p4_1 === 'yes' || values.p4_2 === 'yes' || values.p4_3 === 'yes' || values.p4_4 === 'yes';
+
+    const isProhibited =
+      values.p2_1 === 'yes' || values.p2_2 === 'yes' ||
+      (values.p2_3 === 'yes' && values.p2_3a !== 'yes') ||
+      values.p2_4 === 'yes' || values.p2_5 === 'yes' || values.p2_6 === 'yes';
+    if (isProhibited) return { level: 'prohibited', transparencyRequired };
+
+    if (values.systemType === 'gpai_systemic') return { level: 'high_risk', transparencyRequired };
+
+    const isHighRisk =
+      (values.p2_3 === 'yes' && values.p2_3a === 'yes') ||
+      values.p3_1 === 'yes' || values.p3_2 === 'yes' ||
+      (values.p3_3 === 'yes' && values.p3_3a === 'yes') ||
+      values.p3_4 === 'yes' || values.p3_5 === 'yes' || values.p3_6 === 'yes' ||
+      values.p3_7 === 'yes' || values.p3_8 === 'yes' || values.p3_9 === 'yes';
+    if (isHighRisk) return { level: 'high_risk', transparencyRequired };
+
+    if (values.systemType === 'gpai_base') return { level: 'gpai_regime', transparencyRequired };
+    if (values.systemType === 'multipurpose') return { level: 'limited_risk', transparencyRequired };
+    if (transparencyRequired) return { level: 'limited_risk', transparencyRequired };
+    return { level: 'minimal_risk', transparencyRequired };
   }
 
   async function onSubmit(values: FormValues) {
     setCalculating(true);
     try {
-      const riskLevel = calculateRiskLevel(values);
+      const classificationResult = calculateRiskLevel(values);
       const { data: { session } } = await supabase.auth.getSession();
 
+      const classificationData = {
+        ...values,
+        p2_3a: values.p2_3 === 'yes' ? values.p2_3a : null,
+        p3_3a: values.p3_3 === 'yes' ? values.p3_3a : null,
+      };
+
       await supabase.from('use_cases').update({
-        ai_act_level: riskLevel, classification_data: values, status: 'classified',
+        ai_act_level: classificationResult.level,
+        classification_data: classificationData,
+        status: 'classified',
         updated_at: new Date().toISOString(),
       }).eq('id', useCaseId);
 
@@ -320,15 +382,17 @@ export default function ClassifyUseCasePage() {
         await supabase.from('use_case_versions').insert({
           use_case_id: useCaseId,
           version_number: 1,
-          classification_data: values,
-          ai_act_level: riskLevel,
+          classification_data: classificationData,
+          ai_act_level: classificationResult.level,
           created_by: session?.user?.id,
           notes: 'Versión inicial - Primera clasificación',
         });
       }
 
-      setResult(riskLevel);
-      toast.success('Clasificación Completada', { description: `El sistema ha sido clasificado como: ${riskLevels[riskLevel as keyof typeof riskLevels].label}` });
+      setResult(classificationResult);
+      toast.success('Clasificación Completada', {
+        description: `El sistema ha sido clasificado como: ${riskLevels[classificationResult.level as keyof typeof riskLevels].label}`,
+      });
     } catch (error: any) {
       toast.error('Error', { description: error.message || 'No se pudo guardar' });
     } finally { setCalculating(false); }
@@ -336,7 +400,6 @@ export default function ClassifyUseCasePage() {
 
   // ── Step navigation ───────────────────────────────────────────────────────
 
-  const totalSteps = selectedSystemType === 'specific_purpose' ? 4 : 2;
   const progressValue = (currentStep / totalSteps) * 100;
 
   const handleNextStep = () => {
@@ -352,7 +415,7 @@ export default function ClassifyUseCasePage() {
   );
 
   if (result) {
-    const riskInfo = riskLevels[result as keyof typeof riskLevels];
+    const riskInfo = riskLevels[result.level as keyof typeof riskLevels];
     const RiskIcon = riskInfo.icon;
     return (
       <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
@@ -363,8 +426,23 @@ export default function ClassifyUseCasePage() {
                 <RiskIcon className={`w-10 h-10 ${riskInfo.color.split(' ')[1]}`} />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Clasificación Completada</h1>
-              <Badge className={`text-lg px-4 py-1 ${riskInfo.color}`}>{riskInfo.label}</Badge>
-              <p className="text-gray-600 mt-4 mb-6">{riskInfo.description}</p>
+              <div className="flex flex-wrap gap-2 justify-center mb-4">
+                <Badge className={`text-lg px-4 py-1 ${riskInfo.color}`}>{riskInfo.label}</Badge>
+                {result.transparencyRequired && (
+                  <Badge className="text-sm px-3 py-1 bg-yellow-100 text-yellow-800 border-yellow-200">
+                    Transparencia obligatoria (Art. 50)
+                  </Badge>
+                )}
+              </div>
+              <p className="text-gray-600 mb-6">{riskInfo.description}</p>
+              {result.level === 'limited_risk' && form.getValues('systemType') === 'multipurpose' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-left">
+                  <p className="text-sm text-yellow-800">
+                    <AlertTriangle className="w-4 h-4 inline mr-1" />
+                    <strong>Aviso:</strong> Este sistema tiene múltiples usos. El AI Act exige evaluar el riesgo por cada caso de uso concreto. Repite esta clasificación para cada finalidad prevista.
+                  </p>
+                </div>
+              )}
               <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
                 <h3 className="font-semibold text-gray-900 mb-2">{useCase?.name}</h3>
                 <p className="text-sm text-gray-600">{useCase?.description}</p>
@@ -438,9 +516,12 @@ export default function ClassifyUseCasePage() {
                 {/* Step 1: System Type */}
                 {currentStep === 1 && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-bold">1</span>Tipo de Sistema de IA</h3>
-                      <InfoTooltip text="El AI Act clasifica los activos de IA en 4 categorías según su naturaleza. Selecciona la que mejor describa tu activo." />
+                    <div>
+                      <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-1">
+                        <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm flex items-center justify-center font-bold">1</span>
+                        Tipo de Sistema de IA
+                      </h3>
+                      <p className="text-sm text-gray-500 ml-8">Si usas un modelo de terceros vía API (OpenAI, Anthropic, Google…), selecciona según la aplicación que construyes, no según el modelo base.</p>
                     </div>
                     <FormField control={form.control} name="systemType" render={({ field }) => (
                       <FormItem>
@@ -448,17 +529,23 @@ export default function ClassifyUseCasePage() {
                           <div className="grid grid-cols-1 gap-3">
                             {systemTypes.map((type) => {
                               const Icon = type.icon;
+                              const isSelected = field.value === type.value;
                               return (
-                                <button key={type.value} type="button" onClick={() => field.onChange(type.value)} className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all hover:shadow-md ${field.value === type.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
-                                  <div className={`p-3 rounded-xl ${field.value === type.value ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                                    <Icon className={`w-6 h-6 ${field.value === type.value ? 'text-blue-600' : 'text-gray-500'}`} />
+                                <button key={type.value} type="button" onClick={() => field.onChange(type.value)}
+                                  className={`flex items-start gap-4 p-5 rounded-xl border-2 text-left transition-all hover:shadow-md ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
+                                  <div className={`p-3 rounded-xl shrink-0 ${isSelected ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                                    <Icon className={`w-6 h-6 ${isSelected ? 'text-blue-600' : 'text-gray-500'}`} />
                                   </div>
                                   <div className="flex-1">
-                                    <div className="font-semibold text-gray-900 text-base">{type.label}</div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="font-semibold text-gray-900 text-base">{type.label}</span>
+                                      {type.badge && <Badge variant="secondary" className="text-xs">{type.badge}</Badge>}
+                                      <InfoTooltip text={type.tooltip} />
+                                    </div>
                                     <div className="text-sm text-gray-600 mt-1 leading-relaxed">{type.description}</div>
                                     <div className="text-xs text-blue-600 mt-2 font-medium">{type.examples}</div>
                                   </div>
-                                  {field.value === type.value && <CheckCircle2 className="w-6 h-6 text-blue-500 shrink-0" />}
+                                  {isSelected && <CheckCircle2 className="w-6 h-6 text-blue-500 shrink-0" />}
                                 </button>
                               );
                             })}
@@ -469,64 +556,244 @@ export default function ClassifyUseCasePage() {
                   </div>
                 )}
 
-                {/* Step 2: Article 5 */}
+                {/* Step 2: Article 5 — Prohibited */}
                 {currentStep === 2 && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-red-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-red-100 text-red-600 text-sm flex items-center justify-center font-bold">2</span>Artículo 5: Prácticas Prohibidas</h3>
-                      <InfoTooltip text="El Artículo 5 del AI Act prohíbe ciertas prácticas consideradas inaceptables para la UE. Si respondes Sí a alguna, el sistema será clasificado como PROHIBIDO." />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-red-900 flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-red-100 text-red-600 text-sm flex items-center justify-center font-bold">2</span>
+                          Usos Prohibidos (Art. 5)
+                        </h3>
+                        <Badge className="bg-red-100 text-red-800 border-red-200 text-xs">Cualquier Sí → Prohibido</Badge>
+                      </div>
+                      <p className="text-sm text-gray-500 ml-8">Si cualquier respuesta es Sí, el sistema está prohibido en la UE. Aplica a todos los tipos de sistema.</p>
                     </div>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                       <p className="text-sm text-red-800"><AlertCircle className="w-4 h-4 inline mr-1" /><strong>Atención:</strong> Si alguna de estas prácticas aplica a tu sistema, está prohibido en la UE.</p>
                     </div>
                     <div className="space-y-3">
-                      <FormField control={form.control} name="isSubliminal" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Usa técnicas subliminales o manipuladoras que distorsionen el comportamiento causando daño?" tooltip="Técnicas que distorsionan el comportamiento de personas de manera que puedan causar daño psicológico o físico sin que la persona sea consciente." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isSubliminal')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="exploitsVulnerabilities" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Explota vulnerabilidades de grupos específicos (edad, discapacidad, situación social)?" tooltip="Aprovecha debilidades de personas debido a su edad, discapacidad, situación social o económica específica para causar daño." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('exploitsVulnerabilities')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isSocialScoring" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Realiza puntuación social (social scoring) por autoridades públicas?" tooltip="Evaluación o clasificación de personas basada en comportamiento social o personalidad que conduce a tratamiento desfavorable en contextos no relacionados." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isSocialScoring')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isRealTimeBiometric" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Realiza identificación biométrica remota en tiempo real en espacios públicos para fines policiales?" tooltip="Identificación mediante biometría en tiempo real en espacios públicos por autoridades policiales (prohibido salvo excepciones muy limitadas)." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isRealTimeBiometric')} /></FormControl></FormItem>)} />
+                      <SectionDivider title="Sección A: Manipulación y explotación" />
+                      <FormField control={form.control} name="p2_1" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="2.1 — ¿El sistema intenta influir en el comportamiento de las personas sin que sean conscientes, o aprovecha sus puntos débiles para perjudicarlas?"
+                            tooltip="El AI Act prohíbe dos técnicas distintas: (1) técnicas subliminales que operan fuera de la consciencia del usuario; y (2) técnicas que explotan vulnerabilidades específicas —edad, discapacidad, situación económica— para distorsionar la conducta causando daño. Si tu sistema optimiza métricas de engagement sin considerar el impacto en el usuario, puede entrar en esta categoría."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p2_1')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p2_2" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="2.2 — ¿El sistema puntúa o clasifica a personas por su comportamiento para conceder o denegar beneficios en contextos no relacionados con esa puntuación?"
+                            tooltip="La prohibición de 'social scoring' se refiere a usar IA para construir perfiles de comportamiento social que luego se usen en contextos distintos al que generó los datos. No confundir con el scoring crediticio tradicional basado en historial financiero (que es Alto Riesgo, no Prohibido)."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p2_2')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <SectionDivider title="Sección B: Vigilancia y biometría" />
+                      <FormField control={form.control} name="p2_3" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="2.3 — ¿El sistema identifica personas a distancia y en tiempo real en espacios públicos mediante biometría, con fines de vigilancia policial?"
+                            tooltip="Se refiere a la identificación biométrica remota en tiempo real: el sistema procesa rasgos físicos de personas en espacios accesibles al público para contrastarlos con bases de datos, mientras ocurre. Esta prohibición tiene tres excepciones muy estrictas — si crees que tu sistema podría acogerse a alguna, responde Sí y se desplegará la subpregunta."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p2_3')} />
+                        </FormControl></FormItem>
+                      )} />
+                      {p2_3Value === 'yes' && (
+                        <div className="ml-6 border-l-2 border-orange-200 pl-4">
+                          <FormField control={form.control} name="p2_3a" render={({ field }) => (
+                            <FormItem><FormControl>
+                              <YesNoSelector value={field.value} onChange={field.onChange}
+                                label="2.3a — ¿Opera exclusivamente bajo autorización judicial para búsqueda de víctimas de trata, prevención de ataque terrorista inminente o localización de sospechosos de delitos graves?"
+                                tooltip="Las tres únicas excepciones requieren: (1) autorización judicial previa, (2) que el uso sea estrictamente necesario, y (3) que existan las salvaguardas procedimentales exigidas. Si se cumple todo → no es Prohibido, pero sí es Alto Riesgo. Si hay cualquier duda, consulta con asesoría legal."
+                                isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p2_3a')} />
+                            </FormControl></FormItem>
+                          )} />
+                        </div>
+                      )}
+                      <FormField control={form.control} name="p2_4" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="2.4 — ¿El sistema deduce rasgos sensibles —raza, ideología política, religión u orientación sexual— a partir de datos biométricos?"
+                            tooltip="Esta prohibición cubre los sistemas que usan datos biométricos (imagen, voz, movimiento, señales fisiológicas) para inferir atributos especialmente protegidos. No requiere que la inferencia sea correcta — el mero intento de deducir estos atributos es suficiente para la prohibición."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p2_4')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p2_5" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="2.5 — ¿El sistema recopila imágenes de rostros de forma masiva desde internet o cámaras para crear o ampliar bases de datos de reconocimiento facial?"
+                            tooltip="La prohibición cubre tanto el scraping desde fuentes abiertas (redes sociales, webs públicas) como la captura desde sistemas de videovigilancia, siempre que el fin sea construir o ampliar bases de datos de reconocimiento facial. La mera recopilación masiva con esta finalidad está prohibida."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p2_5')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p2_6" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="2.6 — ¿El sistema detecta o infiere las emociones de empleados o estudiantes en el contexto laboral o educativo?"
+                            tooltip="El AI Act prohíbe la inferencia de emociones en el lugar de trabajo y en centros educativos. No aplica si la finalidad es exclusivamente médica o de seguridad y está debidamente documentada. Si hay una relación de dependencia o evaluación, aplica la prohibición."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p2_6')} />
+                        </FormControl></FormItem>
+                      )} />
                     </div>
                   </div>
                 )}
 
-                {/* Step 3: Annex III */}
-                {currentStep === 3 && selectedSystemType === 'specific_purpose' && (
+                {/* Step 3: Annex III — only for non-GPAI */}
+                {currentStep === 3 && !isGPAI && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-orange-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-sm flex items-center justify-center font-bold">3</span>Artículo 6: Sistemas de Alto Riesgo (Anexo III)</h3>
-                      <InfoTooltip text="El Anexo III lista los sistemas de IA considerados de alto riesgo por su impacto potencial en seguridad, derechos fundamentales o sociedad." />
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-orange-900 flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-sm flex items-center justify-center font-bold">3</span>
+                          Sistemas de Alto Riesgo (Art. 6 y Anexo III)
+                        </h3>
+                        <InfoTooltip text="El Anexo III del AI Act lista nueve categorías de sistemas considerados de alto riesgo. Un Sí en cualquier pregunta activa los requisitos del Capítulo III: gestión de riesgos, calidad de datos, documentación técnica, supervisión humana y registro en la base de datos UE." />
+                      </div>
+                      <p className="text-sm text-gray-500 ml-8">Si cualquier respuesta es Sí, el sistema se clasifica como Alto Riesgo salvo que se aplique la excepción de la Sección 2 del Art. 6.</p>
                     </div>
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
-                      <p className="text-sm text-orange-800"><AlertTriangle className="w-4 h-4 inline mr-1" />Estos sistemas requieren gestión de riesgos, datos de calidad, supervisión humana, transparencia y registro UE.</p>
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <p className="text-sm text-orange-800"><AlertTriangle className="w-4 h-4 inline mr-1" /><strong>Importante:</strong> Estos sistemas requieren gestión de riesgos, supervisión humana, documentación técnica y registro en la base de datos de la UE.</p>
                     </div>
                     <div className="space-y-3">
-                      <FormField control={form.control} name="isBiometricIdentification" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Realiza identificación o verificación biométrica de personas?" tooltip="Sistemas de identificación biométrica a distancia o categorización biométrica por características protegidas." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isBiometricIdentification')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isCriticalInfrastructure" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Gestiona infraestructura crítica (tráfico, agua, gas, electricidad)?" tooltip="Sistemas de gestión de infraestructura crítica donde un fallo podría poner en riesgo la vida de personas." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isCriticalInfrastructure')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isEducationVocational" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se usa en educación o formación profesional para evaluación o acceso?" tooltip="Sistemas que determinan acceso a instituciones educativas, evalúan el aprendizaje o asignan personas." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isEducationVocational')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isEmployment" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se usa en empleo, gestión de trabajadores o acceso a la autopromoción?" tooltip="Reclutamiento, selección, promoción, terminación, o asignación de tareas basadas en comportamiento o características personales." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isEmployment')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isAccessToServices" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Evalúa acceso a servicios esenciales (crédito, seguros, servicios públicos)?" tooltip="Evaluación de elegibilidad para servicios esenciales como créditos, seguros, servicios públicos, beneficios sociales." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isAccessToServices')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isLawEnforcement" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se utiliza para aplicación de la ley?" tooltip="Evaluación de riesgos de reincidencia, análisis de evidencia, perfilado de personas en contexto policial." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isLawEnforcement')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isMigrationAsylum" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Se usa para migración, asilo o control de fronteras?" tooltip="Sistemas para evaluar solicitudes de asilo, visados, detección de irregularidades en documentos de viaje." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isMigrationAsylum')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isJusticeDemocratic" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Asiste en la administración de justicia o procesos democráticos?" tooltip="Sistemas que asisten jueces en investigación/interpretación de hechos/ley, o que influyen en elecciones." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isJusticeDemocratic')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isSafetyComponent" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Es un componente de seguridad de productos regulados por legislación sectorial UE (Anexo I)?" tooltip="Maquinaria, juguetes, dispositivos médicos, vehículos, equipos de protección individual regulados por la UE." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isSafetyComponent')} /></FormControl></FormItem>)} />
+                      <SectionDivider title="Biometría" />
+                      <FormField control={form.control} name="p3_1" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.1 — ¿El sistema realiza identificación biométrica remota en diferido (no en tiempo real) de personas?"
+                            tooltip="La identificación biométrica remota post-facto consiste en cotejar grabaciones o imágenes ya obtenidas contra bases de datos, sin hacerlo en el momento de la captura. Es Alto Riesgo (no Prohibido) cuando no se hace en tiempo real."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_1')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p3_2" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.2 — ¿El sistema categoriza personas por características biométricas para inferir raza, opinión política, sindicación, religión, vida u orientación sexual?"
+                            tooltip="La categorización biométrica sensible va más allá de la identificación: infiere atributos especialmente protegidos. No confundir con la prohibición (p2_4): aquí aplica cuando el uso es legítimo pero la materia es sensible, lo que lo convierte en Alto Riesgo."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_2')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p3_3" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.3 — ¿El sistema detecta, reconoce o verifica emociones de personas?"
+                            tooltip="La detección de emociones mediante biometría (expresión facial, tono de voz, microgestos) es Alto Riesgo cuando no opera en el ámbito laboral o educativo (donde sería Prohibida). Por ejemplo, en atención al cliente, banca o seguros puede ser Alto Riesgo."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_3')} />
+                        </FormControl></FormItem>
+                      )} />
+                      {p3_3Value === 'yes' && (
+                        <div className="ml-6 border-l-2 border-orange-200 pl-4">
+                          <FormField control={form.control} name="p3_3a" render={({ field }) => (
+                            <FormItem><FormControl>
+                              <YesNoSelector value={field.value} onChange={field.onChange}
+                                label="3.3a — ¿Se usa exclusivamente con finalidad médica o de seguridad debidamente documentada?"
+                                tooltip="Si la detección de emociones tiene una finalidad exclusivamente médica (p.ej., monitorización de pacientes) o de seguridad (p.ej., detección de fatiga en conductores) y está debidamente justificada y documentada, se aplica una excepción que puede reducir su clasificación."
+                                isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_3a')} />
+                            </FormControl></FormItem>
+                          )} />
+                        </div>
+                      )}
+                      <SectionDivider title="Infraestructuras y seguridad" />
+                      <FormField control={form.control} name="p3_4" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.4 — ¿El sistema gestiona o controla infraestructura crítica (redes eléctricas, agua, gas, transporte o sistemas financieros)?"
+                            tooltip="Infraestructura crítica es aquella cuya interrupción tendría consecuencias graves para la seguridad pública, la economía o servicios esenciales. Si el sistema toma decisiones automatizadas que afectan a estos entornos, se clasifica como Alto Riesgo."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_4')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p3_5" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.5 — ¿El sistema es un componente de seguridad de un producto regulado por legislación sectorial de la UE (Anexo I del AI Act)?"
+                            tooltip="El Anexo I del AI Act lista sectores con legislación de armonización preexistente: maquinaria industrial, juguetes, equipos de radio, equipos de presión, vehículos a motor, dispositivos médicos, equipos de protección individual, entre otros. Si tu sistema de IA actúa como componente de seguridad de estos productos, es Alto Riesgo."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_5')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <SectionDivider title="Derechos fundamentales y acceso a servicios" />
+                      <FormField control={form.control} name="p3_6" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.6 — ¿El sistema determina el acceso a educación, formación profesional, o evalúa el rendimiento académico?"
+                            tooltip="Sistemas que deciden quién accede a instituciones educativas, qué trayectorias formativas se recomiendan, o que evalúan el rendimiento de estudiantes. Incluye plataformas de evaluación adaptativa, sistemas de admisión y herramientas de detección de plagio que determinan sanciones."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_6')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p3_7" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.7 — ¿El sistema interviene en reclutamiento, selección, evaluación o gestión de personas en el empleo?"
+                            tooltip="Aplica a la IA que filtra CVs, puntúa candidatos, decide ascensos o despidos, asigna tareas, monitoriza productividad o determina condiciones laborales. La presencia de supervisión humana no excluye la clasificación como Alto Riesgo si la IA condiciona las decisiones finales."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_7')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p3_8" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.8 — ¿El sistema evalúa la elegibilidad para servicios públicos, prestaciones sociales, créditos, seguros u otros servicios esenciales?"
+                            tooltip="Scoring crediticio, evaluación de riesgo en seguros, valoración de elegibilidad para ayudas sociales, scoring médico para priorización de atención. La clave es si el sistema condiciona de forma significativa el acceso de personas a recursos o servicios esenciales."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_8')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <SectionDivider title="Orden público y justicia" />
+                      <FormField control={form.control} name="p3_9" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="3.9 — ¿El sistema apoya decisiones en las áreas de aplicación de la ley, gestión migratoria, asilo, control de fronteras, administración de justicia o procesos democráticos?"
+                            tooltip="Esta categoría agrupa los tres últimos grupos del Anexo III: (6) aplicación de la ley — análisis de riesgo de reincidencia, perfilado, poligrafía; (7) migración y asilo — valoración de solicitudes, detección de documentos fraudulentos; (8) administración de justicia — asistencia a jueces; y (9) procesos democráticos — influencia en elecciones o referéndums."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p3_9')} />
+                        </FormControl></FormItem>
+                      )} />
                     </div>
                   </div>
                 )}
 
-                {/* Step 4: Article 50 */}
-                {currentStep === 4 && selectedSystemType === 'specific_purpose' && (
+                {/* Step 3/4: Article 50 Transparency — step 3 for GPAI, step 4 for non-GPAI */}
+                {((currentStep === 3 && isGPAI) || (currentStep === 4 && !isGPAI)) && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-yellow-900 flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 text-sm flex items-center justify-center font-bold">4</span>Artículo 50: Obligaciones de Transparencia</h3>
-                      <InfoTooltip text="El Artículo 50 establece obligaciones de transparencia para ciertos sistemas de IA que interactúan con personas o generan contenido sintético." />
+                    <div>
+                      <h3 className="font-semibold text-yellow-900 flex items-center gap-2 mb-1">
+                        <span className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 text-sm flex items-center justify-center font-bold">{isGPAI ? '3' : '4'}</span>
+                        Obligaciones de Transparencia (Art. 50)
+                      </h3>
+                      <p className="text-sm text-gray-500 ml-8">Un Sí activa la obligación de transparencia pero no cambia el nivel de riesgo principal. Puede coexistir con cualquier clasificación.</p>
                     </div>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                      <p className="text-sm text-yellow-800"><Shield className="w-4 h-4 inline mr-1" />Estos sistemas deben informar a los usuarios que están interactuando con IA o que el contenido es generado/modificado artificialmente.</p>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <p className="text-sm text-yellow-800"><Shield className="w-4 h-4 inline mr-1" /><strong>Transparencia obligatoria:</strong> Estos sistemas deben informar activamente a los usuarios de que interactúan con IA o de que el contenido es sintético.</p>
                     </div>
                     <div className="space-y-3">
-                      <FormField control={form.control} name="interactsWithHumans" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Interactúa directamente con personas (chatbots, sistemas conversacionales)?" tooltip="Chatbots, asistentes virtuales, o cualquier sistema que interactúe con humanos que puedan pensar que están interactuando con una persona." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('interactsWithHumans')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isEmotionRecognition" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Reconoce o interpreta emociones a partir de datos biométricos?" tooltip="Detección de emociones a través de expresiones faciales, tono de voz, gestos u otras características biométricas." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isEmotionRecognition')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="isBiometricCategorization" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Categoriza personas basándose en datos biométricos?" tooltip="Clasificación de personas en categorías basadas en características biométricas como edad, género, origen étnico." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('isBiometricCategorization')} /></FormControl></FormItem>)} />
-                      <FormField control={form.control} name="generatesDeepfakes" render={({ field }) => (<FormItem><FormControl><YesNoSelector value={field.value} onChange={field.onChange} label="¿Genera o manipula contenido sintético (deepfakes) que emula personas reales?" tooltip="Contenido de audio, imagen o video que parece ser real pero ha sido creado o modificado artificialmente." isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('generatesDeepfakes')} /></FormControl></FormItem>)} />
+                      <FormField control={form.control} name="p4_1" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="4.1 — ¿El sistema interactúa directamente con personas sin que sea evidente que están ante una IA (chatbots, agentes conversacionales)?"
+                            tooltip="La obligación aplica cuando un usuario podría creer razonablemente que está interactuando con una persona humana. No aplica si el uso de IA es obvio por el contexto o si el usuario ya fue informado. Incluye chatbots de atención al cliente, asistentes virtuales y agentes autónomos."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p4_1')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p4_2" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="4.2 — ¿El sistema genera contenido sintético de imagen, audio o vídeo que representa personas, lugares o eventos reales (deepfakes)?"
+                            tooltip="La obligación de marcar el contenido como generado por IA aplica a los contenidos que podrían inducir a error sobre su autenticidad. Se excluyen los usos artísticos o de entretenimiento que lo anuncien claramente. El foco es en la capacidad de confusión con la realidad."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p4_2')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p4_3" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="4.3 — ¿El sistema genera textos publicados sobre materias de interés público sin revelar que son generados por IA?"
+                            tooltip="Aplica a sistemas que producen contenido informativo, periodístico o de análisis de actualidad que podría presentarse al público sin indicar su origen artificial. El objetivo es prevenir la desinformación a escala."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p4_3')} />
+                        </FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name="p4_4" render={({ field }) => (
+                        <FormItem><FormControl>
+                          <YesNoSelector value={field.value} onChange={field.onChange}
+                            label="4.4 — ¿El sistema detecta o infiere emociones de personas (fuera del ámbito laboral/educativo prohibido)?"
+                            tooltip="La detección de emociones en contextos no prohibidos (ver 2.6) activa la obligación de informar al afectado. Por ejemplo, en atención al cliente o en aplicaciones de salud mental. Debe notificarse al usuario antes o en el momento en que se produce la detección."
+                            isAiFilling={isAiFilling} aiFilled={aiFilledFields.has('p4_4')} />
+                        </FormControl></FormItem>
+                      )} />
                     </div>
                   </div>
                 )}
