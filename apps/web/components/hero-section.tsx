@@ -319,10 +319,10 @@ export function HeroSection() {
         }}
       >
         {[
-          { value: '450+', label: 'Artículos cubiertos' },
+          { value: '50+', label: 'Factores de riesgo catalogados' },
           { value: '−90%', label: 'Tiempo de auditoría' },
-          { value: 'Ago 2026', label: 'Fecha límite EU' },
-          { value: 'SOC 2', label: 'Certificación' },
+          { value: '100%', label: 'Generación automática de informes' },
+          { value: '5min', label: 'Para tener tu primer sistema clasificado' },
         ].map((stat, i, arr) => (
           <div key={stat.label} className="flex items-center gap-12">
             <div className="text-center">

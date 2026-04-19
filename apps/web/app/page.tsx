@@ -13,8 +13,6 @@ import {
   TrendingDown,
   Users,
   ArrowRight,
-  Building2,
-  Scale,
   Bot,
   Cpu,
   Sparkles,
@@ -157,38 +155,6 @@ function ComplianceMockup() {
 }
 
 // ─────────────────────────────────────────────────────────
-// Animated counter hook
-// ─────────────────────────────────────────────────────────
-function useCountUp(end: number, duration = 2000, start = 0) {
-  const [count, setCount] = useState(start);
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
-      { threshold: 0.1 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-    let startTime: number;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      setCount(Math.floor(progress * (end - start) + start));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [isVisible, end, duration, start]);
-
-  return { count, ref };
-}
-
-// ─────────────────────────────────────────────────────────
 // Countdown hook
 // ─────────────────────────────────────────────────────────
 function useCountdown() {
@@ -211,64 +177,6 @@ function useCountdown() {
   }, [deadline]);
   return t;
 }
-
-// ─────────────────────────────────────────────────────────
-// 2. STATS SECTION
-// ─────────────────────────────────────────────────────────
-function StatItem({ icon: Icon, value, suffix, label, isSpark }: {
-  icon: any; value: number; suffix: string; label: string; isSpark: boolean;
-}) {
-  const { count, ref } = useCountUp(value, 1800);
-  return (
-    <div ref={ref} className="text-center relative group">
-      <div
-        className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center"
-        style={{ background: isSpark ? 'rgba(232,255,71,0.12)' : 'rgba(139,155,180,0.12)' }}
-      >
-        <Icon className="h-5 w-5" style={{ color: isSpark ? '#E8FF47' : '#8B9BB4' }} />
-      </div>
-      <div
-        className="text-4xl lg:text-5xl font-bold mb-1"
-        style={{
-          fontFamily: '"Fraunces", Georgia, serif',
-          color: isSpark ? '#E8FF47' : '#F0EEE8',
-        }}
-      >
-        {count}{suffix}
-      </div>
-      <div className="text-sm max-w-[140px] mx-auto leading-snug font-light" style={{ color: 'rgba(139,155,180,0.7)' }}>{label}</div>
-    </div>
-  );
-}
-
-function StatsSection() {
-  const stats = [
-    { icon: Building2, value: 50, suffix: '+', label: 'Factores de riesgo catalogados', isSpark: true },
-    { icon: Scale,    value: 4,   suffix: '',    label: 'Niveles de riesgo AI Act cubiertos', isSpark: false },
-    { icon: FileText, value: 100, suffix: '%',  label: 'Generación automática de informes', isSpark: true },
-    { icon: Clock,    value: 5,   suffix: 'min', label: 'Para tener tu primer sistema clasificado', isSpark: false },
-  ];
-
-  return (
-    <section className="py-14 relative overflow-hidden" style={{ background: '#0B1C3D' }}>
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: 'linear-gradient(to right,rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.03) 1px,transparent 1px)',
-          backgroundSize: '40px 40px',
-        }}
-      />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 max-w-4xl mx-auto">
-          {stats.map((stat, index) => (
-            <StatItem key={index} {...stat} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 
 // ─────────────────────────────────────────────────────────
 // 3. PROBLEM SECTION
@@ -1292,7 +1200,6 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#F0EEE8]">
       <Header />
       <HeroSection />
-      <StatsSection />
       <ProblemSection />
       <HowItWorksSection />
       <AIClassificationDemo />
