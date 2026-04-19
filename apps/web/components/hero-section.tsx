@@ -9,7 +9,7 @@ function useRadarCanvas(canvasRef: React.RefObject<HTMLCanvasElement>) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     if (!ctx) return;
 
     const Y_RGB = { r: 232, g: 255, b: 71 };
