@@ -7,7 +7,7 @@ import { ArrowRight, Play } from 'lucide-react';
 // ── Canvas animation: Radar Sweep ─────────────────────────────────────────────
 function useRadarCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = canvasRef.current as HTMLCanvasElement;
     if (!canvas) return;
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     if (!ctx) return;
