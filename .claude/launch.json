@@ -3,10 +3,14 @@
   "configurations": [
     {
       "name": "Next.js Web",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "apps/web"],
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:/Users/pablo/Documents/GitHub/cumplia/apps/web/node_modules/next/dist/bin/next", "dev", "--port", "3000"],
+      "cwd": "apps/web",
       "port": 3000,
-      "autoPort": true
+      "autoPort": true,
+      "env": {
+        "NODE_PATH": "C:/Users/pablo/Documents/GitHub/cumplia/apps/web/node_modules"
+      }
     },
     {
       "name": "FastAPI API",
