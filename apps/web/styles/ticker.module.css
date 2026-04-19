@@ -1,0 +1,32 @@
+.wrap {
+  background: rgba(232,255,71,0.07);
+  border-top: 1px solid rgba(232,255,71,0.15);
+  border-bottom: 1px solid rgba(232,255,71,0.15);
+  overflow: hidden;
+  padding: 13px 0;
+}
+
+.track {
+  display: flex;
+  gap: 64px;
+  animation: ticker 22s linear infinite;
+  white-space: nowrap;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  color: var(--y);
+  flex-shrink: 0;
+}
+
+.sep { opacity: 0.3; }
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

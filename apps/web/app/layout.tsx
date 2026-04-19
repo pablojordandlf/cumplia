@@ -1,7 +1,22 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { DM_Sans, DM_Mono } from 'next/font/google';
 import { Toaster } from '@/components/providers/toaster';
 import { ThemeScript } from '@/components/providers/theme-provider';
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+});
+
+const dmMono = DM_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-dm-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -73,14 +88,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-ES" suppressHydrationWarning>
+    <html lang="es-ES" suppressHydrationWarning className={`${dmSans.variable} ${dmMono.variable}`}>
       <head>
         <ThemeScript />
-        {/* Google Fonts: Fraunces (display) + Geist (UI) */}
+        {/* Google Fonts: Fraunces (display) + Geist (UI) — DM fonts loaded via next/font */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,900&family=Geist:wght@200;300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,900&family=Geist:wght@200;300;400;500&display=swap"
           rel="stylesheet"
         />
         {/* Organization Schema */}
