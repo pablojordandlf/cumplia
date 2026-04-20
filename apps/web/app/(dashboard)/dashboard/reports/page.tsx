@@ -66,10 +66,11 @@ export default function ReportsPage() {
       const enriched: SystemForReport[] = await Promise.all(
         useCases.map(async (uc) => {
           const [{ data: obligations }, { data: risks }] = await Promise.all([
-            supabase.from('use_case_obligations').select('status').eq('use_case_id', uc.id),
-            supabase.from('ai_system_risks').select('status').eq('ai_system_id', uc.id),
+            supabase.from('use_case_obligations').select('is_completed').eq('use_case_id', uc.id),
+            supabase.from('use_case_risks').select('status, applicable').eq('use_case_id', uc.id),
           ]);
 
+          const applicableRisks = risks?.filter(r => r.applicable === true) ?? [];
           return {
             id: uc.id,
             name: uc.name,
@@ -77,9 +78,9 @@ export default function ReportsPage() {
             status: uc.status || 'draft',
             created_at: uc.created_at,
             obligations_total: obligations?.length ?? 0,
-            obligations_completed: obligations?.filter(o => o.status === 'completed').length ?? 0,
-            risks_total: risks?.length ?? 0,
-            risks_mitigated: risks?.filter(r => ['mitigated', 'accepted'].includes(r.status)).length ?? 0,
+            obligations_completed: obligations?.filter(o => o.is_completed === true).length ?? 0,
+            risks_total: applicableRisks.length,
+            risks_mitigated: applicableRisks.filter(r => r.status === 'mitigated').length,
           };
         })
       );
