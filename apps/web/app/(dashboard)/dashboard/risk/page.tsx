@@ -253,24 +253,24 @@ export default function RiskPage() {
       const enriched: SystemRiskData[] = await Promise.all(
         useCases.map(async (uc) => {
           const { data: risks } = await supabase
-            .from('ai_system_risks')
-            .select('status, probability, impact')
-            .eq('ai_system_id', uc.id)
+            .from('use_case_risks')
+            .select('status, probability, impact, applicable')
+            .eq('use_case_id', uc.id)
 
-          const total = risks?.length ?? 0
+          const applicable = risks?.filter((r) => r.applicable === true) ?? []
+          const total = applicable.length
           const assessed =
-            risks?.filter((r) =>
+            applicable.filter((r) =>
               ['assessed', 'mitigated', 'accepted'].includes(r.status)
-            ).length ?? 0
+            ).length
           const mitigated =
-            risks?.filter((r) => ['mitigated', 'accepted'].includes(r.status))
-              .length ?? 0
+            applicable.filter((r) => r.status === 'mitigated').length
           const critical_open =
-            risks?.filter(
+            applicable.filter(
               (r) =>
                 r.probability === 'critical' &&
                 !['mitigated', 'accepted'].includes(r.status)
-            ).length ?? 0
+            ).length
           const pct = total > 0 ? Math.round((mitigated / total) * 100) : 0
 
           return {

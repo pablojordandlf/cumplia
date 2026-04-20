@@ -61,14 +61,14 @@ export function DashboardNavbar() {
         className="flex items-center hover:opacity-80 transition-opacity"
       >
         <CumpliaLogo
-          markSize={28}
-          wordSize={18}
+          markSize={30}
+          wordSize={22}
           variant="light"
           className="dark:hidden"
         />
         <CumpliaLogo
-          markSize={28}
-          wordSize={18}
+          markSize={30}
+          wordSize={22}
           variant="dark"
           className="hidden dark:inline-flex"
         />

@@ -261,14 +261,14 @@ export default function AssessmentsPage() {
         useCases.map(async (uc) => {
           const { data: obligations } = await supabase
             .from('use_case_obligations')
-            .select('status')
+            .select('is_completed')
             .eq('use_case_id', uc.id)
 
           const total = obligations?.length ?? 0
           const completed =
-            obligations?.filter((o) => o.status === 'completed').length ?? 0
+            obligations?.filter((o) => o.is_completed === true).length ?? 0
           const in_progress =
-            obligations?.filter((o) => o.status === 'in_progress').length ?? 0
+            obligations?.filter((o) => o.is_completed === false).length ?? 0
           const pct = total > 0 ? Math.round((completed / total) * 100) : 0
 
           return {

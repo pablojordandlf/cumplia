@@ -291,9 +291,9 @@ function SidebarContent({
             className="inline-flex flex-shrink-0"
           >
             {collapsed ? (
-              <Logomark size={28} variant="light" />
+              <Logomark size={30} variant="light" />
             ) : (
-              <CumpliaLogo markSize={28} wordSize={18} variant="light" />
+              <CumpliaLogo markSize={30} wordSize={22} variant="light" />
             )}
           </Link>
 
@@ -520,7 +520,7 @@ export function DashboardSidebar() {
       {/* Mobile Header with Hamburger */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#FAFAF8] border-b border-[#E3DFD5] z-40 flex items-center justify-between px-4">
         <Link href="/" className="inline-flex">
-          <CumpliaLogo markSize={26} wordSize={16} variant="light" />
+          <CumpliaLogo markSize={30} wordSize={22} variant="light" />
         </Link>
 
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
