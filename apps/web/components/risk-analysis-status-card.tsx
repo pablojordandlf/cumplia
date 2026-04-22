@@ -15,6 +15,7 @@ interface SystemRiskProgress {
   risk_analysis_completed: boolean;
   total: number;
   mitigated: number;
+  accepted: number;
   assessed: number;
   identified: number;
 }
@@ -130,11 +131,12 @@ export function RiskAnalysisStatusCard() {
       });
 
       const result: SystemRiskProgress[] = useCases.map((uc) => {
-        const systemRisks = risksBySystem[uc.id] ?? [];
-        const total = systemRisks.length;
-        const mitigated = systemRisks.filter((r) => r.status === 'mitigated').length;
-        const assessed = systemRisks.filter((r) => r.status === 'assessed').length;
-        const identified = total - mitigated - assessed;
+        const sr = risksBySystem[uc.id] ?? [];
+        const total = sr.length;
+        const mitigated = sr.filter((r) => r.status === 'mitigated').length;
+        const accepted = sr.filter((r) => r.status === 'accepted').length;
+        const assessed = sr.filter((r) => r.status === 'assessed').length;
+        const identified = total - mitigated - accepted - assessed;
         return {
           system_id: uc.id,
           system_name: uc.name,
@@ -142,6 +144,7 @@ export function RiskAnalysisStatusCard() {
           risk_analysis_completed: uc.risk_analysis_completed ?? false,
           total,
           mitigated,
+          accepted,
           assessed,
           identified,
         };
@@ -164,7 +167,6 @@ export function RiskAnalysisStatusCard() {
     ? systems.filter((s) => s.ai_act_level === filterLevel)
     : systems;
 
-  const completedCount = systems.filter((s) => s.risk_analysis_completed).length;
   const noAnalysisCount = systems.filter((s) => s.total === 0).length;
 
   const levelKeys = Object.keys(LEVEL_COLORS).filter((level) =>
@@ -188,7 +190,7 @@ export function RiskAnalysisStatusCard() {
           <div className="h-8 w-40 animate-pulse rounded bg-gray-100" />
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-6 animate-pulse rounded bg-gray-100" />
+              <div key={i} className="h-16 animate-pulse rounded bg-gray-100" />
             ))}
           </div>
         </div>
@@ -201,10 +203,11 @@ export function RiskAnalysisStatusCard() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="space-y-4"
     >
-      <div className="rounded-lg border border-[#E3DFD5] bg-white p-6">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="rounded-lg border border-[#E3DFD5] bg-white p-6 flex flex-col" style={{ maxHeight: '520px' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4 shrink-0">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-[#0B1C3D]" />
             <h3 className="text-sm font-semibold text-[#0B1C3D]">Gestión de Riesgos</h3>
@@ -212,30 +215,23 @@ export function RiskAnalysisStatusCard() {
           <span className="text-xs text-[#8B9BB4]">{filteredSystems.length} sistemas</span>
         </div>
 
-        {/* Summary stat */}
-        <div className="mb-4 rounded-lg bg-[#F8FAFB] border border-[#E3DFD5] px-4 py-3 flex items-center justify-between">
-          <span className="text-xs text-[#8B9BB4]">Análisis completados</span>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-[#27A844]" />
-            <span className="text-sm font-semibold text-[#0B1C3D]">
-              {completedCount} / {systems.length}
-            </span>
-          </div>
-        </div>
-
         {/* Legend */}
         {systems.length > 0 && (
-          <div className="mb-4 flex items-center gap-4 text-xs text-[#8B9BB4]">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#27A844]" />
+          <div className="mb-3 flex items-center gap-3 text-xs text-[#8B9BB4] shrink-0 flex-wrap">
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-2 w-2 rounded-sm bg-[#27A844]" />
               Mitigados
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#3B82F6]" />
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-2 w-2 rounded-sm bg-[#0D9488]" />
+              Admitidos
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-2 w-2 rounded-sm bg-[#3B82F6]" />
               Evaluados
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#CBD5E1]" />
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-2 w-2 rounded-sm bg-[#CBD5E1]" />
               Identificados
             </span>
           </div>
@@ -243,124 +239,126 @@ export function RiskAnalysisStatusCard() {
 
         {/* Level filter */}
         {levelKeys.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2">
-            <motion.button
+          <div className="mb-4 flex flex-wrap gap-1.5 shrink-0">
+            <button
               onClick={() => setFilterLevel(null)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+              className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
                 filterLevel === null
                   ? 'bg-[#0B1C3D] text-white'
                   : 'bg-[#E3DFD5] text-[#8B9BB4] hover:bg-gray-200'
               }`}
             >
               Todos
-            </motion.button>
+            </button>
             {levelKeys.map((level) => {
               const colors = LEVEL_COLORS[level];
               return (
-                <motion.button
+                <button
                   key={level}
                   onClick={() => setFilterLevel(level)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+                  className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
                     filterLevel === level
                       ? `${colors.bg} text-white`
                       : `${colors.bgLight} ${colors.color} hover:opacity-80`
                   }`}
                 >
                   {colors.text}
-                </motion.button>
+                </button>
               );
             })}
           </div>
         )}
 
-        {filteredSystems.length > 0 ? (
-          <motion.div
-            className="space-y-3"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {filteredSystems.map((system) => {
-              const colors = LEVEL_COLORS[system.ai_act_level] ?? LEVEL_COLORS.unclassified;
-              const mitigatedPct = system.total > 0 ? (system.mitigated / system.total) * 100 : 0;
-              const assessedPct = system.total > 0 ? (system.assessed / system.total) * 100 : 0;
+        {/* Scrollable systems list */}
+        <div className="overflow-y-auto flex-1 pr-1 space-y-2">
+          {filteredSystems.length > 0 ? (
+            <motion.div
+              className="space-y-2"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {filteredSystems.map((system) => {
+                const colors = LEVEL_COLORS[system.ai_act_level] ?? LEVEL_COLORS.unclassified;
+                const mitigatedPct = system.total > 0 ? (system.mitigated / system.total) * 100 : 0;
+                const acceptedPct  = system.total > 0 ? (system.accepted  / system.total) * 100 : 0;
+                const assessedPct  = system.total > 0 ? (system.assessed  / system.total) * 100 : 0;
 
-              return (
-                <motion.div
-                  key={system.system_id}
-                  variants={itemVariants}
-                  className="group rounded-lg border border-[#E3DFD5] bg-[#F8FAFB] p-4 transition-all hover:border-[#E8FF47]/40 hover:bg-white"
-                >
-                  <Link href={`/dashboard/inventory/${system.system_id}`}>
-                    <div className="space-y-3 cursor-pointer">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span>{colors.icon}</span>
-                            <h4 className="font-medium text-[#0B1C3D] group-hover:text-[#122850] transition-colors truncate">
+                return (
+                  <motion.div
+                    key={system.system_id}
+                    variants={itemVariants}
+                    className="group rounded-lg border border-[#E3DFD5] bg-[#F8FAFB] px-3 py-2.5 transition-all hover:border-[#E8FF47]/40 hover:bg-white"
+                  >
+                    <Link href={`/dashboard/inventory/${system.system_id}`}>
+                      <div className="cursor-pointer">
+                        {/* Top row: name + badge + status icon */}
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                            <span className="text-sm">{colors.icon}</span>
+                            <h4 className="text-xs font-medium text-[#0B1C3D] group-hover:text-[#122850] transition-colors truncate">
                               {system.system_name}
                             </h4>
+                            <Badge className={`text-[10px] px-1.5 py-0 shrink-0 ${colors.badge}`}>
+                              {colors.text}
+                            </Badge>
                           </div>
-                          <Badge className={`mt-2 ${colors.badge}`}>{colors.text}</Badge>
-                        </div>
-                        <div className="text-right shrink-0 ml-2">
                           {system.risk_analysis_completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-[#27A844]" />
+                            <CheckCircle2 className="h-4 w-4 text-[#27A844] shrink-0" />
                           ) : (
-                            <Clock className="h-5 w-5 text-[#D97706]" />
+                            <Clock className="h-4 w-4 text-[#D97706] shrink-0" />
                           )}
                         </div>
+
+                        {system.total === 0 ? (
+                          <p className="text-xs text-[#8B9BB4]">Sin análisis iniciado</p>
+                        ) : (
+                          <>
+                            {/* Segmented bar */}
+                            <div className="h-2 w-full rounded-full bg-[#CBD5E1] overflow-hidden flex">
+                              <div
+                                className="h-full bg-[#27A844] shrink-0 transition-all duration-500"
+                                style={{ width: `${mitigatedPct}%` }}
+                              />
+                              <div
+                                className="h-full bg-[#0D9488] shrink-0 transition-all duration-500"
+                                style={{ width: `${acceptedPct}%` }}
+                              />
+                              <div
+                                className="h-full bg-[#3B82F6] shrink-0 transition-all duration-500"
+                                style={{ width: `${assessedPct}%` }}
+                              />
+                            </div>
+                            {/* Counts */}
+                            <div className="mt-1 flex items-center gap-2 text-[10px] text-[#8B9BB4] tabular-nums flex-wrap">
+                              <span className="font-medium text-[#0B1C3D]">{system.total} total</span>
+                              <span>·</span>
+                              <span className="text-[#27A844]">{system.mitigated} mit</span>
+                              <span>·</span>
+                              <span className="text-[#0D9488]">{system.accepted} adm</span>
+                              <span>·</span>
+                              <span className="text-[#3B82F6]">{system.assessed} eval</span>
+                              <span>·</span>
+                              <span>{system.identified} id</span>
+                            </div>
+                          </>
+                        )}
                       </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            <div className="text-center py-8 text-[#8B9BB4]">
+              <p className="text-sm">No hay sistemas en esta categoría</p>
+            </div>
+          )}
+        </div>
 
-                      {system.total === 0 ? (
-                        <p className="text-xs text-[#8B9BB4]">Sin análisis iniciado</p>
-                      ) : (
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-[#8B9BB4]">Progreso de riesgos</span>
-                            <span className="font-medium text-[#0B1C3D] tabular-nums">
-                              {system.mitigated + system.assessed}/{system.total}
-                            </span>
-                          </div>
-                          {/* Segmented bar */}
-                          <div className="h-2 w-full rounded-full bg-[#CBD5E1] overflow-hidden flex">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${mitigatedPct}%` }}
-                              transition={{ duration: 0.5 }}
-                              className="h-full bg-[#27A844] shrink-0"
-                            />
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${assessedPct}%` }}
-                              transition={{ duration: 0.5, delay: 0.1 }}
-                              className="h-full bg-[#3B82F6] shrink-0"
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-[#8B9BB4]">
-                            <span>{system.mitigated} mit · {system.assessed} eval · {system.identified} id</span>
-                            <span>{Math.round(mitigatedPct)}% mitigado</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        ) : (
-          <div className="text-center py-8 text-[#8B9BB4]">
-            <p className="text-sm">No hay sistemas en esta categoría</p>
-          </div>
-        )}
-
+        {/* Footer note */}
         {noAnalysisCount > 0 && (
-          <p className="mt-4 text-xs text-[#8B9BB4]">
+          <p className="mt-3 shrink-0 text-xs text-[#8B9BB4]">
             {noAnalysisCount} sistema{noAnalysisCount !== 1 ? 's' : ''} sin análisis iniciado
           </p>
         )}
