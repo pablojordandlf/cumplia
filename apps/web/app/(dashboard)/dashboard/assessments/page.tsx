@@ -12,7 +12,6 @@ import {
   Circle,
   ExternalLink,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { PageShell, PageHeader, StatCardsSkeleton } from '@/components/ui/page-shell'
@@ -28,10 +27,8 @@ interface SystemAssessment {
   id: string
   name: string
   ai_act_level: string
-  status: string
   total_obligations: number
   completed_obligations: number
-  in_progress_obligations: number
   completion_percentage: number
 }
 
@@ -39,12 +36,15 @@ interface SystemAssessment {
 // Config
 // ---------------------------------------------------------------------------
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Borrador',
-  in_review: 'En revisión',
-  approved: 'Aprobado',
-  active: 'Activo',
-  archived: 'Archivado',
+const OBLIGATIONS_BY_LEVEL: Record<string, number> = {
+  prohibited: 2,
+  high_risk: 8,
+  limited_risk: 4,
+  minimal_risk: 2,
+  gpai_sr: 7,
+  gpai_model: 3,
+  gpai_system: 3,
+  unclassified: 1,
 }
 
 const PRIORITY_ORDER: Record<string, number> = {
@@ -90,18 +90,6 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
         (PRIORITY_ORDER[b.original.ai_act_level] ?? 99),
     },
     {
-      accessorKey: 'status',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Estado" />
-      ),
-      cell: ({ row }) => (
-        <Badge variant="outline" className="capitalize text-xs">
-          {STATUS_LABELS[row.original.status] ?? row.original.status}
-        </Badge>
-      ),
-      filterFn: (row, _id, value) => row.original.status === value,
-    },
-    {
       accessorKey: 'total_obligations',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Total" />
@@ -118,17 +106,6 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
       cell: ({ row }) => (
         <span className="text-sm tabular-nums text-status-success font-medium">
           {row.original.completed_obligations}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'in_progress_obligations',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="En progreso" />
-      ),
-      cell: ({ row }) => (
-        <span className="text-sm tabular-nums text-status-warning">
-          {row.original.in_progress_obligations}
         </span>
       ),
     },
@@ -150,48 +127,6 @@ function buildColumns(): ColumnDef<SystemAssessment>[] {
             </span>
           </div>
         )
-      },
-    },
-    {
-      id: 'evaluation_status',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Evaluacion" />
-      ),
-      accessorFn: (row) => {
-        if (row.total_obligations === 0) return 'pending'
-        if (row.completion_percentage === 100) return 'completed'
-        return 'in_progress'
-      },
-      cell: ({ row }) => {
-        const { total_obligations, completion_percentage } = row.original
-        if (total_obligations === 0) {
-          return (
-            <Badge className="bg-gray-100 text-gray-600 border-gray-200 text-xs border">
-              Sin iniciar
-            </Badge>
-          )
-        }
-        if (completion_percentage === 100) {
-          return (
-            <Badge className="bg-status-success-subtle text-status-success border-status-success-border text-xs border">
-              <CheckCircle2 className="w-3 h-3 mr-1" /> Completado
-            </Badge>
-          )
-        }
-        return (
-          <Badge className="bg-status-warning-subtle text-status-warning border-status-warning-border text-xs border">
-            <Clock className="w-3 h-3 mr-1" /> En progreso
-          </Badge>
-        )
-      },
-      filterFn: (row, _id, value) => {
-        const { total_obligations, completion_percentage } = row.original
-        if (value === 'completed')
-          return completion_percentage === 100 && total_obligations > 0
-        if (value === 'in_progress')
-          return completion_percentage > 0 && completion_percentage < 100
-        if (value === 'pending') return total_obligations === 0
-        return true
       },
     },
     {
@@ -239,7 +174,7 @@ export default function AssessmentsPage() {
 
       let q = supabase
         .from('use_cases')
-        .select('id, name, ai_act_level, status')
+        .select('id, name, ai_act_level')
         .is('deleted_at', null)
 
       if (membership?.organization_id) {
@@ -257,32 +192,34 @@ export default function AssessmentsPage() {
         return
       }
 
-      const enriched: SystemAssessment[] = await Promise.all(
-        useCases.map(async (uc) => {
-          const { data: obligations } = await supabase
-            .from('use_case_obligations')
-            .select('is_completed')
-            .eq('use_case_id', uc.id)
+      const useCaseIds = useCases.map((uc) => uc.id)
 
-          const total = obligations?.length ?? 0
-          const completed =
-            obligations?.filter((o) => o.is_completed === true).length ?? 0
-          const in_progress =
-            obligations?.filter((o) => o.is_completed === false).length ?? 0
-          const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+      // Fetch completed obligations for all systems in one query
+      const { data: completedRows } = await supabase
+        .from('use_case_obligations')
+        .select('use_case_id')
+        .in('use_case_id', useCaseIds)
+        .eq('is_completed', true)
 
-          return {
-            id: uc.id,
-            name: uc.name,
-            ai_act_level: uc.ai_act_level || 'unclassified',
-            status: uc.status || 'draft',
-            total_obligations: total,
-            completed_obligations: completed,
-            in_progress_obligations: in_progress,
-            completion_percentage: pct,
-          }
-        })
-      )
+      const completedBySystem: Record<string, number> = {}
+      completedRows?.forEach((row) => {
+        completedBySystem[row.use_case_id] = (completedBySystem[row.use_case_id] ?? 0) + 1
+      })
+
+      const enriched: SystemAssessment[] = useCases.map((uc) => {
+        const level = uc.ai_act_level || 'unclassified'
+        const total = OBLIGATIONS_BY_LEVEL[level] ?? 0
+        const completed = completedBySystem[uc.id] ?? 0
+        const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+        return {
+          id: uc.id,
+          name: uc.name,
+          ai_act_level: level,
+          total_obligations: total,
+          completed_obligations: completed,
+          completion_percentage: pct,
+        }
+      })
 
       setSystems(enriched)
     } finally {
@@ -297,7 +234,7 @@ export default function AssessmentsPage() {
   const inProgress = systems.filter(
     (s) => s.completion_percentage > 0 && s.completion_percentage < 100
   ).length
-  const notStarted = systems.filter((s) => s.total_obligations === 0).length
+  const notStarted = systems.filter((s) => s.completed_obligations === 0).length
 
   const columns = buildColumns()
 
@@ -357,7 +294,7 @@ export default function AssessmentsPage() {
             </span>
           </div>
           <p className="text-2xl font-bold text-[#0B1C3D]">{notStarted}</p>
-          <p className="text-xs text-[#8B9BB4] mt-1">sin obligaciones asignadas</p>
+          <p className="text-xs text-[#8B9BB4] mt-1">sin obligaciones completadas</p>
         </div>
       </div>
       )}
@@ -382,15 +319,6 @@ export default function AssessmentsPage() {
                   { label: 'Riesgo Limitado', value: 'limited_risk' },
                   { label: 'Riesgo Minimo', value: 'minimal_risk' },
                   { label: 'No Clasificado', value: 'unclassified' },
-                ],
-              },
-              {
-                key: 'evaluation_status',
-                label: 'Evaluacion',
-                options: [
-                  { label: 'Completado', value: 'completed' },
-                  { label: 'En progreso', value: 'in_progress' },
-                  { label: 'Sin iniciar', value: 'pending' },
                 ],
               },
             ],
