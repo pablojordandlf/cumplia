@@ -4,17 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
 import {
-  BarChart3,
-  CheckCircle2,
-  Clock,
   AlertCircle,
   RefreshCw,
-  Circle,
   ExternalLink,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { PageShell, PageHeader, StatCardsSkeleton } from '@/components/ui/page-shell'
+import { PageShell, PageHeader } from '@/components/ui/page-shell'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
 import { createClient } from '@/lib/supabase/client'
@@ -227,15 +223,6 @@ export default function AssessmentsPage() {
     }
   }
 
-  const totalSystems = systems.length
-  const fullyCompleted = systems.filter(
-    (s) => s.completion_percentage === 100 && s.total_obligations > 0
-  ).length
-  const inProgress = systems.filter(
-    (s) => s.completion_percentage > 0 && s.completion_percentage < 100
-  ).length
-  const notStarted = systems.filter((s) => s.completed_obligations === 0).length
-
   const columns = buildColumns()
 
   return (
@@ -251,53 +238,6 @@ export default function AssessmentsPage() {
         }
       />
 
-      {/* Summary Cards */}
-      {loading ? (
-        <StatCardsSkeleton />
-      ) : (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart3 className="w-4 h-4 text-[#0B1C3D]" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
-              Total sistemas
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-[#0B1C3D]">{totalSystems}</p>
-          <p className="text-xs text-[#8B9BB4] mt-1">sistemas registrados</p>
-        </div>
-        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
-              Completados
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-[#0B1C3D]">{fullyCompleted}</p>
-          <p className="text-xs text-[#8B9BB4] mt-1">100% obligaciones cumplidas</p>
-        </div>
-        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-[#0B1C3D]" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
-              En progreso
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-[#0B1C3D]">{inProgress}</p>
-          <p className="text-xs text-[#8B9BB4] mt-1">parcialmente completados</p>
-        </div>
-        <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Circle className="w-4 h-4 text-gray-400" />
-            <span className="text-xs font-medium text-[#8B9BB4] uppercase tracking-wide">
-              Sin iniciar
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-[#0B1C3D]">{notStarted}</p>
-          <p className="text-xs text-[#8B9BB4] mt-1">sin obligaciones completadas</p>
-        </div>
-      </div>
-      )}
 
       {/* DataTable */}
       <div className="bg-white rounded-xl border border-[#E3DFD5] p-4">

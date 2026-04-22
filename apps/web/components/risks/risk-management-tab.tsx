@@ -26,6 +26,12 @@ import {
   AI_ACT_RISK_CONFIG,
   getRiskManagementStatus 
 } from '@/types/risk-management';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { RiskRegistry } from './risk-registry';
 import { RiskMatrix } from './risk-matrix';
 import { RiskTemplateSelector } from './risk-template-selector';
@@ -206,14 +212,25 @@ export function RiskManagementTab({
                   Selecciona una plantilla o usa IA para identificar los factores de riesgo aplicables
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => setShowAIAssistant(true)}
-                className="flex-shrink-0 bg-gradient-to-r from-[#E8FF47] to-[#D9885F] hover:opacity-90 text-white gap-2 shadow-sm"
-                size="sm"
-              >
-                <Sparkles className="h-4 w-4" />
-                Completar con IA
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span tabIndex={0}>
+                      <Button
+                        disabled
+                        className="flex-shrink-0 bg-gradient-to-r from-[#E8FF47] to-[#D9885F] opacity-50 text-white gap-2 shadow-sm cursor-not-allowed"
+                        size="sm"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Completar con IA
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-xs">
+                    <p>Primero selecciona y aplica una plantilla de riesgos para establecer el catálogo base. Después podrás usar la IA para analizarlos.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </CardHeader>
           <CardContent>
