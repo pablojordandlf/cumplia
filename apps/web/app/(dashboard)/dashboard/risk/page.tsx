@@ -33,6 +33,7 @@ interface SystemRiskData {
   total_risks: number
   assessed_risks: number
   mitigated_risks: number
+  critical_risks: number
   critical_open: number
   completion_percentage: number
 }
@@ -115,19 +116,21 @@ function buildColumns(): ColumnDef<SystemRiskData>[] {
       ),
     },
     {
-      accessorKey: 'critical_open',
+      accessorKey: 'critical_risks',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Críticos" />
       ),
       cell: ({ row }) => {
-        const val = row.original.critical_open
-        if (val === 0) {
+        const { critical_risks, critical_open } = row.original
+        if (critical_risks === 0) {
           return <span className="text-sm text-muted-foreground tabular-nums">—</span>
         }
         return (
           <div className="flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-status-danger shrink-0" />
-            <span className="text-sm font-semibold text-status-danger tabular-nums">{val}</span>
+            <AlertTriangle className={`w-3.5 h-3.5 shrink-0 ${critical_open > 0 ? 'text-status-danger' : 'text-status-warning'}`} />
+            <span className={`text-sm font-semibold tabular-nums ${critical_open > 0 ? 'text-status-danger' : 'text-[#0B1C3D]'}`}>
+              {critical_risks}
+            </span>
           </div>
         )
       },
@@ -265,6 +268,8 @@ export default function RiskPage() {
             ).length
           const mitigated =
             applicable.filter((r) => r.status === 'mitigated').length
+          const critical_risks =
+            applicable.filter((r) => r.probability === 'critical').length
           const critical_open =
             applicable.filter(
               (r) =>
@@ -281,6 +286,7 @@ export default function RiskPage() {
             total_risks: total,
             assessed_risks: assessed,
             mitigated_risks: mitigated,
+            critical_risks,
             critical_open,
             completion_percentage: pct,
           }
