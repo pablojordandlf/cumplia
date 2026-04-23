@@ -1,9 +1,12 @@
 import jwt
-from jwt import PyJWKClient
+from jwt import PyJWKClient, ExpiredSignatureError, InvalidTokenError
 from fastapi import HTTPException, status
 from typing import Dict, Any, Optional
 
 from core.config import settings
+
+# Supabase JWT audience claim (project URL is the default aud for Supabase JWTs)
+_SUPABASE_JWT_AUDIENCE = settings.SUPABASE_URL or "authenticated"
 
 
 def verify_supabase_jwt(token: str) -> Dict[str, Any]:
@@ -29,7 +32,7 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
                 token,
                 jwt_secret,
                 algorithms=["HS256"],
-                options={"verify_aud": False}
+                audience=_SUPABASE_JWT_AUDIENCE,
             )
             return payload
         
@@ -46,7 +49,7 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
                 token,
                 signing_key.key,
                 algorithms=["RS256"],
-                options={"verify_aud": False}
+                audience=_SUPABASE_JWT_AUDIENCE,
             )
             return payload
         
@@ -56,13 +59,13 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.InvalidTokenError:
+    except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
