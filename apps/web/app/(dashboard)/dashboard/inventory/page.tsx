@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ColumnDef, Row } from '@tanstack/react-table'
 import {
@@ -19,7 +19,7 @@ import { Progress } from '@/components/ui/progress'
 import { PageShell, PageHeader } from '@/components/ui/page-shell'
 import { RiskBadge } from '@/components/risk-badge'
 import { DataTable, DataTableColumnHeader } from '@/components/ui/data-table'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { hasPermission, MemberRole } from '@/lib/permissions'
 
@@ -236,6 +236,7 @@ export default function InventoryPage() {
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<MemberRole | null>(null)
   const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
     fetchUserRole()
@@ -386,12 +387,9 @@ export default function InventoryPage() {
     ? useCases.filter((uc) => (uc.tags ?? []).includes(activeTag))
     : useCases
 
-  const columns = buildColumns(
-    obligationsCounts,
-    canDelete,
-    activeTag,
-    setActiveTag,
-    handleDelete
+  const columns = useMemo(
+    () => buildColumns(obligationsCounts, canDelete, activeTag, setActiveTag, handleDelete),
+    [obligationsCounts, canDelete, activeTag, handleDelete]
   )
 
   return (

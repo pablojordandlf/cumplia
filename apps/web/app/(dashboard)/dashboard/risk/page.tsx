@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
 import {
@@ -309,7 +309,7 @@ export default function RiskPage() {
   const systemsWithRisks = systems.filter((s) => s.total_risks > 0).length
   const criticalTotal = systems.reduce((acc, s) => acc + s.critical_open, 0)
 
-  const columns = buildColumns()
+  const columns = useMemo(() => buildColumns(), [])
 
   return (
     <PageShell>

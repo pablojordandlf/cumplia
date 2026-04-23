@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -484,12 +484,14 @@ export default function MembersPage() {
     )
   }
 
-  const memberColumns = buildMemberColumns(
-    canManageMembers,
-    currentUserRole,
-    handleRemoveMember
+  const memberColumns = useMemo(
+    () => buildMemberColumns(canManageMembers, currentUserRole, handleRemoveMember),
+    [canManageMembers, currentUserRole, handleRemoveMember]
   )
-  const inviteColumns = buildInviteColumns(handleResendInvite, handleCancelInvite)
+  const inviteColumns = useMemo(
+    () => buildInviteColumns(handleResendInvite, handleCancelInvite),
+    [handleResendInvite, handleCancelInvite]
+  )
 
   return (
     <div className="container mx-auto py-8 max-w-5xl space-y-6">

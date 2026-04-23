@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { ColumnDef } from '@tanstack/react-table'
 import {
@@ -223,7 +223,7 @@ export default function AssessmentsPage() {
     }
   }
 
-  const columns = buildColumns()
+  const columns = useMemo(() => buildColumns(), [])
 
   return (
     <PageShell>
