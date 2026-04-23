@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Política de Cookies - CumplIA",
   description: "Información sobre el uso de cookies en CumplIA. Gestiona tus preferencias.",
+  alternates: {
+    canonical: "https://cumplia.com/cookies",
+  },
 };
 
 export default function CookiesPage() {

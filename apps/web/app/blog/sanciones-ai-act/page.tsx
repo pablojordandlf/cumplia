@@ -1,8 +1,9 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Scale, 
+import {
+  Scale,
   ArrowLeft,
   AlertTriangle,
   Calendar,
@@ -12,10 +13,25 @@ import {
 } from 'lucide-react';
 import { Header } from '@/components/landing-header';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Sanciones del AI Act: Cuánto Puedes Pagar por Incumplir',
   description: 'Análisis completo de las sanciones y multas del AI Act. Descubre cuánto puede costar el incumplimiento del Reglamento de Inteligencia Artificial de la UE y cómo evitarlas.',
-  keywords: 'sanciones AI Act, multas AI Act, penalizaciones reglamento IA, coste incumplimiento AI Act, multas inteligencia artificial UE',
+  keywords: [
+    'sanciones AI Act',
+    'multas AI Act',
+    'penalizaciones reglamento IA',
+    'coste incumplimiento AI Act',
+    'multas inteligencia artificial UE',
+  ],
+  alternates: {
+    canonical: 'https://cumplia.com/blog/sanciones-ai-act',
+  },
+  openGraph: {
+    title: 'Sanciones del AI Act: Cuánto Puedes Pagar por Incumplir',
+    description: 'Análisis completo de las sanciones y multas del AI Act. Descubre cuánto puede costar el incumplimiento del Reglamento de Inteligencia Artificial de la UE.',
+    url: 'https://cumplia.com/blog/sanciones-ai-act',
+    type: 'article',
+  },
 };
 
 // JSON-LD Schema

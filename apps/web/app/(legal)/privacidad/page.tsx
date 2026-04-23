@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Política de Privacidad - CumplIA",
   description: "Política de privacidad y protección de datos de CumplIA. Cumplimiento con GDPR.",
+  alternates: {
+    canonical: "https://cumplia.com/privacidad",
+  },
 };
 
 export default function PrivacidadPage() {

@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Términos de Servicio - CumplIA",
   description: "Términos y condiciones de uso de la plataforma CumplIA para cumplimiento del AI Act.",
+  alternates: {
+    canonical: "https://cumplia.com/terminos-servicio",
+  },
 };
 
 export default function TerminosServicioPage() {
