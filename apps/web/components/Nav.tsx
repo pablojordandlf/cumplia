@@ -1,13 +1,12 @@
 import Link from 'next/link';
 import styles from '@/styles/nav.module.css';
-import LogoMark from './LogoMark';
+import { CumpliaLogo } from '@/components/ui/cumplia-logo';
 
 export default function Nav() {
   return (
     <nav className={styles.nav}>
-      <Link href="/" className={styles.logo}>
-        <LogoMark />
-        Cumpl<span className={styles.logoIa}>IA</span>
+      <Link href="/" className="flex items-center">
+        <CumpliaLogo markSize={30} wordSize={20} variant="dark" gap={10} />
       </Link>
 
       <ul className={styles.links}>
