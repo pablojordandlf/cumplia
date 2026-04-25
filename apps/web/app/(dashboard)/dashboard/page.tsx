@@ -280,56 +280,55 @@ export default function DashboardPage() {
         {/* THREE METRIC CARDS - HERO ROW */}
         <motion.div
           variants={itemVariants}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          className="grid grid-cols-3 gap-4"
         >
           {/* Total Systems */}
           <Link href="/dashboard/inventory">
             <motion.div
-              whileHover={{ translateY: -4 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 cursor-pointer group hover:shadow-md transition-all border border-gray-200 dark:border-slate-700"
+              whileHover={{ translateY: -2 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-4 cursor-pointer group hover:shadow-md transition-all border border-[#E3DFD5] dark:border-slate-700 flex items-center gap-4"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 group-hover:from-blue-500/30 group-hover:to-cyan-500/30 transition-all">
-                  <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <TrendingUp className="w-5 h-5 text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 shrink-0">
+                <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Total de Sistemas</h3>
-              <p className="text-4xl font-bold text-gray-900 dark:text-gray-100">{stats.totalSystems}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-500 mt-2">Sistemas IA registrados</p>
+              <div className="min-w-0">
+                <p className="text-xs text-[#8B9BB4] font-medium">Total de Sistemas</p>
+                <p className="text-2xl font-bold text-[#0B1C3D] dark:text-gray-100 leading-tight">{stats.totalSystems}</p>
+                <p className="text-xs text-[#8B9BB4] truncate">Sistemas IA registrados</p>
+              </div>
             </motion.div>
           </Link>
 
           {/* Compliance Rate */}
           <motion.div
-            whileHover={{ translateY: -4 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 group hover:shadow-md transition-all border border-gray-200 dark:border-slate-700"
+            whileHover={{ translateY: -2 }}
+            className="bg-white dark:bg-slate-800 rounded-xl p-4 group hover:shadow-md transition-all border border-[#E3DFD5] dark:border-slate-700 flex items-center gap-4"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 group-hover:from-green-500/30 group-hover:to-emerald-500/30 transition-all">
-                <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 shrink-0">
+              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-[#8B9BB4] font-medium">Cumplimiento</p>
+              <p className="text-2xl font-bold text-[#0B1C3D] dark:text-gray-100 leading-tight">{completionRate}%</p>
+              <div className="mt-1 h-1.5 w-full rounded-full bg-[#E3DFD5] overflow-hidden">
+                <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${completionRate}%` }} />
               </div>
             </div>
-            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-2">Cumplimiento</h3>
-            <p className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1">{completionRate}%</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">de obligaciones cumplidas</p>
-            <Progress value={completionRate} className="mt-4 h-2" />
           </motion.div>
 
           {/* High Risk Alert */}
           <motion.div
-            whileHover={{ translateY: -4 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 group hover:shadow-md transition-all border border-gray-200 dark:border-slate-700"
+            whileHover={{ translateY: -2 }}
+            className="bg-white dark:bg-slate-800 rounded-xl p-4 group hover:shadow-md transition-all border border-[#E3DFD5] dark:border-slate-700 flex items-center gap-4"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-red-500/20 to-rose-500/20 group-hover:from-red-500/30 group-hover:to-rose-500/30 transition-all">
-                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-              </div>
-              <Eye className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className={`p-2 rounded-lg shrink-0 ${stats.highRiskCount > 0 ? 'bg-red-50 dark:bg-red-900/20' : 'bg-gray-50 dark:bg-gray-800'}`}>
+              <AlertTriangle className={`w-5 h-5 ${stats.highRiskCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-[#8B9BB4]'}`} />
             </div>
-            <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Riesgo Alto</h3>
-            <p className="text-4xl font-bold text-gray-900 dark:text-gray-100">{stats.highRiskCount}</p>
-            <p className="text-xs text-gray-600 dark:text-gray-500 mt-2">Requieren revisión urgente</p>
+            <div className="min-w-0">
+              <p className="text-xs text-[#8B9BB4] font-medium">Riesgo Alto</p>
+              <p className={`text-2xl font-bold leading-tight ${stats.highRiskCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-[#0B1C3D] dark:text-gray-100'}`}>{stats.highRiskCount}</p>
+              <p className="text-xs text-[#8B9BB4] truncate">Requieren revisión</p>
+            </div>
           </motion.div>
         </motion.div>
 

@@ -1,71 +1,102 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CheckCircle2, ArrowRight, Target, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface RiskAnalysisStats {
-  highRiskTotal: number;
-  highRiskWithAnalysis: number;
-  limitedRiskTotal: number;
-  limitedRiskWithAnalysis: number;
-  minimalRiskTotal: number;
-  minimalRiskWithAnalysis: number;
-  systemsWithoutAnalysis: number;
+interface SystemRiskProgress {
+  system_id: string;
+  system_name: string;
+  ai_act_level: string;
+  risk_analysis_completed: boolean;
+  total: number;
+  mitigated: number;
+  accepted: number;
+  assessed: number;
+  identified: number;
 }
 
-const RISK_CONFIG = {
+const PRIORITY_ORDER: Record<string, number> = {
+  prohibited: 1,
+  high_risk: 2,
+  limited_risk: 3,
+  minimal_risk: 4,
+};
+
+const LEVEL_COLORS: Record<string, { badge: string; icon: string; text: string; bg: string; color: string; bgLight: string }> = {
+  prohibited: {
+    badge: 'bg-[#F4E4D7] text-[#C92A2A] border border-[#C92A2A]/20',
+    icon: '🔴',
+    text: 'Prohibido',
+    bg: 'bg-[#C92A2A]',
+    color: 'text-[#C92A2A]',
+    bgLight: 'bg-[#F4E4D7]',
+  },
   high_risk: {
-    label: 'Alto Riesgo',
-    badge: '🔴',
-    color: 'from-red-600 to-red-500',
-    barColor: 'bg-red-600',
-    required: true,
+    badge: 'bg-[#FFE8D1] text-[#D97706] border border-[#D97706]/20',
+    icon: '🟠',
+    text: 'Alto Riesgo',
+    bg: 'bg-[#D97706]',
+    color: 'text-[#D97706]',
+    bgLight: 'bg-[#FFE8D1]',
   },
   limited_risk: {
-    label: 'Riesgo Limitado',
-    badge: '🟡',
-    color: 'from-yellow-600 to-yellow-500',
-    barColor: 'bg-yellow-600',
-    required: false,
+    badge: 'bg-[#FFF8DC] text-[#B8860B] border border-[#B8860B]/20',
+    icon: '🟡',
+    text: 'Limitado',
+    bg: 'bg-[#B8860B]',
+    color: 'text-[#B8860B]',
+    bgLight: 'bg-[#FFF8DC]',
   },
   minimal_risk: {
-    label: 'Riesgo Mínimo',
-    badge: '🟢',
-    color: 'from-green-600 to-green-500',
-    barColor: 'bg-green-600',
-    required: false,
+    badge: 'bg-[#E8F5E3] text-[#27A844] border border-[#27A844]/20',
+    icon: '🟢',
+    text: 'Mínimo',
+    bg: 'bg-[#27A844]',
+    color: 'text-[#27A844]',
+    bgLight: 'bg-[#E8F5E3]',
+  },
+  unclassified: {
+    badge: 'bg-[#E3DFD5] text-[#707070] border border-[#707070]/20',
+    icon: '⚪',
+    text: 'Sin clasificar',
+    bg: 'bg-[#707070]',
+    color: 'text-[#707070]',
+    bgLight: 'bg-[#E3DFD5]',
   },
 };
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+};
+
 export function RiskAnalysisStatusCard() {
-  const [stats, setStats] = useState<RiskAnalysisStats>({
-    highRiskTotal: 0,
-    highRiskWithAnalysis: 0,
-    limitedRiskTotal: 0,
-    limitedRiskWithAnalysis: 0,
-    minimalRiskTotal: 0,
-    minimalRiskWithAnalysis: 0,
-    systemsWithoutAnalysis: 0,
-  });
+  const [systems, setSystems] = useState<SystemRiskProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterLevel, setFilterLevel] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
-    fetchRiskAnalysisStats();
+    fetchData();
   }, []);
 
-  async function fetchRiskAnalysisStats() {
+  async function fetchData() {
     try {
+      setLoading(true);
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
 
-      // Get user's organization
       const { data: membership } = await supabase
         .from('organization_members')
         .select('organization_id')
@@ -75,285 +106,260 @@ export function RiskAnalysisStatusCard() {
 
       const organizationId = membership?.organization_id;
 
-      // Fetch all systems
-      let systemsQuery = supabase
+      let useCasesQuery = supabase
         .from('use_cases')
-        .select('id, ai_act_level, risk_analysis_completed')
+        .select('id, name, ai_act_level, risk_analysis_completed')
         .is('deleted_at', null);
 
       if (organizationId) {
-        systemsQuery = systemsQuery.or(`organization_id.eq.${organizationId},user_id.eq.${session.user.id}`);
+        useCasesQuery = useCasesQuery.or(
+          `organization_id.eq.${organizationId},user_id.eq.${session.user.id}`
+        );
       } else {
-        systemsQuery = systemsQuery.eq('user_id', session.user.id);
+        useCasesQuery = useCasesQuery.eq('user_id', session.user.id);
       }
 
-      const { data: systems, error } = await systemsQuery;
+      const { data: useCases } = await useCasesQuery.order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching systems:', error);
-        setLoading(false);
+      if (!useCases?.length) {
+        setSystems([]);
         return;
       }
 
-      // Calculate stats per risk level
-      const allSystems = systems || [];
-      
-      const highRiskSystems = allSystems.filter(s => s.ai_act_level === 'high_risk');
-      const limitedRiskSystems = allSystems.filter(s => s.ai_act_level === 'limited_risk');
-      const minimalRiskSystems = allSystems.filter(s => s.ai_act_level === 'minimal_risk');
-      
-      const highRiskWithAnalysis = highRiskSystems.filter(s => s.risk_analysis_completed).length;
-      const limitedRiskWithAnalysis = limitedRiskSystems.filter(s => s.risk_analysis_completed).length;
-      const minimalRiskWithAnalysis = minimalRiskSystems.filter(s => s.risk_analysis_completed).length;
-      
-      const systemsWithoutAnalysis = allSystems.filter(
-        s => s.ai_act_level && s.ai_act_level !== 'unclassified' && !s.risk_analysis_completed
-      ).length;
+      const useCaseIds = useCases.map((uc) => uc.id);
 
-      setStats({
-        highRiskTotal: highRiskSystems.length,
-        highRiskWithAnalysis,
-        limitedRiskTotal: limitedRiskSystems.length,
-        limitedRiskWithAnalysis,
-        minimalRiskTotal: minimalRiskSystems.length,
-        minimalRiskWithAnalysis,
-        systemsWithoutAnalysis,
+      const { data: risks } = await supabase
+        .from('use_case_risks')
+        .select('use_case_id, status')
+        .in('use_case_id', useCaseIds)
+        .eq('applicable', true);
+
+      const risksBySystem: Record<string, { status: string }[]> = {};
+      risks?.forEach((r) => {
+        if (!risksBySystem[r.use_case_id]) risksBySystem[r.use_case_id] = [];
+        risksBySystem[r.use_case_id].push({ status: r.status });
       });
+
+      const result: SystemRiskProgress[] = useCases.map((uc) => {
+        const sr = risksBySystem[uc.id] ?? [];
+        const total = sr.length;
+        const mitigated = sr.filter((r) => r.status === 'mitigated').length;
+        const accepted  = sr.filter((r) => r.status === 'accepted').length;
+        const assessed  = sr.filter((r) => r.status === 'assessed').length;
+        const identified = total - mitigated - accepted - assessed;
+        return {
+          system_id: uc.id,
+          system_name: uc.name,
+          ai_act_level: uc.ai_act_level || 'unclassified',
+          risk_analysis_completed: uc.risk_analysis_completed ?? false,
+          total,
+          mitigated,
+          accepted,
+          assessed,
+          identified,
+        };
+      });
+
+      result.sort(
+        (a, b) => (PRIORITY_ORDER[a.ai_act_level] ?? 99) - (PRIORITY_ORDER[b.ai_act_level] ?? 99)
+      );
+
+      setSystems(result);
     } catch (error) {
-      console.error('Error in fetchRiskAnalysisStats:', error);
+      console.error('Error fetching risk progress:', error);
+      toast.error('Error', { description: 'No se pudieron cargar los datos de riesgos' });
     } finally {
       setLoading(false);
     }
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  };
+  const filteredSystems = filterLevel
+    ? systems.filter((s) => s.ai_act_level === filterLevel)
+    : systems;
 
-  const sectionVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: (i: number) => ({
-      opacity: 1,
-      x: 0,
-      transition: { delay: 0.1 + i * 0.1 },
-    }),
-  };
+  const noAnalysisCount = systems.filter((s) => s.total === 0).length;
+
+  const levelKeys = Object.keys(LEVEL_COLORS).filter((level) =>
+    systems.some((s) => s.ai_act_level === level)
+  );
 
   if (loading) {
     return (
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="h-64 rounded-2xl bg-gray-100/60 backdrop-blur-sm border border-gray-300/60 animate-pulse"
-      />
+      <div className="rounded-xl border border-[#E3DFD5] bg-white p-5" style={{ height: '520px' }}>
+        <div className="space-y-3">
+          <div className="h-5 w-40 animate-pulse rounded-md bg-[#F0EDE8]" />
+          <div className="h-px bg-[#E3DFD5]" />
+          <div className="space-y-2 pt-1">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-[58px] animate-pulse rounded-lg bg-[#F0EDE8]" />
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 
-  // Filter sections to show only those with systems
-  const sectionsToShow = [
-    {
-      key: 'high_risk',
-      ...RISK_CONFIG.high_risk,
-      total: stats.highRiskTotal,
-      completed: stats.highRiskWithAnalysis,
-    },
-    ...(stats.limitedRiskTotal > 0 ? [{
-      key: 'limited_risk',
-      ...RISK_CONFIG.limited_risk,
-      total: stats.limitedRiskTotal,
-      completed: stats.limitedRiskWithAnalysis,
-    }] : []),
-    ...(stats.minimalRiskTotal > 0 ? [{
-      key: 'minimal_risk',
-      ...RISK_CONFIG.minimal_risk,
-      total: stats.minimalRiskTotal,
-      completed: stats.minimalRiskWithAnalysis,
-    }] : []),
-  ];
-
-  const totalSystems = stats.highRiskTotal + stats.limitedRiskTotal + stats.minimalRiskTotal;
-  const totalCompleted = stats.highRiskWithAnalysis + stats.limitedRiskWithAnalysis + stats.minimalRiskWithAnalysis;
-
   return (
     <motion.div
-      variants={containerVariants}
       initial="hidden"
       animate="visible"
+      variants={containerVariants}
+      className="rounded-xl border border-[#E3DFD5] bg-white p-5 flex flex-col"
+      style={{ height: '520px' }}
     >
-      <Card className="glass rounded-2xl bg-white/75 border-gray-300/70 backdrop-blur-md transition-all duration-300 overflow-hidden hover:shadow-lg">
-        <CardHeader className="pb-4 border-b border-gray-200/70">
-          <motion.div
-            className="flex items-center justify-between"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 border border-blue-300/70">
-                <Target className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <CardTitle className="text-xl font-bold text-gray-900">
-                  Progreso de Gestión de Riesgos
-                </CardTitle>
-                <CardDescription className="text-xs mt-1 text-gray-700">
-                  Estado de completitud de análisis por nivel de riesgo
-                </CardDescription>
-              </div>
-            </div>
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: 10 }}
-              className="p-2.5 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 border border-green-300/70 flex-shrink-0"
-            >
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-            </motion.div>
-          </motion.div>
-        </CardHeader>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-[#0B1C3D]" />
+          <h3 className="text-sm font-semibold text-[#0B1C3D]">Gestión de Riesgos</h3>
+        </div>
+        <span className="text-xs text-[#8B9BB4] tabular-nums">{filteredSystems.length} sistemas</span>
+      </div>
 
-        <CardContent className="pt-6 space-y-4">
-          {/* Overall Progress */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15 }}
-            className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-300/60"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold text-gray-900">
-                Progreso General
-              </span>
-              <span className="text-sm font-bold text-blue-700">
-                {totalCompleted}/{totalSystems} completados
-              </span>
-            </div>
-            <Progress
-              value={totalSystems > 0 ? Math.round((totalCompleted / totalSystems) * 100) : 0}
-              className="h-2.5"
-            />
-          </motion.div>
+      {/* Divider */}
+      <div className="border-b border-[#E3DFD5] mb-3 shrink-0" />
 
-          {/* Risk Level Sections */}
-          <div className="space-y-4">
-            {sectionsToShow.length > 0 ? (
-              sectionsToShow.map((section, idx) => {
-                const percentage = section.total > 0 ? Math.round((section.completed / section.total) * 100) : 0;
-                
-                return (
-                  <motion.div
-                    key={section.key}
-                    custom={idx}
-                    variants={sectionVariants}
-                    className="p-4 rounded-xl bg-gray-50/80 border border-gray-300/70 hover:border-gray-400/80 transition-all hover:bg-gray-100/80 hover:shadow-md"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3 flex-1">
-                        <span className="text-lg">{section.badge}</span>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900">
-                              {section.label}
-                            </span>
-                            {section.required && (
-                              <Badge variant="destructive" className="text-xs bg-red-600 text-white">
-                                Obligatorio
-                              </Badge>
-                            )}
-                            {!section.required && (
-                              <Badge variant="outline" className="text-xs bg-gray-100 border-gray-400 text-gray-700">
-                                Opcional
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-700 mt-0.5">
-                            {section.completed} de {section.total} sistema{section.total !== 1 ? 's' : ''} completado{section.completed !== 1 ? 's' : ''}
-                          </p>
+      {/* Legend */}
+      {systems.length > 0 && (
+        <div className="mb-3 flex items-center gap-3 shrink-0 flex-wrap">
+          {[
+            { color: '#27A844', label: 'Mitigados' },
+            { color: '#0D9488', label: 'Admitidos' },
+            { color: '#3B82F6', label: 'Evaluados' },
+            { color: '#CBD5E1', label: 'Identificados' },
+          ].map(({ color, label }) => (
+            <span key={label} className="flex items-center gap-1 text-[10px] text-[#8B9BB4]">
+              <span className="inline-block h-2 w-2 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+              {label}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Level filters */}
+      {levelKeys.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-1.5 shrink-0">
+          <motion.button
+            onClick={() => setFilterLevel(null)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
+              filterLevel === null
+                ? 'bg-[#0B1C3D] text-white'
+                : 'bg-[#F0EDE8] text-[#8B9BB4] hover:bg-[#E3DFD5]'
+            }`}
+          >
+            Todos
+          </motion.button>
+          {levelKeys.map((level) => {
+            const colors = LEVEL_COLORS[level];
+            return (
+              <motion.button
+                key={level}
+                onClick={() => setFilterLevel(level)}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
+                  filterLevel === level
+                    ? `${colors.bg} text-white`
+                    : `${colors.bgLight} ${colors.color} hover:opacity-80`
+                }`}
+              >
+                {colors.text}
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Scrollable list */}
+      <div className="overflow-y-auto flex-1 space-y-2 pr-0.5">
+        {filteredSystems.length > 0 ? (
+          <motion.div className="space-y-2" variants={containerVariants} initial="hidden" animate="visible">
+            {filteredSystems.map((system) => {
+              const colors = LEVEL_COLORS[system.ai_act_level] ?? LEVEL_COLORS.unclassified;
+              const mitigatedPct = system.total > 0 ? (system.mitigated / system.total) * 100 : 0;
+              const acceptedPct  = system.total > 0 ? (system.accepted  / system.total) * 100 : 0;
+              const assessedPct  = system.total > 0 ? (system.assessed  / system.total) * 100 : 0;
+
+              return (
+                <motion.div
+                  key={system.system_id}
+                  variants={itemVariants}
+                  className="group rounded-lg border border-[#E3DFD5] bg-[#F8FAFB] px-3 py-2.5 transition-all hover:border-[#0B1C3D]/10 hover:bg-white hover:shadow-sm"
+                >
+                  <Link href={`/dashboard/inventory/${system.system_id}`}>
+                    <div className="cursor-pointer">
+                      {/* Row 1: name + badge + status */}
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                          <span className="text-sm leading-none shrink-0">{colors.icon}</span>
+                          <h4 className="text-xs font-medium text-[#0B1C3D] group-hover:text-[#122850] transition-colors truncate">
+                            {system.system_name}
+                          </h4>
+                          <Badge className={`text-[10px] px-1.5 py-0 leading-4 shrink-0 ${colors.badge}`}>
+                            {colors.text}
+                          </Badge>
                         </div>
+                        {system.risk_analysis_completed ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-[#27A844] shrink-0" />
+                        ) : (
+                          <Clock className="h-3.5 w-3.5 text-[#D97706] shrink-0" />
+                        )}
                       </div>
-                      <span className="text-lg font-bold text-gray-900 min-w-12 text-right">
-                        {percentage}%
-                      </span>
+
+                      {system.total === 0 ? (
+                        <p className="text-[10px] text-[#8B9BB4]">Sin análisis iniciado</p>
+                      ) : (
+                        <>
+                          {/* Row 2: segmented progress bar */}
+                          <div className="h-1.5 w-full rounded-full bg-[#E3DFD5] overflow-hidden flex">
+                            <div
+                              className="h-full bg-[#27A844] shrink-0 transition-all duration-500"
+                              style={{ width: `${mitigatedPct}%` }}
+                            />
+                            <div
+                              className="h-full bg-[#0D9488] shrink-0 transition-all duration-500"
+                              style={{ width: `${acceptedPct}%` }}
+                            />
+                            <div
+                              className="h-full bg-[#3B82F6] shrink-0 transition-all duration-500"
+                              style={{ width: `${assessedPct}%` }}
+                            />
+                          </div>
+                          {/* Row 3: counts */}
+                          <div className="mt-1 flex items-center gap-1.5 text-[10px] tabular-nums flex-wrap">
+                            <span className="font-medium text-[#0B1C3D]">{system.total} total</span>
+                            <span className="text-[#CBD5E1]">·</span>
+                            <span className="text-[#27A844]">{system.mitigated} mit</span>
+                            <span className="text-[#CBD5E1]">·</span>
+                            <span className="text-[#0D9488]">{system.accepted} adm</span>
+                            <span className="text-[#CBD5E1]">·</span>
+                            <span className="text-[#3B82F6]">{system.assessed} eval</span>
+                            <span className="text-[#CBD5E1]">·</span>
+                            <span className="text-[#8B9BB4]">{system.identified} id</span>
+                          </div>
+                        </>
+                      )}
                     </div>
-
-                    {/* Progress Bar with Color */}
-                    <div className="relative h-2.5 rounded-full bg-gray-300/40 border border-gray-400/40 overflow-hidden">
-                      <motion.div
-                        className={`h-full rounded-full ${section.barColor} transition-all`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percentage}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                      />
-                    </div>
-
-                    {/* Warning if incomplete */}
-                    {section.required && percentage < 100 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="mt-3 p-2 rounded-lg bg-red-50 border border-red-300/60 flex items-start gap-2"
-                      >
-                        <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-red-700">
-                          Completa los análisis para cumplir normativa
-                        </p>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                );
-              })
-            ) : (
-              <div className="p-8 text-center rounded-lg bg-gray-100/60 border border-gray-300/60">
-                <p className="text-sm text-gray-600">
-                  Sin sistemas clasificados para mostrar
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Warning: Systems without analysis */}
-          {stats.systemsWithoutAnalysis > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="p-3 rounded-lg bg-orange-50 border border-orange-300/60 flex items-start gap-3"
-            >
-              <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-orange-900">
-                  {stats.systemsWithoutAnalysis} sistema{stats.systemsWithoutAnalysis !== 1 ? 's' : ''} sin análisis
-                </p>
-                <p className="text-xs text-orange-800 mt-0.5">
-                  Completa los análisis pendientes en tu inventario
-                </p>
-              </div>
-            </motion.div>
-          )}
-
-          {/* CTA Link */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="pt-2 flex justify-center"
-          >
-            <Link
-              href="/dashboard/inventory"
-              className="group inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors px-4 py-2 rounded-lg hover:bg-blue-100/60"
-            >
-              <Target className="w-4 h-4" />
-              Ver Inventario y Gestionar Análisis
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </motion.div>
-        </CardContent>
-      </Card>
+        ) : (
+          <div className="flex items-center justify-center h-full text-center text-[#8B9BB4]">
+            <p className="text-xs">No hay sistemas en esta categoría</p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      {noAnalysisCount > 0 && (
+        <p className="mt-2 shrink-0 text-[10px] text-[#8B9BB4]">
+          {noAnalysisCount} sistema{noAnalysisCount !== 1 ? 's' : ''} sin análisis iniciado
+        </p>
+      )}
     </motion.div>
   );
 }
