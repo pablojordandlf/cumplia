@@ -1,8 +1,9 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Shield, 
+import {
+  Shield,
   ArrowLeft,
   BookOpen,
   Calendar,
@@ -10,10 +11,26 @@ import {
 } from 'lucide-react';
 import { Header } from '@/components/landing-header';
 
-export const metadata = {
-  title: '¿Qué es el AI Act? Guía Completa para Empresas 2024',
-  description: 'Descubre qué es el AI Act, quién debe cumplirlo y cómo afecta a tu empresa. Guía introductoria completa al Reglamento de Inteligencia Artificial de la Unión Europea.',
-  keywords: 'qué es AI Act, Reglamento IA UE, AI Act explicado, cumplimiento IA empresas, inteligencia artificial regulación Europa',
+export const metadata: Metadata = {
+  title: '¿Qué es el AI Act? Guía Completa para Empresas',
+  description: 'Descubre qué es el AI Act, quién debe cumplirlo y cómo afecta a tu empresa. Guía completa al Reglamento de Inteligencia Artificial de la Unión Europea (UE 2024/1689).',
+  keywords: [
+    'qué es el AI Act',
+    'Reglamento IA UE',
+    'AI Act explicado',
+    'cumplimiento IA empresas',
+    'inteligencia artificial regulación Europa',
+    'UE 2024/1689',
+  ],
+  alternates: {
+    canonical: 'https://cumplia.com/blog/que-es-ai-act',
+  },
+  openGraph: {
+    title: '¿Qué es el AI Act? Guía Completa para Empresas',
+    description: 'Descubre qué es el AI Act, quién debe cumplirlo y cómo afecta a tu empresa. Guía completa al Reglamento de Inteligencia Artificial de la Unión Europea.',
+    url: 'https://cumplia.com/blog/que-es-ai-act',
+    type: 'article',
+  },
 };
 
 // JSON-LD Schema

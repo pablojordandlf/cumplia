@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CumpliaLogo } from "@/components/ui/cumplia-logo";
 
 export const metadata: Metadata = {
   title: "Política de Cookies - CumplIA",
   description: "Información sobre el uso de cookies en CumplIA. Gestiona tus preferencias.",
+  alternates: {
+    canonical: "https://cumplia.com/cookies",
+  },
 };
 
 export default function CookiesPage() {
@@ -20,10 +24,7 @@ export default function CookiesPage() {
               Volver
             </Button>
           </Link>
-          <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-blue-600" />
-            <span className="font-bold text-lg">CumplIA</span>
-          </div>
+          <CumpliaLogo markSize={28} wordSize={20} variant="light" gap={8} />
         </div>
       </header>
 

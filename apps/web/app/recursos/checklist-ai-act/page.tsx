@@ -1,8 +1,9 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  CheckCircle, 
+import {
+  CheckCircle,
   Download,
   ArrowRight,
   FileText,
@@ -12,10 +13,25 @@ import {
 } from 'lucide-react';
 import { Header } from '@/components/landing-header';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Checklist de Cumplimiento AI Act | Descargable Gratis',
   description: 'Checklist completo y descargable para evaluar el cumplimiento del AI Act en tu empresa. Verifica que cumples con todos los requisitos del Reglamento de Inteligencia Artificial de la UE.',
-  keywords: 'checklist AI Act, cumplimiento AI Act PDF, lista verificación AI Act, requisitos AI Act, guía cumplimiento IA',
+  keywords: [
+    'checklist AI Act',
+    'cumplimiento AI Act PDF',
+    'lista verificación AI Act',
+    'requisitos AI Act',
+    'guía cumplimiento IA',
+  ],
+  alternates: {
+    canonical: 'https://cumplia.com/recursos/checklist-ai-act',
+  },
+  openGraph: {
+    title: 'Checklist de Cumplimiento AI Act | Descargable Gratis',
+    description: 'Checklist completo para evaluar el cumplimiento del AI Act en tu empresa. Verifica todos los requisitos del Reglamento de Inteligencia Artificial de la UE.',
+    url: 'https://cumplia.com/recursos/checklist-ai-act',
+    type: 'article',
+  },
 };
 
 // JSON-LD Schema

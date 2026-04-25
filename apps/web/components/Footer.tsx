@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import LogoMark from './LogoMark';
+import { CumpliaLogo } from '@/components/ui/cumplia-logo';
 import styles from '@/styles/footer.module.css';
 
 const COLS = [
@@ -35,9 +35,8 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.top}>
         <div className={styles.brand}>
-          <Link href="/" className={styles.logo}>
-            <LogoMark />
-            Cumpl<span className={styles.logoIa}>IA</span>
+          <Link href="/" className="inline-flex mb-3">
+            <CumpliaLogo markSize={28} wordSize={20} variant="dark" gap={10} />
           </Link>
           <p className={styles.tagline}>
             Simplificamos el cumplimiento del AI Act para empresas europeas.

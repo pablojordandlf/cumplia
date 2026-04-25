@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CumpliaLogo } from "@/components/ui/cumplia-logo";
 
 export const metadata: Metadata = {
   title: "Términos de Servicio - CumplIA",
   description: "Términos y condiciones de uso de la plataforma CumplIA para cumplimiento del AI Act.",
+  alternates: {
+    canonical: "https://cumplia.com/terminos-servicio",
+  },
 };
 
 export default function TerminosServicioPage() {
@@ -20,10 +24,7 @@ export default function TerminosServicioPage() {
               Volver
             </Button>
           </Link>
-          <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-blue-600" />
-            <span className="font-bold text-lg">CumplIA</span>
-          </div>
+          <CumpliaLogo markSize={28} wordSize={20} variant="light" gap={8} />
         </div>
       </header>
 
