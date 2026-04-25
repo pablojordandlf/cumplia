@@ -2,9 +2,8 @@
 
 import { ThemeToggle } from '@/components/theme-toggle';
 import UserMenu from '@/components/auth/UserMenu';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { CumpliaLogo } from '@/components/ui/cumplia-logo';
 import { useSidebar } from '@/contexts/sidebar-context';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +20,6 @@ const pathTitles: Record<string, string> = {
 
 export function DashboardNavbar() {
   const pathname  = usePathname();
-  const router    = useRouter();
   const { isCollapsed } = useSidebar();
   const [isVisible, setIsVisible]     = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -55,24 +53,10 @@ export function DashboardNavbar() {
         isVisible ? 'translate-y-0 shadow-sm' : '-translate-y-full shadow-none'
       )}
     >
-      {/* Left: CumplIA Logo */}
-      <button
-        onClick={() => router.push('/dashboard')}
-        className="flex items-center hover:opacity-80 transition-opacity"
-      >
-        <CumpliaLogo
-          markSize={30}
-          wordSize={22}
-          variant="light"
-          className="dark:hidden"
-        />
-        <CumpliaLogo
-          markSize={30}
-          wordSize={22}
-          variant="dark"
-          className="hidden dark:inline-flex"
-        />
-      </button>
+      {/* Left: page title */}
+      <span className="text-sm font-medium text-[#0B1C3D] dark:text-[#F0EEE8] tracking-[-0.01em]">
+        {getPageTitle()}
+      </span>
 
       {/* Right: Theme toggle + user menu */}
       <div className="flex items-center gap-3">
