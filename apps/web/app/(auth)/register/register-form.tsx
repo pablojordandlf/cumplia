@@ -24,7 +24,7 @@ export default function RegisterForm() {
   const [success, setSuccess] = useState(false);
   const [invitationContext, setInvitationContext] = useState<{
     token: string;
-    email: string;
+    maskedEmail: string;
     orgName: string;
     role: string;
   } | null>(null);
@@ -33,22 +33,18 @@ export default function RegisterForm() {
   // Check for invitation context on mount
   useEffect(() => {
     const token = searchParams.get('invitation_token');
-    const emailParam = searchParams.get('email');
-    
-    if (token && emailParam) {
-      // Get org name from sessionStorage (set by accept-invite page)
+
+    if (token) {
+      const maskedEmail = sessionStorage.getItem('invitation_masked_email') ?? '';
       const orgName = sessionStorage.getItem('invitation_org_name');
       const role = sessionStorage.getItem('invitation_role');
 
       setInvitationContext({
         token,
-        email: emailParam,
+        maskedEmail,
         orgName: orgName || 'Organization',
-        role: role || 'member'
+        role: role || 'member',
       });
-
-      // Pre-fill email
-      setEmail(emailParam);
     }
   }, [searchParams]);
 
@@ -99,7 +95,7 @@ export default function RegisterForm() {
 
         // Clean up sessionStorage
         sessionStorage.removeItem('invitation_token');
-        sessionStorage.removeItem('invitation_email');
+        sessionStorage.removeItem('invitation_masked_email');
         sessionStorage.removeItem('invitation_org_id');
         sessionStorage.removeItem('invitation_org_name');
         sessionStorage.removeItem('invitation_role');
@@ -192,11 +188,11 @@ export default function RegisterForm() {
             <Input
               id="email"
               type="email"
-              placeholder="tu@empresa.com"
+              placeholder={invitationContext?.maskedEmail || 'tu@empresa.com'}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading || !!invitationContext}
+              disabled={isLoading}
               className="bg-[#1a1a1a] border-[#8B9BB4]/30 text-[#E3DFD5]"
             />
           </div>

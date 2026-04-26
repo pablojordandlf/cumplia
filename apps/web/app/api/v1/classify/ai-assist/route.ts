@@ -111,8 +111,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await request.json();
-  const mode: 'chat' | 'autofill' = body.mode ?? 'chat';
+  const body: Record<string, unknown> = await request.json();
+  const mode: 'chat' | 'autofill' = body.mode === 'autofill' ? 'autofill' : 'chat';
 
   if (mode === 'autofill') {
     return handleAutofill(body);
@@ -120,10 +120,19 @@ export async function POST(request: NextRequest) {
   return handleChat(body);
 }
 
-async function handleChat(body: any) {
-  const messages: Message[] = body.messages;
+async function handleChat(body: Record<string, unknown>) {
+  const messages: Message[] = body.messages as Message[];
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
+  }
+  if (messages.length > 50) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  const oversizedMessage = messages.find(
+    m => typeof m.content !== 'string' || m.content.length > 4000
+  );
+  if (oversizedMessage) {
+    return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
   }
 
   const stream = client.messages.stream({
@@ -159,8 +168,10 @@ async function handleChat(body: any) {
   });
 }
 
-async function handleAutofill(body: any) {
-  const { systemName, systemDescription, sector } = body;
+async function handleAutofill(body: Record<string, unknown>) {
+  const systemName = typeof body.systemName === 'string' ? body.systemName.slice(0, 200) : undefined;
+  const systemDescription = typeof body.systemDescription === 'string' ? body.systemDescription.slice(0, 3000) : undefined;
+  const sector = typeof body.sector === 'string' ? body.sector.slice(0, 100) : undefined;
   if (!systemName && !systemDescription) {
     return NextResponse.json({ error: 'systemName or systemDescription required' }, { status: 400 });
   }
@@ -186,8 +197,8 @@ async function handleAutofill(body: any) {
     }
     const result = JSON.parse(jsonMatch[0]);
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Autofill error:', err);
-    return NextResponse.json({ error: err.message ?? 'AI error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,16 +1,16 @@
 /**
  * GET /api/v1/invitations/validate?token=xxx
- * 
+ *
  * Valida un token de invitación sin crear nada.
  * Puede ser llamado por usuarios anónimos o autenticados.
- * 
+ *
  * Retorna:
  * {
  *   isValid: boolean,
  *   error?: string,
  *   data?: {
  *     invitationId: uuid,
- *     email: string,
+ *     maskedEmail: string,   // e.g. "j***@example.com"
  *     organizationId: uuid,
  *     organizationName: string,
  *     role: string,
@@ -22,17 +22,26 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
+interface ValidationData {
+  invitationId: string;
+  email: string;
+  organizationId: string;
+  organizationName: string;
+  role: string;
+  expiresAt: string;
+}
+
 interface ValidationResponse {
   isValid: boolean;
   error?: string;
-  data?: {
-    invitationId: string;
-    email: string;
-    organizationId: string;
-    organizationName: string;
-    role: string;
-    expiresAt: string;
-  };
+  data?: Omit<ValidationData, 'email'> & { maskedEmail: string };
+}
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***';
+  const masked = local.length <= 2 ? '***' : `${local[0]}${'*'.repeat(local.length - 2)}${local[local.length - 1]}`;
+  return `${masked}@${domain}`;
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse<ValidationResponse>> {
@@ -93,11 +102,25 @@ export async function GET(request: NextRequest): Promise<NextResponse<Validation
       );
     }
 
-    // Retornar la respuesta tal como viene de la BD
-    return NextResponse.json(data as ValidationResponse, {
+    // Mask the email before returning to unauthenticated callers
+    const responseData: ValidationResponse = data.isValid && data.data
+      ? {
+          isValid: true,
+          data: {
+            invitationId: data.data.invitationId,
+            maskedEmail: maskEmail(data.data.email),
+            organizationId: data.data.organizationId,
+            organizationName: data.data.organizationName,
+            role: data.data.role,
+            expiresAt: data.data.expiresAt,
+          },
+        }
+      : { isValid: false, error: data.error };
+
+    return NextResponse.json(responseData, {
       status: data.isValid ? 200 : 400,
       headers: {
-        'Cache-Control': 'no-store', // No cachear invitaciones
+        'Cache-Control': 'no-store',
       },
     });
   } catch (error) {

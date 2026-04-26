@@ -107,10 +107,10 @@ export async function POST(
     }
 
     return NextResponse.json({ success: true, data: updatedInvitation });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error resending invite:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

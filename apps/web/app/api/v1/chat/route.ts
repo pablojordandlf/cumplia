@@ -84,6 +84,15 @@ export async function POST(request: NextRequest) {
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
   }
+  if (messages.length > 50) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  const oversizedMessage = messages.find(
+    m => typeof m.content !== 'string' || m.content.length > 4000
+  );
+  if (oversizedMessage) {
+    return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
+  }
 
   // Get user's organization
   const { data: membership } = await supabase

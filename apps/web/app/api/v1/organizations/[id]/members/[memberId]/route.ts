@@ -75,10 +75,10 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true, data: updatedMember });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -144,10 +144,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error removing member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

@@ -50,10 +50,6 @@ export async function GET(request: Request) {
     return NextResponse.json({
       useCasesUsed: useCasesCount || 0,
       usersUsed: usersCount,
-      user: {
-        id: user.id,
-        email: user.email,
-      }
     });
   } catch (error) {
     console.error('Error in usage endpoint:', error);

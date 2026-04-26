@@ -83,10 +83,10 @@ export async function GET(
     };
 
     return NextResponse.json({ success: true, data: usage });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching usage:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

@@ -76,7 +76,7 @@ export default function AcceptInviteClient() {
 
       if (session?.user) {
         // User is authenticated - accept invite immediately
-        await acceptInvitation(token!, invitationData.email);
+        await acceptInvitation(token!);
         setStatus('success');
 
         // Redirect to dashboard after 2 seconds
@@ -87,13 +87,13 @@ export default function AcceptInviteClient() {
         // User not authenticated - store context and redirect to register
         // Store invitation context in sessionStorage for register form
         sessionStorage.setItem('invitation_token', token!);
-        sessionStorage.setItem('invitation_email', invitationData.email);
-        sessionStorage.setItem('invitation_org_id', invitationData.organization_id);
-        sessionStorage.setItem('invitation_org_name', invitationData.organization_name);
+        sessionStorage.setItem('invitation_masked_email', invitationData.maskedEmail);
+        sessionStorage.setItem('invitation_org_id', invitationData.organizationId);
+        sessionStorage.setItem('invitation_org_name', invitationData.organizationName);
         sessionStorage.setItem('invitation_role', invitationData.role);
 
-        // Redirect to register with invitation token
-        const registerUrl = `/register?invitation_token=${encodeURIComponent(token!)}&email=${encodeURIComponent(invitationData.email)}`;
+        // Do not pass email in URL — server validates it against the invitation token
+        const registerUrl = `/register?invitation_token=${encodeURIComponent(token!)}`;
         setStatus('unauthenticated');
 
         // Redirect after a brief delay
@@ -111,7 +111,7 @@ export default function AcceptInviteClient() {
    * For authenticated users: accept the invitation via backend
    * This was already validated server-side, so we just need to update DB
    */
-  async function acceptInvitation(invitationToken: string, invitationEmail: string) {
+  async function acceptInvitation(invitationToken: string) {
     try {
       const response = await fetch('/api/invitations/accept', {
         method: 'POST',

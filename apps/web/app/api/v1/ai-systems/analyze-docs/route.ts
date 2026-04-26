@@ -6,6 +6,7 @@ const client = new Anthropic();
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_FILES = 5;
+const MAX_TEXT_CONTENT_CHARS = 100_000;
 
 const VALID_SECTORS = [
   'finance', 'healthcare', 'education', 'government', 'retail',
@@ -182,7 +183,8 @@ export async function POST(request: NextRequest) {
         });
       } else {
         // Treat as plain text (txt, md, csv, etc.)
-        const text = Buffer.from(buffer).toString('utf-8');
+        const fullText = Buffer.from(buffer).toString('utf-8');
+        const text = fullText.slice(0, MAX_TEXT_CONTENT_CHARS);
         contentBlocks.push({
           type: 'text',
           text: `--- Contenido del archivo: ${file.name} ---\n\n${text}`,

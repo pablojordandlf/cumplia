@@ -49,7 +49,8 @@ export async function GET(
     .single();
 
   if (error && error.code !== 'PGRST116') {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[technical-docs] GET error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 
   return NextResponse.json({ doc: data ?? null });
@@ -111,6 +112,9 @@ export async function PUT(
       .single();
   }
 
-  if (result.error) return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (result.error) {
+    console.error('[technical-docs] PUT error:', result.error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
   return NextResponse.json({ doc: result.data });
 }
