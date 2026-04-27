@@ -31,7 +31,47 @@ import { supabase } from '@/lib/supabase';
 import { AIClassificationAssistant } from '@/components/ai-classification-assistant';
 import { RiaFormRenderer, getRiaStepCount, getRiaStepTitle } from '@/components/ria-form-renderer';
 import { evaluateRiaClassification, evaluateTransparencyRequired } from '@/lib/utils/ria-classification';
-import type { RiaFormTemplate, RiaFormAnswers } from '@/types/ria-form-template';
+import type { RiaFormTemplate, RiaFormAnswers, SystemTypeValue } from '@/types/ria-form-template';
+
+/**
+ * Build the complete answers map by defaulting every visible yes/no question
+ * to 'no' when the user hasn't explicitly answered it.
+ *
+ * Only questions that are actually visible at submission time (correct step
+ * applies_to filter, parent trigger resolved) are included, so hidden
+ * child questions never receive a spurious 'no'.
+ */
+function buildEffectiveAnswers(template: RiaFormTemplate, answers: RiaFormAnswers): RiaFormAnswers {
+  const systemTypeValue = answers['systemType'] as SystemTypeValue | undefined;
+  const isGpai = systemTypeValue === 'gpai';
+
+  const visibleSteps = template.structure.steps.filter((step) => {
+    if (!step.applies_to || step.applies_to === 'all') return true;
+    if (step.applies_to === 'non_gpai') return !isGpai;
+    if (step.applies_to === 'gpai') return isGpai;
+    return true;
+  });
+
+  const effective: RiaFormAnswers = { ...answers };
+
+  for (const step of visibleSteps) {
+    if (step.type !== 'questions') continue;
+    for (const section of step.sections ?? []) {
+      for (const question of section.questions) {
+        // Skip child questions whose parent hasn't triggered them
+        if (question.parent_question_id) {
+          const parentAnswer = effective[question.parent_question_id];
+          if (parentAnswer !== question.parent_answer_trigger) continue;
+        }
+        if (!(question.key in effective)) {
+          effective[question.key] = 'no';
+        }
+      }
+    }
+  }
+
+  return effective;
+}
 
 // ── Risk level display config ─────────────────────────────────────────────────
 
@@ -240,15 +280,18 @@ export default function ClassifyUseCasePage() {
     if (!template) return;
     setCalculating(true);
     try {
-      const level = evaluateRiaClassification(template.classification_rules, answers);
-      const transparencyRequired = evaluateTransparencyRequired(template.classification_rules, answers);
+      // Merge explicit answers with 'no' defaults for every visible unanswered question
+      const effectiveAnswers = buildEffectiveAnswers(template, answers);
+
+      const level = evaluateRiaClassification(template.classification_rules, effectiveAnswers, template.structure);
+      const transparencyRequired = evaluateTransparencyRequired(template.classification_rules, effectiveAnswers);
       const classificationResult = { level, transparencyRequired };
 
       const { data: { session } } = await supabase.auth.getSession();
 
       await supabase.from('use_cases').update({
         ai_act_level: level,
-        classification_data: answers,
+        classification_data: effectiveAnswers,
         status: 'classified',
         updated_at: new Date().toISOString(),
       }).eq('id', useCaseId);
@@ -263,7 +306,7 @@ export default function ClassifyUseCasePage() {
         await supabase.from('use_case_versions').insert({
           use_case_id: useCaseId,
           version_number: 1,
-          classification_data: answers,
+          classification_data: effectiveAnswers,
           ai_act_level: level,
           created_by: session?.user?.id,
           notes: 'Versión inicial - Primera clasificación',
