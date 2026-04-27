@@ -240,7 +240,7 @@ export default function ClassifyUseCasePage() {
     if (!template) return;
     setCalculating(true);
     try {
-      const level = evaluateRiaClassification(template.classification_rules, answers);
+      const level = evaluateRiaClassification(template.classification_rules, answers, template.structure);
       const transparencyRequired = evaluateTransparencyRequired(template.classification_rules, answers);
       const classificationResult = { level, transparencyRequired };
 

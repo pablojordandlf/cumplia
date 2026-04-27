@@ -31,19 +31,21 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
+    // Clear the default flag from ALL templates accessible to this org
+    // (both org-specific ones and the system template) so only one can be default at a time.
     if (template.organization_id) {
       await supabase
         .from('ria_form_templates')
         .update({ is_default: false })
         .eq('organization_id', template.organization_id)
         .eq('is_default', true);
-    } else if (template.is_system) {
-      await supabase
-        .from('ria_form_templates')
-        .update({ is_default: false })
-        .is('organization_id', null)
-        .eq('is_default', true);
     }
+    // Always unset the system template default, regardless of what we're setting.
+    await supabase
+      .from('ria_form_templates')
+      .update({ is_default: false })
+      .is('organization_id', null)
+      .eq('is_default', true);
 
     const { error: setError } = await supabase
       .from('ria_form_templates')

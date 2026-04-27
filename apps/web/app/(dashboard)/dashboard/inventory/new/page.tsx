@@ -47,20 +47,6 @@ interface CustomField {
   value: string;
 }
 
-// Define the sectors
-const sectors = [
-  'finance',
-  'healthcare',
-  'education',
-  'government',
-  'retail',
-  'technology',
-  'entertainment',
-  'manufacturing',
-  'transportation',
-  'other',
-] as const;
-
 // Define AI Act roles according to Article 3
 const aiActRoles = [
   { value: 'provider', label: 'Proveedor', description: 'Desarrolla o hace desarrollar sistemas de IA' },
@@ -91,7 +77,6 @@ const useCaseFormSchema = z.object({
     message: 'El nombre debe tener al menos 2 caracteres.',
   }),
   description: z.string().optional(),
-  sector: z.enum(sectors),
   ai_act_role: z.enum(['provider', 'deployer', 'distributor', 'importer']),
   is_poc: z.boolean(),
 });
@@ -124,7 +109,6 @@ export default function NewUseCasePage() {
     defaultValues: {
       name: '',
       description: '',
-      sector: undefined,
       ai_act_role: undefined,
       is_poc: false,
     },
@@ -133,7 +117,7 @@ export default function NewUseCasePage() {
   const watchedValues: CurrentFormValues = {
     name: form.watch('name'),
     description: form.watch('description'),
-    sector: form.watch('sector'),
+    sector: undefined,
     ai_act_role: form.watch('ai_act_role'),
     is_poc: form.watch('is_poc'),
   };
@@ -263,9 +247,6 @@ export default function NewUseCasePage() {
   function handleDocumentExtraction(data: ExtractedDocData) {
     if (data.name) form.setValue('name', data.name, { shouldValidate: true });
     if (data.description) form.setValue('description', data.description, { shouldValidate: true });
-    if (data.sector && sectors.includes(data.sector as typeof sectors[number])) {
-      form.setValue('sector', data.sector as typeof sectors[number], { shouldValidate: true });
-    }
     if (data.ai_act_role && ['provider', 'deployer', 'distributor', 'importer'].includes(data.ai_act_role)) {
       form.setValue('ai_act_role', data.ai_act_role as 'provider' | 'deployer' | 'distributor' | 'importer', { shouldValidate: true });
     }
@@ -305,7 +286,7 @@ export default function NewUseCasePage() {
           organization_id: memberData?.organization_id ?? null,
           name: values.name,
           description: values.description,
-          sector: values.sector,
+          sector: 'other',
           ai_act_role: values.ai_act_role,
           status: 'draft',
           ai_act_level: 'unclassified',
@@ -351,7 +332,7 @@ export default function NewUseCasePage() {
               </div>
               <div className="hidden sm:block">
                 <p className="font-medium text-gray-900">Información Básica</p>
-                <p className="text-sm text-gray-500">Nombre, sector, rol</p>
+                <p className="text-sm text-gray-500">Nombre, descripción, rol</p>
               </div>
             </div>
             
@@ -380,7 +361,7 @@ export default function NewUseCasePage() {
           onSelectCase={(useCase) => {
             form.setValue('name', useCase.name);
             form.setValue('description', useCase.description);
-            form.setValue('sector', useCase.sector as any);
+
             toast.success('Caso precargado', { description: `Se ha cargado la información de "${useCase.name}". Puedes modificarla antes de guardar.` });
           }}
         />
@@ -436,34 +417,6 @@ export default function NewUseCasePage() {
                     </FormControl>
                     <FormDescription>
                       Detalles sobre qué hace el sistema, para quién y por qué.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="sector"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sector</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un sector" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {sectors.map((sector) => (
-                          <SelectItem key={sector} value={sector}>
-                            <span className="capitalize">{sector}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      El sector industrial o de actividad económica al que pertenece el sistema de IA.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
