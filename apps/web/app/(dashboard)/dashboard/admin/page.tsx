@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { FileWarning, FormInput, Settings2, ArrowLeft } from 'lucide-react';
+import { FileWarning, FormInput, Settings2, ArrowLeft, ClipboardList } from 'lucide-react';
 import { RiskTemplatesPanel } from './components/risk-templates-panel';
 import { CustomFieldsPanel } from './components/custom-fields-panel';
+import { RiaFormPanel } from './components/ria-form-panel';
 import { usePermissions } from '@/hooks/use-permissions';
 import { toast } from 'sonner'
 
@@ -38,7 +39,7 @@ export default function AdminPage() {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="risk-templates" className="flex items-center gap-2">
             <FileWarning className="w-4 h-4" />
             Plantillas de Riesgos
@@ -47,14 +48,22 @@ export default function AdminPage() {
             <FormInput className="w-4 h-4" />
             Campos Adicionales
           </TabsTrigger>
+          <TabsTrigger value="ria-form" className="flex items-center gap-2">
+            <ClipboardList className="w-4 h-4" />
+            Formulario RIA
+          </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="risk-templates" className="mt-6">
           <RiskTemplatesPanel />
         </TabsContent>
-        
+
         <TabsContent value="custom-fields" className="mt-6">
           <CustomFieldsPanel />
+        </TabsContent>
+
+        <TabsContent value="ria-form" className="mt-6">
+          <RiaFormPanel />
         </TabsContent>
       </Tabs>
     </div>
