@@ -247,13 +247,7 @@ export default function MembersPage() {
 
   const { isReady: isAuthReady, user } = useAuthReady()
 
-  useEffect(() => {
-    if (isAuthReady) {
-      fetchData()
-    }
-  }, [isAuthReady])
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
@@ -373,7 +367,13 @@ export default function MembersPage() {
       setError('Error inesperado al cargar los datos del equipo.')
       setIsLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (isAuthReady) {
+      fetchData()
+    }
+  }, [isAuthReady, fetchData])
 
   const handleResendInvite = useCallback(
     async (inviteId: string) => {
@@ -397,7 +397,7 @@ export default function MembersPage() {
         toast.error('Error al reenviar la invitación')
       }
     },
-    [organizationId]
+    [organizationId, fetchData]
   )
 
   const handleRemoveMember = useCallback(
@@ -419,7 +419,7 @@ export default function MembersPage() {
         toast.error('Error al eliminar el miembro')
       }
     },
-    [organizationId]
+    [organizationId, fetchData]
   )
 
   const handleCancelInvite = useCallback(
@@ -441,10 +441,19 @@ export default function MembersPage() {
         toast.error('Error al cancelar la invitación')
       }
     },
-    [organizationId]
+    [organizationId, fetchData]
   )
 
   const canManageMembers = currentUserRole === 'owner' || currentUserRole === 'admin'
+
+  const memberColumns = useMemo(
+    () => buildMemberColumns(canManageMembers, currentUserRole, handleRemoveMember),
+    [canManageMembers, currentUserRole, handleRemoveMember]
+  )
+  const inviteColumns = useMemo(
+    () => buildInviteColumns(handleResendInvite, handleCancelInvite),
+    [handleResendInvite, handleCancelInvite]
+  )
 
   if (!isAuthReady) {
     return (
@@ -483,15 +492,6 @@ export default function MembersPage() {
       </div>
     )
   }
-
-  const memberColumns = useMemo(
-    () => buildMemberColumns(canManageMembers, currentUserRole, handleRemoveMember),
-    [canManageMembers, currentUserRole, handleRemoveMember]
-  )
-  const inviteColumns = useMemo(
-    () => buildInviteColumns(handleResendInvite, handleCancelInvite),
-    [handleResendInvite, handleCancelInvite]
-  )
 
   return (
     <div className="container mx-auto py-8 max-w-5xl space-y-6">
