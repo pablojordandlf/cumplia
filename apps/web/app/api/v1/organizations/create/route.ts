@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { PLANS } from '@/lib/plans';
 
 export async function POST(request: Request) {
   try {
@@ -143,33 +144,11 @@ function generateSlug(name: string): string {
 }
 
 function getMaxAiSystems(plan: string): number {
-  switch (plan) {
-    case 'free':
-    case 'starter':
-      return 3;
-    case 'professional':
-      return 15;
-    case 'business':
-      return 50;
-    case 'enterprise':
-      return -1; // Unlimited
-    default:
-      return 15;
-  }
+  const planConfig = PLANS[plan] || PLANS.starter;
+  return planConfig.features.ai_systems;
 }
 
 function getMaxUsers(plan: string): number {
-  switch (plan) {
-    case 'free':
-    case 'starter':
-      return 1;
-    case 'professional':
-      return 3;
-    case 'business':
-      return 10;
-    case 'enterprise':
-      return -1; // Unlimited
-    default:
-      return 3;
-  }
+  const planConfig = PLANS[plan] || PLANS.starter;
+  return planConfig.features.users;
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { PLANS } from '@/lib/plans';
 import { sendInviteEmail } from '@/lib/email/send-invite';
 
 export const dynamic = 'force-dynamic';
@@ -208,18 +209,23 @@ export async function POST(
       );
     }
 
-    // Check if seats are available
+    // Check if seats are available using plan definition (not seats_total in DB,
+    // which may be stale if the plan was changed after org creation).
     const { data: org } = await supabase
       .from('organizations')
-      .select('seats_total, seats_used')
+      .select('plan_name, seats_used')
       .eq('id', id)
       .single();
 
-    if (org && org.seats_used >= org.seats_total) {
-      return NextResponse.json(
-        { success: false, error: 'No available seats' },
-        { status: 400 }
-      );
+    if (org) {
+      const planConfig = PLANS[org.plan_name || 'starter'] || PLANS.starter;
+      const planMaxUsers = planConfig.features.users;
+      if (planMaxUsers !== -1 && org.seats_used >= planMaxUsers) {
+        return NextResponse.json(
+          { success: false, error: 'No available seats' },
+          { status: 400 }
+        );
+      }
     }
 
     // Generate invite token

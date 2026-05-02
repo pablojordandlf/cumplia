@@ -10,6 +10,7 @@ import { Building, Loader2, Save, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuthReady } from '@/lib/auth-helpers';
+import { PLANS } from '@/lib/plans';
 
 interface Organization {
   id: string;
@@ -114,12 +115,15 @@ export default function OrganizationSettingsPage() {
         return;
       }
 
+      const resolvedPlanName = orgData.plan_name || 'starter';
+      const planConfig = PLANS[resolvedPlanName] || PLANS.starter;
+
       const org: Organization = {
         id: orgData.id,
         name: orgData.name || 'Sin nombre',
-        plan: orgData.plan_name || 'free',
-        plan_name: orgData.plan_name || 'free',
-        seats_total: orgData.seats_total || 1,
+        plan: resolvedPlanName,
+        plan_name: resolvedPlanName,
+        seats_total: planConfig.features.users,
         seats_used: orgData.seats_used || 1,
       };
 

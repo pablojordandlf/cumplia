@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Users, Loader2, UserPlus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthReady } from '@/lib/auth-helpers';
+import { PLANS } from '@/lib/plans';
 
 export function UsageIndicator() {
   const [used, setUsed] = useState<number>(0);
@@ -59,25 +60,11 @@ export function UsageIndicator() {
         return;
       }
       
-      // Obtener el límite de seats
-      let maxUsers = orgData?.seats_total;
-        
-      // Si no hay seats_total, buscar en tabla plans
-      if (!maxUsers) {
-        const planName = orgData?.plan_name || 'free';
-        const { data: planData } = await supabase
-          .from('plans')
-          .select('limits')
-          .eq('name', planName)
-          .single();
-        
-        if (planData?.limits) {
-          const limits = planData.limits as any;
-          maxUsers = limits?.users || limits?.max_users || 1;
-        }
-      }
-
-      maxUsers = maxUsers || 1;
+      // Obtener el límite de usuarios desde la definición del plan (no desde seats_total en BD,
+      // que puede estar desactualizado si el plan fue modificado después de la creación).
+      const planName = orgData?.plan_name || 'starter';
+      const planConfig = PLANS[planName] || PLANS.starter;
+      const maxUsers = planConfig.features.users;
 
       // Contar miembros activos
       const { count: membersCount, error: membersError } = await supabase
