@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 const FIELDS = [
   'system_purpose', 'intended_users', 'deployment_context',
   'architecture_description', 'training_data_description', 'training_methodology',
@@ -49,7 +51,7 @@ export async function GET(
     .single();
 
   if (error && error.code !== 'PGRST116') {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 
   return NextResponse.json({ doc: data ?? null });
@@ -111,6 +113,6 @@ export async function PUT(
       .single();
   }
 
-  if (result.error) return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (result.error) return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   return NextResponse.json({ doc: result.data });
 }

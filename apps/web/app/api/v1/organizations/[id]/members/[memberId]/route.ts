@@ -47,6 +47,14 @@ export async function PUT(
       );
     }
 
+    const assignableRoles = ['viewer', 'editor', 'admin'];
+    if (!assignableRoles.includes(role)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid role. Must be viewer, editor, or admin' },
+        { status: 400 }
+      );
+    }
+
     // Prevent changing owner's role
     const { data: targetMember } = await supabase
       .from('organization_members')
@@ -78,7 +86,7 @@ export async function PUT(
   } catch (error: any) {
     console.error('Error updating member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -147,7 +155,7 @@ export async function DELETE(
   } catch (error: any) {
     console.error('Error removing member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

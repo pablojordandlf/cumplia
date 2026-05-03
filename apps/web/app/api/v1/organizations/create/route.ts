@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import { PLANS } from '@/lib/plans';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     // Client for auth operations (uses anon key with RLS)
@@ -79,7 +81,7 @@ export async function POST(request: Request) {
     if (orgError) {
       console.error('Error creating organization:', orgError);
       return NextResponse.json(
-        { message: 'Error al crear la organización', error: orgError.message },
+        { message: 'Error al crear la organización' },
         { status: 500 }
       );
     }
@@ -127,7 +129,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Unexpected error:', error);
     return NextResponse.json(
-      { message: 'Error interno del servidor', error: error.message },
+      { message: 'Error interno del servidor' },
       { status: 500 }
     );
   }

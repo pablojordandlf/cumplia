@@ -3,6 +3,8 @@ import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 import type { CreateRiaTemplatePayload } from '@/types/ria-form-template';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const supabase = await createClient();
