@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
-import { requirePermission } from '@/lib/supabase/get-user-role';
+import { getUserRoleInOrg } from '@/lib/supabase/get-user-role';
+import { hasPermission } from '@/lib/permissions';
 import { NextRequest, NextResponse } from 'next/server';
 import type { UpdateRiaTemplatePayload } from '@/types/ria-form-template';
+import type { MemberRole } from '@/types/organization';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -27,6 +29,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
+    // Verify the user is a member of the organization that owns this template
+    const role = await getUserRoleInOrg(supabase, user.id, template.organization_id);
+    if (!role) {
+      return NextResponse.json({ success: false, error: 'Sin acceso a esta plantilla' }, { status: 403 });
+    }
+
     return NextResponse.json({ success: true, data: template });
   } catch {
     return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 });
@@ -43,11 +51,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const permCheck = await requirePermission(supabase, user.id, 'templates:manage');
-    if (!permCheck.allowed) {
-      return NextResponse.json({ success: false, error: 'Sin permisos para gestionar plantillas' }, { status: 403 });
-    }
-
+    // Fetch template first to know which org owns it
     const { data: existing, error: fetchError } = await supabase
       .from('ria_form_templates')
       .select('*')
@@ -56,6 +60,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (fetchError || !existing) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+    }
+
+    // Check permission in the template's own organization
+    const role = await getUserRoleInOrg(supabase, user.id, existing.organization_id);
+    if (!role || !hasPermission(role as MemberRole, 'templates:manage')) {
+      return NextResponse.json({ success: false, error: 'Sin permisos para gestionar plantillas' }, { status: 403 });
     }
 
     if (existing.is_system) {
@@ -118,19 +128,21 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const permCheck = await requirePermission(supabase, user.id, 'templates:manage');
-    if (!permCheck.allowed) {
-      return NextResponse.json({ success: false, error: 'Sin permisos para gestionar plantillas' }, { status: 403 });
-    }
-
+    // Fetch template first to know which org owns it
     const { data: existing, error: fetchError } = await supabase
       .from('ria_form_templates')
-      .select('id, is_system, is_default')
+      .select('id, organization_id, is_system, is_default')
       .eq('id', id)
       .single();
 
     if (fetchError || !existing) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+    }
+
+    // Check permission in the template's own organization
+    const role = await getUserRoleInOrg(supabase, user.id, existing.organization_id);
+    if (!role || !hasPermission(role as MemberRole, 'templates:manage')) {
+      return NextResponse.json({ success: false, error: 'Sin permisos para gestionar plantillas' }, { status: 403 });
     }
 
     if (existing.is_system) {
