@@ -49,7 +49,7 @@ export async function GET(
     .single();
 
   if (error && error.code !== 'PGRST116') {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Error al obtener la documentación técnica' }, { status: 500 });
   }
 
   return NextResponse.json({ doc: data ?? null });
@@ -111,6 +111,6 @@ export async function PUT(
       .single();
   }
 
-  if (result.error) return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (result.error) return NextResponse.json({ error: 'Error al guardar la documentación técnica' }, { status: 500 });
   return NextResponse.json({ doc: result.data });
 }

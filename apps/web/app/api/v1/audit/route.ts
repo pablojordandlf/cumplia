@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Error al obtener el registro de auditoría' }, { status: 500 });
   }
 
   return NextResponse.json({ entries: data ?? [] });
@@ -68,6 +68,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'action and entity_type required' }, { status: 400 });
   }
 
+  const FIELD_PATTERN = /^[a-z0-9_-]{1,100}$/i;
+  if (!FIELD_PATTERN.test(action) || !FIELD_PATTERN.test(entity_type)) {
+    return NextResponse.json({ error: 'Invalid action or entity_type format' }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from('audit_log')
     .insert({
@@ -77,14 +82,14 @@ export async function POST(request: NextRequest) {
       action,
       entity_type,
       entity_id: entity_id ?? null,
-      entity_name: entity_name ?? null,
-      details: details ?? {},
+      entity_name: entity_name ? String(entity_name).slice(0, 500) : null,
+      details: details && typeof details === 'object' ? details : {},
     })
     .select()
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Error al registrar la entrada de auditoría' }, { status: 500 });
   }
 
   return NextResponse.json(data);

@@ -126,6 +126,16 @@ async function handleChat(body: any) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
   }
 
+  if (messages.length > 50) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+
+  for (const msg of messages) {
+    if (typeof msg.content !== 'string' || msg.content.length > 10_000) {
+      return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
+    }
+  }
+
   const stream = client.messages.stream({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
@@ -186,8 +196,8 @@ async function handleAutofill(body: any) {
     }
     const result = JSON.parse(jsonMatch[0]);
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err) {
     console.error('Autofill error:', err);
-    return NextResponse.json({ error: err.message ?? 'AI error' }, { status: 500 });
+    return NextResponse.json({ error: 'Error al procesar la solicitud de IA' }, { status: 500 });
   }
 }
