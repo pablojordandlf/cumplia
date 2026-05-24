@@ -2,7 +2,6 @@
 
 import { AdminLayout } from "./layouts/AdminLayout";
 import { ComplianceLayout } from "./layouts/ComplianceLayout";
-import { AuditorLayout } from "./layouts/AuditorLayout";
 import { ViewerLayout } from "./layouts/ViewerLayout";
 import { useAuthReady, fetchUserOrganization } from "@/lib/auth-helpers";
 import { useEffect, useState } from "react";

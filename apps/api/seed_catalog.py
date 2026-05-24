@@ -265,8 +265,10 @@ CATALOG_TEMPLATES = [
 
 def seed_catalog():
     """Populate the use_case_catalog table with templates."""
-    database_url = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/cumplia')
-    
+    database_url = os.getenv('DATABASE_URL')
+    if not database_url:
+        raise RuntimeError("DATABASE_URL environment variable is required")
+
     engine = create_engine(database_url)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = SessionLocal()

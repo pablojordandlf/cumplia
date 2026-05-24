@@ -57,13 +57,23 @@ async function getRedirectUrl(
     // Check if user has a pending invitation by email
     const { data: pendingInviteByEmail } = await supabase
       .from('pending_invitations')
-      .select('id, organization_id, email, role, name')
+      .select('id, organization_id, email, role, name, invite_expires_at')
       .eq('email', user.email)
       .eq('status', 'pending')
       .limit(1)
       .single()
 
     if (pendingInviteByEmail) {
+      // Reject expired invitations
+      const expiresAt = new Date(pendingInviteByEmail.invite_expires_at)
+      if (expiresAt < new Date()) {
+        await supabase
+          .from('pending_invitations')
+          .update({ status: 'expired' })
+          .eq('id', pendingInviteByEmail.id)
+        return '/login?error=invite_expired'
+      }
+
       // Accept invitation automatically
       const now = new Date().toISOString()
       

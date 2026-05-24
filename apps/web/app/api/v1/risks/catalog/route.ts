@@ -2,6 +2,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/risks/catalog
  * Returns all risks from the MIT AI Risk Repository catalog

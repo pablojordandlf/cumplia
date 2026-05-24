@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/use-cases/[id]/classify - Guardar clasificación AI Act
 export async function POST(
   request: NextRequest,
