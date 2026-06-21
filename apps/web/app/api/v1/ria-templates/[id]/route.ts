@@ -27,6 +27,22 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
+    if (!template.is_system && template.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership) {
+        return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+      }
+    } else if (!template.is_system && !template.organization_id && template.created_by !== user.id) {
+      return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true, data: template });
   } catch {
     return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 });

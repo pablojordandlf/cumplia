@@ -89,6 +89,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       notes
     } = body;
 
+    const validLevels = ['low', 'medium', 'high', 'critical'];
+    const validStatuses = ['identified', 'mitigated', 'accepted', 'not_applicable'];
+
+    if (probability !== undefined && !validLevels.includes(probability)) {
+      return NextResponse.json({ error: 'Invalid probability value' }, { status: 400 });
+    }
+    if (impact !== undefined && !validLevels.includes(impact)) {
+      return NextResponse.json({ error: 'Invalid impact value' }, { status: 400 });
+    }
+    if (status !== undefined && !validStatuses.includes(status)) {
+      return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+    }
+    if (mitigation_measures !== undefined && typeof mitigation_measures !== 'string') {
+      return NextResponse.json({ error: 'Invalid mitigation_measures' }, { status: 400 });
+    }
+    if (notes !== undefined && typeof notes !== 'string') {
+      return NextResponse.json({ error: 'Invalid notes' }, { status: 400 });
+    }
+
     // Calculate residual risk score if both probability and impact provided
     let residual_risk_score = existingRisk.residual_risk_score;
     if (probability && impact) {

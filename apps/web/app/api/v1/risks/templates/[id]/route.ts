@@ -52,6 +52,28 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    if (!template.is_system && template.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership) {
+        return NextResponse.json(
+          { error: 'Template not found' },
+          { status: 404 }
+        );
+      }
+    } else if (!template.is_system && !template.organization_id && template.created_by !== user.id) {
+      return NextResponse.json(
+        { error: 'Template not found' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({ template });
   } catch (error) {
     console.error('Error in get template API:', error);

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { FileWarning, FormInput, Settings2, ArrowLeft, ClipboardList } from 'lucide-react';
+import { FileWarning, FormInput, Settings2, ClipboardList } from 'lucide-react';
 import { RiskTemplatesPanel } from './components/risk-templates-panel';
 import { CustomFieldsPanel } from './components/custom-fields-panel';
 import { RiaFormPanel } from './components/ria-form-panel';

@@ -49,7 +49,7 @@ export async function sendInviteEmail({
       throw new Error(`Failed to send email: ${response.error.message}`);
     }
 
-    console.log('Invite email sent successfully:', response.data);
+    console.log('Invite email sent successfully');
     return response.data;
   } catch (error) {
     console.error('Error sending invite email:', error);
