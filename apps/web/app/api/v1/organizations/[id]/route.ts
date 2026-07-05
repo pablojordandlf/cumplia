@@ -4,6 +4,8 @@ import { hasPermission } from '@/lib/permissions';
 import { getCurrentContext } from '@/lib/server-context';
 import { MemberRole } from '@/types/organization';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/organizations/[id]
  * Fetches details of a specific organization.

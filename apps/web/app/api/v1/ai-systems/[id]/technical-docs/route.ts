@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 const FIELDS = [
   'system_purpose', 'intended_users', 'deployment_context',
   'architecture_description', 'training_data_description', 'training_methodology',
