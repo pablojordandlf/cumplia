@@ -103,6 +103,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         content: String(m.content),
       }));
 
+    const MAX_MESSAGES = 20;
+    const MAX_MESSAGE_LENGTH = 4000;
+    if (messages.length > MAX_MESSAGES) {
+      return NextResponse.json({ error: 'Too many messages in conversation' }, { status: 400 });
+    }
+    const oversizedMessage = messages.find(m => m.content.length > MAX_MESSAGE_LENGTH);
+    if (oversizedMessage) {
+      return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
+    }
+
     // Fetch risks already registered for this system (from the applied template)
     const { data: systemRisks } = await supabase
       .from('use_case_risks')

@@ -126,6 +126,16 @@ async function handleChat(body: any) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
   }
 
+  const MAX_MESSAGES = 20;
+  const MAX_MESSAGE_LENGTH = 4000;
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json({ error: 'Too many messages in conversation' }, { status: 400 });
+  }
+  const oversizedMessage = messages.find(m => typeof m.content === 'string' && m.content.length > MAX_MESSAGE_LENGTH);
+  if (oversizedMessage) {
+    return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
+  }
+
   const stream = client.messages.stream({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
@@ -163,6 +173,14 @@ async function handleAutofill(body: any) {
   const { systemName, systemDescription, sector } = body;
   if (!systemName && !systemDescription) {
     return NextResponse.json({ error: 'systemName or systemDescription required' }, { status: 400 });
+  }
+
+  const MAX_FIELD_LENGTH = 2000;
+  if (systemName && systemName.length > MAX_FIELD_LENGTH) {
+    return NextResponse.json({ error: 'systemName too long' }, { status: 400 });
+  }
+  if (systemDescription && systemDescription.length > MAX_FIELD_LENGTH) {
+    return NextResponse.json({ error: 'systemDescription too long' }, { status: 400 });
   }
 
   const prompt = [
