@@ -29,6 +29,14 @@ export async function POST(request: Request) {
       .eq('status', 'active')
       .maybeSingle();
 
+    if (membershipError) {
+      console.error('Error checking existing membership:', membershipError);
+      return NextResponse.json(
+        { message: 'Error al verificar membresía existente' },
+        { status: 500 }
+      );
+    }
+
     if (existingMembership) {
       return NextResponse.json(
         { message: 'Ya perteneces a una organización activa' },
@@ -106,13 +114,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update user metadata with organization info
-    await supabase.auth.updateUser({
+    // Update user metadata with organization info (non-critical — org already created)
+    const { error: updateUserError } = await supabase.auth.updateUser({
       data: {
         organization_id: organization.id,
         organization_role: 'owner',
       },
     });
+    if (updateUserError) {
+      console.error('Error updating user metadata:', updateUserError);
+    }
 
     return NextResponse.json({
       message: 'Organización creada exitosamente',

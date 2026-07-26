@@ -36,6 +36,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Plantilla origen no encontrada' }, { status: 404 });
     }
 
+    // Verify user can access the source template: must be system template or belong to their org
     const { data: membership } = await supabase
       .from('organization_members')
       .select('organization_id')
@@ -44,6 +45,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
+
+    if (!source.is_system && source.organization_id !== membership?.organization_id) {
+      return NextResponse.json({ success: false, error: 'Plantilla origen no encontrada' }, { status: 404 });
+    }
 
     const { data: newTemplate, error: insertError } = await supabase
       .from('ria_form_templates')

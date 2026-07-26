@@ -15,6 +15,33 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Verify user has access to this AI system
+    const { data: system, error: systemError } = await supabase
+      .from('use_cases')
+      .select('id, organization_id, user_id')
+      .eq('id', aiSystemId)
+      .single();
+
+    if (systemError || !system) {
+      return NextResponse.json({ success: false, error: 'Sistema no encontrado' }, { status: 404 });
+    }
+
+    if (system.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', system.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership && system.user_id !== user.id) {
+        return NextResponse.json({ success: false, error: 'Sin acceso a este sistema' }, { status: 403 });
+      }
+    } else if (system.user_id !== user.id) {
+      return NextResponse.json({ success: false, error: 'Sin acceso a este sistema' }, { status: 403 });
+    }
+
     const { data: assignment } = await supabase
       .from('ai_system_ria_assignments')
       .select('template_id, ria_form_templates(*)')
@@ -58,6 +85,33 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Verify user has edit access to this AI system
+    const { data: system, error: systemError } = await supabase
+      .from('use_cases')
+      .select('id, organization_id, user_id')
+      .eq('id', aiSystemId)
+      .single();
+
+    if (systemError || !system) {
+      return NextResponse.json({ success: false, error: 'Sistema no encontrado' }, { status: 404 });
+    }
+
+    if (system.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', system.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership && system.user_id !== user.id) {
+        return NextResponse.json({ success: false, error: 'Sin acceso a este sistema' }, { status: 403 });
+      }
+    } else if (system.user_id !== user.id) {
+      return NextResponse.json({ success: false, error: 'Sin acceso a este sistema' }, { status: 403 });
     }
 
     const { template_id } = await request.json();

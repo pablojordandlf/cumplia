@@ -27,6 +27,21 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
+    // Verify user can access this template: must be a system template or belong to the user's org
+    if (!template.is_system) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership) {
+        return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+      }
+    }
+
     return NextResponse.json({ success: true, data: template });
   } catch {
     return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 });

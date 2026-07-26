@@ -40,9 +40,18 @@ export async function PUT(
     const body = await request.json();
     const { role } = body;
 
+    const VALID_ASSIGNABLE_ROLES = ['admin', 'editor', 'viewer'] as const;
+
     if (!role) {
       return NextResponse.json(
         { success: false, error: 'Role is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!(VALID_ASSIGNABLE_ROLES as readonly string[]).includes(role)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid role. Must be one of: admin, editor, viewer' },
         { status: 400 }
       );
     }

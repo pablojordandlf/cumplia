@@ -47,7 +47,7 @@ export default function OrganizationSettingsPage() {
     }
   }, [isAuthReady]);
 
-  async function fetchOrganization(retryCount = 0) {
+  async function fetchOrganization() {
     try {
       setIsLoading(true);
       setError(null);

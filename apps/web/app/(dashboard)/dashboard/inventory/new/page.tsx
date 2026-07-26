@@ -27,18 +27,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Square, FlaskConical, Package, X, GripVertical, Pencil } from 'lucide-react';
+import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, FlaskConical, Package, X, GripVertical, Pencil } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 import { DocumentAnalyzer, type ExtractedDocData, type CurrentFormValues } from '@/components/document-analyzer';
-import { LimitGate } from '@/components/permission-gate';
 import { useLimit } from '@/hooks/use-limit';
 import { usePermissions } from '@/hooks/use-permissions';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-
-const MAX_FILE_SIZE = 500_000;
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 // Custom field interface
 interface CustomField {

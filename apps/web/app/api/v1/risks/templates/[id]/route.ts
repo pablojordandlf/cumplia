@@ -52,6 +52,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Verify access: system templates are public; custom templates require org membership
+    if (!template.is_system && template.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership) {
+        return NextResponse.json(
+          { error: 'Template not found' },
+          { status: 404 }
+        );
+      }
+    }
+
     return NextResponse.json({ template });
   } catch (error) {
     console.error('Error in get template API:', error);

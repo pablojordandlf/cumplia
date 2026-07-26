@@ -261,10 +261,13 @@ export async function POST(
     }
 
     // Increment seats_used count
-    await supabase
+    const { error: seatsIncrError } = await supabase
       .from('organizations')
       .update({ seats_used: (org?.seats_used || 0) + 1 })
       .eq('id', id);
+    if (seatsIncrError) {
+      console.error('Error incrementing seats_used:', seatsIncrError);
+    }
 
     // Send invite email
     try {
@@ -379,10 +382,13 @@ export async function DELETE(
         .single();
 
       if (org && org.seats_used > 0) {
-        await supabase
+        const { error: seatsDecrError } = await supabase
           .from('organizations')
           .update({ seats_used: org.seats_used - 1 })
           .eq('id', id);
+        if (seatsDecrError) {
+          console.error('Error decrementing seats_used:', seatsDecrError);
+        }
       }
 
       return NextResponse.json({ success: true, message: 'Invitation canceled' });

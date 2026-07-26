@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Users, Loader2, UserPlus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthReady } from '@/lib/auth-helpers';
@@ -90,7 +88,6 @@ export function UsageIndicator() {
 
       const activeMembers = membersCount || 0;
       const pendingInvites = invitesCount || 0;
-      const totalUsed = activeMembers + pendingInvites;
 
       setTotal(maxUsers);
       setUsed(activeMembers);

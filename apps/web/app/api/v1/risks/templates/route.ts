@@ -24,6 +24,18 @@ export async function GET(request: NextRequest) {
     const aiActLevel = searchParams.get('ai_act_level');
     const includeSystem = searchParams.get('include_system') !== 'false';
 
+    // Get user's organization to scope custom templates to their org only
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const VALID_AI_ACT_LEVELS = ['high_risk', 'limited_risk', 'minimal_risk', 'prohibited', 'not_applicable'];
+
     let query = supabase
       .from('risk_templates')
       .select(`
@@ -44,9 +56,21 @@ export async function GET(request: NextRequest) {
       .order('is_system', { ascending: false })
       .order('name');
 
-    // Filter by AI Act level if provided
-    // Check if ai_act_level matches OR if applies_to_levels contains the level
+    // Scope custom templates to the user's organization; always include system templates
+    if (membership?.organization_id) {
+      query = query.or(`is_system.eq.true,organization_id.eq.${membership.organization_id}`);
+    } else {
+      query = query.eq('is_system', true);
+    }
+
+    // Filter by AI Act level if provided — validate against allowlist to prevent PostgREST injection
     if (aiActLevel) {
+      if (!VALID_AI_ACT_LEVELS.includes(aiActLevel)) {
+        return NextResponse.json(
+          { error: 'Invalid ai_act_level value' },
+          { status: 400 }
+        );
+      }
       query = query.or(`ai_act_level.eq.${aiActLevel},applies_to_levels.cs.{${aiActLevel}}`);
     }
 
