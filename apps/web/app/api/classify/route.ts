@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
       }
     );
     
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       .from('use_cases')
       .select('*')
       .eq('id', useCaseId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (fetchError || !useCase) {

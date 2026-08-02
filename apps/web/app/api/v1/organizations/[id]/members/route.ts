@@ -62,7 +62,7 @@ export async function GET(
     if (membersError) {
       console.error('Error fetching members:', membersError);
       return NextResponse.json(
-        { success: false, error: membersError.message },
+        { success: false, error: 'Failed to fetch members' },
         { status: 500 }
       );
     }
@@ -89,7 +89,7 @@ export async function GET(
     if (invitationsError) {
       console.error('Error fetching invitations:', invitationsError);
       return NextResponse.json(
-        { success: false, error: invitationsError.message },
+        { success: false, error: 'Failed to fetch invitations' },
         { status: 500 }
       );
     }
@@ -115,10 +115,10 @@ export async function GET(
     const allItems = [...formattedMembers, ...formattedInvitations];
 
     return NextResponse.json({ success: true, data: allItems });
-  } catch (error: any) {
-    console.error('Unexpected error:', error);
+  } catch (error) {
+    console.error('Unexpected error in GET members:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -260,11 +260,8 @@ export async function POST(
       throw error;
     }
 
-    // Increment seats_used count
-    await supabase
-      .from('organizations')
-      .update({ seats_used: (org?.seats_used || 0) + 1 })
-      .eq('id', id);
+    // Atomic increment of seats_used via SQL to avoid read-modify-write race condition
+    await supabase.rpc('increment_seats_used', { org_id: id });
 
     // Send invite email
     try {
@@ -300,10 +297,10 @@ export async function POST(
     }
 
     return NextResponse.json({ success: true, data: invitation }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error inviting member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -366,24 +363,13 @@ export async function DELETE(
       if (error) {
         console.error('Error canceling invitation:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Failed to cancel invitation' },
           { status: 500 }
         );
       }
 
-      // Decrement seats_used count
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('seats_used')
-        .eq('id', id)
-        .single();
-
-      if (org && org.seats_used > 0) {
-        await supabase
-          .from('organizations')
-          .update({ seats_used: org.seats_used - 1 })
-          .eq('id', id);
-      }
+      // Atomic decrement of seats_used via SQL to avoid race condition
+      await supabase.rpc('decrement_seats_used', { org_id: id });
 
       return NextResponse.json({ success: true, message: 'Invitation canceled' });
     }
@@ -415,7 +401,7 @@ export async function DELETE(
       if (error) {
         console.error('Error removing member:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Failed to remove member' },
           { status: 500 }
         );
       }
@@ -424,10 +410,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error removing member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

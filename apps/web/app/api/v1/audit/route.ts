@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[audit] Error fetching audit log:', error);
+    return NextResponse.json({ error: 'Failed to fetch audit log' }, { status: 500 });
   }
 
   return NextResponse.json({ entries: data ?? [] });
@@ -68,6 +69,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'action and entity_type required' }, { status: 400 });
   }
 
+  const VALID_ACTIONS = ['create', 'update', 'delete', 'view', 'export', 'invite', 'remove', 'accept', 'cancel'];
+  const VALID_ENTITY_TYPES = ['ai_system', 'member', 'template', 'document', 'invitation', 'organization', 'risk', 'obligation'];
+
+  if (!VALID_ACTIONS.includes(action)) {
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  }
+
+  if (!VALID_ENTITY_TYPES.includes(entity_type)) {
+    return NextResponse.json({ error: 'Invalid entity_type' }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from('audit_log')
     .insert({
@@ -84,7 +96,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[audit] Error inserting audit entry:', error);
+    return NextResponse.json({ error: 'Failed to create audit entry' }, { status: 500 });
   }
 
   return NextResponse.json(data);

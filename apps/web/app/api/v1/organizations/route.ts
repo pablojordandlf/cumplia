@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { hasPermission } from '@/lib/permissions';
 import { getCurrentContext } from '@/lib/server-context';
-import { MemberRole } from '@/types/organization';
 
 /**
  * GET /api/v1/organizations
@@ -10,7 +8,7 @@ import { MemberRole } from '@/types/organization';
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const supabase = await createClient();
-  const { user, organizationId: currentOrgId, role: currentUserRole } = await getCurrentContext(request);
+  const { user } = await getCurrentContext(request);
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
