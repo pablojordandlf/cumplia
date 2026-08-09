@@ -46,6 +46,8 @@ export async function getUserRoleInOrg(
 /**
  * Checks whether the current user has the given permission in their org.
  * Returns { allowed: true } or { allowed: false, status: 403 }.
+ * NOTE: Uses the user's most-recently-joined org. Prefer requirePermissionInOrg
+ * when the target organization is known.
  */
 export async function requirePermission(
   supabase: SupabaseClient,
@@ -53,6 +55,23 @@ export async function requirePermission(
   permission: Permission
 ): Promise<{ allowed: true; role: MemberRole } | { allowed: false; status: 403 }> {
   const role = await getUserRole(supabase, userId);
+  if (!role || !hasPermission(role, permission)) {
+    return { allowed: false, status: 403 };
+  }
+  return { allowed: true, role };
+}
+
+/**
+ * Checks whether the current user has the given permission in a specific organization.
+ * Returns { allowed: true } or { allowed: false, status: 403 }.
+ */
+export async function requirePermissionInOrg(
+  supabase: SupabaseClient,
+  userId: string,
+  organizationId: string,
+  permission: Permission
+): Promise<{ allowed: true; role: MemberRole } | { allowed: false; status: 403 }> {
+  const role = await getUserRoleInOrg(supabase, userId, organizationId);
   if (!role || !hasPermission(role, permission)) {
     return { allowed: false, status: 403 };
   }

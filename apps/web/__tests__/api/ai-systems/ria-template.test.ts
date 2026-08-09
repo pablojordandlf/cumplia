@@ -32,9 +32,10 @@ describe('GET /api/v1/ai-systems/[id]/ria-template', () => {
   it('returns assigned template when one exists', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
     const template = { id: 'tpl-1', name: 'Template A', is_default: false };
-    mockSupabase.from.mockReturnValueOnce(
-      makeQb({ template_id: 'tpl-1', ria_form_templates: template })
-    );
+    mockSupabase.from
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))              // use_cases
+      .mockReturnValueOnce(makeQb({ role: 'admin' }))                         // membership
+      .mockReturnValueOnce(makeQb({ template_id: 'tpl-1', ria_form_templates: template })); // assignment
 
     const req = makeRequest(`/api/v1/ai-systems/${SYSTEM_ID}/ria-template`);
     const res = await GET(req, routeParams);
@@ -48,8 +49,10 @@ describe('GET /api/v1/ai-systems/[id]/ria-template', () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
     const defaultTemplate = { id: 'tpl-default', name: 'Default Template', is_default: true };
     mockSupabase.from
-      .mockReturnValueOnce(makeQb(null))              // no assignment
-      .mockReturnValueOnce(makeQb(defaultTemplate));  // default template
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))  // use_cases
+      .mockReturnValueOnce(makeQb({ role: 'admin' }))             // membership
+      .mockReturnValueOnce(makeQb(null))                          // no assignment
+      .mockReturnValueOnce(makeQb(defaultTemplate));              // default template
 
     const req = makeRequest(`/api/v1/ai-systems/${SYSTEM_ID}/ria-template`);
     const res = await GET(req, routeParams);
@@ -62,9 +65,11 @@ describe('GET /api/v1/ai-systems/[id]/ria-template', () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
     const systemTemplate = { id: 'tpl-system', name: 'System Template', is_system: true };
     mockSupabase.from
-      .mockReturnValueOnce(makeQb(null))               // no assignment
-      .mockReturnValueOnce(makeQb(null))               // no default template
-      .mockReturnValueOnce(makeQb(systemTemplate));    // system template
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))  // use_cases
+      .mockReturnValueOnce(makeQb({ role: 'admin' }))             // membership
+      .mockReturnValueOnce(makeQb(null))                          // no assignment
+      .mockReturnValueOnce(makeQb(null))                          // no default template
+      .mockReturnValueOnce(makeQb(systemTemplate));               // system template
 
     const req = makeRequest(`/api/v1/ai-systems/${SYSTEM_ID}/ria-template`);
     const res = await GET(req, routeParams);
@@ -76,9 +81,11 @@ describe('GET /api/v1/ai-systems/[id]/ria-template', () => {
   it('returns null data when no template exists at all', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
     mockSupabase.from
-      .mockReturnValueOnce(makeQb(null))  // no assignment
-      .mockReturnValueOnce(makeQb(null))  // no default
-      .mockReturnValueOnce(makeQb(null)); // no system template
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))  // use_cases
+      .mockReturnValueOnce(makeQb({ role: 'admin' }))             // membership
+      .mockReturnValueOnce(makeQb(null))                          // no assignment
+      .mockReturnValueOnce(makeQb(null))                          // no default
+      .mockReturnValueOnce(makeQb(null));                         // no system template
 
     const req = makeRequest(`/api/v1/ai-systems/${SYSTEM_ID}/ria-template`);
     const res = await GET(req, routeParams);
@@ -102,6 +109,9 @@ describe('PUT /api/v1/ai-systems/[id]/ria-template', () => {
 
   it('returns 400 when template_id is missing', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
+    mockSupabase.from
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))  // use_cases
+      .mockReturnValueOnce(makeQb({ role: 'admin' }));            // membership
     const req = makeRequest(`/api/v1/ai-systems/${SYSTEM_ID}/ria-template`, {
       method: 'PUT',
       body: {},
@@ -113,7 +123,10 @@ describe('PUT /api/v1/ai-systems/[id]/ria-template', () => {
 
   it('returns 404 when template does not exist', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
-    mockSupabase.from.mockReturnValueOnce(makeQb(null, { message: 'Not found' }));
+    mockSupabase.from
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))         // use_cases
+      .mockReturnValueOnce(makeQb({ role: 'admin' }))                    // membership
+      .mockReturnValueOnce(makeQb(null, { message: 'Not found' }));      // template not found
 
     const req = makeRequest(`/api/v1/ai-systems/${SYSTEM_ID}/ria-template`, {
       method: 'PUT',
@@ -127,8 +140,10 @@ describe('PUT /api/v1/ai-systems/[id]/ria-template', () => {
   it('returns 200 and upserts assignment when template exists', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
     mockSupabase.from
-      .mockReturnValueOnce(makeQb({ id: 'tpl-1' }))  // template exists
-      .mockReturnValueOnce(makeQb(null));              // upsert assignment
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))  // use_cases
+      .mockReturnValueOnce(makeQb({ role: 'editor' }))            // membership (editor is allowed)
+      .mockReturnValueOnce(makeQb({ id: 'tpl-1' }))              // template exists
+      .mockReturnValueOnce(makeQb(null));                         // upsert assignment
 
     const req = makeRequest(`/api/v1/ai-systems/${SYSTEM_ID}/ria-template`, {
       method: 'PUT',

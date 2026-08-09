@@ -3,18 +3,42 @@ import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_ACT_REFERENCE } from '@/lib/ai-act-reference';
 
+export const dynamic = 'force-dynamic';
+
 const client = new Anthropic();
+
+const MAX_MESSAGES = 50;
+const MAX_MESSAGE_LENGTH = 4000;
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
+interface AiSystem {
+  id: string;
+  name: string;
+  sector?: string;
+  status?: string;
+  description?: string;
+  ai_act_level?: string;
+}
+
+interface AiRisk {
+  use_case_id: string;
+  status?: string;
+}
+
+interface AiObligation {
+  use_case_id: string;
+  is_completed?: boolean;
+}
+
 function buildOrgContext(orgData: {
   orgName: string;
-  systems: any[];
-  risks: any[];
-  obligations: any[];
+  systems: AiSystem[];
+  risks: AiRisk[];
+  obligations: AiObligation[];
 }): string {
   const { orgName, systems, risks, obligations } = orgData;
 
@@ -83,6 +107,12 @@ export async function POST(request: NextRequest) {
   const messages: Message[] = body.messages;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
+  }
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  if (messages.some(m => typeof m.content !== 'string' || m.content.length > MAX_MESSAGE_LENGTH)) {
+    return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
   }
 
   // Get user's organization

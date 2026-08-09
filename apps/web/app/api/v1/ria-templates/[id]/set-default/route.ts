@@ -31,6 +31,19 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
+    if (template.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      if (!membership || !['owner', 'admin'].includes(membership.role)) {
+        return NextResponse.json({ success: false, error: 'Sin permisos para gestionar esta plantilla' }, { status: 403 });
+      }
+    }
+
     // Clear the default flag from ALL templates accessible to this org
     // (both org-specific ones and the system template) so only one can be default at a time.
     if (template.organization_id) {

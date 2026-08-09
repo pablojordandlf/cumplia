@@ -47,11 +47,6 @@ interface RegisterWithInvitationResponse {
     email: string;
     organizationId: string;
     role: string;
-    session: {
-      access_token: string;
-      refresh_token: string;
-      expires_in: number;
-    };
   };
 }
 
@@ -219,18 +214,13 @@ export async function POST(
             email,
             organizationId: acceptResult.data.organizationId,
             role: acceptResult.data.role,
-            session: {
-              access_token: '',
-              refresh_token: '',
-              expires_in: 0,
-            },
           },
         },
         { status: 200 }
       );
     }
 
-    // ✅ TODO ÉXITO
+    // ✅ TODO ÉXITO — session cookies are set automatically by @supabase/ssr
     return NextResponse.json(
       {
         success: true,
@@ -239,11 +229,6 @@ export async function POST(
           email,
           organizationId: acceptResult.data.organizationId,
           role: acceptResult.data.role,
-          session: {
-            access_token: sessionData.session.access_token,
-            refresh_token: sessionData.session.refresh_token || '',
-            expires_in: sessionData.session.expires_in || 3600,
-          },
         },
       },
       { status: 200 }

@@ -109,6 +109,11 @@ async function getRedirectUrl(
         .single()
 
       if (pendingInviteByToken) {
+        // Verify the authenticated user's email matches the invitation
+        if (pendingInviteByToken.email.toLowerCase() !== user.email?.toLowerCase()) {
+          return '/login?error=invite_email_mismatch'
+        }
+
         // Check if invitation expired
         const expiresAt = new Date(pendingInviteByToken.invite_expires_at)
         if (expiresAt < new Date()) {

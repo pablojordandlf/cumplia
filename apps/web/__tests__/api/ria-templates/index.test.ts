@@ -33,7 +33,9 @@ describe('GET /api/v1/ria-templates', () => {
       { id: 'tpl-1', name: 'System Template', is_system: true, is_default: true },
       { id: 'tpl-2', name: 'Custom Template', is_system: false, is_default: false },
     ];
-    mockSupabase.from.mockReturnValueOnce(makeQb(templates));
+    mockSupabase.from
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))  // membership lookup
+      .mockReturnValueOnce(makeQb(templates));                     // templates query
 
     const res = await GET();
     expect(res.status).toBe(200);
@@ -44,7 +46,9 @@ describe('GET /api/v1/ria-templates', () => {
 
   it('returns 500 when database query fails', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: VALID_USER }, error: null });
-    mockSupabase.from.mockReturnValueOnce(makeQb(null, { message: 'DB error' }));
+    mockSupabase.from
+      .mockReturnValueOnce(makeQb({ organization_id: 'org-1' }))       // membership lookup
+      .mockReturnValueOnce(makeQb(null, { message: 'DB error' }));     // templates query fails
 
     const res = await GET();
     expect(res.status).toBe(500);

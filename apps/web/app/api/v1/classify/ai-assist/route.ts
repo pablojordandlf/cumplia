@@ -3,7 +3,13 @@ import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_ACT_REFERENCE } from '@/lib/ai-act-reference';
 
+export const dynamic = 'force-dynamic';
+
 const client = new Anthropic();
+
+const MAX_MESSAGES = 50;
+const MAX_MESSAGE_LENGTH = 4000;
+const MAX_INPUT_LENGTH = 2000;
 
 // ── Chat mode: streaming conversation ────────────────────────────────────────
 
@@ -120,10 +126,16 @@ export async function POST(request: NextRequest) {
   return handleChat(body);
 }
 
-async function handleChat(body: any) {
-  const messages: Message[] = body.messages;
+async function handleChat(body: { messages?: Message[] }) {
+  const messages: Message[] = body.messages ?? [];
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
+  }
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  if (messages.some(m => typeof m.content !== 'string' || m.content.length > MAX_MESSAGE_LENGTH)) {
+    return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
   }
 
   const stream = client.messages.stream({
@@ -159,10 +171,16 @@ async function handleChat(body: any) {
   });
 }
 
-async function handleAutofill(body: any) {
+async function handleAutofill(body: { systemName?: string; systemDescription?: string; sector?: string }) {
   const { systemName, systemDescription, sector } = body;
   if (!systemName && !systemDescription) {
     return NextResponse.json({ error: 'systemName or systemDescription required' }, { status: 400 });
+  }
+  if (systemName && systemName.length > MAX_INPUT_LENGTH) {
+    return NextResponse.json({ error: 'systemName too long' }, { status: 400 });
+  }
+  if (systemDescription && systemDescription.length > MAX_INPUT_LENGTH * 2) {
+    return NextResponse.json({ error: 'systemDescription too long' }, { status: 400 });
   }
 
   const prompt = [

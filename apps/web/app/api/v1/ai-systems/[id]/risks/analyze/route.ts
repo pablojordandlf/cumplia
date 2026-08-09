@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 
+export const dynamic = 'force-dynamic';
+
 const client = new Anthropic();
+
+const MAX_MESSAGES = 50;
+const MAX_MESSAGE_LENGTH = 4000;
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -97,10 +102,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const body = await request.json();
     // Strip any client-side fields before passing to Anthropic SDK
+    const rawMessages: Array<{ role: string; content: string }> = body.messages ?? [];
+    if (rawMessages.length > MAX_MESSAGES) {
+      return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+    }
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> =
-      (body.messages ?? []).map((m: { role: string; content: string }) => ({
+      rawMessages.map((m) => ({
         role: m.role as 'user' | 'assistant',
-        content: String(m.content),
+        content: String(m.content).slice(0, MAX_MESSAGE_LENGTH),
       }));
 
     // Fetch risks already registered for this system (from the applied template)

@@ -68,6 +68,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'action and entity_type required' }, { status: 400 });
   }
 
+  const SAFE_LABEL = /^[a-z_:][a-z0-9_:.-]{0,63}$/;
+  if (!SAFE_LABEL.test(action) || !SAFE_LABEL.test(entity_type)) {
+    return NextResponse.json({ error: 'Invalid action or entity_type format' }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from('audit_log')
     .insert({

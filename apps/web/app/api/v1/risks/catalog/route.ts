@@ -49,7 +49,11 @@ export async function GET(request: NextRequest) {
       query = query.eq('timing', timing);
     }
     if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+      // Strip all characters that could inject PostgREST filter syntax
+      const safeSearch = search.replace(/[^a-zA-Z0-9\s\-_áéíóúüÁÉÍÓÚÜñÑ]/g, '').slice(0, 100);
+      if (safeSearch) {
+        query = query.or(`name.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%`);
+      }
     }
 
     const { data: risks, error } = await query;

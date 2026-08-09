@@ -15,6 +15,25 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { data: system } = await supabase
+      .from('use_cases')
+      .select('organization_id')
+      .eq('id', aiSystemId)
+      .single();
+    if (!system) {
+      return NextResponse.json({ success: false, error: 'Sistema no encontrado' }, { status: 404 });
+    }
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', system.organization_id)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+    if (!membership) {
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
+    }
+
     const { data: assignment } = await supabase
       .from('ai_system_ria_assignments')
       .select('template_id, ria_form_templates(*)')
@@ -58,6 +77,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data: system } = await supabase
+      .from('use_cases')
+      .select('organization_id')
+      .eq('id', aiSystemId)
+      .single();
+    if (!system) {
+      return NextResponse.json({ success: false, error: 'Sistema no encontrado' }, { status: 404 });
+    }
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('role')
+      .eq('organization_id', system.organization_id)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+    if (!membership || !['owner', 'admin', 'editor'].includes(membership.role)) {
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 });
     }
 
     const { template_id } = await request.json();
