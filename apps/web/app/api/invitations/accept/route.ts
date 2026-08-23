@@ -120,7 +120,7 @@ export async function POST(
         .insert({
           invitation_id: token, // Nota: Esto es aproximado, idealmente querríamos el ID real
           user_id: user.id,
-          ip_address: request.headers.get('x-forwarded-for') || 'unknown',
+          ip_address: (request.headers.get('x-forwarded-for') || '').split(',')[0].trim().replace(/[^0-9a-f.:]/gi, '') || 'unknown',
           user_agent: request.headers.get('user-agent') || undefined,
         });
     } catch (logError) {

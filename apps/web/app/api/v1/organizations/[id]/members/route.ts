@@ -168,6 +168,14 @@ export async function POST(
       );
     }
 
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!EMAIL_RE.test(email) || email.length > 254) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid email address' },
+        { status: 400 }
+      );
+    }
+
     // Validate role
     const validRoles = ['viewer', 'editor', 'admin'];
     if (!validRoles.includes(role)) {

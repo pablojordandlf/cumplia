@@ -32,6 +32,10 @@ export async function GET(request: NextRequest) {
       .select('id, ai_act_level, risk_analysis_completed');
 
     if (orgIds.length > 0) {
+      const UUID_RE = /^[0-9a-f-]{36}$/i;
+      if (!orgIds.every((id: string) => UUID_RE.test(id))) {
+        return NextResponse.json({ error: 'Invalid organization ID' }, { status: 400 });
+      }
       query = query.or(
         `user_id.eq.${user.id},organization_id.in.(${orgIds.join(',')})`
       );

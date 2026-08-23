@@ -68,6 +68,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'action and entity_type required' }, { status: 400 });
   }
 
+  const VALID_ACTIONS = ['create', 'update', 'delete', 'view', 'invite', 'accept', 'revoke'];
+  const VALID_ENTITY_TYPES = ['ai_system', 'risk', 'document', 'member', 'organization', 'template'];
+  if (!VALID_ACTIONS.includes(action)) {
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  }
+  if (!VALID_ENTITY_TYPES.includes(entity_type)) {
+    return NextResponse.json({ error: 'Invalid entity_type' }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from('audit_log')
     .insert({

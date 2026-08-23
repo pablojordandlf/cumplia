@@ -37,8 +37,9 @@ export async function sendInviteEmail({
     // Send email via Resend
     // Using onboarding@resend.dev for development (free tier without domain verification)
     // TODO: Change to 'invitaciones@cumplia.app' when custom domain is verified
+    const fromAddress = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const response = await resend.emails.send({
-      from: 'onboarding@resend.dev',
+      from: fromAddress,
       to: email,
       subject: `Te invitan a unirte a ${organizationName} en CumplIA`,
       html,
@@ -49,7 +50,7 @@ export async function sendInviteEmail({
       throw new Error(`Failed to send email: ${response.error.message}`);
     }
 
-    console.log('Invite email sent successfully:', response.data);
+    console.log('Invite email sent successfully, id:', response.data?.id);
     return response.data;
   } catch (error) {
     console.error('Error sending invite email:', error);

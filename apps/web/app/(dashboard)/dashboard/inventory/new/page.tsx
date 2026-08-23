@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, Square, FlaskConical, Package, X, GripVertical, Pencil } from 'lucide-react';
+import { Plus, AlertCircle, ChevronLeft, FileText, Shield, HelpCircle, Play, FlaskConical, Package, X, GripVertical, Pencil } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { UseCaseSuggestions } from '@/components/use-case-suggestions';
 import { DocumentAnalyzer, type ExtractedDocData, type CurrentFormValues } from '@/components/document-analyzer';
