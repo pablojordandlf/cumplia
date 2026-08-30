@@ -97,12 +97,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const validRoles = ['viewer', 'editor', 'admin'];
+    const memberRole = validRoles.includes(invitation.role) ? invitation.role : 'viewer';
+
     const { error: memberError } = await supabase
       .from('organization_members')
       .insert({
         organization_id: invitation.organization_id,
         user_id: user.id,
-        role: invitation.role || 'member',
+        email: user.email || invitation.email,
+        name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+        role: memberRole,
         status: 'active',
       })
       .select()
@@ -115,6 +120,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // seats_used was already incremented when the invitation was created — no change needed here.
 
     const { error: updateError } = await supabase
       .from('pending_invitations')

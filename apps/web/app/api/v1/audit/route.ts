@@ -68,6 +68,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'action and entity_type required' }, { status: 400 });
   }
 
+  const validActions = [
+    'create', 'update', 'delete', 'view', 'export',
+    'created', 'updated', 'deleted', 'viewed', 'exported',
+    'invited', 'removed', 'role_changed', 'accepted',
+    'classification_completed', 'risk_added', 'risk_mitigated',
+    'obligation_completed', 'complete_obligation', 'document_uploaded',
+    'template_set_default',
+  ];
+  const validEntityTypes = [
+    'ai_system', 'use_case', 'organization', 'member', 'invitation',
+    'risk', 'obligation', 'document', 'ria_template', 'custom_field_template',
+  ];
+
+  if (!validActions.includes(action)) {
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  }
+  if (!validEntityTypes.includes(entity_type)) {
+    return NextResponse.json({ error: 'Invalid entity_type' }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from('audit_log')
     .insert({

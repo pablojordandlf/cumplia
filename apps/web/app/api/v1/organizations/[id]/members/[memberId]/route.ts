@@ -47,6 +47,14 @@ export async function PUT(
       );
     }
 
+    const validRoles = ['viewer', 'editor', 'admin'];
+    if (!validRoles.includes(role)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid role. Must be one of: viewer, editor, admin' },
+        { status: 400 }
+      );
+    }
+
     // Prevent changing owner's role
     const { data: targetMember } = await supabase
       .from('organization_members')
@@ -135,7 +143,7 @@ export async function DELETE(
 
     const { error } = await supabase
       .from('organization_members')
-      .delete()
+      .update({ status: 'removed' })
       .eq('id', memberId)
       .eq('organization_id', id);
 

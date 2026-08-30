@@ -85,6 +85,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
   }
 
+  const MAX_MESSAGES = 50;
+  const MAX_MESSAGE_LENGTH = 8000;
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  const sanitizedMessages = messages.map(m => ({
+    role: m.role,
+    content: typeof m.content === 'string' ? m.content.slice(0, MAX_MESSAGE_LENGTH) : '',
+  }));
+
   // Get user's organization
   const { data: membership } = await supabase
     .from('organization_members')
@@ -135,7 +145,7 @@ export async function POST(request: NextRequest) {
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     system: fullSystemPrompt,
-    messages: messages.map(m => ({ role: m.role, content: m.content })),
+    messages: sanitizedMessages,
   });
 
   const encoder = new TextEncoder();

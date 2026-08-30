@@ -3,6 +3,15 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import { PLANS } from '@/lib/plans';
 
+export const dynamic = 'force-dynamic';
+
+const VALID_SIZES = ['1-10', '11-50', '51-200', '201-1000', '1000+'];
+const VALID_INDUSTRIES = [
+  'technology', 'healthcare', 'finance', 'education', 'retail',
+  'manufacturing', 'government', 'legal', 'consulting', 'media',
+  'energy', 'transportation', 'real_estate', 'agriculture', 'other',
+];
+
 export async function POST(request: Request) {
   try {
     // Client for auth operations (uses anon key with RLS)
@@ -51,6 +60,20 @@ export async function POST(request: Request) {
     if (!country || typeof country !== 'string') {
       return NextResponse.json(
         { message: 'El país es obligatorio' },
+        { status: 400 }
+      );
+    }
+
+    if (size && !VALID_SIZES.includes(size)) {
+      return NextResponse.json(
+        { message: 'Tamaño de organización inválido' },
+        { status: 400 }
+      );
+    }
+
+    if (industry && !VALID_INDUSTRIES.includes(industry)) {
+      return NextResponse.json(
+        { message: 'Sector inválido' },
         { status: 400 }
       );
     }

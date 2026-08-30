@@ -145,7 +145,6 @@ export async function POST(
         email_confirm: true, // Confirmar email automáticamente
         user_metadata: {
           registered_via_invitation: true,
-          invitation_token,
         },
       });
 

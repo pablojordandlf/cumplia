@@ -152,9 +152,9 @@ describe('POST /api/v1/organizations/[id]/members', () => {
       .mockReturnValueOnce(makeQb({ role: 'admin' }))                              // membership check
       .mockReturnValueOnce(makeQb(null))                                            // no existing member
       .mockReturnValueOnce(makeQb(null))                                            // no pending invitation
-      .mockReturnValueOnce(makeQb({ seats_total: 5, seats_used: 2 }))              // org seats check
+      .mockReturnValueOnce(makeQb({ plan_name: 'enterprise', seats_used: 2 }))     // org seats check
       .mockReturnValueOnce(makeQb(createdInvitation))                              // insert invitation
-      .mockReturnValueOnce(makeQb(null))                                            // update seats_used
+      // seats increment now via rpc('increment_org_seats_used') — not a from() call
       .mockReturnValueOnce(makeQb({ name: 'My Org' }))                            // org name for email
       .mockReturnValueOnce(makeQb({ full_name: 'Admin User' }));                   // inviter name for email
 

@@ -168,6 +168,21 @@ export async function POST(
       );
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
+    if (name && (typeof name !== 'string' || name.length > 255)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid name' },
+        { status: 400 }
+      );
+    }
+
     // Validate role
     const validRoles = ['viewer', 'editor', 'admin'];
     if (!validRoles.includes(role)) {
@@ -260,11 +275,8 @@ export async function POST(
       throw error;
     }
 
-    // Increment seats_used count
-    await supabase
-      .from('organizations')
-      .update({ seats_used: (org?.seats_used || 0) + 1 })
-      .eq('id', id);
+    // Increment seats_used atomically to avoid race conditions
+    await supabase.rpc('increment_org_seats_used', { org_id: id });
 
     // Send invite email
     try {
@@ -371,19 +383,8 @@ export async function DELETE(
         );
       }
 
-      // Decrement seats_used count
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('seats_used')
-        .eq('id', id)
-        .single();
-
-      if (org && org.seats_used > 0) {
-        await supabase
-          .from('organizations')
-          .update({ seats_used: org.seats_used - 1 })
-          .eq('id', id);
-      }
+      // Decrement seats_used atomically
+      await supabase.rpc('decrement_org_seats_used', { org_id: id });
 
       return NextResponse.json({ success: true, message: 'Invitation canceled' });
     }
