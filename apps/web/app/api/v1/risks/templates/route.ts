@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/risks/templates
  * Returns all risk templates (system defaults + user created)
@@ -24,6 +26,17 @@ export async function GET(request: NextRequest) {
     const aiActLevel = searchParams.get('ai_act_level');
     const includeSystem = searchParams.get('include_system') !== 'false';
 
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const orgId = membership?.organization_id;
+
     let query = supabase
       .from('risk_templates')
       .select(`
@@ -43,6 +56,12 @@ export async function GET(request: NextRequest) {
       `)
       .order('is_system', { ascending: false })
       .order('name');
+
+    if (orgId) {
+      query = query.or(`is_system.eq.true,organization_id.eq.${orgId}`);
+    } else {
+      query = query.eq('is_system', true);
+    }
 
     // Filter by AI Act level if provided
     // Check if ai_act_level matches OR if applies_to_levels contains the level

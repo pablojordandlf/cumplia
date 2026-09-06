@@ -40,9 +40,10 @@ export async function PUT(
     const body = await request.json();
     const { role } = body;
 
-    if (!role) {
+    const ALLOWED_ROLES = ['admin', 'editor', 'viewer'];
+    if (!role || !ALLOWED_ROLES.includes(role)) {
       return NextResponse.json(
-        { success: false, error: 'Role is required' },
+        { success: false, error: 'Role must be one of: admin, editor, viewer' },
         { status: 400 }
       );
     }
@@ -75,10 +76,9 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true, data: updatedMember });
-  } catch (error: any) {
-    console.error('Error updating member:', error);
+  } catch {
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -144,10 +144,9 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Error removing member:', error);
+  } catch {
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

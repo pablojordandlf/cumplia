@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_ACT_REFERENCE } from '@/lib/ai-act-reference';
 
+export const dynamic = 'force-dynamic';
+
 const client = new Anthropic();
 
 interface Message {
@@ -83,6 +85,17 @@ export async function POST(request: NextRequest) {
   const messages: Message[] = body.messages;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
+  }
+
+  const MAX_MESSAGES = 20;
+  const MAX_MESSAGE_LENGTH = 4000;
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  for (const msg of messages) {
+    if (typeof msg.content !== 'string' || msg.content.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
+    }
   }
 
   // Get user's organization

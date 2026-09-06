@@ -45,11 +45,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           { status: 404 }
         );
       }
-      console.error('Error fetching template:', error);
       return NextResponse.json(
         { error: 'Failed to fetch template' },
         { status: 500 }
       );
+    }
+
+    if (!template.is_system && template.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership) {
+        return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+      }
     }
 
     return NextResponse.json({ template });

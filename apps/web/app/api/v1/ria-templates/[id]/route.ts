@@ -3,6 +3,8 @@ import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 import type { UpdateRiaTemplatePayload } from '@/types/ria-form-template';
 
+export const dynamic = 'force-dynamic';
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
@@ -25,6 +27,20 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     if (error || !template) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+    }
+
+    if (!template.is_system && template.organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', template.organization_id)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (!membership) {
+        return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+      }
     }
 
     return NextResponse.json({ success: true, data: template });

@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_ACT_REFERENCE } from '@/lib/ai-act-reference';
 
+export const dynamic = 'force-dynamic';
+
 const client = new Anthropic();
 
 // ── Chat mode: streaming conversation ────────────────────────────────────────
@@ -126,6 +128,17 @@ async function handleChat(body: any) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
   }
 
+  const MAX_MESSAGES = 20;
+  const MAX_MESSAGE_LENGTH = 4000;
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  for (const msg of messages) {
+    if (typeof msg.content !== 'string' || msg.content.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json({ error: 'Message content too long' }, { status: 400 });
+    }
+  }
+
   const stream = client.messages.stream({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
@@ -165,6 +178,17 @@ async function handleAutofill(body: any) {
     return NextResponse.json({ error: 'systemName or systemDescription required' }, { status: 400 });
   }
 
+  const MAX_FIELD_LENGTH = 2000;
+  if (typeof systemName === 'string' && systemName.length > MAX_FIELD_LENGTH) {
+    return NextResponse.json({ error: 'systemName too long' }, { status: 400 });
+  }
+  if (typeof systemDescription === 'string' && systemDescription.length > MAX_FIELD_LENGTH) {
+    return NextResponse.json({ error: 'systemDescription too long' }, { status: 400 });
+  }
+  if (typeof sector === 'string' && sector.length > 200) {
+    return NextResponse.json({ error: 'sector too long' }, { status: 400 });
+  }
+
   const prompt = [
     systemName && `Nombre del sistema: ${systemName}`,
     systemDescription && `Descripción: ${systemDescription}`,
@@ -186,8 +210,8 @@ async function handleAutofill(body: any) {
     }
     const result = JSON.parse(jsonMatch[0]);
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err) {
     console.error('Autofill error:', err);
-    return NextResponse.json({ error: err.message ?? 'AI error' }, { status: 500 });
+    return NextResponse.json({ error: 'AI processing error' }, { status: 500 });
   }
 }

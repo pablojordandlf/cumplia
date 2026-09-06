@@ -3,6 +3,8 @@ import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 import type { CreateRiaTemplatePayload } from '@/types/ria-form-template';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -12,12 +14,31 @@ export async function GET() {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data: templates, error } = await supabase
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const orgId = membership?.organization_id;
+
+    let query = supabase
       .from('ria_form_templates')
       .select('*')
       .order('is_system', { ascending: false })
       .order('is_default', { ascending: false })
       .order('name');
+
+    if (orgId) {
+      query = query.or(`is_system.eq.true,organization_id.eq.${orgId}`);
+    } else {
+      query = query.eq('is_system', true);
+    }
+
+    const { data: templates, error } = await query;
 
     if (error) {
       return NextResponse.json({ success: false, error: 'Error al cargar plantillas' }, { status: 500 });

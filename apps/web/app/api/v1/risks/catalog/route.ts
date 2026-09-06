@@ -2,6 +2,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/risks/catalog
  * Returns all risks from the MIT AI Risk Repository catalog
@@ -49,7 +51,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('timing', timing);
     }
     if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+      const safeSearch = search.replace(/[(),:.%_]/g, '');
+      query = query.or(`name.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%`);
     }
 
     const { data: risks, error } = await query;

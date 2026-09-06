@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
@@ -28,6 +30,19 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (fetchError || !template) {
+      return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
+    }
+
+    const { data: userMembership } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!template.is_system && template.organization_id !== userMembership?.organization_id) {
       return NextResponse.json({ success: false, error: 'Plantilla no encontrada' }, { status: 404 });
     }
 
