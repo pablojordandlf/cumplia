@@ -62,7 +62,7 @@ export async function GET(
     if (membersError) {
       console.error('Error fetching members:', membersError);
       return NextResponse.json(
-        { success: false, error: membersError.message },
+        { success: false, error: 'Error fetching members' },
         { status: 500 }
       );
     }
@@ -89,7 +89,7 @@ export async function GET(
     if (invitationsError) {
       console.error('Error fetching invitations:', invitationsError);
       return NextResponse.json(
-        { success: false, error: invitationsError.message },
+        { success: false, error: 'Error fetching invitations' },
         { status: 500 }
       );
     }
@@ -366,7 +366,7 @@ export async function DELETE(
       if (error) {
         console.error('Error canceling invitation:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Error canceling invitation' },
           { status: 500 }
         );
       }
@@ -410,14 +410,29 @@ export async function DELETE(
         .from('organization_members')
         .update({ status: 'removed' })
         .eq('organization_id', id)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .eq('status', 'active');
 
       if (error) {
         console.error('Error removing member:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Error removing member' },
           { status: 500 }
         );
+      }
+
+      // Decrement seats_used count
+      const { data: orgForDecrement } = await supabase
+        .from('organizations')
+        .select('seats_used')
+        .eq('id', id)
+        .single();
+
+      if (orgForDecrement && orgForDecrement.seats_used > 0) {
+        await supabase
+          .from('organizations')
+          .update({ seats_used: orgForDecrement.seats_used - 1 })
+          .eq('id', id);
       }
 
       return NextResponse.json({ success: true, message: 'Member removed' });

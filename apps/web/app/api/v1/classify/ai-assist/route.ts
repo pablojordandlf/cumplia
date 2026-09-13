@@ -111,8 +111,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await request.json();
-  const mode: 'chat' | 'autofill' = body.mode ?? 'chat';
+  const body = await request.json() as Record<string, unknown>;
+  const mode: 'chat' | 'autofill' = body.mode === 'autofill' ? 'autofill' : 'chat';
 
   if (mode === 'autofill') {
     return handleAutofill(body);
@@ -120,17 +120,29 @@ export async function POST(request: NextRequest) {
   return handleChat(body);
 }
 
-async function handleChat(body: any) {
-  const messages: Message[] = body.messages;
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+async function handleChat(body: Record<string, unknown>) {
+  const rawMessages: unknown[] = Array.isArray(body.messages) ? body.messages : [];
+  if (rawMessages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
+  }
+  if (rawMessages.length > 50) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  const messages: Message[] = rawMessages
+    .filter((m): m is { role: 'user' | 'assistant'; content: unknown } =>
+      typeof m === 'object' && m !== null &&
+      ((m as Record<string, unknown>).role === 'user' || (m as Record<string, unknown>).role === 'assistant')
+    )
+    .map(m => ({ role: m.role, content: String(m.content ?? '') }));
+  if (messages.length === 0) {
+    return NextResponse.json({ error: 'No valid messages' }, { status: 400 });
   }
 
   const stream = client.messages.stream({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     system: CHAT_SYSTEM_PROMPT,
-    messages: messages.map(m => ({ role: m.role, content: m.content })),
+    messages,
   });
 
   const encoder = new TextEncoder();
@@ -159,8 +171,8 @@ async function handleChat(body: any) {
   });
 }
 
-async function handleAutofill(body: any) {
-  const { systemName, systemDescription, sector } = body;
+async function handleAutofill(body: Record<string, unknown>) {
+  const { systemName, systemDescription, sector } = body as { systemName?: string; systemDescription?: string; sector?: string };
   if (!systemName && !systemDescription) {
     return NextResponse.json({ error: 'systemName or systemDescription required' }, { status: 400 });
   }
@@ -186,8 +198,8 @@ async function handleAutofill(body: any) {
     }
     const result = JSON.parse(jsonMatch[0]);
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Autofill error:', err);
-    return NextResponse.json({ error: err.message ?? 'AI error' }, { status: 500 });
+    return NextResponse.json({ error: 'Error processing AI request' }, { status: 500 });
   }
 }

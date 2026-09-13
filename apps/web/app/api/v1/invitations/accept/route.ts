@@ -102,6 +102,8 @@ export async function POST(request: NextRequest) {
       .insert({
         organization_id: invitation.organization_id,
         user_id: user.id,
+        email: user.email ?? invitation.email,
+        name: user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? null,
         role: invitation.role || 'member',
         status: 'active',
       })

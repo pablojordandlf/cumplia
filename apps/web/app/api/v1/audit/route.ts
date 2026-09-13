@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error fetching audit log:', error);
+    return NextResponse.json({ error: 'Error fetching audit log' }, { status: 500 });
   }
 
   return NextResponse.json({ entries: data ?? [] });
@@ -84,7 +85,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error inserting audit log entry:', error);
+    return NextResponse.json({ error: 'Error logging action' }, { status: 500 });
   }
 
   return NextResponse.json(data);

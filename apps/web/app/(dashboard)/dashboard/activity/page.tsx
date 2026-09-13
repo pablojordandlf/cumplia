@@ -80,7 +80,7 @@ export default function ActivityPage() {
     ? entries.filter(e => e.entity_type === filter || e.action === filter)
     : entries;
 
-  const entityTypes = [...new Set(entries.map(e => e.entity_type))];
+  const entityTypes: string[] = [...new Set(entries.map(e => e.entity_type))];
 
   return (
     <div className="p-6 max-w-3xl mx-auto">

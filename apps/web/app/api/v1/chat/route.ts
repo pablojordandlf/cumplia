@@ -10,11 +10,30 @@ interface Message {
   content: string;
 }
 
+interface OrgSystem {
+  id: string;
+  name: string;
+  description?: string | null;
+  sector?: string | null;
+  status?: string | null;
+  ai_act_level?: string | null;
+}
+
+interface OrgRisk {
+  use_case_id: string;
+  status?: string | null;
+}
+
+interface OrgObligation {
+  use_case_id: string;
+  is_completed?: boolean | null;
+}
+
 function buildOrgContext(orgData: {
   orgName: string;
-  systems: any[];
-  risks: any[];
-  obligations: any[];
+  systems: OrgSystem[];
+  risks: OrgRisk[];
+  obligations: OrgObligation[];
 }): string {
   const { orgName, systems, risks, obligations } = orgData;
 
@@ -80,9 +99,21 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const messages: Message[] = body.messages;
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+  const rawMessages: unknown[] = Array.isArray(body.messages) ? body.messages : [];
+  if (rawMessages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
+  }
+  if (rawMessages.length > 50) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+  const messages: Message[] = rawMessages
+    .filter((m): m is { role: 'user' | 'assistant'; content: unknown } =>
+      typeof m === 'object' && m !== null &&
+      ((m as Record<string, unknown>).role === 'user' || (m as Record<string, unknown>).role === 'assistant')
+    )
+    .map(m => ({ role: m.role, content: String(m.content ?? '') }));
+  if (messages.length === 0) {
+    return NextResponse.json({ error: 'No valid messages' }, { status: 400 });
   }
 
   // Get user's organization
@@ -98,7 +129,7 @@ export async function POST(request: NextRequest) {
   }
 
   const orgId = membership.organization_id;
-  const orgName = (membership.organizations as any)?.name ?? 'Mi Organización';
+  const orgName = (membership.organizations as { name?: string } | null)?.name ?? 'Mi Organización';
 
   // Fetch systems first to get IDs, then fetch related data in parallel
   const systemsRes = await supabase

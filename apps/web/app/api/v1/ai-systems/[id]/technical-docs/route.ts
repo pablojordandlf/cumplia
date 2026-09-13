@@ -49,7 +49,8 @@ export async function GET(
     .single();
 
   if (error && error.code !== 'PGRST116') {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error fetching technical docs:', error);
+    return NextResponse.json({ error: 'Error fetching technical documentation' }, { status: 500 });
   }
 
   return NextResponse.json({ doc: data ?? null });
@@ -111,6 +112,9 @@ export async function PUT(
       .single();
   }
 
-  if (result.error) return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (result.error) {
+    console.error('Error saving technical docs:', result.error);
+    return NextResponse.json({ error: 'Error saving technical documentation' }, { status: 500 });
+  }
   return NextResponse.json({ doc: result.data });
 }
