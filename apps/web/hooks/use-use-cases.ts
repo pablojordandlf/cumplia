@@ -1,6 +1,6 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { UseCase, UseCaseFilters } from '@/lib/api/use-cases';
+import { UseCase } from '@/lib/api/use-cases';
 
 interface UseCasesHook {
   useCases: UseCase[];

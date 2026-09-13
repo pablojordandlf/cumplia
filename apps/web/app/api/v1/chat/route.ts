@@ -92,6 +92,7 @@ Si el usuario pregunta algo que no está en los datos, indícalo claramente. No 
 Sé conciso y directo. Usa listas y formato cuando sea útil.`;
 
 export async function POST(request: NextRequest) {
+  try {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
@@ -193,4 +194,8 @@ export async function POST(request: NextRequest) {
       'Cache-Control': 'no-cache',
     },
   });
+  } catch (err) {
+    console.error('Chat route error:', err);
+    return NextResponse.json({ error: 'Error processing chat request' }, { status: 500 });
+  }
 }
