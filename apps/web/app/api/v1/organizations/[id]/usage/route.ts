@@ -86,7 +86,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Error fetching usage:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

@@ -16,10 +16,15 @@ export async function GET(request: Request) {
       
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
-      
+      const allowedHosts = new Set(
+        [process.env.NEXT_PUBLIC_APP_URL]
+          .filter(Boolean)
+          .map(u => u!.replace(/^https?:\/\//, '').replace(/\/$/, ''))
+      )
+
       if (isLocalEnv) {
         return NextResponse.redirect(`${origin}${redirectUrl}`)
-      } else if (forwardedHost) {
+      } else if (forwardedHost && allowedHosts.has(forwardedHost)) {
         return NextResponse.redirect(`https://${forwardedHost}${redirectUrl}`)
       } else {
         return NextResponse.redirect(`${origin}${redirectUrl}`)
@@ -109,6 +114,11 @@ async function getRedirectUrl(
         .single()
 
       if (pendingInviteByToken) {
+        // Verify the authenticated user's email matches the invitation
+        if (pendingInviteByToken.email.toLowerCase() !== (user.email ?? '').toLowerCase()) {
+          return '/login?error=invite_email_mismatch'
+        }
+
         // Check if invitation expired
         const expiresAt = new Date(pendingInviteByToken.invite_expires_at)
         if (expiresAt < new Date()) {
@@ -117,7 +127,7 @@ async function getRedirectUrl(
             .from('pending_invitations')
             .update({ status: 'expired' })
             .eq('id', pendingInviteByToken.id)
-          
+
           return '/login?error=invite_expired'
         }
 

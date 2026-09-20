@@ -96,6 +96,14 @@ export function validateSAMLMetadata(xml: string): { valid: boolean; error?: str
   }
 }
 
+function escapeXmlAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 /**
  * Generate Service Provider metadata for Supabase
  */
@@ -104,12 +112,16 @@ export function generateServiceProviderMetadata(
   acsUrl: string,
   sloUrl?: string
 ): string {
+  const safeEntityId = escapeXmlAttr(spEntityId);
+  const safeAcsUrl = escapeXmlAttr(acsUrl);
+  const safeSloUrl = sloUrl ? escapeXmlAttr(sloUrl) : undefined;
+
   return `<?xml version="1.0" encoding="UTF-8"?>
-<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="${spEntityId}">
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="${safeEntityId}">
   <SPSSODescriptor AuthnRequestsSigned="false" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
     <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
-    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="${acsUrl}" index="0" isDefault="true"/>
-    ${sloUrl ? `<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="${sloUrl}"/>` : ''}
+    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="${safeAcsUrl}" index="0" isDefault="true"/>
+    ${safeSloUrl ? `<SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="${safeSloUrl}"/>` : ''}
   </SPSSODescriptor>
 </EntityDescriptor>`;
 }

@@ -64,7 +64,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     if (!hasAccess) {
-      console.error(`Access denied for user ${user.id} to system ${aiSystemId}`);
+      console.error('Access denied: insufficient permissions for system read');
       return NextResponse.json(
         { error: 'Not authorized to view this system' },
         { status: 403 }
@@ -312,10 +312,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     if (!hasEditAccess) {
-      console.error(`Edit access denied for user ${user.id} to system ${aiSystemId}`, {
-        membershipError: membershipError?.message,
-        organizationId: system.organization_id
-      });
+      console.error('Access denied: insufficient permissions for system edit');
       return NextResponse.json(
         { error: 'Not authorized to modify this system' },
         { status: 403 }

@@ -188,6 +188,6 @@ async function handleAutofill(body: any) {
     return NextResponse.json(result);
   } catch (err: any) {
     console.error('Autofill error:', err);
-    return NextResponse.json({ error: err.message ?? 'AI error' }, { status: 500 });
+    return NextResponse.json({ error: 'AI processing error' }, { status: 500 });
   }
 }

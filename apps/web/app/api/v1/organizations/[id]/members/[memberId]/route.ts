@@ -78,7 +78,7 @@ export async function PUT(
   } catch (error: any) {
     console.error('Error updating member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -147,7 +147,7 @@ export async function DELETE(
   } catch (error: any) {
     console.error('Error removing member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

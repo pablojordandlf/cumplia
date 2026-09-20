@@ -110,7 +110,7 @@ export async function POST(
   } catch (error: any) {
     console.error('Error resending invite:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }

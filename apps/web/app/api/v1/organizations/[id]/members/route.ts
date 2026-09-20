@@ -62,7 +62,7 @@ export async function GET(
     if (membersError) {
       console.error('Error fetching members:', membersError);
       return NextResponse.json(
-        { success: false, error: membersError.message },
+        { success: false, error: 'Internal server error' },
         { status: 500 }
       );
     }
@@ -89,7 +89,7 @@ export async function GET(
     if (invitationsError) {
       console.error('Error fetching invitations:', invitationsError);
       return NextResponse.json(
-        { success: false, error: invitationsError.message },
+        { success: false, error: 'Internal server error' },
         { status: 500 }
       );
     }
@@ -118,7 +118,7 @@ export async function GET(
   } catch (error: any) {
     console.error('Unexpected error:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -303,7 +303,7 @@ export async function POST(
   } catch (error: any) {
     console.error('Error inviting member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -366,7 +366,7 @@ export async function DELETE(
       if (error) {
         console.error('Error canceling invitation:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Internal server error' },
           { status: 500 }
         );
       }
@@ -415,7 +415,7 @@ export async function DELETE(
       if (error) {
         console.error('Error removing member:', error);
         return NextResponse.json(
-          { success: false, error: error.message },
+          { success: false, error: 'Internal server error' },
           { status: 500 }
         );
       }
@@ -427,7 +427,7 @@ export async function DELETE(
   } catch (error: any) {
     console.error('Error removing member:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
