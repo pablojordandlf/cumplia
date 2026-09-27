@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_ACT_REFERENCE } from '@/lib/ai-act-reference';
 
+export const dynamic = 'force-dynamic';
+
 const client = new Anthropic();
 
 interface Message {

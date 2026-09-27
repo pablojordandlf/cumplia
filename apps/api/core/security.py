@@ -29,7 +29,8 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
                 token,
                 jwt_secret,
                 algorithms=["HS256"],
-                options={"verify_aud": False}
+                audience="authenticated",
+                options={"verify_aud": True}
             )
             return payload
         
@@ -46,7 +47,8 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
                 token,
                 signing_key.key,
                 algorithms=["RS256"],
-                options={"verify_aud": False}
+                audience="authenticated",
+                options={"verify_aud": True}
             )
             return payload
         

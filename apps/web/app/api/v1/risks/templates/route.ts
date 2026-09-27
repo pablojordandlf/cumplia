@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/risks/templates
  * Returns all risk templates (system defaults + user created)

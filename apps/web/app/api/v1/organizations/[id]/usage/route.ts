@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { PLANS } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ export async function GET(
     // Get organization plan
     const { data: org } = await supabase
       .from('organizations')
-      .select('plan, seats_total, seats_used')
+      .select('plan_name, seats_used')
       .eq('id', id)
       .single();
 

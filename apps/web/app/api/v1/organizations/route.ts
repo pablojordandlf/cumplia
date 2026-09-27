@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { hasPermission } from '@/lib/permissions';
 import { getCurrentContext } from '@/lib/server-context';
-import { MemberRole } from '@/types/organization';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/v1/organizations

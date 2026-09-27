@@ -136,23 +136,25 @@ export default function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      const recentSystems: RecentSystem[] = await Promise.all(
-        (recentSystemsData || []).map(async (system) => {
-          const { data: sysObligations } = await supabase
+      const systemIds = (recentSystemsData || []).map((s) => s.id);
+      const { data: allObligations } = systemIds.length > 0
+        ? await supabase
             .from('use_case_obligations')
-            .select('*')
-            .eq('use_case_id', system.id);
+            .select('use_case_id, is_completed')
+            .in('use_case_id', systemIds)
+        : { data: [] };
 
-          const completed = sysObligations?.filter((o: any) => o.is_completed).length || 0;
-          const total = getObligationsCountForLevel(system.ai_act_level);
+      const obligationsBySystem = (allObligations || []).reduce<Record<string, { completed: number }>>((acc, o) => {
+        if (!acc[o.use_case_id]) acc[o.use_case_id] = { completed: 0 };
+        if (o.is_completed) acc[o.use_case_id].completed += 1;
+        return acc;
+      }, {});
 
-          return {
-            ...system,
-            completed_obligations: completed,
-            total_obligations: total,
-          };
-        })
-      );
+      const recentSystems: RecentSystem[] = (recentSystemsData || []).map((system) => ({
+        ...system,
+        completed_obligations: obligationsBySystem[system.id]?.completed || 0,
+        total_obligations: getObligationsCountForLevel(system.ai_act_level),
+      }));
 
       setStats({
         totalSystems: systems?.length || 0,
