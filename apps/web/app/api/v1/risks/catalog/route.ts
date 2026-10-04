@@ -49,7 +49,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('timing', timing);
     }
     if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+      const sanitizedSearch = search.replace(/[(),]/g, '').slice(0, 200);
+      query = query.or(`name.ilike.%${sanitizedSearch}%,description.ilike.%${sanitizedSearch}%`);
     }
 
     const { data: risks, error } = await query;

@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       .insert({
         organization_id: invitation.organization_id,
         user_id: user.id,
-        role: invitation.role || 'member',
+        role: invitation.role || 'viewer',
         status: 'active',
       })
       .select()
