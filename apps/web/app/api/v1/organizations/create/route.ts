@@ -124,10 +124,10 @@ export async function POST(request: Request) {
       },
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Unexpected error:', error);
     return NextResponse.json(
-      { message: 'Error interno del servidor', error: error.message },
+      { message: 'Error interno del servidor' },
       { status: 500 }
     );
   }

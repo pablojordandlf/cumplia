@@ -239,11 +239,6 @@ export async function POST(
           email,
           organizationId: acceptResult.data.organizationId,
           role: acceptResult.data.role,
-          session: {
-            access_token: sessionData.session.access_token,
-            refresh_token: sessionData.session.refresh_token || '',
-            expires_in: sessionData.session.expires_in || 3600,
-          },
         },
       },
       { status: 200 }
