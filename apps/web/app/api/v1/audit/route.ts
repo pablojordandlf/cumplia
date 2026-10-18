@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -37,7 +39,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch audit log' }, { status: 500 });
   }
 
   return NextResponse.json({ entries: data ?? [] });
@@ -84,7 +86,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create audit entry' }, { status: 500 });
   }
 
   return NextResponse.json(data);

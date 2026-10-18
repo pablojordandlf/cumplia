@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+export const dynamic = 'force-dynamic';
+
 
 // GET /api/use-cases/[id] - Obtener sistema de IA específico
 export async function GET(

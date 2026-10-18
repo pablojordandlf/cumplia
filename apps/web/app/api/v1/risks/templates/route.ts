@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // app/api/v1/risks/templates/route.ts
 import { createClient } from '@/lib/supabase/server';
 import { requirePermission } from '@/lib/supabase/get-user-role';

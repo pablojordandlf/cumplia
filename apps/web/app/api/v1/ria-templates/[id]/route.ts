@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { requirePermission } from '@/lib/supabase/get-user-role';
 import { NextRequest, NextResponse } from 'next/server';
 import type { UpdateRiaTemplatePayload } from '@/types/ria-form-template';
+export const dynamic = 'force-dynamic';
+
 
 interface RouteParams {
   params: Promise<{ id: string }>;

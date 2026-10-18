@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { AI_ACT_REFERENCE } from '@/lib/ai-act-reference';
+export const dynamic = 'force-dynamic';
+
 
 const client = new Anthropic();
 
@@ -83,6 +85,12 @@ export async function POST(request: NextRequest) {
   const messages: Message[] = body.messages;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: 'messages required' }, { status: 400 });
+  }
+  if (messages.length > 20) {
+    return NextResponse.json({ error: 'Too many messages (max 20)' }, { status: 400 });
+  }
+  if (messages.some(m => typeof m.content !== 'string' || m.content.length > 4000)) {
+    return NextResponse.json({ error: 'Message content too long (max 4000 chars)' }, { status: 400 });
   }
 
   // Get user's organization

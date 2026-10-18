@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // app/api/v1/risks/templates/[id]/duplicate/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';

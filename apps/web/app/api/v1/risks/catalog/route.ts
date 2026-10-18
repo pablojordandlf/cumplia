@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // app/api/v1/risks/catalog/route.ts
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
