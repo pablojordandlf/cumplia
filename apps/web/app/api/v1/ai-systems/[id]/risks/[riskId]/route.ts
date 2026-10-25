@@ -1,4 +1,6 @@
 // app/api/v1/ai-systems/[id]/risks/[riskId]/route.ts
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
